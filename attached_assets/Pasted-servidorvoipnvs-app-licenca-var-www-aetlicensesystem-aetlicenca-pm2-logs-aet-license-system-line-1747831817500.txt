@@ -1,0 +1,94 @@
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ pm2 logs aet-license-system --lines 20
+[TAILING] Tailing last 20 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error-16.log last 20 lines:
+16|aet-lic |     at async TransactionalStorage.getUserByEmail (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:708:20)
+16|aet-lic |     at async file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:1438:28
+16|aet-lic | Error: connect ECONNREFUSED ::1:443
+16|aet-lic |     at file:///var/www/aetlicensesystem/aetlicenca/node_modules/@neondatabase/serverless/index.mjs:1345:74
+16|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+16|aet-lic |     at async NeonPreparedQuery.execute (file:///var/www/aetlicensesystem/aetlicenca/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+16|aet-lic |     at async TransactionalStorage.getUserByEmail (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:708:20)
+16|aet-lic |     at async file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:1438:28
+16|aet-lic | Error: connect ECONNREFUSED ::1:443
+16|aet-lic |     at file:///var/www/aetlicensesystem/aetlicenca/node_modules/@neondatabase/serverless/index.mjs:1345:74
+16|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+16|aet-lic |     at async NeonPreparedQuery.execute (file:///var/www/aetlicensesystem/aetlicenca/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+16|aet-lic |     at async TransactionalStorage.getUserByEmail (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:708:20)
+16|aet-lic |     at async file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:1438:28
+16|aet-lic | Error: connect ECONNREFUSED ::1:443
+16|aet-lic |     at file:///var/www/aetlicensesystem/aetlicenca/node_modules/@neondatabase/serverless/index.mjs:1345:74
+16|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+16|aet-lic |     at async NeonPreparedQuery.execute (file:///var/www/aetlicensesystem/aetlicenca/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+16|aet-lic |     at async TransactionalStorage.getUserByEmail (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:708:20)
+16|aet-lic |     at async file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:1438:28
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out-16.log last 20 lines:
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | 12:48:10 PM [express] serving on port 5000
+16|aet-lic | 12:48:12 PM [express] GET /api/user 401 in 21ms :: {"message":"Não autenticado"}
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | 12:48:13 PM [express] POST /api/register 500 in 152ms :: {"message":"connect ECONNREFUSED ::1:443"}
+16|aet-lic | 12:48:15 PM [express] POST /api/register 500 in 20ms :: {"message":"connect ECONNREFUSED ::1:443"}
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Novo cliente WebSocket conectado
+
+^C
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ cat server/db.ts
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import ws from "ws";
+import * as schema from "@shared/schema";
+
+neonConfig.webSocketConstructor = ws;
+
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    "DATABASE_URL must be set. Did you forget to provision a database?",
+  );
+}
+
+export const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  max: 20, // Máximo de conexões no pool
+  idleTimeoutMillis: 30000, // Tempo máximo que uma conexão pode ficar inativa
+  connectionTimeoutMillis: 5000 // Tempo limite para estabelecer uma conexão
+});
+
+export const db = drizzle({ client: pool, schema });
+
+/**
+ * Executa uma operação de banco de dados dentro de uma transação
+ * @param callback Função que recebe o objeto de transação e executa operações
+ * @returns Resultado da execução do callback
+ */
+export async function withTransaction<T>(
+  callback: (tx: typeof db) => Promise<T>
+): Promise<T> {
+  const client = await pool.connect();
+  
+  try {
+    await client.query('BEGIN');
+    const tx = drizzle({ client, schema });
+    const result = await callback(tx);
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Transaction failed:', error);
+    throw error;
+  } finally {
+    client.release();
+  }
+}servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ 

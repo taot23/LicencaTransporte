@@ -1,0 +1,40 @@
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ psql -U aetuser -d aetlicensesystem -c "\dt"
+Password for user aetuser: 
+              List of relations
+ Schema |       Name       | Type  |  Owner  
+--------+------------------+-------+---------
+ public | license_requests | table | aetuser
+ public | status_histories | table | aetuser
+ public | transporters     | table | aetuser
+ public | users            | table | aetuser
+ public | vehicles         | table | aetuser
+(5 rows)
+
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ psql -U aetuser -d aetlicensesystem -c "SELECT * FROM users LIMIT 5"
+Password for user aetuser: 
+ id | email | password | full_name | phone | role | is_admin | created_at 
+----+-------+----------+-----------+-------+------+----------+------------
+(0 rows)
+
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ psql -U aetuser -d aetlicensesystem -c "SELECT current_database()"
+Password for user aetuser: 
+ current_database 
+------------------
+ aetlicensesystem
+(1 row)
+
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ pm2 restart aet-license-system --update-env
+[PM2] Applying action restartProcessId on app [aet-license-system](ids: [ 16 ])
+[PM2] [aet-license-system](16) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 16 │ aet-license-system │ cluster  │ 5    │ online    │ 0%       │ 40.6mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+Module
+┌────┬────────────────────┬──────────┬──────────┬──────────┐
+│ id │ name               │ status   │ cpu      │ mem      │
+├────┼────────────────────┼──────────┼──────────┼──────────┤
+│ 0  │ pm2-logrotate      │ online   │ 0%       │ 63.9mb   │
+└────┴────────────────────┴──────────┴──────────┴──────────┘
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ 
