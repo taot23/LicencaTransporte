@@ -1,0 +1,78 @@
+⚡ Done in 33ms
+[PM2][ERROR] File ecosystem.config.js malformated
+Error [ERR_REQUIRE_ESM]: require() of ES Module /var/www/aetlicensesystem/aetlicenca/ecosystem.config.js from /usr/lib/node_modules/pm2/lib/Common.js not supported.
+ecosystem.config.js is treated as an ES module file as it is a .js file whose nearest parent package.json contains "type": "module" which declares all .js files in that package scope as ES modules.
+Instead either rename ecosystem.config.js to end in .cjs, change the requiring code to use dynamic import() which is available in all CommonJS modules, or change "type": "module" to "type": "commonjs" in /var/www/aetlicensesystem/aetlicenca/package.json to treat all .js files as CommonJS (using .mjs for all ES modules instead).
+
+    at Common.parseConfig (/usr/lib/node_modules/pm2/lib/Common.js:331:12)
+    at API._startJson (/usr/lib/node_modules/pm2/lib/API.js:934:25)
+    at API.start (/usr/lib/node_modules/pm2/lib/API.js:329:12)
+    at /usr/lib/node_modules/pm2/lib/binaries/CLI.js:297:13
+    at /usr/lib/node_modules/pm2/node_modules/async/internal/withoutIndex.js:8:40
+    at replenish (/usr/lib/node_modules/pm2/node_modules/async/internal/eachOfLimit.js:81:17)
+    at /usr/lib/node_modules/pm2/node_modules/async/internal/eachOfLimit.js:86:9
+    at eachLimit (/usr/lib/node_modules/pm2/node_modules/async/forEachLimit.js:47:45)
+    at awaitable (/usr/lib/node_modules/pm2/node_modules/async/internal/awaitify.js:14:28)
+    at Command.<anonymous> (/usr/lib/node_modules/pm2/lib/binaries/CLI.js:296:7)
+    at Command.listener (/usr/lib/node_modules/pm2/node_modules/commander/index.js:315:8)
+    at Command.emit (node:events:517:28)
+    at Command.parseArgs (/usr/lib/node_modules/pm2/node_modules/commander/index.js:651:12)
+    at Command.parse (/usr/lib/node_modules/pm2/node_modules/commander/index.js:474:21)
+    at beginCommandProcessing (/usr/lib/node_modules/pm2/lib/binaries/CLI.js:154:13)
+    at /usr/lib/node_modules/pm2/lib/binaries/CLI.js:228:7
+    at /usr/lib/node_modules/pm2/lib/API.js:181:16
+    at /usr/lib/node_modules/pm2/lib/Client.js:54:16
+    at Timeout._onTimeout (/usr/lib/node_modules/pm2/lib/Client.js:369:9) {
+  code: 'ERR_REQUIRE_ESM'
+}
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ cat > ecosystem.config.cjs << EOF
+module.exports = {
+  apps: [{
+    name: "aet-license-system",
+    script: "./dist/index.js",  # Note que o caminho é ./dist/index.js, não ./dist/server/index.js
+    env: {
+      NODE_ENV: "production",
+      PORT: 5000
+    },
+    instances: 1,
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '1G'
+  }]
+}
+EOF
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ pm2 start ecosystem.config.cjs
+[PM2][ERROR] File ecosystem.config.cjs malformated
+/var/www/aetlicensesystem/aetlicenca/ecosystem.config.cjs:4
+    script: "./dist/index.js",  # Note que o caminho é ./dist/index.js, não ./dist/server/index.js
+                                ^
+
+SyntaxError: Invalid or unexpected token
+    at internalCompileFunction (node:internal/vm:76:18)
+    at wrapSafe (node:internal/modules/cjs/loader:1283:20)
+    at Module._compile (node:internal/modules/cjs/loader:1328:27)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+    at Module.load (node:internal/modules/cjs/loader:1203:32)
+    at Module._load (node:internal/modules/cjs/loader:1019:12)
+    at Module.require (node:internal/modules/cjs/loader:1231:19)
+    at require (node:internal/modules/helpers:177:18)
+    at Common.parseConfig (/usr/lib/node_modules/pm2/lib/Common.js:331:12)
+    at API._startJson (/usr/lib/node_modules/pm2/lib/API.js:934:25)
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ pm2 status
+┌────┬──────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name             │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+└────┴──────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+Module
+┌────┬──────────────────────────────┬───────────────┬──────────┬──────────┬──────┬──────────┬──────────┬──────────┐
+│ id │ module                       │ version       │ pid      │ status   │ ↺    │ cpu      │ mem      │ user     │
+├────┼──────────────────────────────┼───────────────┼──────────┼──────────┼──────┼──────────┼──────────┼──────────┤
+│ 0  │ pm2-logrotate                │ 2.7.0         │ 170483   │ online   │ 0    │ 0%       │ 69.4mb   │ ser… │
+└────┴──────────────────────────────┴───────────────┴──────────┴──────────┴──────┴──────────┴──────────┴──────────┘
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ cat > .env << EOF
+DATABASE_URL=postgresql://aetuser:sua_senha_segura@localhost:5432/aetlicensesystem
+SESSION_SECRET=uma_string_aleatoria_muito_longa
+PORT=5000
+NODE_ENV=production
+EOF
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ pm2 logs aet-license-system
+[TAILING] Tailing last 15 lines for [aet-license-system] process (change the value with --lines option)
