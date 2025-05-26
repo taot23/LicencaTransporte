@@ -527,7 +527,6 @@ export const brazilianStates = [
   { code: "SP", name: "São Paulo" },
   { code: "SE", name: "Sergipe" },
   { code: "TO", name: "Tocantins" },
-  { code: "DNIT", name: "DNIT" },
 ];
 
 // Enum para tipo de veículo
