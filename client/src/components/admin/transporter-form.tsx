@@ -51,12 +51,32 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [personType, setPersonType] = useState<"pj" | "pf">(transporter?.personType as "pj" | "pf" || "pj");
-  const [subsidiaries, setSubsidiaries] = useState<Subsidiary[]>(
-    transporter?.subsidiaries ? JSON.parse(transporter.subsidiaries as string) : []
-  );
-  const [documents, setDocuments] = useState<Document[]>(
-    transporter?.documents ? JSON.parse(transporter.documents as string) : []
-  );
+  const [subsidiaries, setSubsidiaries] = useState<Subsidiary[]>(() => {
+    if (!transporter?.subsidiaries) return [];
+    try {
+      return typeof transporter.subsidiaries === 'string' 
+        ? JSON.parse(transporter.subsidiaries) 
+        : Array.isArray(transporter.subsidiaries) 
+        ? transporter.subsidiaries 
+        : [];
+    } catch (error) {
+      console.error('Erro ao fazer parse das subsidiárias:', error);
+      return [];
+    }
+  });
+  const [documents, setDocuments] = useState<Document[]>(() => {
+    if (!transporter?.documents) return [];
+    try {
+      return typeof transporter.documents === 'string' 
+        ? JSON.parse(transporter.documents) 
+        : Array.isArray(transporter.documents) 
+        ? transporter.documents 
+        : [];
+    } catch (error) {
+      console.error('Erro ao fazer parse dos documentos:', error);
+      return [];
+    }
+  });
   const [selectedFiles, setSelectedFiles] = useState<{ [key: string]: File | null }>({
     socialContract: null,
     powerOfAttorney: null,

@@ -1,0 +1,199 @@
+curl: (7) Failed to connect to localhost port 5000 after 0 ms: Couldn't connect to server
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <style data-vite-theme="" data-inject-first="">:root {
+      --background: 0 0% 100%;
+--foreground: 20 14.3% 4.1%;
+--muted: 60 4.8% 95.9%;
+--muted-foreground: 25 5.3% 44.7%;
+--popover: 0 0% 100%;
+--popover-foreground: 20 14.3% 4.1%;
+--card: 0 0% 100%;
+--card-foreground: 20 14.3% 4.1%;
+--border: 20 5.9% 90%;
+--input: 20 5.9% 90%;
+--primary: 240 80% 60%;
+--primary-foreground: 227 100% 99%;
+--secondary: 60 4.8% 95.9%;
+--secondary-foreground: 24 9.8% 10%;
+--accent: 60 4.8% 95.9%;
+--accent-foreground: 24 9.8% 10%;
+--destructive: 0 84.2% 60.2%;
+--destructive-foreground: 60 9.1% 97.8%;
+--ring: 20 14.3% 4.1%;
+--radius: 0.375rem;
+  }
+  .dark {
+      --background: 240 10% 3.9%;
+--foreground: 0 0% 98%;
+--muted: 240 3.7% 15.9%;
+--muted-foreground: 240 5% 64.9%;
+--popover: 240 10% 3.9%;
+--popover-foreground: 0 0% 98%;
+--card: 240 10% 3.9%;
+--card-foreground: 0 0% 98%;
+--border: 240 3.7% 15.9%;
+--input: 240 3.7% 15.9%;
+--primary: 240 80% 60%;
+--primary-foreground: 227 100% 99%;
+--secondary: 240 3.7% 15.9%;
+--secondary-foreground: 0 0% 98%;
+--accent: 240 3.7% 15.9%;
+--accent-foreground: 0 0% 98%;
+--destructive: 0 62.8% 30.6%;
+--destructive-foreground: 0 0% 98%;
+--ring: 240 4.9% 83.9%;
+--radius: 0.375rem;
+  }</style>
+
+    <script type="module">
+import { createHotContext } from "/@vite/client";
+const hot = createHotContext("/__dummy__runtime-error-plugin");
+
+function sendError(error) {
+  if (!(error instanceof Error)) {
+    error = new Error("(unknown runtime error)");
+  }
+  const serialized = {
+    message: error.message,
+    stack: error.stack,
+  };
+  hot.send("runtime-error-plugin:error", serialized);
+}
+
+window.addEventListener("error", (evt) => {
+  sendError(evt.error);
+});
+
+window.addEventListener("unhandledrejection", (evt) => {
+  sendError(evt.reason);
+});
+</script>
+
+    <script type="module">
+import RefreshRuntime from "/@react-refresh"
+RefreshRuntime.injectIntoGlobalHook(window)
+window.$RefreshReg$ = () => {}
+window.$RefreshSig$ = () => (type) => type
+window.__vite_plugin_react_preamble_installed__ = true
+</script>
+
+    <script type="module" src="/@vite/client"></script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx?v=I64-dZuD9AQqIbxewxNQL"></script>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+  </body>
+</html>servidorvoipnvs@app-licenca:/opt/vendas-app/nvs-pm2 restart aet-license-system-system
+Use --update-env to update environment variables
+[PM2][ERROR] Process or Namespace aet-license-system not found
+servidorvoipnvs@app-licenca:/opt/vendas-app/nvs-antt2$ cd /var/www/aetlicensesystem/aetlicenca/
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ pm2 restart aet-license-system
+Use --update-env to update environment variables
+[PM2][ERROR] Process or Namespace aet-license-system not found
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ ^C
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ npm run build
+pm2 restart aet-license-system --update-env
++
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v5.4.14 building for production...
+transforming (1) index.htmlBrowserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 3546 modules transformed.
+../dist/public/index.html                                 2.09 kB │ gzip:   0.87 kB
+../dist/public/assets/romeo_and_juliet-B4cvDGaF.png       6.16 kB
+../dist/public/assets/bitrain_7_axles-B5XwGOCw.png        7.78 kB
+../dist/public/assets/roadtrain_9_axles-BKlIL4qU.png      9.12 kB
+../dist/public/assets/bitrain_9_axles-DgGO0-iP.png       10.50 kB
+../dist/public/assets/bitrain_6_axles-yIrLMiMD.png       12.30 kB
+../dist/public/assets/flatbed-Br6N4C94.png               21.53 kB
+../dist/public/assets/logo-nvs-CtWo4a5Q.png             119.08 kB
+../dist/public/assets/index-Cg8iEvXY.css                 87.14 kB │ gzip:  14.76 kB
+../dist/public/assets/index-tMwtdlN_.js               1,408.18 kB │ gzip: 378.26 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1m 15s
+
+  dist/index.js  144.3kb
+
+⚡ Done in 232ms
+[PM2][ERROR] Process or Namespace aet-license-system not found
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ pm2 logs aet-license-system --lines 20
+[TAILING] Tailing last 20 lines for [aet-license-system] process (change the value with --lines option)
+pm2 status
+^C
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ pm2 status
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 27 │ vendas-app-final   │ fork     │ 124  │ online    │ 0%       │ 111.0mb  │
+│ 28 │ vendas-app-unico   │ fork     │ 0    │ online    │ 0%       │ 104.7mb  │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+Module
+┌────┬────────────────────┬──────────┬──────────┬──────────┐
+│ id │ name               │ status   │ cpu      │ mem      │
+├────┼────────────────────┼──────────┼──────────┼──────────┤
+│ 0  │ pm2-logrotate      │ online   │ 0%       │ 45.6mb   │
+└────┴────────────────────┴──────────┴──────────┴──────────┘
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ curl -I http://localhost:5000
+curl: (7) Failed to connect to localhost port 5000 after 0 ms: Couldn't connect to server
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ pm2 restart aet-license-system
+Use --update-env to update environment variables
+[PM2][ERROR] Process or Namespace aet-license-system not found
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ pm2 start ecosystem.config.cjs --env production
+[PM2][WARN] Applications aet-license-system not running, starting...
+[PM2][WARN] Environment [production] is not defined in process file
+[PM2] App [aet-license-system] launched (1 instances)
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 29 │ aet-license-system │ cluster  │ 0    │ online    │ 0%       │ 38.2mb   │
+│ 27 │ vendas-app-final   │ fork     │ 134  │ online    │ 119.2%   │ 68.8mb   │
+│ 28 │ vendas-app-unico   │ fork     │ 0    │ online    │ 0%       │ 105.4mb  │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+Module
+┌────┬────────────────────┬──────────┬──────────┬──────────┐
+│ id │ name               │ status   │ cpu      │ mem      │
+├────┼────────────────────┼──────────┼──────────┼──────────┤
+│ 0  │ pm2-logrotate      │ online   │ 0%       │ 45.8mb   │
+└────┴────────────────────┴──────────┴──────────┴──────────┘
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ sudo systemctl status nginx
+● nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (/lib/systemd/system/nginx.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2025-05-23 01:03:05 UTC; 1h 18min ago
+       Docs: man:nginx(8)
+    Process: 437990 ExecStartPre=/usr/sbin/nginx -t -q -g daemon on; master_process on; (code=exited, status=0/>
+    Process: 437992 ExecStart=/usr/sbin/nginx -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+    Process: 439991 ExecReload=/usr/sbin/nginx -g daemon on; master_process on; -s reload (code=exited, status=>
+   Main PID: 437993 (nginx)
+      Tasks: 3 (limit: 4682)
+     Memory: 3.0M
+        CPU: 711ms
+     CGroup: /system.slice/nginx.service
+             ├─437993 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
+             ├─439908 "nginx: worker process"
+             └─439909 "nginx: worker process"
+
+May 23 01:17:17 app-licenca systemd[1]: Reloading nginx.service - A high performance web server and a reverse p>
+May 23 01:17:18 app-licenca nginx[439152]: 2025/05/23 01:17:17 [notice] 439152#439152: signal process started
+May 23 01:17:18 app-licenca systemd[1]: Reloaded nginx.service - A high performance web server and a reverse pr>
+May 23 01:20:19 app-licenca systemd[1]: Reloading nginx.service - A high performance web server and a reverse p>
+May 23 01:20:19 app-licenca nginx[439907]: 2025/05/23 01:20:19 [notice] 439907#439907: signal process started
+May 23 01:20:19 app-licenca systemd[1]: Reloaded nginx.service - A high performance web server and a reverse pr>
+May 23 01:24:08 app-licenca systemd[1]: Reloading nginx.service - A high performance web server and a reverse p>
+May 23 01:24:08 app-licenca nginx[439991]: 2025/05/23 01:24:08 [emerg] 439991#439991: unexpected end of file, e>
+May 23 01:24:08 app-licenca systemd[1]: nginx.service: Control process exited, code=exited, status=1/FAILURE
+May 23 01:24:08 app-licenca systemd[1]: Reload failed for nginx.service - A high performance web server and a r>
+lines 1-26/26 (END)

@@ -1,0 +1,289 @@
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ psql -U nvsantt -d aetlicensesystem -c "\d transporters"
+Password for user nvsantt: 
+                                            Table "public.transporters"
+      Column       |            Type             | Collation | Nullable |                 Default                  
+-------------------+-----------------------------+-----------+----------+------------------------------------------
+ id                | integer                     |           | not null | nextval('transporters_id_seq'::regclass)
+ person_type       | text                        |           | not null | 
+ name              | text                        |           | not null | 
+ document_number   | text                        |           | not null | 
+ email             | text                        |           | not null | 
+ phone             | text                        |           |          | 
+ trade_name        | text                        |           |          | 
+ legal_responsible | text                        |           |          | 
+ birth_date        | text                        |           |          | 
+ nationality       | text                        |           |          | 
+ id_number         | text                        |           |          | 
+ id_issuer         | text                        |           |          | 
+ id_state          | text                        |           |          | 
+ street            | text                        |           |          | 
+ number            | text                        |           |          | 
+ complement        | text                        |           |          | 
+ district          | text                        |           |          | 
+ zip_code          | text                        |           |          | 
+ city              | text                        |           |          | 
+ state             | text                        |           |          | 
+ subsidiaries      | json                        |           |          | '[]'::json
+ documents         | json                        |           |          | '[]'::json
+ contact1_name     | text                        |           |          | 
+ contact1_phone    | text                        |           |          | 
+ contact2_name     | text                        |           |          | 
+ contact2_phone    | text                        |           |          | 
+ user_id           | integer                     |           |          | 
+ created_at        | timestamp without time zone |           | not null | now()
+Indexes:
+    "transporters_pkey" PRIMARY KEY, btree (id)
+    "idx_transporter_document" UNIQUE, btree (document_number)
+    "idx_transporter_name" btree (name)
+    "idx_transporter_user_id" btree (user_id)
+    "transporters_document_number_unique" UNIQUE CONSTRAINT, btree (document_number)
+Foreign-key constraints:
+    "transporters_user_id_users_id_fk" FOREIGN KEY (user_id) REFERENCES users(id)
+Referenced by:
+    TABLE "license_requests" CONSTRAINT "license_requests_transporter_id_transporters_id_fk" FOREIGN KEY (transporter_id) REFERENCES transporters(id)
+
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ psql -U nvsantt -d aetlicensesystem
+Password for user nvsantt: 
+psql (15.13 (Debian 15.13-0+deb12u1))
+Type "help" for help.
+
+aetlicensesystem=# GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO nvsantt;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO nvsantt;
+GRANT ALL PRIVILEGES ON SCHEMA public TO nvsantt;
+GRANT
+GRANT
+GRANT
+aetlicensesystem=# \q
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ pm2 logs aet-license-system --lines 50
+[TAILING] Tailing last 50 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error-16.log last 50 lines:
+16|aet-lic |   hint: undefined,
+16|aet-lic |   position: undefined,
+16|aet-lic |   internalPosition: undefined,
+16|aet-lic |   internalQuery: undefined,
+16|aet-lic |   where: undefined,
+16|aet-lic |   schema: undefined,
+16|aet-lic |   table: undefined,
+16|aet-lic |   column: undefined,
+16|aet-lic |   dataType: undefined,
+16|aet-lic |   constraint: undefined,
+16|aet-lic |   file: 'auth.c',
+16|aet-lic |   line: '326',
+16|aet-lic |   routine: 'auth_failed'
+16|aet-lic | }
+16|aet-lic | error: password authentication failed for user "nvsantt"
+16|aet-lic |     at /var/www/aetlicensesystem/aetlicenca/node_modules/pg-pool/index.js:45:11
+16|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+16|aet-lic |     at async file:///var/www/aetlicensesystem/aetlicenca/node_modules/drizzle-orm/node-postgres/session.js:83:22
+16|aet-lic |     at async TransactionalStorage.getUserByEmail (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:706:20)
+16|aet-lic |     at async Strategy._verify (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:1407:24)
+16|aet-lic | Login error: error: password authentication failed for user "nvsantt"
+16|aet-lic |     at /var/www/aetlicensesystem/aetlicenca/node_modules/pg-pool/index.js:45:11
+16|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+16|aet-lic |     at async file:///var/www/aetlicensesystem/aetlicenca/node_modules/drizzle-orm/node-postgres/session.js:83:22
+16|aet-lic |     at async TransactionalStorage.getUserByEmail (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:706:20)
+16|aet-lic |     at async Strategy._verify (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:1407:24) {
+16|aet-lic |   length: 103,
+16|aet-lic |   severity: 'FATAL',
+16|aet-lic |   code: '28P01',
+16|aet-lic |   detail: undefined,
+16|aet-lic |   hint: undefined,
+16|aet-lic |   position: undefined,
+16|aet-lic |   internalPosition: undefined,
+16|aet-lic |   internalQuery: undefined,
+16|aet-lic |   where: undefined,
+16|aet-lic |   schema: undefined,
+16|aet-lic |   table: undefined,
+16|aet-lic |   column: undefined,
+16|aet-lic |   dataType: undefined,
+16|aet-lic |   constraint: undefined,
+16|aet-lic |   file: 'auth.c',
+16|aet-lic |   line: '326',
+16|aet-lic |   routine: 'auth_failed'
+16|aet-lic | }
+16|aet-lic | error: password authentication failed for user "nvsantt"
+16|aet-lic |     at /var/www/aetlicensesystem/aetlicenca/node_modules/pg-pool/index.js:45:11
+16|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+16|aet-lic |     at async file:///var/www/aetlicensesystem/aetlicenca/node_modules/drizzle-orm/node-postgres/session.js:83:22
+16|aet-lic |     at async TransactionalStorage.getUserByEmail (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:706:20)
+16|aet-lic |     at async Strategy._verify (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:1407:24)
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out-16.log last 50 lines:
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | 2:22:06 PM [express] GET /api/user 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:22:06 PM [express] GET /api/licenses/drafts 401 in 1ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:22:15 PM [express] POST /api/login 200 in 43ms :: {"id":1,"email":"admin@sistema.com","fullName":"…
+16|aet-lic | 2:22:15 PM [express] GET /api/admin/licenses 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:22:16 PM [express] GET /api/admin/licenses 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:22:18 PM [express] GET /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:22:19 PM [express] GET /api/admin/transporters 401 in 4ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:22:22 PM [express] GET /api/admin/non-admin-users 401 in 1ms :: {"message":"Não autenticado"}
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | 2:22:54 PM [express] GET /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:22:55 PM [express] GET /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | [DEBUG] Consultando CNPJ via ReceitaWS: 10280806000134
+16|aet-lic | [DEBUG] URL da ReceitaWS: https://www.receitaws.com.br/v1/cnpj/10280806000134
+16|aet-lic | [DEBUG] Enviando solicitação para ReceitaWS
+16|aet-lic | [DEBUG] Resposta da ReceitaWS: 200 OK
+16|aet-lic | [DEBUG] Processando resposta da ReceitaWS
+16|aet-lic | [DEBUG] Dados recebidos: {"abertura":"20/08/2008","situacao":"ATIVA","tipo":"MATRIZ","nome":"FRIBON TRANSPORTES LTDA","fantasia":"FRIBON TRANSPORTES","porte":"DEMAIS","natureza_juridica":"206-2 - Sociedade Empresária Limitada","atividade_principal":[{"code":"49.30-2-02","text":"Transporte rodoviário de carga, exceto produtos perigosos e mudanças, intermunicipal, interestadual e internacional"}],"atividades_secundarias":[{"code":"49.30-2-01","text":"Transporte rodoviário de carga, exceto produtos perigosos e mudanças, municipal"},{"code":"49.30-2-03","text":"Transporte rodoviário de produtos perigosos"},{"code":"49.30-2-04","text":"Transporte rodoviário de mudanças"},{"code":"52.50-8-03","text":"Agenciamento de cargas, exceto para o transporte marítimo"},{"code":"52.50-8-04","text":"Organização logística do transporte de carga"},{"code":"52.50-8-05","text":"Operador de transporte multimodal - OTM"}],"qsa":[{"nome":"RONY CEZAR FRIZON","qual":"05-Administrador"},{"nome":"EDVALDO PEREIRA BOMFIM","qual":"05-Administrador"},{"nome":"FRIBON GESTAO E PARTICIPACOES LTDA","qual":"22-Sócio","nome_rep_legal":"EDVALDO PEREIRA BOMFIM","qual_rep_legal":"05-Administrador"}],"logradouro":"RODOVIA BR-364","numero":"SN","complemento":"SETOR AREAS PERIFERICAS","municipio":"RONDONOPOLIS","bairro":"VILA RICA","uf":"MT","cep":"78.750-541","email":"sefaz.fribon@fribontranspotes.com.br","telefone":"(66) 3421-5392 / (66) 3423-2101","data_situacao":"20/08/2008","cnpj":"10.280.806/0001-34","ultima_atualizacao":"2025-05-11T23:59:59.000Z","status":"OK","efr":"","motivo_situacao":"","situacao_especial":"","data_situacao_especial":"","capital_social":"15000000.00","simples":{"optante":false,"data_opcao":"20/08/2008","data_exclusao":"31/12/2008","ultima_atualizacao":"2025-05-11T23:59:59.000Z"},"simei":{"optante":false,"data_opcao":null,"data_exclusao":null,"ultima_atualizacao":"2025-05-11T23:59:59.000Z"},"extra":{},"billing":{"free":true,"database":true}}
+16|aet-lic | [DEBUG] Dados mapeados: {"razao_social":"FRIBON TRANSPORTES LTDA","nome_fantasia":"FRIBON TRANSPORTES","logradouro":"RODOVIA BR-364","numero":"SN","complemento":"SETOR AREAS PERIFERICAS","bairro":"VILA RICA","cep":"78750541","municipio":"RONDONOPOLIS","uf":"MT"}
+16|aet-lic | 2:23:07 PM [express] GET /api/external/cnpj/10280806000134 200 in 374ms :: {"razao_social":"FRIBON T…
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | 2:23:17 PM [express] POST /api/admin/transporters 401 in 1ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:23:19 PM [express] POST /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:23:22 PM [express] POST /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:23:24 PM [express] POST /api/admin/transporters 401 in 1ms :: {"message":"Não autenticado"}
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | 2:24:09 PM [express] GET /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:24:10 PM [express] GET /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:24:11 PM [express] POST /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | 2:24:12 PM [express] POST /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+
+pm2 restart aet-license-system --update-env
+
+^C
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ pm2 restart aet-license-system --update-env
+[PM2] Applying action restartProcessId on app [aet-license-system](ids: [ 16 ])
+[PM2] [aet-license-system](16) ✓
+┌────┬───────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                  │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼───────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 16 │ aet-license-system    │ default     │ 1.0.0   │ cluster │ 272098   │ 0s     │ 15   │ online    │ 0%       │ 40.6mb   │ ser… │ disabled │
+└────┴───────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+Module
+┌────┬──────────────────────────────┬───────────────┬──────────┬──────────┬──────┬──────────┬──────────┬──────────┐
+│ id │ module                       │ version       │ pid      │ status   │ ↺    │ cpu      │ mem      │ user     │
+├────┼──────────────────────────────┼───────────────┼──────────┼──────────┼──────┼──────────┼──────────┼──────────┤
+│ 0  │ pm2-logrotate                │ 2.7.0         │ 170483   │ online   │ 0    │ 0%       │ 63.8mb   │ ser… │
+└────┴──────────────────────────────┴───────────────┴──────────┴──────────┴──────┴──────────┴──────────┴──────────┘
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ pm2 logs aet-license-system --lines 50
+[TAILING] Tailing last 50 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error-16.log last 50 lines:
+16|aet-lic |   hint: undefined,
+16|aet-lic |   position: undefined,
+16|aet-lic |   internalPosition: undefined,
+16|aet-lic |   internalQuery: undefined,
+16|aet-lic |   where: undefined,
+16|aet-lic |   schema: undefined,
+16|aet-lic |   table: undefined,
+16|aet-lic |   column: undefined,
+16|aet-lic |   dataType: undefined,
+16|aet-lic |   constraint: undefined,
+16|aet-lic |   file: 'auth.c',
+16|aet-lic |   line: '326',
+16|aet-lic |   routine: 'auth_failed'
+16|aet-lic | }
+16|aet-lic | error: password authentication failed for user "nvsantt"
+16|aet-lic |     at /var/www/aetlicensesystem/aetlicenca/node_modules/pg-pool/index.js:45:11
+16|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+16|aet-lic |     at async file:///var/www/aetlicensesystem/aetlicenca/node_modules/drizzle-orm/node-postgres/session.js:83:22
+16|aet-lic |     at async TransactionalStorage.getUserByEmail (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:706:20)
+16|aet-lic |     at async Strategy._verify (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:1407:24)
+16|aet-lic | Login error: error: password authentication failed for user "nvsantt"
+16|aet-lic |     at /var/www/aetlicensesystem/aetlicenca/node_modules/pg-pool/index.js:45:11
+16|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+16|aet-lic |     at async file:///var/www/aetlicensesystem/aetlicenca/node_modules/drizzle-orm/node-postgres/session.js:83:22
+16|aet-lic |     at async TransactionalStorage.getUserByEmail (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:706:20)
+16|aet-lic |     at async Strategy._verify (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:1407:24) {
+16|aet-lic |   length: 103,
+16|aet-lic |   severity: 'FATAL',
+16|aet-lic |   code: '28P01',
+16|aet-lic |   detail: undefined,
+16|aet-lic |   hint: undefined,
+16|aet-lic |   position: undefined,
+16|aet-lic |   internalPosition: undefined,
+16|aet-lic |   internalQuery: undefined,
+16|aet-lic |   where: undefined,
+16|aet-lic |   schema: undefined,
+16|aet-lic |   table: undefined,
+16|aet-lic |   column: undefined,
+16|aet-lic |   dataType: undefined,
+16|aet-lic |   constraint: undefined,
+16|aet-lic |   file: 'auth.c',
+16|aet-lic |   line: '326',
+16|aet-lic |   routine: 'auth_failed'
+16|aet-lic | }
+16|aet-lic | error: password authentication failed for user "nvsantt"
+16|aet-lic |     at /var/www/aetlicensesystem/aetlicenca/node_modules/pg-pool/index.js:45:11
+16|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+16|aet-lic |     at async file:///var/www/aetlicensesystem/aetlicenca/node_modules/drizzle-orm/node-postgres/session.js:83:22
+16|aet-lic |     at async TransactionalStorage.getUserByEmail (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:706:20)
+16|aet-lic |     at async Strategy._verify (file:///var/www/aetlicensesystem/aetlicenca/dist/index.js:1407:24)
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out-16.log last 50 lines:
+16|aet-lic | [DEBUG] Enviando solicitação para ReceitaWS
+16|aet-lic | [DEBUG] Resposta da ReceitaWS: 200 OK
+16|aet-lic | [DEBUG] Processando resposta da ReceitaWS
+16|aet-lic | [DEBUG] Dados recebidos: {"abertura":"20/08/2008","situacao":"ATIVA","tipo":"MATRIZ","nome":"FRIBON TRANSPORTES LTDA","fantasia":"FRIBON TRANSPORTES","porte":"DEMAIS","natureza_juridica":"206-2 - Sociedade Empresária Limitada","atividade_principal":[{"code":"49.30-2-02","text":"Transporte rodoviário de carga, exceto produtos perigosos e mudanças, intermunicipal, interestadual e internacional"}],"atividades_secundarias":[{"code":"49.30-2-01","text":"Transporte rodoviário de carga, exceto produtos perigosos e mudanças, municipal"},{"code":"49.30-2-03","text":"Transporte rodoviário de produtos perigosos"},{"code":"49.30-2-04","text":"Transporte rodoviário de mudanças"},{"code":"52.50-8-03","text":"Agenciamento de cargas, exceto para o transporte marítimo"},{"code":"52.50-8-04","text":"Organização logística do transporte de carga"},{"code":"52.50-8-05","text":"Operador de transporte multimodal - OTM"}],"qsa":[{"nome":"RONY CEZAR FRIZON","qual":"05-Administrador"},{"nome":"EDVALDO PEREIRA BOMFIM","qual":"05-Administrador"},{"nome":"FRIBON GESTAO E PARTICIPACOES LTDA","qual":"22-Sócio","nome_rep_legal":"EDVALDO PEREIRA BOMFIM","qual_rep_legal":"05-Administrador"}],"logradouro":"RODOVIA BR-364","numero":"SN","complemento":"SETOR AREAS PERIFERICAS","municipio":"RONDONOPOLIS","bairro":"VILA RICA","uf":"MT","cep":"78.750-541","email":"sefaz.fribon@fribontranspotes.com.br","telefone":"(66) 3421-5392 / (66) 3423-2101","data_situacao":"20/08/2008","cnpj":"10.280.806/0001-34","ultima_atualizacao":"2025-05-11T23:59:59.000Z","status":"OK","efr":"","motivo_situacao":"","situacao_especial":"","data_situacao_especial":"","capital_social":"15000000.00","simples":{"optante":false,"data_opcao":"20/08/2008","data_exclusao":"31/12/2008","ultima_atualizacao":"2025-05-11T23:59:59.000Z"},"simei":{"optante":false,"data_opcao":null,"data_exclusao":null,"ultima_atualizacao":"2025-05-11T23:59:59.000Z"},"extra":{},"billing":{"free":true,"database":true}}
+16|aet-lic | [DEBUG] Dados mapeados: {"razao_social":"FRIBON TRANSPORTES LTDA","nome_fantasia":"FRIBON TRANSPORTES","logradouro":"RODOVIA BR-364","numero":"SN","complemento":"SETOR AREAS PERIFERICAS","bairro":"VILA RICA","cep":"78750541","municipio":"RONDONOPOLIS","uf":"MT"}
+16|aet-lic | 2:23:07 PM [express] GET /api/external/cnpj/10280806000134 200 in 374ms :: {"razao_social":"FRIBON T…
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | 2:23:17 PM [express] POST /api/admin/transporters 401 in 1ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:23:19 PM [express] POST /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:23:22 PM [express] POST /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:23:24 PM [express] POST /api/admin/transporters 401 in 1ms :: {"message":"Não autenticado"}
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | 2:24:09 PM [express] GET /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:24:10 PM [express] GET /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:24:11 PM [express] POST /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | 2:24:12 PM [express] POST /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | 2:27:02 PM [express] serving on port 5000
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | Novo cliente WebSocket conectado
+16|aet-lic | 2:27:24 PM [express] GET /api/admin/transporters 401 in 21ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:27:24 PM [express] GET /api/user 401 in 5ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:27:24 PM [express] GET /api/admin/non-admin-users 401 in 6ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:27:30 PM [express] POST /api/login 200 in 94ms :: {"id":1,"email":"admin@sistema.com","fullName":"…
+16|aet-lic | 2:27:30 PM [express] GET /api/admin/licenses 401 in 3ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:27:31 PM [express] GET /api/admin/licenses 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:27:32 PM [express] GET /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:27:33 PM [express] GET /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | [DEBUG] Consultando CNPJ via ReceitaWS: 10280806000134
+16|aet-lic | [DEBUG] URL da ReceitaWS: https://www.receitaws.com.br/v1/cnpj/10280806000134
+16|aet-lic | [DEBUG] Enviando solicitação para ReceitaWS
+16|aet-lic | [DEBUG] Resposta da ReceitaWS: 200 OK
+16|aet-lic | [DEBUG] Processando resposta da ReceitaWS
+16|aet-lic | [DEBUG] Dados recebidos: {"abertura":"20/08/2008","situacao":"ATIVA","tipo":"MATRIZ","nome":"FRIBON TRANSPORTES LTDA","fantasia":"FRIBON TRANSPORTES","porte":"DEMAIS","natureza_juridica":"206-2 - Sociedade Empresária Limitada","atividade_principal":[{"code":"49.30-2-02","text":"Transporte rodoviário de carga, exceto produtos perigosos e mudanças, intermunicipal, interestadual e internacional"}],"atividades_secundarias":[{"code":"49.30-2-01","text":"Transporte rodoviário de carga, exceto produtos perigosos e mudanças, municipal"},{"code":"49.30-2-03","text":"Transporte rodoviário de produtos perigosos"},{"code":"49.30-2-04","text":"Transporte rodoviário de mudanças"},{"code":"52.50-8-03","text":"Agenciamento de cargas, exceto para o transporte marítimo"},{"code":"52.50-8-04","text":"Organização logística do transporte de carga"},{"code":"52.50-8-05","text":"Operador de transporte multimodal - OTM"}],"qsa":[{"nome":"RONY CEZAR FRIZON","qual":"05-Administrador"},{"nome":"EDVALDO PEREIRA BOMFIM","qual":"05-Administrador"},{"nome":"FRIBON GESTAO E PARTICIPACOES LTDA","qual":"22-Sócio","nome_rep_legal":"EDVALDO PEREIRA BOMFIM","qual_rep_legal":"05-Administrador"}],"logradouro":"RODOVIA BR-364","numero":"SN","complemento":"SETOR AREAS PERIFERICAS","municipio":"RONDONOPOLIS","bairro":"VILA RICA","uf":"MT","cep":"78.750-541","email":"sefaz.fribon@fribontranspotes.com.br","telefone":"(66) 3421-5392 / (66) 3423-2101","data_situacao":"20/08/2008","cnpj":"10.280.806/0001-34","ultima_atualizacao":"2025-05-11T23:59:59.000Z","status":"OK","efr":"","motivo_situacao":"","situacao_especial":"","data_situacao_especial":"","capital_social":"15000000.00","simples":{"optante":false,"data_opcao":"20/08/2008","data_exclusao":"31/12/2008","ultima_atualizacao":"2025-05-11T23:59:59.000Z"},"simei":{"optante":false,"data_opcao":null,"data_exclusao":null,"ultima_atualizacao":"2025-05-11T23:59:59.000Z"},"extra":{},"billing":{"free":true,"database":true}}
+16|aet-lic | [DEBUG] Dados mapeados: {"razao_social":"FRIBON TRANSPORTES LTDA","nome_fantasia":"FRIBON TRANSPORTES","logradouro":"RODOVIA BR-364","numero":"SN","complemento":"SETOR AREAS PERIFERICAS","bairro":"VILA RICA","cep":"78750541","municipio":"RONDONOPOLIS","uf":"MT"}
+16|aet-lic | 2:27:38 PM [express] GET /api/external/cnpj/10280806000134 304 in 374ms :: {"razao_social":"FRIBON T…
+16|aet-lic | 2:27:46 PM [express] POST /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | 2:27:47 PM [express] POST /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+16|aet-lic | Cliente WebSocket desconectado
+16|aet-lic | Cliente WebSocket desconectado
+
+16|aet-license-system  | Novo cliente WebSocket conectado
+16|aet-license-system  | Novo cliente WebSocket conectado
+^C
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/aetlicenca$ 
