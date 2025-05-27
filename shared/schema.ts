@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json, index, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, json, index, uniqueIndex, numeric } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -175,7 +175,7 @@ export const vehicles = pgTable("vehicles", {
   model: text("model"),
   year: integer("year"),
   renavam: text("renavam"),
-  tare: integer("tare").notNull(), // peso em kg
+  tare: numeric("tare").notNull(), // peso em kg
   axleCount: integer("axle_count"), // Quantidade de eixos
   remarks: text("remarks"),
   crlvYear: integer("crlv_year").notNull(),
