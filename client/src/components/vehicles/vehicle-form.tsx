@@ -659,7 +659,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                         field.onChange(value && value > 0 ? value : '');
                       }}
                       min="1"
-                      className="h-9"
+                      className="h-10"
                       required
                     />
                   </FormControl>
@@ -710,7 +710,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                           field.onChange(numericValue);
                         }
                       }}
-                      className="h-9"
+                      className="h-10"
                       required
                     />
                   </FormControl>
@@ -730,7 +730,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                   placeholder="" 
                   value={cmt || ''} 
                   onChange={(e) => setCmt(e.target.valueAsNumber || undefined)}
-                  className="h-9" 
+                  className="h-10" 
                 />
               </FormItem>
             )}
@@ -752,7 +752,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                       {...field} 
                       value={field.value || ''} 
                       onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                      className="h-9"
+                      className="h-10"
                       required
                     />
                   </FormControl>
@@ -774,7 +774,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                       {...field}
                       value={field.value || ''} 
                       onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                      className="h-9" 
+                      className="h-10" 
                     />
                   </FormControl>
                   <FormMessage />
