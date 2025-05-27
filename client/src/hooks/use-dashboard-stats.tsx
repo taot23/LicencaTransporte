@@ -18,24 +18,17 @@ export type DashboardStats = {
 
 export function useDashboardStats() {
   return useQuery<DashboardStats>({
-    queryKey: ["/api/dashboard/stats", Date.now()], // Força cache novo sempre
+    queryKey: ["/api/dashboard/stats"],
     queryFn: async () => {
-      const res = await fetch(`/api/dashboard/stats?t=${Date.now()}`, {
-        credentials: "include",
-        cache: "no-cache",
-        headers: {
-          "Cache-Control": "no-cache",
-          "Pragma": "no-cache"
-        }
+      const res = await fetch("/api/dashboard/stats", {
+        credentials: "include"
       });
       if (!res.ok) {
         throw new Error("Erro ao buscar estatísticas do dashboard");
       }
       return res.json();
     },
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    refetchOnMount: true
   });
 }
