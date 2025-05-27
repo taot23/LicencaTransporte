@@ -1491,29 +1491,19 @@ export class DatabaseStorage implements IStorage {
   
   // Dashboard stats
   async getDashboardStats(userId: number): Promise<DashboardStats> {
-    // Removendo a consulta base que causava o erro
-    // let baseQuery = db.select();
-    //
-    // if (userId !== 0) {
-    //   baseQuery = baseQuery.where(eq(licenseRequests.userId, userId));
-    // }
+    console.log(`[STATS] Obtendo estatísticas para usuário ${userId}`);
     
-    // Contar licenças emitidas (status approved)
-    const issuedLicensesQuery = db.select({ count: sql`count(*)` })
-      .from(licenseRequests)
-      .where(and(
-        userId !== 0 ? eq(licenseRequests.userId, userId) : sql`1=1`,
-        eq(licenseRequests.status, "approved")
-      ));
+    // Para licenças emitidas, usar o método que considera estados individuais aprovados
+    const issuedLicenses = await this.getIssuedLicensesByUserId(userId);
+    console.log(`[STATS] Licenças emitidas encontradas: ${issuedLicenses.length}`);
     
-    // Contar licenças pendentes (nem draft nem approved)
-    const pendingLicensesQuery = db.select({ count: sql`count(*)` })
-      .from(licenseRequests)
-      .where(and(
-        userId !== 0 ? eq(licenseRequests.userId, userId) : sql`1=1`,
-        eq(licenseRequests.isDraft, false),
-        sql`status != 'approved'`
-      ));
+    // Para licenças pendentes, buscar todas as não-draft que não estão nas emitidas
+    const allUserLicenses = await this.getLicenseRequestsByUserId(userId);
+    const pendingLicenses = allUserLicenses.filter(license => 
+      !license.isDraft && 
+      !issuedLicenses.some(issued => issued.id === license.id)
+    );
+    console.log(`[STATS] Licenças pendentes encontradas: ${pendingLicenses.length}`);
     
     // Contar veículos registrados
     const registeredVehiclesQuery = db.select({ count: sql`count(*)` })
@@ -1538,16 +1528,12 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(licenseRequests.createdAt))
       .limit(5);
     
-    // Executar todas as consultas em paralelo
+    // Executar as consultas em paralelo
     const [
-      issuedLicensesResult,
-      pendingLicensesResult,
       registeredVehiclesResult,
       activeVehiclesResult,
       recentLicensesResult
     ] = await Promise.all([
-      issuedLicensesQuery,
-      pendingLicensesQuery,
       registeredVehiclesQuery,
       activeVehiclesQuery,
       recentLicensesQuery
@@ -1564,13 +1550,16 @@ export class DatabaseStorage implements IStorage {
       createdAt: license.createdAt
     }));
     
-    return {
-      issuedLicenses: Number(issuedLicensesResult[0]?.count || 0),
-      pendingLicenses: Number(pendingLicensesResult[0]?.count || 0),
+    const stats = {
+      issuedLicenses: issuedLicenses.length,
+      pendingLicenses: pendingLicenses.length,
       registeredVehicles: Number(registeredVehiclesResult[0]?.count || 0),
       activeVehicles: Number(activeVehiclesResult[0]?.count || 0),
       recentLicenses
     };
+    
+    console.log(`[STATS] Estatísticas finais para usuário ${userId}:`, stats);
+    return stats;
   }
   
   async getVehicleStats(userId: number): Promise<ChartData[]> {
