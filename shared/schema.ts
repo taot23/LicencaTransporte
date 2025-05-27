@@ -204,6 +204,7 @@ export const insertVehicleSchema = createInsertSchema(vehicles)
     axleCount: z.number().min(1, "A quantidade de eixos deve ser maior que zero"),
     year: z.number().min(1950, "O ano de fabricação é obrigatório"),
     remarks: z.string().optional(),
+    status: z.string().optional(),
     crlvFile: z.any().optional(),
   });
 
