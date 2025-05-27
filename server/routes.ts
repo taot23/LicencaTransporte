@@ -388,7 +388,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/dashboard/stats', requireAuth, async (req, res) => {
     try {
       const userId = req.user!.id;
+      console.log(`[DASHBOARD STATS API] Usuário ${userId} solicitando estatísticas`);
+      
+      // Evitar cache para debug
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
       const stats = await storage.getDashboardStats(userId);
+      console.log(`[DASHBOARD STATS API] Retornando estatísticas:`, stats);
       res.json(stats);
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
