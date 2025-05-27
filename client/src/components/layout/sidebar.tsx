@@ -18,6 +18,7 @@ import {
   LayoutDashboard,
   Users,
   Settings,
+  Car,
   RefreshCw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -203,6 +204,20 @@ export function Sidebar({ className }: SidebarProps) {
               >
                 <Users className="mr-3 h-5 w-5" />
                 Usuários
+              </Button>
+            )}
+            
+            {isAdmin && (
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start text-white hover:bg-gray-700",
+                  location === "/admin/vehicle-models" ? "bg-gray-700" : "bg-transparent"
+                )}
+                onClick={() => handleNavigate("/admin/vehicle-models")}
+              >
+                <Car className="mr-3 h-5 w-5" />
+                Modelos de Veículos
               </Button>
             )}
             
