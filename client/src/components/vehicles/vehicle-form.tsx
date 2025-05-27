@@ -313,39 +313,72 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
             />
           </div>
           
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-sm flex items-center">
-                  Tipo de Veículo <span className="text-red-500 ml-1">*</span>
-                </FormLabel>
-                <Select 
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    setVehicleType(value);
-                    console.log("Selected vehicle type:", value);
-                  }} 
-                  value={field.value}
-                  defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {vehicleTypeOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
+          <div className="grid grid-cols-2 gap-3">
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm flex items-center">
+                    Tipo de Veículo <span className="text-red-500 ml-1">*</span>
+                  </FormLabel>
+                  <Select 
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      setVehicleType(value);
+                      console.log("Selected vehicle type:", value);
+                    }} 
+                    value={field.value}
+                    defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {vehicleTypeOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {/* Campo de Status do Veículo - agora ao lado do tipo */}
+            {vehicle && (
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm">
+                      Status do Veículo
+                    </FormLabel>
+                    <Select 
+                      onValueChange={(value) => field.onChange(value)} 
+                      value={field.value}
+                      defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="Selecione o status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="active">Ativo</SelectItem>
+                        <SelectItem value="maintenance">Em Manutenção</SelectItem>
+                        <SelectItem value="inactive">Inativo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
-          />
+          </div>
           
           {/* Mostrar campo Tipo de Carroceria apenas para tipos compatíveis */}
           {(vehicleType === "truck" || vehicleType === "semi_trailer" || vehicleType === "trailer") && (
@@ -380,36 +413,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
             />
           )}
           
-          {/* Campo de Status do Veículo - apenas para edição */}
-          {vehicle && (
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm">
-                    Status do Veículo
-                  </FormLabel>
-                  <Select 
-                    onValueChange={(value) => field.onChange(value)} 
-                    value={field.value}
-                    defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="h-9">
-                        <SelectValue placeholder="Selecione o status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="active">Ativo</SelectItem>
-                      <SelectItem value="maintenance">Em Manutenção</SelectItem>
-                      <SelectItem value="inactive">Inativo</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+
           
           <div className="grid grid-cols-3 gap-3">
             <FormField
