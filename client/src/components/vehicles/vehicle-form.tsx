@@ -74,6 +74,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       renavam: vehicle.renavam || "",
       axleCount: vehicle.axleCount || undefined,
       remarks: vehicle.remarks || "",
+      status: vehicle.status || "active",
     } : {
       plate: "",
       type: "", // Sem valor padrão para o tipo
@@ -86,6 +87,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       renavam: "",
       axleCount: undefined,
       remarks: "",
+      status: "active",
     },
   });
 
