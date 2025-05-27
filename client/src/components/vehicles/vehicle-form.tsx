@@ -493,19 +493,28 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                     <Input 
                       type="text" 
                       placeholder="Ex: 7.500 ou 7,500" 
-                      {...field}
                       value={field.value ? field.value.toString().replace('.', ',') : ''} 
                       onChange={(e) => {
                         let value = e.target.value;
                         // Remove caracteres não numéricos exceto vírgula e ponto
                         value = value.replace(/[^\d.,]/g, '');
-                        // Substitui vírgula por ponto para processamento interno
-                        const numericValue = parseFloat(value.replace(',', '.'));
                         
+                        // Se o campo está vazio, permite
+                        if (value === '') {
+                          field.onChange('');
+                          return;
+                        }
+                        
+                        // Substitui vírgula por ponto para processamento interno
+                        const normalizedValue = value.replace(',', '.');
+                        const numericValue = parseFloat(normalizedValue);
+                        
+                        // Se é um número válido, atualiza o campo
                         if (!isNaN(numericValue) && numericValue > 0) {
                           field.onChange(numericValue);
-                        } else if (value === '' || value === '0') {
-                          field.onChange('');
+                        } else if (value.match(/^\d+[.,]?\d*$/)) {
+                          // Permite valores parciais durante a digitação (ex: "7,")
+                          // Não atualiza o campo interno ainda, mas permite a digitação
                         }
                       }}
                       className="h-9"
