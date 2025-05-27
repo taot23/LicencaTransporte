@@ -57,6 +57,10 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
   
   // Função para filtrar marcas baseado no tipo de veículo
   const getFilteredBrands = (type: string): string[] => {
+    console.log("getFilteredBrands called with type:", type);
+    console.log("vehicleModels length:", vehicleModels.length);
+    console.log("vehicleModels sample:", vehicleModels.slice(0, 3));
+    
     if (!vehicleModels.length) return [];
     
     let allowedTypes: string[] = [];
@@ -83,12 +87,17 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
         allowedTypes = [type];
     }
     
-    const brands = vehicleModels
-      .filter(model => allowedTypes.includes(model.vehicleType))
+    console.log("allowedTypes:", allowedTypes);
+    
+    const filteredModels = vehicleModels.filter(model => allowedTypes.includes(model.vehicleType));
+    console.log("filteredModels:", filteredModels.length);
+    
+    const brands = filteredModels
       .map(model => model.brand)
       .filter((brand, index, array) => array.indexOf(brand) === index)
       .sort();
     
+    console.log("final brands:", brands);
     return brands;
   };
   
