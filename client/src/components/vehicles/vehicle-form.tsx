@@ -408,8 +408,8 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
           </Button>
         </div>
         
-        <div className="p-4 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+        <div className="p-6 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="plate"
@@ -470,7 +470,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
             />
           </div>
           
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="type"
@@ -572,7 +572,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
           
 
           
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-4">
             <FormField
               control={form.control}
               name="brand"
@@ -672,7 +672,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
             />
           </div>
           
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="tare"
@@ -736,7 +736,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
             )}
           </div>
           
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="year"
