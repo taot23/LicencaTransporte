@@ -1499,6 +1499,14 @@ export class DatabaseStorage implements IStorage {
     
     // Para licenças pendentes, buscar todas as não-draft que não estão nas emitidas
     const allUserLicenses = await this.getLicenseRequestsByUserId(userId);
+    console.log(`[STATS] Total de licenças do usuário: ${allUserLicenses.length}`);
+    console.log(`[STATS] Licenças do usuário (primeiras 3):`, allUserLicenses.slice(0, 3).map(l => ({
+      id: l.id, 
+      status: l.status, 
+      isDraft: l.isDraft,
+      stateStatuses: l.stateStatuses
+    })));
+    
     const pendingLicenses = allUserLicenses.filter(license => 
       !license.isDraft && 
       !issuedLicenses.some(issued => issued.id === license.id)
