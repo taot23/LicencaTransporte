@@ -1037,4 +1037,68 @@ export class TransactionalStorage implements IStorage {
       throw new Error('Falha ao buscar histórico de status para o estado especificado');
     }
   }
+
+  // ===== VEHICLE MODELS METHODS =====
+  async getAllVehicleModels(): Promise<VehicleModel[]> {
+    try {
+      return await db
+        .select()
+        .from(vehicleModels)
+        .orderBy(asc(vehicleModels.brand), asc(vehicleModels.model));
+    } catch (error) {
+      console.error('Erro ao buscar modelos de veículos:', error);
+      throw new Error('Falha ao buscar modelos de veículos');
+    }
+  }
+
+  async getVehicleModelById(id: number): Promise<VehicleModel | undefined> {
+    try {
+      const [model] = await db
+        .select()
+        .from(vehicleModels)
+        .where(eq(vehicleModels.id, id));
+      return model || undefined;
+    } catch (error) {
+      console.error('Erro ao buscar modelo de veículo por ID:', error);
+      throw new Error('Falha ao buscar modelo de veículo');
+    }
+  }
+
+  async createVehicleModel(model: InsertVehicleModel): Promise<VehicleModel> {
+    try {
+      const [newModel] = await db
+        .insert(vehicleModels)
+        .values(model)
+        .returning();
+      return newModel;
+    } catch (error) {
+      console.error('Erro ao criar modelo de veículo:', error);
+      throw new Error('Falha ao criar modelo de veículo');
+    }
+  }
+
+  async updateVehicleModel(id: number, model: InsertVehicleModel): Promise<VehicleModel | undefined> {
+    try {
+      const [updatedModel] = await db
+        .update(vehicleModels)
+        .set(model)
+        .where(eq(vehicleModels.id, id))
+        .returning();
+      return updatedModel || undefined;
+    } catch (error) {
+      console.error('Erro ao atualizar modelo de veículo:', error);
+      throw new Error('Falha ao atualizar modelo de veículo');
+    }
+  }
+
+  async deleteVehicleModel(id: number): Promise<void> {
+    try {
+      await db
+        .delete(vehicleModels)
+        .where(eq(vehicleModels.id, id));
+    } catch (error) {
+      console.error('Erro ao deletar modelo de veículo:', error);
+      throw new Error('Falha ao deletar modelo de veículo');
+    }
+  }
 }
