@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/main-layout";
 import { VehicleList } from "@/components/vehicles/vehicle-list";
-import { VehicleForm } from "@/components/vehicles/vehicle-form-responsive";
+import { VehicleForm } from "@/components/vehicles/vehicle-form";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Plus, RefreshCw } from "lucide-react";
