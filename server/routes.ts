@@ -2427,9 +2427,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const transporter = await storage.createTransporter(transporterData);
         
-        // Log administrativo para criação de transportador
-        console.log(`[ADMIN LOG] Transportador criado - ID: ${transporter.id} | Nome: ${transporter.name} | Documento: ${transporter.documentNumber} | Por: ${req.user!.email}`);
-        
         res.status(201).json(transporter);
       } catch (error) {
         console.error("Erro ao validar dados do transportador:", error);
@@ -2525,9 +2522,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Atualizar transportador
       const updatedTransporter = await storage.updateTransporter(transporterId, transporterData);
       
-      // Log administrativo para edição de transportador
-      console.log(`[ADMIN LOG] Transportador editado - ID: ${updatedTransporter.id} | Nome: ${updatedTransporter.name} | Documento: ${updatedTransporter.documentNumber} | Por: ${req.user!.email}`);
-      
       res.json(updatedTransporter);
     } catch (error) {
       console.error("Erro ao atualizar transportador:", error);
@@ -2544,9 +2538,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!transporter) {
         return res.status(404).json({ message: "Transportador não encontrado" });
       }
-      
-      // Log administrativo para exclusão de transportador
-      console.log(`[ADMIN LOG] Transportador excluído - ID: ${transporter.id} | Nome: ${transporter.name} | Documento: ${transporter.documentNumber} | Por: ${req.user!.email}`);
       
       await storage.deleteTransporter(transporterId);
       
@@ -2579,14 +2570,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Vincular transportador ao usuário (ou desvincular se userId for null)
       const updatedTransporter = await storage.linkTransporterToUser(transporterId, userId);
-      
-      // Log administrativo para vinculação de transportador
-      if (userId !== null) {
-        const user = await storage.getUser(userId);
-        console.log(`[ADMIN LOG] Transportador vinculado - Transportador: ${transporter.name} (ID: ${transporterId}) | Usuário: ${user?.email} (ID: ${userId}) | Por: ${req.user!.email}`);
-      } else {
-        console.log(`[ADMIN LOG] Transportador desvinculado - Transportador: ${transporter.name} (ID: ${transporterId}) | Por: ${req.user!.email}`);
-      }
       
       res.json(updatedTransporter);
     } catch (error) {
