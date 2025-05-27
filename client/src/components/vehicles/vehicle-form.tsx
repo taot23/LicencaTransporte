@@ -725,13 +725,15 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
             {vehicleType === "tractor_unit" && (
               <FormItem>
                 <FormLabel className="text-sm">CMT (kg)</FormLabel>
-                <Input 
-                  type="number" 
-                  placeholder="" 
-                  value={cmt || ''} 
-                  onChange={(e) => setCmt(e.target.valueAsNumber || undefined)}
-                  className="h-10" 
-                />
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="" 
+                    value={cmt || ''} 
+                    onChange={(e) => setCmt(e.target.valueAsNumber || undefined)}
+                    className="h-10" 
+                  />
+                </FormControl>
               </FormItem>
             )}
           </div>
@@ -845,10 +847,10 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
         </div>
         
         <div className="flex justify-end gap-2 py-2 px-4 border-t">
-          <Button type="button" variant="outline" onClick={onCancel} className="h-9 px-4">
+          <Button type="button" variant="outline" onClick={onCancel} className="h-10 px-4">
             Cancelar
           </Button>
-          <Button type="submit" disabled={isSubmitting} className="h-9 px-4 bg-primary">
+          <Button type="submit" disabled={isSubmitting} className="h-10 px-4 bg-primary">
             {isSubmitting && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
             {vehicle ? "Atualizar" : "Cadastrar Veículo"}
           </Button>
