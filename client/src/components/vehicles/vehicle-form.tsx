@@ -491,15 +491,23 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                   </FormLabel>
                   <FormControl>
                     <Input 
-                      type="number" 
-                      placeholder="Mínimo 1" 
+                      type="text" 
+                      placeholder="Ex: 7.500 ou 7,500" 
                       {...field}
-                      value={field.value || ''} 
+                      value={field.value ? field.value.toString().replace('.', ',') : ''} 
                       onChange={(e) => {
-                        const value = e.target.valueAsNumber;
-                        field.onChange(value && value > 0 ? value : '');
+                        let value = e.target.value;
+                        // Remove caracteres não numéricos exceto vírgula e ponto
+                        value = value.replace(/[^\d.,]/g, '');
+                        // Substitui vírgula por ponto para processamento interno
+                        const numericValue = parseFloat(value.replace(',', '.'));
+                        
+                        if (!isNaN(numericValue) && numericValue > 0) {
+                          field.onChange(numericValue);
+                        } else if (value === '' || value === '0') {
+                          field.onChange('');
+                        }
                       }}
-                      min="1"
                       className="h-9"
                       required
                     />
