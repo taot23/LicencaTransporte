@@ -211,6 +211,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       if (vehicleData.renavam) formData.append("renavam", vehicleData.renavam);
       if (vehicleData.axleCount) formData.append("axleCount", vehicleData.axleCount.toString());
       if (vehicleData.remarks) formData.append("remarks", vehicleData.remarks);
+      if (values.status) formData.append("status", values.status);
       
       formData.append("crlvFile", file);
       
@@ -234,7 +235,8 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
         year: values.year,
         renavam: values.renavam,
         axleCount: values.axleCount,
-        remarks: values.remarks
+        remarks: values.remarks,
+        status: values.status || "active"
       };
       
       console.log("Sending vehicle data as JSON:", vehicleData);
@@ -370,6 +372,37 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                           {option.label}
                         </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+          
+          {/* Campo de Status do Veículo - apenas para edição */}
+          {vehicle && (
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm">
+                    Status do Veículo
+                  </FormLabel>
+                  <Select 
+                    onValueChange={(value) => field.onChange(value)} 
+                    value={field.value}
+                    defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder="Selecione o status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="active">Ativo</SelectItem>
+                      <SelectItem value="maintenance">Em Manutenção</SelectItem>
+                      <SelectItem value="inactive">Inativo</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
