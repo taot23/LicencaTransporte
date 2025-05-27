@@ -595,3 +595,24 @@ export const bodyTypeOptions = [
   { value: "closed", label: "FECHADA" },
   { value: "tank", label: "TANQUE" },
 ];
+
+// Vehicle Models - Cadastro de Modelos de Veículos
+export const vehicleModels = pgTable("vehicle_models", {
+  id: serial("id").primaryKey(),
+  brand: text("brand").notNull(), // Marca (ex: Volvo, Scania, Mercedes-Benz)
+  model: text("model").notNull(), // Modelo (ex: FH 460, R450, Actros 2651)
+  vehicleType: text("vehicle_type").notNull(), // Tipo de veículo
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    brandIdx: index("idx_vehicle_model_brand").on(table.brand),
+    typeIdx: index("idx_vehicle_model_type").on(table.vehicleType),
+    brandModelIdx: index("idx_vehicle_model_brand_model").on(table.brand, table.model)
+  };
+});
+
+export const insertVehicleModelSchema = createInsertSchema(vehicleModels)
+  .omit({ id: true, createdAt: true });
+
+export type VehicleModel = typeof vehicleModels.$inferSelect;
+export type InsertVehicleModel = z.infer<typeof insertVehicleModelSchema>;

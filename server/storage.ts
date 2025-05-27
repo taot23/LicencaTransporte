@@ -4,7 +4,8 @@ import {
   transporters, type Transporter, type InsertTransporter,
   licenseRequests, type LicenseRequest, type InsertLicenseRequest, type UpdateLicenseStatus, 
   type UpdateLicenseState, LicenseStatus, LicenseType,
-  statusHistories, type StatusHistory, type InsertStatusHistory
+  statusHistories, type StatusHistory, type InsertStatusHistory,
+  vehicleModels, type VehicleModel, type InsertVehicleModel
 } from "@shared/schema";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
@@ -63,6 +64,13 @@ export interface IStorage {
   createVehicle(userId: number, vehicle: InsertVehicle & { crlvUrl?: string | null }): Promise<Vehicle>;
   updateVehicle(id: number, vehicle: Partial<Vehicle>): Promise<Vehicle>;
   deleteVehicle(id: number): Promise<void>;
+  
+  // Vehicle Model methods
+  getAllVehicleModels(): Promise<VehicleModel[]>;
+  getVehicleModelById(id: number): Promise<VehicleModel | undefined>;
+  createVehicleModel(model: InsertVehicleModel): Promise<VehicleModel>;
+  updateVehicleModel(id: number, model: InsertVehicleModel): Promise<VehicleModel | undefined>;
+  deleteVehicleModel(id: number): Promise<void>;
   
   // License methods
   getLicenseRequestById(id: number): Promise<LicenseRequest | undefined>;

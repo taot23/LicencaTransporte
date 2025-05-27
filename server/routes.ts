@@ -13,6 +13,7 @@ import {
   updateLicenseStatusSchema,
   updateLicenseStateSchema,
   insertStatusHistorySchema,
+  insertVehicleModelSchema,
   LicenseStatus,
   userRoleEnum,
   licenseRequests,
@@ -21,6 +22,7 @@ import {
 } from "@shared/schema";
 import { eq, sql, or, inArray } from "drizzle-orm";
 import { fromZodError } from "zod-validation-error";
+import { ZodError } from "zod";
 import multer from "multer";
 import path from "path";
 import * as fs from "fs";
@@ -2897,6 +2899,68 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     } catch (error) {
       console.error('Erro na migração de números AET:', error);
       res.status(500).json({ message: 'Erro durante migração de números AET' });
+    }
+  });
+
+  // ===== VEHICLE MODELS ROUTES =====
+  // Listar todos os modelos de veículos (apenas admin)
+  app.get("/api/admin/vehicle-models", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const models = await storage.getAllVehicleModels();
+      res.json(models);
+    } catch (error) {
+      console.error("Erro ao buscar modelos de veículos:", error);
+      res.status(500).json({ message: "Erro ao buscar modelos de veículos" });
+    }
+  });
+
+  // Criar novo modelo de veículo (apenas admin)
+  app.post("/api/admin/vehicle-models", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const vehicleModelData = insertVehicleModelSchema.parse(req.body);
+      const newModel = await storage.createVehicleModel(vehicleModelData);
+      res.status(201).json(newModel);
+    } catch (error) {
+      console.error("Erro ao criar modelo de veículo:", error);
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Erro ao criar modelo de veículo" });
+      }
+    }
+  });
+
+  // Atualizar modelo de veículo (apenas admin)
+  app.patch("/api/admin/vehicle-models/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const vehicleModelData = insertVehicleModelSchema.parse(req.body);
+      const updatedModel = await storage.updateVehicleModel(id, vehicleModelData);
+      
+      if (!updatedModel) {
+        return res.status(404).json({ message: "Modelo de veículo não encontrado" });
+      }
+      
+      res.json(updatedModel);
+    } catch (error) {
+      console.error("Erro ao atualizar modelo de veículo:", error);
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Erro ao atualizar modelo de veículo" });
+      }
+    }
+  });
+
+  // Deletar modelo de veículo (apenas admin)
+  app.delete("/api/admin/vehicle-models/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteVehicleModel(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Erro ao deletar modelo de veículo:", error);
+      res.status(500).json({ message: "Erro ao deletar modelo de veículo" });
     }
   });
 
