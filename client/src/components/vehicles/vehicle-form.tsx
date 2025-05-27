@@ -52,7 +52,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
   
   // Buscar modelos de veículos
   const { data: vehicleModels = [] } = useQuery<VehicleModel[]>({
-    queryKey: ["/api/admin/vehicle-models"],
+    queryKey: ["/api/vehicle-models"],
   });
   
   // Função para filtrar marcas baseado no tipo de veículo

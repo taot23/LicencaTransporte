@@ -2903,6 +2903,17 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // ===== VEHICLE MODELS ROUTES =====
+  // Endpoint público para consultar modelos de veículos (usado nos formulários)
+  app.get("/api/vehicle-models", async (req, res) => {
+    try {
+      const models = await storage.getAllVehicleModels();
+      res.json(models);
+    } catch (error) {
+      console.error("Erro ao buscar modelos de veículos:", error);
+      res.status(500).json({ message: "Erro ao buscar modelos de veículos" });
+    }
+  });
+
   // Listar todos os modelos de veículos (apenas admin)
   app.get("/api/admin/vehicle-models", requireAuth, requireAdmin, async (req, res) => {
     try {
