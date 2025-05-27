@@ -48,6 +48,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
 
   // Estado para controlar os placeholders dinâmicos
   const [vehicleType, setVehicleType] = useState<string>(vehicle?.type || "");
+  const [tareDisplay, setTareDisplay] = useState<string>(vehicle?.tare ? vehicle.tare.toString().replace('.', ',') : '');
   
   // Atualizar vehicleType quando o veículo mudar
   useEffect(() => {
@@ -493,28 +494,29 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                     <Input 
                       type="text" 
                       placeholder="Ex: 7.500 ou 7,500" 
-                      value={field.value ? field.value.toString().replace('.', ',') : ''} 
+                      value={tareDisplay}
                       onChange={(e) => {
-                        let value = e.target.value;
-                        // Remove caracteres não numéricos exceto vírgula e ponto
-                        value = value.replace(/[^\d.,]/g, '');
+                        const rawValue = e.target.value;
                         
-                        // Se o campo está vazio, permite
-                        if (value === '') {
+                        // Permite apenas números, vírgula e ponto
+                        const cleanValue = rawValue.replace(/[^\d.,]/g, '');
+                        
+                        // Atualiza o display sempre
+                        setTareDisplay(cleanValue);
+                        
+                        // Se está vazio, limpa o campo
+                        if (cleanValue === '') {
                           field.onChange('');
                           return;
                         }
                         
-                        // Substitui vírgula por ponto para processamento interno
-                        const normalizedValue = value.replace(',', '.');
+                        // Converte vírgula para ponto para validação numérica
+                        const normalizedValue = cleanValue.replace(',', '.');
                         const numericValue = parseFloat(normalizedValue);
                         
-                        // Se é um número válido, atualiza o campo
+                        // Se é um número completo e válido, salva no form
                         if (!isNaN(numericValue) && numericValue > 0) {
                           field.onChange(numericValue);
-                        } else if (value.match(/^\d+[.,]?\d*$/)) {
-                          // Permite valores parciais durante a digitação (ex: "7,")
-                          // Não atualiza o campo interno ainda, mas permite a digitação
                         }
                       }}
                       className="h-9"
