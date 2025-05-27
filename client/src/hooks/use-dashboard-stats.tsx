@@ -18,7 +18,7 @@ export type DashboardStats = {
 
 export function useDashboardStats() {
   return useQuery<DashboardStats>({
-    queryKey: ["/api/dashboard/stats"],
+    queryKey: ["/api/dashboard/stats", "v2"], // Nova versão para invalidar cache
     queryFn: async () => {
       const res = await fetch("/api/dashboard/stats", {
         credentials: "include"
@@ -28,7 +28,7 @@ export function useDashboardStats() {
       }
       return res.json();
     },
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 0, // Sem cache
     refetchOnMount: true
   });
 }
