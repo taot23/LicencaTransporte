@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { VehicleModel, InsertVehicleModel } from "@shared/schema";
@@ -15,6 +16,8 @@ import { AdminLayout } from "@/components/layout/admin-layout";
 export default function VehicleModelsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingModel, setEditingModel] = useState<VehicleModel | null>(null);
+  const [brandFilter, setBrandFilter] = useState("");
+  const [modelFilter, setModelFilter] = useState("");
   const { toast } = useToast();
 
   const {
@@ -140,15 +143,12 @@ export default function VehicleModelsPage() {
     );
   }
 
-  // Agrupar modelos por marca
-  const groupedModels = vehicleModels.reduce((acc, model) => {
-    const brand = model.brand;
-    if (!acc[brand]) {
-      acc[brand] = [];
-    }
-    acc[brand].push(model);
-    return acc;
-  }, {} as Record<string, VehicleModel[]>);
+  // Filtrar modelos com base nos filtros aplicados
+  const filteredModels = vehicleModels.filter((model) => {
+    const matchesBrand = brandFilter === "" || model.brand.toLowerCase().includes(brandFilter.toLowerCase());
+    const matchesModel = modelFilter === "" || model.model.toLowerCase().includes(modelFilter.toLowerCase());
+    return matchesBrand && matchesModel;
+  });
 
   return (
     <AdminLayout contentKey="vehicle-models">
@@ -191,6 +191,33 @@ export default function VehicleModelsPage() {
         </div>
       </div>
 
+      {/* Seção de Consulta/Filtros */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Consulta de Modelos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Input
+                placeholder="Marca"
+                value={brandFilter}
+                onChange={(e) => setBrandFilter(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div className="space-y-2">
+              <Input
+                placeholder="Modelo"
+                value={modelFilter}
+                onChange={(e) => setModelFilter(e.target.value)}
+                className="w-full"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Lista de Modelos</CardTitle>
@@ -199,7 +226,7 @@ export default function VehicleModelsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {vehicleModels.length === 0 ? (
+          {filteredModels.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">Nenhum modelo de veículo cadastrado</p>
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -233,7 +260,7 @@ export default function VehicleModelsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {vehicleModels
+                  {filteredModels
                     .sort((a, b) => {
                       const brandCompare = a.brand.localeCompare(b.brand);
                       if (brandCompare !== 0) return brandCompare;
