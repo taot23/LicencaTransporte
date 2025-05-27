@@ -222,73 +222,67 @@ export default function VehicleModelsPage() {
               </Dialog>
             </div>
           ) : (
-            <div className="space-y-6">
-              {Object.entries(groupedModels)
-                .sort(([a], [b]) => a.localeCompare(b))
-                .map(([brand, models]) => (
-                  <div key={brand} className="space-y-3">
-                    <h3 className="text-lg font-semibold text-primary">{brand}</h3>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Modelo</TableHead>
-                          <TableHead>Tipo de Veículo</TableHead>
-                          <TableHead className="text-right">Ações</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {models
-                          .sort((a, b) => a.model.localeCompare(b.model))
-                          .map((model) => (
-                            <TableRow key={model.id}>
-                              <TableCell className="font-medium">{model.model}</TableCell>
-                              <TableCell>
-                                <Badge variant="outline">
-                                  {getVehicleTypeLabel(model.vehicleType)}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                  <Dialog
-                                    open={editingModel?.id === model.id}
-                                    onOpenChange={(open) => {
-                                      if (!open) setEditingModel(null);
-                                      else setEditingModel(model);
-                                    }}
-                                  >
-                                    <DialogTrigger asChild>
-                                      <Button variant="outline" size="sm">
-                                        <Edit className="h-4 w-4" />
-                                      </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-md">
-                                      <DialogHeader>
-                                        <DialogTitle>Editar Modelo</DialogTitle>
-                                      </DialogHeader>
-                                      <VehicleModelForm
-                                        initialData={model}
-                                        onSubmit={handleUpdate}
-                                        onCancel={() => setEditingModel(null)}
-                                        isSubmitting={updateMutation.isPending}
-                                      />
-                                    </DialogContent>
-                                  </Dialog>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleDelete(model.id)}
-                                    disabled={deleteMutation.isPending}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                ))}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Resultados</h3>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Marca</TableHead>
+                    <TableHead>Modelo</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {vehicleModels
+                    .sort((a, b) => {
+                      const brandCompare = a.brand.localeCompare(b.brand);
+                      if (brandCompare !== 0) return brandCompare;
+                      return a.model.localeCompare(b.model);
+                    })
+                    .map((model) => (
+                      <TableRow key={model.id}>
+                        <TableCell className="font-medium">{model.brand}</TableCell>
+                        <TableCell>{model.model}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Dialog
+                              open={editingModel?.id === model.id}
+                              onOpenChange={(open) => {
+                                if (!open) setEditingModel(null);
+                                else setEditingModel(model);
+                              }}
+                            >
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-md">
+                                <DialogHeader>
+                                  <DialogTitle>Editar Modelo</DialogTitle>
+                                </DialogHeader>
+                                <VehicleModelForm
+                                  initialData={model}
+                                  onSubmit={handleUpdate}
+                                  onCancel={() => setEditingModel(null)}
+                                  isSubmitting={updateMutation.isPending}
+                                />
+                              </DialogContent>
+                            </Dialog>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDelete(model.id)}
+                              disabled={deleteMutation.isPending}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
             </div>
           )}
         </CardContent>
