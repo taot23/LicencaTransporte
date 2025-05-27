@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { VehicleModel, InsertVehicleModel } from "@shared/schema";
 import { VehicleModelForm } from "@/components/admin/vehicle-model-form";
+import { AdminLayout } from "@/components/layout/admin-layout";
 
 export default function VehicleModelsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -150,7 +151,8 @@ export default function VehicleModelsPage() {
   }, {} as Record<string, VehicleModel[]>);
 
   return (
-    <div className="space-y-6">
+    <AdminLayout contentKey="vehicle-models">
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Modelos de Veículos</h1>
@@ -291,6 +293,7 @@ export default function VehicleModelsPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }
