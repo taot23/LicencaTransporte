@@ -433,7 +433,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                           field.onChange(formatted);
                         }
                       }}
-                      className={`h-9 ${plateDisplay.length >= 7 && !validateBrazilianPlate(plateDisplay) ? 'border-red-500' : ''}`}
+                      className={`h-10 ${plateDisplay.length >= 7 && !validateBrazilianPlate(plateDisplay) ? 'border-red-500' : ''}`}
                       maxLength={8}
                       required 
                     />
@@ -462,7 +462,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                     Renavam <span className="text-red-500 ml-1">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Renavam" {...field} className="h-9" required />
+                    <Input placeholder="Renavam" {...field} className="h-10" required />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -488,7 +488,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                     value={field.value}
                     defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="h-9">
+                      <SelectTrigger className="h-10">
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                     </FormControl>
@@ -520,7 +520,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                       value={field.value}
                       defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="h-9">
+                        <SelectTrigger className="h-10">
                           <SelectValue placeholder="Selecione o status" />
                         </SelectTrigger>
                       </FormControl>
@@ -552,7 +552,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                     value={field.value}
                     defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="h-9">
+                      <SelectTrigger className="h-10">
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                     </FormControl>
@@ -592,7 +592,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                     disabled={!vehicleType}
                   >
                     <FormControl>
-                      <SelectTrigger className="h-9">
+                      <SelectTrigger className="h-10">
                         <SelectValue placeholder={vehicleType ? "Selecione a marca" : "Selecione primeiro o tipo"} />
                       </SelectTrigger>
                     </FormControl>
@@ -623,7 +623,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                     disabled={!selectedBrand || !vehicleType}
                   >
                     <FormControl>
-                      <SelectTrigger className="h-9">
+                      <SelectTrigger className="h-10">
                         <SelectValue placeholder={selectedBrand ? "Selecione o modelo" : "Selecione primeiro a marca"} />
                       </SelectTrigger>
                     </FormControl>
