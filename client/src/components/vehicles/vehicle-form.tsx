@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { insertVehicleSchema, vehicleTypeOptions, bodyTypeOptions, Vehicle } from "@shared/schema";
+import { insertVehicleSchema, vehicleTypeOptions, bodyTypeOptions, Vehicle, VehicleModel } from "@shared/schema";
 import { z } from "zod";
 import {
   Form,
@@ -48,6 +48,86 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
 
   // Estado para controlar os placeholders dinâmicos
   const [vehicleType, setVehicleType] = useState<string>(vehicle?.type || "");
+  const [selectedBrand, setSelectedBrand] = useState<string>(vehicle?.brand || "");
+  
+  // Buscar modelos de veículos
+  const { data: vehicleModels = [] } = useQuery<VehicleModel[]>({
+    queryKey: ["/api/admin/vehicle-models"],
+  });
+  
+  // Função para filtrar marcas baseado no tipo de veículo
+  const getFilteredBrands = (type: string): string[] => {
+    if (!vehicleModels.length) return [];
+    
+    let allowedTypes: string[] = [];
+    
+    switch (type) {
+      case "tractor_unit":
+        allowedTypes = ["tractor_unit", "truck"];
+        break;
+      case "truck":
+        allowedTypes = ["truck", "tractor_unit"];
+        break;
+      case "semi_trailer":
+        allowedTypes = ["semi_trailer", "trailer"];
+        break;
+      case "trailer":
+        allowedTypes = ["trailer", "semi_trailer"];
+        break;
+      case "crane":
+      case "dolly":
+      case "flatbed":
+        allowedTypes = [type];
+        break;
+      default:
+        allowedTypes = [type];
+    }
+    
+    const brands = vehicleModels
+      .filter(model => allowedTypes.includes(model.vehicleType))
+      .map(model => model.brand)
+      .filter((brand, index, array) => array.indexOf(brand) === index)
+      .sort();
+    
+    return brands;
+  };
+  
+  // Função para filtrar modelos baseado na marca e tipo
+  const getFilteredModels = (brand: string, type: string): string[] => {
+    if (!vehicleModels.length || !brand) return [];
+    
+    let allowedTypes: string[] = [];
+    
+    switch (type) {
+      case "tractor_unit":
+        allowedTypes = ["tractor_unit", "truck"];
+        break;
+      case "truck":
+        allowedTypes = ["truck", "tractor_unit"];
+        break;
+      case "semi_trailer":
+        allowedTypes = ["semi_trailer", "trailer"];
+        break;
+      case "trailer":
+        allowedTypes = ["trailer", "semi_trailer"];
+        break;
+      case "crane":
+      case "dolly":
+      case "flatbed":
+        allowedTypes = [type];
+        break;
+      default:
+        allowedTypes = [type];
+    }
+    
+    const models = vehicleModels
+      .filter(model => model.brand === brand && allowedTypes.includes(model.vehicleType))
+      .map(model => model.model)
+      .filter((model, index, array) => array.indexOf(model) === index)
+      .sort();
+    
+    return models;
+  };
   const [tareDisplay, setTareDisplay] = useState<string>(vehicle?.tare ? vehicle.tare.toString().replace('.', ',') : '');
   
   // Atualizar vehicleType quando o veículo mudar
@@ -425,9 +505,29 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                   <FormLabel className="text-sm flex items-center">
                     Marca <span className="text-red-500 ml-1">*</span>
                   </FormLabel>
-                  <FormControl>
-                    <Input placeholder="" {...field} className="h-9" required />
-                  </FormControl>
+                  <Select 
+                    value={field.value} 
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      setSelectedBrand(value);
+                      // Limpar o modelo quando trocar de marca
+                      form.setValue("model", "");
+                    }}
+                    disabled={!vehicleType}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder={vehicleType ? "Selecione a marca" : "Selecione primeiro o tipo"} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {getFilteredBrands(vehicleType).map((brand) => (
+                        <SelectItem key={brand} value={brand}>
+                          {brand}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -441,9 +541,24 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                   <FormLabel className="text-sm flex items-center">
                     Modelo <span className="text-red-500 ml-1">*</span>
                   </FormLabel>
-                  <FormControl>
-                    <Input placeholder="" {...field} className="h-9" required />
-                  </FormControl>
+                  <Select 
+                    value={field.value} 
+                    onValueChange={field.onChange}
+                    disabled={!selectedBrand || !vehicleType}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="h-9">
+                        <SelectValue placeholder={selectedBrand ? "Selecione o modelo" : "Selecione primeiro a marca"} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {getFilteredModels(selectedBrand, vehicleType).map((model) => (
+                        <SelectItem key={model} value={model}>
+                          {model}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
