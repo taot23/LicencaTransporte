@@ -129,6 +129,46 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
     return models;
   };
   const [tareDisplay, setTareDisplay] = useState<string>(vehicle?.tare ? vehicle.tare.toString().replace('.', ',') : '');
+  const [plateDisplay, setPlateDisplay] = useState<string>(vehicle?.plate || '');
+  
+  // Função para validar placas brasileiras
+  const validateBrazilianPlate = (plate: string): boolean => {
+    // Remove espaços e converte para maiúscula
+    const cleanPlate = plate.replace(/\s/g, '').toUpperCase();
+    
+    // Formato antigo: ABC-1234 ou ABC1234
+    const oldFormat = /^[A-Z]{3}-?\d{4}$/;
+    
+    // Formato Mercosul: BRA2E19 ou BRA-2E19
+    const mercosulFormat = /^[A-Z]{3}-?\d{1}[A-Z]{1}\d{2}$/;
+    
+    return oldFormat.test(cleanPlate) || mercosulFormat.test(cleanPlate);
+  };
+  
+  // Função para formatar placa
+  const formatPlate = (value: string): string => {
+    // Remove tudo que não for letra ou número
+    const clean = value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    
+    if (clean.length <= 3) {
+      return clean;
+    } else if (clean.length <= 7) {
+      // Formato antigo: ABC1234 -> ABC-1234
+      const letters = clean.slice(0, 3);
+      const numbers = clean.slice(3);
+      
+      // Verifica se é formato Mercosul (4º caractere é número, 5º é letra)
+      if (numbers.length >= 2 && /\d/.test(numbers[0]) && /[A-Z]/.test(numbers[1])) {
+        // Formato Mercosul: BRA2E19
+        return letters + numbers;
+      } else {
+        // Formato antigo: ABC-1234
+        return letters + (numbers ? '-' + numbers : '');
+      }
+    }
+    
+    return clean.slice(0, 7);
+  };
   
   // Atualizar vehicleType quando o veículo mudar
   useEffect(() => {
@@ -370,9 +410,36 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                     Placa <span className="text-red-500 ml-1">*</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="ABC-1234" {...field} className="h-9" required />
+                    <Input 
+                      placeholder="ABC-1234 ou BRA2E19" 
+                      value={plateDisplay}
+                      onChange={(e) => {
+                        const formatted = formatPlate(e.target.value);
+                        setPlateDisplay(formatted);
+                        
+                        // Só salva no form se for válido
+                        if (formatted.length >= 7 && validateBrazilianPlate(formatted)) {
+                          field.onChange(formatted);
+                        } else if (formatted.length < 7) {
+                          field.onChange(formatted);
+                        }
+                      }}
+                      className={`h-9 ${plateDisplay.length >= 7 && !validateBrazilianPlate(plateDisplay) ? 'border-red-500' : ''}`}
+                      maxLength={8}
+                      required 
+                    />
                   </FormControl>
                   <FormMessage />
+                  {plateDisplay.length >= 7 && !validateBrazilianPlate(plateDisplay) && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Formato inválido. Use ABC-1234 (antigo) ou BRA2E19 (Mercosul)
+                    </p>
+                  )}
+                  {plateDisplay.length >= 3 && plateDisplay.length < 7 && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Continue digitando...
+                    </p>
+                  )}
                 </FormItem>
               )}
             />
