@@ -1503,9 +1503,14 @@ export class DatabaseStorage implements IStorage {
     
     // Verificar se o usuário é admin baseado no role
     const user = await this.getUser(userId);
-    const isAdmin = user?.role === 'admin' || user?.role === 'supervisor' || user?.role === 'manager';
+    if (!user) {
+      console.log(`[DASHBOARD STATS] ERRO: Usuário ${userId} não encontrado`);
+      throw new Error('Usuário não encontrado');
+    }
     
-    console.log(`[DASHBOARD STATS] Usuário ${user?.email} (${user?.role}) - É admin: ${isAdmin}`);
+    const isAdmin = user.role === 'admin' || user.role === 'supervisor' || user.role === 'manager';
+    
+    console.log(`[DASHBOARD STATS] Usuário ${user.email} (${user.role}) - É admin: ${isAdmin}`);
     
     if (isAdmin) {
       // Admin vê todas as estatísticas globais do sistema
