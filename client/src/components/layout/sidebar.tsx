@@ -264,7 +264,7 @@ export function Sidebar({ className }: SidebarProps) {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0 bg-gray-800 text-white w-[280px] overflow-y-auto max-h-screen">
+            <SheetContent side="left" className="p-0 bg-gray-800 text-white w-[250px] sm:w-[280px] overflow-y-auto max-h-screen">
               <NavItems />
             </SheetContent>
           </Sheet>
@@ -279,7 +279,7 @@ export function Sidebar({ className }: SidebarProps) {
       <div className="pt-16 md:pt-0"></div>
     </>
   ) : (
-    <div className={cn("hidden md:flex md:flex-col md:w-64 fixed inset-y-0 bg-gray-800 text-white shadow-lg z-10", className)}>
+    <div className={cn("hidden md:flex md:flex-col md:w-56 lg:w-64 xl:w-72 fixed inset-y-0 bg-gray-800 text-white shadow-lg z-10", className)}>
       <NavItems />
     </div>
   );

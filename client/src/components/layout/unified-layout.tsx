@@ -37,7 +37,7 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
     <div className="min-h-screen flex bg-gray-50">
       <Sidebar />
       
-      <div className="flex-1 md:ml-64 relative">
+      <div className="flex-1 md:ml-56 lg:ml-64 xl:ml-72 relative">
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-60 z-10">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
