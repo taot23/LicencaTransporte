@@ -897,14 +897,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         vehicleData.crlvYear = parseInt(vehicleData.crlvYear);
       }
 
-      // Validate vehicle data
-      try {
-        insertVehicleSchema.parse(vehicleData);
-      } catch (error: any) {
-        console.log('Validation error:', error);
-        const validationError = fromZodError(error);
+      // Validate vehicle data (usar safeParse para capturar e transformar dados automaticamente)
+      const validationResult = insertVehicleSchema.safeParse(vehicleData);
+      if (!validationResult.success) {
+        console.log('Validation error:', validationResult.error);
+        const validationError = fromZodError(validationResult.error);
         return res.status(400).json({ message: validationError.message });
       }
+      
+      // Usar os dados validados e transformados
+      vehicleData = validationResult.data;
       
       // Add file URL if provided
       let crlvUrl: string | undefined = undefined;
