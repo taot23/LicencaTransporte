@@ -450,12 +450,12 @@ export function Sidebar({ className }: SidebarProps) {
   ) : (
     <>
       {/* Header superior para desktop */}
-      <div className="hidden md:block fixed top-0 right-0 left-56 lg:left-64 xl:left-72 z-20 bg-white border-b border-gray-200 h-16">
+      <div className="hidden md:block fixed top-0 right-0 left-56 lg:left-64 xl:left-72 z-20 bg-[#111827] border-b border-gray-700 h-16">
         <div className="flex items-center justify-end h-full px-6">
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <p className="text-sm font-medium text-gray-700">{user?.fullName}</p>
-              <p className="text-xs text-gray-500">{user?.email}</p>
+              <p className="text-sm font-medium text-white">{user?.fullName}</p>
+              <p className="text-xs text-gray-300">{user?.email}</p>
             </div>
             <Avatar className="h-10 w-10 bg-gray-500">
               <AvatarFallback className="text-white font-medium">{userInitials}</AvatarFallback>
@@ -463,7 +463,7 @@ export function Sidebar({ className }: SidebarProps) {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="text-gray-500 hover:text-gray-700 h-8 w-8"
+              className="text-gray-300 hover:text-white h-8 w-8"
               onClick={handleLogout}
               title="Sair"
             >
