@@ -31,16 +31,18 @@ export function UserSelect({
 }: UserSelectProps) {
   const [value, setValue] = useState<string>(selectedUserId ? String(selectedUserId) : "");
 
-  // Buscar usuários, mas agora usando a rota específica para usuários não-admin
+  // Buscar todos os usuários disponíveis para vinculação
   const { data: users = [], isLoading, error } = useQuery({
-    queryKey: ["/api/admin/non-admin-users"],
+    queryKey: ["/api/admin/users"],
     queryFn: async () => {
       try {
-        const response = await apiRequest("GET", "/api/admin/non-admin-users");
+        const response = await apiRequest("GET", "/api/admin/users");
         const allUsers = await response.json();
-        console.log("[DEBUG] Usuários não-admin carregados:", allUsers.length);
-        // A filtragem já é feita no backend, então retornamos todos os usuários que recebemos
-        return allUsers as EnhancedUser[];
+        console.log("[DEBUG] Todos os usuários carregados:", allUsers.length);
+        // Filtrar apenas usuários que não são admin para vinculação com transportadores
+        const nonAdminUsers = allUsers.filter((user: any) => user.role !== 'admin');
+        console.log("[DEBUG] Usuários não-admin disponíveis:", nonAdminUsers.length);
+        return nonAdminUsers as EnhancedUser[];
       } catch (error) {
         console.error("Erro ao carregar usuários:", error);
         return [];
