@@ -1,0 +1,113 @@
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ sudo psql -h localhost -U aetuser -d aetlicensesystem < data_aet_database.sql 
+Password for user aetuser: 
+SET
+SET
+SET
+SET
+SET
+ set_config 
+------------
+ 
+(1 row)
+
+SET
+SET
+SET
+SET
+ERROR:  relation "public.users" does not exist
+invalid command \.
+ERROR:  syntax error at or near "1"
+LINE 1: 1 admin@sistema.com admin-special-password Administrador (11...
+        ^
+invalid command \N
+invalid command \N
+invalid command \.
+ERROR:  syntax error at or near "1"
+LINE 1: 1 pj Transportadora Teste Ltda 12345678000190 contato@transp...
+        ^
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \.
+ERROR:  syntax error at or near "9"
+LINE 1: 9 2 GHI3F67 semi_trailer RANDON SR BA 2023 78542400003 7500 ...
+        ^
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \.
+ERROR:  syntax error at or near "63"
+LINE 1: 63 2 1 AET-2025-5473 bitrain_9_axles ABC1234 1 10 
+        ^
+invalid command \.
+ERROR:  syntax error at or near "ngbTN50xM7NbJbHrkAzANxXO7_YHHXPv"
+LINE 1: ngbTN50xM7NbJbHrkAzANxXO7_YHHXPv {"cookie":{"originalMaxAge"...
+        ^
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \.
+ERROR:  syntax error at or near "15"
+LINE 1: 15 63 SP 1 pending approved 
+        ^
+ERROR:  relation "public.status_histories_id_seq" does not exist
+LINE 1: SELECT pg_catalog.setval('public.status_histories_id_seq', 3...
+                                 ^
+ERROR:  relation "public.transporters_id_seq" does not exist
+LINE 1: SELECT pg_catalog.setval('public.transporters_id_seq', 2, tr...
+                                 ^
+ERROR:  relation "public.users_id_seq" does not exist
+LINE 1: SELECT pg_catalog.setval('public.users_id_seq', 6, true);
+                                 ^
+ERROR:  relation "public.vehicles_id_seq" does not exist
+LINE 1: SELECT pg_catalog.setval('public.vehicles_id_seq', 32, true)...
+                                 ^
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ 
