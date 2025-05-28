@@ -927,12 +927,17 @@ export class TransactionalStorage implements IStorage {
       userLicenses.forEach(license => {
         if (license.isDraft) return;
         
+        console.log(`[CONTAGEM] Licença ${license.id}: estados=${license.states?.length}, statuses=${license.stateStatuses?.length}`);
+        
         license.states.forEach((state: string) => {
           const stateStatusEntry = license.stateStatuses?.find((entry: string) => entry.startsWith(`${state}:`));
           const stateStatus = stateStatusEntry?.split(':')?.[1];
           
+          console.log(`[CONTAGEM] - Estado ${state}: entry=${stateStatusEntry}, status=${stateStatus}`);
+          
           if (stateStatus === 'approved') {
             issuedLicensesCount++;
+            console.log(`[CONTAGEM] ✓ APROVADO - Total agora: ${issuedLicensesCount}`);
             
             // Verificar se vence em 30 dias
             if (stateStatusEntry && stateStatusEntry.split(':').length > 2) {
