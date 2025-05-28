@@ -774,11 +774,24 @@ export class MemStorage implements IStorage {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
     
+    // Calcular licenças que expiram nos próximos 30 dias
+    const today = new Date();
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(today.getDate() + 30);
+    
+    const expiringLicenses = userLicenses.filter(license => {
+      if (!license.validUntil || license.status !== 'approved') return false;
+      
+      const validUntilDate = new Date(license.validUntil);
+      return validUntilDate >= today && validUntilDate <= thirtyDaysFromNow;
+    }).length;
+
     return {
       issuedLicenses: userLicenses.filter(license => license.status === 'approved').length,
       pendingLicenses: userLicenses.filter(license => license.status !== 'approved').length,
       registeredVehicles: userVehicles.length,
       activeVehicles: userVehicles.filter(vehicle => vehicle.status === 'active').length,
+      expiringLicenses: expiringLicenses,
       recentLicenses: sortedLicenses.slice(0, 5).map(license => ({
         id: license.id,
         requestNumber: license.requestNumber,
@@ -1555,11 +1568,24 @@ export class DatabaseStorage implements IStorage {
         .orderBy(desc(licenseRequests.createdAt))
         .limit(5);
       
+      // Calcular licenças que expiram nos próximos 30 dias para admin
+      const today = new Date();
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(today.getDate() + 30);
+      
+      const adminExpiringLicenses = allIssuedLicenses.filter(license => {
+        if (!license.validUntil) return false;
+        
+        const validUntilDate = new Date(license.validUntil);
+        return validUntilDate >= today && validUntilDate <= thirtyDaysFromNow;
+      }).length;
+
       const adminStats = {
         issuedLicenses: allIssuedLicenses.length,
         pendingLicenses: Number(allPendingLicenses[0]?.count || 0),
         registeredVehicles: Number(allRegisteredVehicles[0]?.count || 0),
         activeVehicles: Number(allActiveVehicles[0]?.count || 0),
+        expiringLicenses: adminExpiringLicenses,
         recentLicenses: allRecentLicenses.map(license => ({
           id: license.id,
           requestNumber: license.requestNumber,
@@ -1679,11 +1705,24 @@ export class DatabaseStorage implements IStorage {
         createdAt: license.createdAt
       }));
       
+      // Calcular licenças que expiram nos próximos 30 dias para transportador
+      const today = new Date();
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(today.getDate() + 30);
+      
+      const userExpiringLicenses = issuedLicenses.filter(license => {
+        if (!license.validUntil) return false;
+        
+        const validUntilDate = new Date(license.validUntil);
+        return validUntilDate >= today && validUntilDate <= thirtyDaysFromNow;
+      }).length;
+
       const userStats = {
         issuedLicenses: issuedLicenses.length,
         pendingLicenses: pendingLicenses.length,
         registeredVehicles: registeredVehiclesCount,
         activeVehicles: activeVehiclesCount,
+        expiringLicenses: userExpiringLicenses,
         recentLicenses
       };
       
