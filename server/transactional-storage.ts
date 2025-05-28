@@ -920,49 +920,13 @@ export class TransactionalStorage implements IStorage {
           .where(eq(licenseRequests.userId, userId));
       }
       
-      // Expandir licenças por estado aprovado (mesma lógica da página)
-      const expandedLicenses: any[] = [];
-      console.log(`[DASHBOARD EXPANDIR] Processando ${userLicenses.length} licenças do usuário`);
+      // Buscar licenças emitidas diretamente da API
+      const issuedLicenses = await this.getAllIssuedLicenses();
+      const userIssuedLicenses = issuedLicenses.filter(l => l.userId === userId);
       
-      userLicenses.forEach(license => {
-        if (license.isDraft) return;
-        
-        console.log(`[DASHBOARD EXPANDIR] Licença ${license.id} - Estados:`, license.states);
-        console.log(`[DASHBOARD EXPANDIR] Licença ${license.id} - StateStatuses:`, license.stateStatuses);
-        
-        license.states.forEach((state: string) => {
-          const stateStatusEntry = license.stateStatuses?.find((entry: string) => entry.startsWith(`${state}:`));
-          const stateStatus = stateStatusEntry?.split(':')?.[1] || 'pending_registration';
-          
-          console.log(`[DASHBOARD EXPANDIR] Licença ${license.id} - Estado ${state} - Status: ${stateStatus}`);
-          
-          if (stateStatus === 'approved') {
-            let stateValidUntil = license.validUntil ? license.validUntil.toString() : null;
-            
-            if (stateStatusEntry && stateStatusEntry.split(':').length > 2) {
-              stateValidUntil = stateStatusEntry.split(':')[2];
-            }
-            
-            expandedLicenses.push({
-              licenseId: license.id,
-              state: state,
-              validUntil: stateValidUntil,
-              requestNumber: license.requestNumber,
-              mainVehiclePlate: license.mainVehiclePlate,
-              transporterId: license.transporterId,
-              userId: license.userId
-            });
-            
-            console.log(`[DASHBOARD EXPANDIR] Adicionado estado aprovado: ${state} da licença ${license.id}`);
-          }
-        });
-      });
-      
-      console.log(`[DASHBOARD EXPANDIR] Total de estados aprovados: ${expandedLicenses.length}`);
-      
-      // Calcular licenças que expiram em 30 dias usando expandedLicenses
+      // Contar licenças a vencer (próximos 30 dias)
       const today = new Date();
-      const expiringLicenses = expandedLicenses.filter(license => {
+      const expiringLicenses = userIssuedLicenses.filter(license => {
         if (!license.validUntil) return false;
         
         const validDate = new Date(license.validUntil);
@@ -1016,7 +980,7 @@ export class TransactionalStorage implements IStorage {
       }));
       
       const result = {
-        issuedLicenses: expandedLicenses.length,
+        issuedLicenses: userIssuedLicenses.length,
         pendingLicenses: pendingLicenses.length,
         registeredVehicles,
         activeVehicles,
