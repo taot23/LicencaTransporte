@@ -922,14 +922,21 @@ export class TransactionalStorage implements IStorage {
       
       // Buscar dados EXATAMENTE como a página de licenças emitidas faz
       const issuedLicensesFromAPI = await this.getAllIssuedLicenses();
+      console.log(`[DEBUG] Total licenças da API: ${issuedLicensesFromAPI.length}`);
+      
       const userIssuedLicenses = issuedLicensesFromAPI.filter(l => l.userId === userId);
+      console.log(`[DEBUG] Licenças do usuário ${userId}: ${userIssuedLicenses.length}`);
       
       // Expandir licenças por estado (mesma lógica da página issued-licenses-page.tsx)
       const expandedLicenses: any[] = [];
       userIssuedLicenses.forEach(license => {
+        console.log(`[DEBUG] Processando licença ${license.id}, estados: ${license.states?.length || 0}, stateStatuses: ${license.stateStatuses?.length || 0}`);
+        
         license.states.forEach((state: string, index: number) => {
           const stateStatusEntry = license.stateStatuses?.find((entry: string) => entry.startsWith(`${state}:`));
           const stateStatus = stateStatusEntry?.split(':')?.[1] || 'pending_registration';
+          
+          console.log(`[DEBUG] Estado ${state}: status=${stateStatus}, entry=${stateStatusEntry}`);
           
           if (stateStatus === 'approved') {
             let stateValidUntil = license.validUntil ? license.validUntil.toString() : null;
@@ -946,6 +953,8 @@ export class TransactionalStorage implements IStorage {
               requestNumber: license.requestNumber,
               mainVehiclePlate: license.mainVehiclePlate
             });
+            
+            console.log(`[DEBUG] Adicionada licença expandida: ${state} - ${license.requestNumber}`);
           }
         });
       });
