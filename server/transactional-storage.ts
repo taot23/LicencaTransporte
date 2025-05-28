@@ -924,8 +924,12 @@ export class TransactionalStorage implements IStorage {
       let issuedLicensesCount = 0;
       let expiringLicensesCount = 0;
       
+      console.log(`[DASHBOARD CONTAGEM] Iniciando contagem para ${userLicenses.length} licenças do usuário`);
+      
       userLicenses.forEach(license => {
         if (license.isDraft) return;
+        
+        console.log(`[DASHBOARD CONTAGEM] Licença ${license.id}: estados=${JSON.stringify(license.states)}, stateStatuses=${JSON.stringify(license.stateStatuses)}`);
         
         // Para cada estado da licença, verificar se foi aprovado
         if (license.states && Array.isArray(license.states)) {
@@ -934,9 +938,12 @@ export class TransactionalStorage implements IStorage {
             const stateStatusEntry = license.stateStatuses?.find(entry => entry.startsWith(`${state}:`));
             const stateStatus = stateStatusEntry?.split(':')?.[1] || 'pending_registration';
             
+            console.log(`[DASHBOARD CONTAGEM] Estado ${state}: statusEntry=${stateStatusEntry}, status=${stateStatus}`);
+            
             // Só contar estados com status "approved"
             if (stateStatus === 'approved') {
               issuedLicensesCount++;
+              console.log(`[DASHBOARD CONTAGEM] ✓ Estado ${state} aprovado! Total agora: ${issuedLicensesCount}`);
               
               // Verificar se vence em 30 dias
               if (stateStatusEntry && stateStatusEntry.split(':').length > 2) {
@@ -957,6 +964,8 @@ export class TransactionalStorage implements IStorage {
           });
         }
       });
+      
+      console.log(`[DASHBOARD CONTAGEM] FINAL: ${issuedLicensesCount} licenças emitidas, ${expiringLicensesCount} a vencer`);
       
       // Licenças pendentes (não emitidas)
       const pendingLicenses = userLicenses.filter(license => {
