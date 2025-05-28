@@ -73,6 +73,10 @@ function Router() {
         path="/issued-licenses" 
         component={isMobile ? MobileIssuedLicensesPage : IssuedLicensesPage} 
       />
+      <ProtectedRoute 
+        path="/gamification" 
+        component={GamificationPage} 
+      />
       
       <Route component={NotFound} />
     </Switch>
