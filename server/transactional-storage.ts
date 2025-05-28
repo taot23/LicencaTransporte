@@ -920,52 +920,41 @@ export class TransactionalStorage implements IStorage {
           .where(eq(licenseRequests.userId, userId));
       }
       
-      // Contar estados aprovados - cada estado aprovado = 1 licença emitida
+      // Aplicar a mesma lógica da página "Licenças Emitidas" (expandedLicenses)
       let issuedLicensesCount = 0;
       let expiringLicensesCount = 0;
       
       userLicenses.forEach(license => {
         if (license.isDraft) return;
         
-        // Processar stateStatuses para contar estados aprovados
-        if (license.stateStatuses) {
-          let statusesData = license.stateStatuses;
-          
-          // Se for string, fazer parse JSON
-          if (typeof statusesData === 'string') {
-            try {
-              statusesData = JSON.parse(statusesData);
-            } catch (e) {
-              return;
-            }
-          }
-          
-          // Se for objeto, contar estados aprovados
-          if (typeof statusesData === 'object' && statusesData !== null) {
-            Object.entries(statusesData).forEach(([state, status]) => {
-              if (typeof status === 'string' && status.startsWith('approved')) {
-                issuedLicensesCount++;
-                
-                // Verificar se vence em 30 dias
-                if (status.includes(':')) {
-                  const datePart = status.split(':')[1];
-                  if (datePart) {
-                    try {
-                      const validDate = new Date(datePart);
-                      const today = new Date();
-                      const diffInDays = Math.ceil((validDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                      
-                      if (diffInDays > 0 && diffInDays <= 30) {
-                        expiringLicensesCount++;
-                      }
-                    } catch (e) {
-                      // Ignorar erros de data
-                    }
+        // Para cada estado da licença, verificar se foi aprovado
+        if (license.states && Array.isArray(license.states)) {
+          license.states.forEach((state) => {
+            // Verificar se este estado específico foi aprovado
+            const stateStatusEntry = license.stateStatuses?.find(entry => entry.startsWith(`${state}:`));
+            const stateStatus = stateStatusEntry?.split(':')?.[1] || 'pending_registration';
+            
+            // Só contar estados com status "approved"
+            if (stateStatus === 'approved') {
+              issuedLicensesCount++;
+              
+              // Verificar se vence em 30 dias
+              if (stateStatusEntry && stateStatusEntry.split(':').length > 2) {
+                const stateValidUntil = stateStatusEntry.split(':')[2];
+                try {
+                  const validDate = new Date(stateValidUntil);
+                  const today = new Date();
+                  const diffInDays = Math.ceil((validDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                  
+                  if (diffInDays > 0 && diffInDays <= 30) {
+                    expiringLicensesCount++;
                   }
+                } catch (e) {
+                  // Ignorar erros de data
                 }
               }
-            });
-          }
+            }
+          });
         }
       });
       
