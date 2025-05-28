@@ -270,7 +270,16 @@ export function Sidebar({ className }: SidebarProps) {
           </Sheet>
           <Logo width={90} className="ml-1" />
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-gray-300 hover:text-white h-8 w-8"
+            onClick={handleLogout}
+            title="Sair"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
           <Avatar className="h-8 w-8 bg-gray-700">
             <AvatarFallback className="text-black font-medium">{userInitials}</AvatarFallback>
           </Avatar>
