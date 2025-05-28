@@ -924,10 +924,18 @@ export class TransactionalStorage implements IStorage {
       
       // Calcular licenças emitidas (com pelo menos um estado aprovado)
       const issuedLicenses = userLicenses.filter(license => {
+        console.log(`[DEBUG ISSUED] Verificando licença ${license.id} - isDraft: ${license.isDraft}`);
         if (license.isDraft) return false;
-        const hasApprovedState = license.stateStatuses && license.stateStatuses.some(status => 
-          status.includes(':approved:')
-        );
+        
+        console.log(`[DEBUG ISSUED] StateStatuses da licença ${license.id}:`, license.stateStatuses);
+        const hasApprovedState = license.stateStatuses && license.stateStatuses.some(status => {
+          console.log(`[DEBUG ISSUED] Verificando status: ${status}`);
+          const isApproved = status.includes(':approved:');
+          console.log(`[DEBUG ISSUED] É aprovado? ${isApproved}`);
+          return isApproved;
+        });
+        
+        console.log(`[DEBUG ISSUED] Licença ${license.id} tem estado aprovado? ${hasApprovedState}`);
         return hasApprovedState;
       });
       
