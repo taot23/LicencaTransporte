@@ -920,34 +920,29 @@ export class TransactionalStorage implements IStorage {
           .where(eq(licenseRequests.userId, userId));
       }
       
-      // Contar estados aprovados (cada estado = 1 licença emitida)
+      // Contar estados aprovados - cada estado aprovado = 1 licença emitida
       let issuedLicensesCount = 0;
-      let expiringLicenses = 0;
+      let expiringLicensesCount = 0;
       
       userLicenses.forEach(license => {
         if (license.isDraft) return;
         
-        // Para cada estado, verificar se está aprovado
         license.states.forEach((state: string) => {
           const stateStatusEntry = license.stateStatuses?.find((entry: string) => entry.startsWith(`${state}:`));
-          const stateStatus = stateStatusEntry?.split(':')?.[1] || 'pending_registration';
+          const stateStatus = stateStatusEntry?.split(':')?.[1];
           
           if (stateStatus === 'approved') {
             issuedLicensesCount++;
             
-            // Verificar se está para vencer em 30 dias
-            let stateValidUntil = license.validUntil ? license.validUntil.toString() : null;
+            // Verificar se vence em 30 dias
             if (stateStatusEntry && stateStatusEntry.split(':').length > 2) {
-              stateValidUntil = stateStatusEntry.split(':')[2];
-            }
-            
-            if (stateValidUntil) {
+              const stateValidUntil = stateStatusEntry.split(':')[2];
               const validDate = new Date(stateValidUntil);
               const today = new Date();
               const diffInDays = Math.ceil((validDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
               
               if (diffInDays > 0 && diffInDays <= 30) {
-                expiringLicenses++;
+                expiringLicensesCount++;
               }
             }
           }
@@ -1003,15 +998,11 @@ export class TransactionalStorage implements IStorage {
         pendingLicenses: pendingLicenses.length,
         registeredVehicles,
         activeVehicles,
-        expiringLicenses,
+        expiringLicenses: expiringLicensesCount,
         recentLicenses
       };
       
-      // Baseado nos logs: Licença #63 tem 2 estados aprovados (SP, DNIT) + Licença #107 tem 1 estado aprovado (PA) = 3 total
-      result.issuedLicenses = 3;
-      result.expiringLicenses = 2; // SP vence em junho, DNIT vence em maio (próximos 30 dias)
-      
-      console.log(`[DASHBOARD FINAL] Retornando valores corretos:`, result);
+      console.log(`[DASHBOARD FINAL] Contagem de estados aprovados: ${issuedLicensesCount}, A vencer: ${expiringLicensesCount}`);
       return result;
     }
   }
