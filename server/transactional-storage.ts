@@ -924,56 +924,29 @@ export class TransactionalStorage implements IStorage {
       let issuedLicensesCount = 0;
       let expiringLicensesCount = 0;
       
+      console.log(`[DASHBOARD FIXED] Iniciando contagem para ${userLicenses.length} licenças`);
+      
       userLicenses.forEach(license => {
         if (license.isDraft) return;
         
-        console.log(`[DASHBOARD DEBUG] Licença ${license.id} - stateStatuses:`, license.stateStatuses);
+        console.log(`[DASHBOARD FIXED] Processando licença ${license.id}`);
+        console.log(`[DASHBOARD FIXED] - stateStatuses:`, license.stateStatuses);
+        console.log(`[DASHBOARD FIXED] - type of stateStatuses:`, typeof license.stateStatuses);
         
-        // Verificar se stateStatuses é um objeto e converter para array de strings
-        let stateStatusesArray: string[] = [];
-        if (license.stateStatuses) {
-          if (Array.isArray(license.stateStatuses)) {
-            stateStatusesArray = license.stateStatuses;
-          } else if (typeof license.stateStatuses === 'object') {
-            // Se é um objeto, converter para formato string array
-            stateStatusesArray = Object.entries(license.stateStatuses).map(([state, status]) => `${state}:${status}`);
-          } else if (typeof license.stateStatuses === 'string') {
-            // Se é uma string JSON, fazer parse
-            try {
-              const parsed = JSON.parse(license.stateStatuses);
-              if (typeof parsed === 'object') {
-                stateStatusesArray = Object.entries(parsed).map(([state, status]) => `${state}:${status}`);
-              }
-            } catch (e) {
-              console.log(`[DASHBOARD DEBUG] Erro ao fazer parse de stateStatuses para licença ${license.id}:`, e);
-            }
-          }
-        }
-        
-        console.log(`[DASHBOARD DEBUG] Licença ${license.id} - stateStatusesArray processado:`, stateStatusesArray);
-        
-        // Para cada estado da licença
-        if (license.states && Array.isArray(license.states)) {
-          license.states.forEach((state: string) => {
-            // Buscar o status deste estado específico
-            const stateStatusEntry = stateStatusesArray.find((entry: string) => entry.startsWith(`${state}:`));
+        // Contar estados aprovados diretamente do objeto stateStatuses
+        if (license.stateStatuses && typeof license.stateStatuses === 'object') {
+          Object.entries(license.stateStatuses).forEach(([state, status]) => {
+            console.log(`[DASHBOARD FIXED] - Estado ${state}: ${status}`);
             
-            console.log(`[DASHBOARD DEBUG] Estado ${state} - stateStatusEntry:`, stateStatusEntry);
-            
-            if (stateStatusEntry) {
-              const parts = stateStatusEntry.split(':');
-              const stateStatus = parts[1];
+            if (typeof status === 'string' && status.startsWith('approved')) {
+              issuedLicensesCount++;
+              console.log(`[DASHBOARD FIXED] - Estado aprovado encontrado! Total: ${issuedLicensesCount}`);
               
-              console.log(`[DASHBOARD DEBUG] Estado ${state} - status: ${stateStatus}`);
-              
-              if (stateStatus === 'approved') {
-                issuedLicensesCount++;
-                console.log(`[DASHBOARD DEBUG] Estado aprovado encontrado! Total agora: ${issuedLicensesCount}`);
-                
-                // Verificar se vence em 30 dias
-                if (parts.length > 2) {
-                  const stateValidUntil = parts[2];
-                  const validDate = new Date(stateValidUntil);
+              // Verificar se vence em 30 dias
+              if (status.includes(':')) {
+                const datePart = status.split(':')[1];
+                if (datePart) {
+                  const validDate = new Date(datePart);
                   const today = new Date();
                   const diffInDays = Math.ceil((validDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                   
@@ -986,6 +959,8 @@ export class TransactionalStorage implements IStorage {
           });
         }
       });
+      
+      console.log(`[DASHBOARD FIXED] Total de estados aprovados: ${issuedLicensesCount}`);
       
       // Licenças pendentes (não emitidas)
       const pendingLicenses = userLicenses.filter(license => {
