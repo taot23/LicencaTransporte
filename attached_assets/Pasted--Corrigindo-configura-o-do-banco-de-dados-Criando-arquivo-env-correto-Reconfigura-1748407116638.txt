@@ -1,0 +1,56 @@
+🔧 Corrigindo configuração do banco de dados...
+📝 Criando arquivo .env correto...
+🗄️ Reconfigurando PostgreSQL...
+DROP DATABASE
+ERROR:  role "aetuser" cannot be dropped because some objects depend on it
+DETAIL:  privileges for schema public
+CREATE DATABASE
+ERROR:  role "aetuser" already exists
+GRANT
+ALTER ROLE
+ALTER ROLE
+You are now connected to database "aetlicensesystem" as user "postgres".
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+✅ Banco configurado com sucesso!
+🔍 Testando conexão...
+psql: error: connection to server at "localhost" (::1), port 5432 failed: FATAL:  password authentication failed for user "aetuser"
+connection to server at "localhost" (::1), port 5432 failed: FATAL:  password authentication failed for user "aetuser"
+❌ Erro na conexão
+🚀 Executando migrações...
+
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/var/www/aetlicensesystem/LicencaTransporte/drizzle.config.ts'
+Using 'pg' driver for database querying
+[⣯] Pulling schema from database...
+error: password authentication failed for user "aetuser"
+    at /var/www/aetlicensesystem/LicencaTransporte/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/var/www/aetlicensesystem/LicencaTransporte/node_modules/drizzle-kit/bin.cjs:66575:26)
+    at async fromDatabase2 (/var/www/aetlicensesystem/LicencaTransporte/node_modules/drizzle-kit/bin.cjs:18700:25) {
+  length: 103,
+  severity: 'FATAL',
+  code: '28P01',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'auth.c',
+  line: '326',
+  routine: 'auth_failed'
+}
+✅ Configuração concluída!
+Execute agora: pm2 start ecosystem.config.js
