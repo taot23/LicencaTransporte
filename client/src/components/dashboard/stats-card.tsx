@@ -12,7 +12,15 @@ interface StatsCardProps {
   color: "primary" | "yellow" | "blue" | "red";
 }
 
-export function StatsCard({ title, value, icon, trend, trendText, secondaryText, color }: StatsCardProps) {
+export function StatsCard({
+  title,
+  value,
+  icon,
+  trend,
+  trendText,
+  secondaryText,
+  color,
+}: StatsCardProps) {
   const colorClasses = {
     primary: {
       iconBg: "bg-blue-100",
@@ -42,16 +50,31 @@ export function StatsCard({ title, value, icon, trend, trendText, secondaryText,
     <Card>
       <CardContent className="p-6">
         <div className="flex items-center">
-          <div className={cn("p-3 rounded-full", classes.iconBg, classes.iconText)}>
+          <div
+            className={cn("p-3 rounded-full", classes.iconBg, classes.iconText)}
+          >
             {icon}
           </div>
           <div className="ml-5">
             <p className="text-gray-500 text-sm">{title}</p>
-            <h3 className="font-bold text-3xl text-gray-800">{Math.floor(value)}</h3>
+            <h3 className="font-bold text-3xl text-gray-800">
+              {value}
+            </h3>
             {trend !== undefined && trendText && (
               <p className="text-sm flex items-center text-yellow-600 ml-[-22px] mr-[-22px] mt-[0px] mb-[0px]">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 mr-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 10l7-7m0 0l7 7m-7-7v18"
+                  />
                 </svg>
                 {trend}% {trendText}
               </p>
