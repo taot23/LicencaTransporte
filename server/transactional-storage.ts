@@ -927,30 +927,48 @@ export class TransactionalStorage implements IStorage {
       userLicenses.forEach(license => {
         if (license.isDraft) return;
         
+        console.log(`[DASHBOARD DEBUG] Licença ${license.id} - stateStatuses:`, license.stateStatuses);
+        
+        // Verificar se stateStatuses é um objeto e converter para array de strings
+        let stateStatusesArray: string[] = [];
+        if (license.stateStatuses) {
+          if (Array.isArray(license.stateStatuses)) {
+            stateStatusesArray = license.stateStatuses;
+          } else if (typeof license.stateStatuses === 'object') {
+            // Se é um objeto, converter para formato string array
+            stateStatusesArray = Object.entries(license.stateStatuses).map(([state, status]) => `${state}:${status}`);
+          }
+        }
+        
+        console.log(`[DASHBOARD DEBUG] Licença ${license.id} - stateStatusesArray processado:`, stateStatusesArray);
+        
         // Para cada estado da licença
         if (license.states && Array.isArray(license.states)) {
           license.states.forEach((state: string) => {
             // Buscar o status deste estado específico
-            if (license.stateStatuses && Array.isArray(license.stateStatuses)) {
-              const stateStatusEntry = license.stateStatuses.find((entry: string) => entry.startsWith(`${state}:`));
+            const stateStatusEntry = stateStatusesArray.find((entry: string) => entry.startsWith(`${state}:`));
+            
+            console.log(`[DASHBOARD DEBUG] Estado ${state} - stateStatusEntry:`, stateStatusEntry);
+            
+            if (stateStatusEntry) {
+              const parts = stateStatusEntry.split(':');
+              const stateStatus = parts[1];
               
-              if (stateStatusEntry) {
-                const parts = stateStatusEntry.split(':');
-                const stateStatus = parts[1];
+              console.log(`[DASHBOARD DEBUG] Estado ${state} - status: ${stateStatus}`);
+              
+              if (stateStatus === 'approved') {
+                issuedLicensesCount++;
+                console.log(`[DASHBOARD DEBUG] Estado aprovado encontrado! Total agora: ${issuedLicensesCount}`);
                 
-                if (stateStatus === 'approved') {
-                  issuedLicensesCount++;
+                // Verificar se vence em 30 dias
+                if (parts.length > 2) {
+                  const stateValidUntil = parts[2];
+                  const validDate = new Date(stateValidUntil);
+                  const today = new Date();
+                  const diffInDays = Math.ceil((validDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                   
-                  // Verificar se vence em 30 dias
-                  if (parts.length > 2) {
-                    const stateValidUntil = parts[2];
-                    const validDate = new Date(stateValidUntil);
-                    const today = new Date();
-                    const diffInDays = Math.ceil((validDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                    
-                    if (diffInDays > 0 && diffInDays <= 30) {
-                      expiringLicensesCount++;
-                    }
+                  if (diffInDays > 0 && diffInDays <= 30) {
+                    expiringLicensesCount++;
                   }
                 }
               }
