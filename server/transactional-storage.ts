@@ -849,28 +849,173 @@ export class TransactionalStorage implements IStorage {
   
   // Métodos para obter estatísticas
   async getDashboardStats(userId: number): Promise<DashboardStats> {
-    // Usar a nova função otimizada para estatísticas
-    const stats = await getDashboardStatsCombined();
+    console.log(`[DASHBOARD NEW] Usuário ${userId} (${(await this.getUser(userId))?.email}) role: ${(await this.getUser(userId))?.role}`);
     
-    // Se for um usuário específico (não admin), filtrar adequadamente
-    let recentLicensesQuery = db
-      .select()
-      .from(licenseRequests)
-      .where(eq(licenseRequests.isDraft, false));
-    
-    // Se não for usuário admin (userId 0), aplicar filtro por userId
-    if (userId !== 0) {
-      recentLicensesQuery = recentLicensesQuery.where(eq(licenseRequests.userId, userId));
+    // Verificar se o usuário é admin baseado no role
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error('Usuário não encontrado');
     }
     
-    const recentLicenses = await recentLicensesQuery
-      .orderBy(desc(licenseRequests.createdAt))
-      .limit(5);
+    const isAdmin = user.role === 'admin' || user.role === 'supervisor' || user.role === 'manager';
     
-    return {
-      ...stats,
-      recentLicenses
-    };
+    if (isAdmin) {
+      console.log(`[DASHBOARD NEW] ADMIN - Coletando dados globais`);
+      const stats = await getDashboardStatsCombined();
+      
+      const recentLicenses = await db
+        .select()
+        .from(licenseRequests)
+        .where(eq(licenseRequests.isDraft, false))
+        .orderBy(desc(licenseRequests.createdAt))
+        .limit(5);
+      
+      return {
+        ...stats,
+        recentLicenses
+      };
+      
+    } else {
+      console.log(`[DASHBOARD NEW] TRANSPORTADOR - Coletando dados específicos do usuário ${userId}`);
+      
+      // Primeiro, verificar se o usuário tem transportadores associados
+      const userTransporters = await db.select()
+        .from(transporters)
+        .where(eq(transporters.userId, userId));
+      
+      const transporterIds = userTransporters.map(t => t.id);
+      console.log(`[DASHBOARD NEW] TRANSPORTADOR - IDs dos transportadores: ${transporterIds.join(', ')}`);
+      
+      // Contar veículos do usuário
+      const vehiclesResult = await db.select({ count: sql`count(*)` })
+        .from(vehicles)
+        .where(eq(vehicles.userId, userId));
+        
+      const activeVehiclesResult = await db.select({ count: sql`count(*)` })
+        .from(vehicles)
+        .where(and(
+          eq(vehicles.userId, userId),
+          eq(vehicles.status, "active")
+        ));
+      
+      const registeredVehicles = Number(vehiclesResult[0]?.count || 0);
+      const activeVehicles = Number(activeVehiclesResult[0]?.count || 0);
+      
+      console.log(`[DASHBOARD NEW] TRANSPORTADOR - Veículos: ${registeredVehicles} total, ${activeVehicles} ativos`);
+      
+      // Buscar licenças específicas do usuário/transportador
+      let userLicenses = [];
+      if (transporterIds.length > 0) {
+        userLicenses = await db.select()
+          .from(licenseRequests)
+          .where(
+            or(
+              eq(licenseRequests.userId, userId),
+              sql`${licenseRequests.transporterId} = ANY(${transporterIds})`
+            )
+          );
+      } else {
+        userLicenses = await db.select()
+          .from(licenseRequests)
+          .where(eq(licenseRequests.userId, userId));
+      }
+      
+      console.log(`[DASHBOARD NEW] TRANSPORTADOR - Licenças encontradas: ${userLicenses.length}`);
+      
+      // Calcular licenças emitidas (com pelo menos um estado aprovado)
+      const issuedLicenses = userLicenses.filter(license => {
+        if (license.isDraft) return false;
+        const hasApprovedState = license.stateStatuses && license.stateStatuses.some(status => 
+          status.includes(':approved:')
+        );
+        return hasApprovedState;
+      });
+      
+      // Calcular licenças pendentes (não-draft e sem estados aprovados)
+      const pendingLicenses = userLicenses.filter(license => {
+        if (license.isDraft) return false;
+        const hasApprovedState = license.stateStatuses && license.stateStatuses.some(status => 
+          status.includes(':approved:')
+        );
+        return !hasApprovedState;
+      });
+      
+      // Calcular licenças que expiram nos próximos 30 dias
+      const today = new Date();
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(today.getDate() + 30);
+      
+      const expiringLicenses = issuedLicenses.filter(license => {
+        // Verificar datas de validade nos stateStatuses
+        if (license.stateStatuses && license.stateStatuses.length > 0) {
+          return license.stateStatuses.some(status => {
+            if (status.includes(':approved:')) {
+              const parts = status.split(':');
+              if (parts.length >= 3) {
+                const validityDate = new Date(parts[2]);
+                return validityDate >= today && validityDate <= thirtyDaysFromNow;
+              }
+            }
+            return false;
+          });
+        }
+        
+        // Fallback para validUntil se não houver stateStatuses
+        if (license.validUntil) {
+          const validUntilDate = new Date(license.validUntil);
+          return validUntilDate >= today && validUntilDate <= thirtyDaysFromNow;
+        }
+        
+        return false;
+      }).length;
+      
+      // Buscar licenças recentes
+      let recentLicensesResult = [];
+      if (transporterIds.length > 0) {
+        recentLicensesResult = await db.select()
+          .from(licenseRequests)
+          .where(and(
+            or(
+              eq(licenseRequests.userId, userId),
+              sql`${licenseRequests.transporterId} = ANY(${transporterIds})`
+            ),
+            eq(licenseRequests.isDraft, false)
+          ))
+          .orderBy(desc(licenseRequests.createdAt))
+          .limit(5);
+      } else {
+        recentLicensesResult = await db.select()
+          .from(licenseRequests)
+          .where(and(
+            eq(licenseRequests.userId, userId),
+            eq(licenseRequests.isDraft, false)
+          ))
+          .orderBy(desc(licenseRequests.createdAt))
+          .limit(5);
+      }
+      
+      const recentLicenses = recentLicensesResult.map(license => ({
+        id: license.id,
+        requestNumber: license.requestNumber,
+        type: license.type,
+        mainVehiclePlate: license.mainVehiclePlate,
+        states: license.states,
+        status: license.status,
+        createdAt: license.createdAt
+      }));
+      
+      const result = {
+        issuedLicenses: issuedLicenses.length,
+        pendingLicenses: pendingLicenses.length,
+        registeredVehicles,
+        activeVehicles,
+        expiringLicenses,
+        recentLicenses
+      };
+      
+      console.log(`[DASHBOARD NEW] TRANSPORTADOR - Retornando:`, result);
+      return result;
+    }
   }
   
   async getVehicleStats(userId: number): Promise<ChartData[]> {
