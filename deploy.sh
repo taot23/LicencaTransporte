@@ -67,7 +67,7 @@ cat > /var/www/aetlicensesystem/.env.example << EOF
 DATABASE_URL=postgresql://aetuser:AET@License2025!@localhost:5432/aetlicensesystem
 SESSION_SECRET=sua_chave_secreta_muito_longa_e_segura_aqui_mude_isso
 NODE_ENV=production
-PORT=5000
+Pcd ORT=5000
 GOV_BR_CLIENT_ID=seu_client_id_gov_br
 GOV_BR_CLIENT_SECRET=seu_client_secret_gov_br
 EOF
