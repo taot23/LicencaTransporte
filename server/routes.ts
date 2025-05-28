@@ -680,7 +680,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[DEBUG TRANSPORTERS] Usuário comum - encontrou ${userTransporters.length} transportadores vinculados de ${allTransporters.length} total`);
       
       if (userTransporters.length === 0) {
-        console.log(`[DEBUG TRANSPORTERS] IDs de transportadores disponíveis: ${allTransporters.map(t => `${t.id}:${t.userId}`).join(', ')}`);
+        console.log(`[DEBUG TRANSPORTERS] IDs de transportadores disponíveis: ${allTransporters.map(t => `${t.id}:${t.userId || 'null'}`).join(', ')}`);
+        console.log(`[DEBUG TRANSPORTERS] Usuário ${userId} não encontrou transportadores. Verificando vinculações...`);
+      } else {
+        console.log(`[DEBUG TRANSPORTERS] Transportadores vinculados ao usuário ${userId}: ${userTransporters.map(t => `${t.name} (ID: ${t.id})`).join(', ')}`);
       }
       
       res.json(userTransporters);
@@ -742,6 +745,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   function isAdminUser(user: Express.User): boolean {
     return ['admin', 'supervisor', 'operational', 'manager'].includes(user.role);
   }
+
+  function canManageTransporters(user: Express.User): boolean {
+    return ['admin', 'operational'].includes(user.role);
+  }
+
+  function canManageVehicleModels(user: Express.User): boolean {
+    return ['admin', 'operational'].includes(user.role);
+  }
   
   // Vehicles CRUD endpoints
   app.get('/api/vehicles', requireAuth, async (req, res) => {
@@ -758,8 +769,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[DEBUG VEHICLES] Admin encontrou ${vehicles.length} veículos no total`);
       } else {
         console.log(`[DEBUG VEHICLES] Usuário comum - buscando veículos do usuário ${user.id}`);
-        vehicles = await storage.getVehiclesByUserId(user.id);
-        console.log(`[DEBUG VEHICLES] Usuário comum encontrou ${vehicles.length} veículos próprios`);
+        
+        // Buscar transportadores vinculados ao usuário
+        const allTransporters = await storage.getAllTransporters();
+        const userTransporters = allTransporters.filter(t => t.userId === user.id);
+        
+        if (userTransporters.length > 0) {
+          console.log(`[DEBUG VEHICLES] Usuário tem ${userTransporters.length} transportadores vinculados`);
+          // Se tem transportadores vinculados, buscar veículos associados a esses transportadores
+          vehicles = await storage.getVehiclesByUserId(user.id);
+        } else {
+          console.log(`[DEBUG VEHICLES] Usuário não tem transportadores vinculados, buscando apenas veículos próprios`);
+          vehicles = await storage.getVehiclesByUserId(user.id);
+        }
+        
+        console.log(`[DEBUG VEHICLES] Usuário comum encontrou ${vehicles.length} veículos`);
       }
       
       res.json(vehicles);
@@ -2624,7 +2648,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Rotas para transportadores
-  app.get('/api/admin/transporters', requireAdmin, async (req, res) => {
+  app.get('/api/admin/transporters', requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    // Verificar se o usuário pode gerenciar transportadores
+    if (!canManageTransporters(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
     try {
       const transporters = await storage.getAllTransporters();
       res.json(transporters);
@@ -2654,7 +2684,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   const transporterUpload = multer({ storage: transporterStorage });
 
-  app.post('/api/admin/transporters', requireAdmin, transporterUpload.any(), async (req, res) => {
+  app.post('/api/admin/transporters', requireAuth, transporterUpload.any(), async (req, res) => {
+    const user = req.user!;
+    
+    // Verificar se o usuário pode gerenciar transportadores
+    if (!canManageTransporters(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
     try {
       // Validar dados do transportador
       try {
