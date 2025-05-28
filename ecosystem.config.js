@@ -1,7 +1,7 @@
-export default {
+module.exports = {
   apps: [{
     name: 'aet-license-system',
-    script: './node_modules/.bin/tsx',
+    script: 'node_modules/.bin/tsx',
     args: 'server/index.ts',
     cwd: '/var/www/aetlicensesystem/LicencaTransporte',
     env: {
