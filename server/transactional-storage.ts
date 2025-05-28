@@ -920,23 +920,51 @@ export class TransactionalStorage implements IStorage {
           .where(eq(licenseRequests.userId, userId));
       }
       
-      // Buscar dados EXATAMENTE como a página de licenças emitidas faz
-      const issuedLicensesFromAPI = await this.getAllIssuedLicenses();
-      console.log(`[DEBUG] Total licenças da API: ${issuedLicensesFromAPI.length}`);
+      // REPLICAR EXATAMENTE o endpoint /api/licenses/issued
+      const transporterIds = userTransporters.map(t => t.id);
+      console.log(`[DEBUG] IDs dos transportadores: ${transporterIds.join(', ')}`);
       
-      const userIssuedLicenses = issuedLicensesFromAPI.filter(l => l.userId === userId);
-      console.log(`[DEBUG] Licenças do usuário ${userId}: ${userIssuedLicenses.length}`);
+      let licencasNoBanco = [];
       
-      // Expandir licenças por estado (mesma lógica da página issued-licenses-page.tsx)
+      // Se houver transportadores associados, buscar licenças por transporterId também
+      if (transporterIds.length > 0) {
+        licencasNoBanco = await db.select()
+          .from(licenseRequests)
+          .where(eq(licenseRequests.isDraft, false))
+          .where(
+            or(
+              eq(licenseRequests.userId, userId),
+              inArray(licenseRequests.transporterId, transporterIds)
+            )
+          );
+          
+        console.log(`[DEBUG LICENÇAS EMITIDAS] Encontradas ${licencasNoBanco.length} licenças para usuário ${userId} ou transportadores ${transporterIds.join(', ')}`);
+      } else {
+        // Se não houver transportadores, buscar apenas por userId
+        licencasNoBanco = await db.select()
+          .from(licenseRequests)
+          .where(eq(licenseRequests.isDraft, false))
+          .where(eq(licenseRequests.userId, userId));
+          
+        console.log(`[DEBUG LICENÇAS EMITIDAS] Encontradas ${licencasNoBanco.length} licenças para usuário ${userId} sem transportadores associados`);
+      }
+      
+      // Filtrar licenças com estado aprovado manualmente (EXATAMENTE igual ao endpoint)
+      const issuedLicenses = licencasNoBanco.filter(lic => {
+        // Verificar estados aprovados
+        return lic.stateStatuses && 
+               Array.isArray(lic.stateStatuses) && 
+               lic.stateStatuses.some(ss => ss.includes(':approved'));
+      });
+      
+      console.log(`[DEBUG LICENÇAS EMITIDAS] Total de licenças emitidas para o usuário ${userId}: ${issuedLicenses.length}`);
+      
+      // Expandir por estado como a página faz
       const expandedLicenses: any[] = [];
-      userIssuedLicenses.forEach(license => {
-        console.log(`[DEBUG] Processando licença ${license.id}, estados: ${license.states?.length || 0}, stateStatuses: ${license.stateStatuses?.length || 0}`);
-        
+      issuedLicenses.forEach(license => {
         license.states.forEach((state: string, index: number) => {
           const stateStatusEntry = license.stateStatuses?.find((entry: string) => entry.startsWith(`${state}:`));
           const stateStatus = stateStatusEntry?.split(':')?.[1] || 'pending_registration';
-          
-          console.log(`[DEBUG] Estado ${state}: status=${stateStatus}, entry=${stateStatusEntry}`);
           
           if (stateStatus === 'approved') {
             let stateValidUntil = license.validUntil ? license.validUntil.toString() : null;
@@ -953,8 +981,6 @@ export class TransactionalStorage implements IStorage {
               requestNumber: license.requestNumber,
               mainVehiclePlate: license.mainVehiclePlate
             });
-            
-            console.log(`[DEBUG] Adicionada licença expandida: ${state} - ${license.requestNumber}`);
           }
         });
       });
