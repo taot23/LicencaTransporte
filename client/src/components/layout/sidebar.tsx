@@ -458,7 +458,7 @@ export function Sidebar({ className }: SidebarProps) {
               <p className="text-xs text-gray-300">{user?.email}</p>
             </div>
             <Avatar className="h-10 w-10 bg-gray-500">
-              <AvatarFallback className="text-white font-medium">{userInitials}</AvatarFallback>
+              <AvatarFallback className="text-black font-medium">{userInitials}</AvatarFallback>
             </Avatar>
             <Button 
               variant="ghost" 
