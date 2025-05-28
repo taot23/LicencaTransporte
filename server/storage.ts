@@ -1574,10 +1574,27 @@ export class DatabaseStorage implements IStorage {
       thirtyDaysFromNow.setDate(today.getDate() + 30);
       
       const adminExpiringLicenses = allIssuedLicenses.filter(license => {
-        if (!license.validUntil) return false;
+        // Verificar datas de validade nos stateStatuses
+        if (license.stateStatuses && license.stateStatuses.length > 0) {
+          return license.stateStatuses.some(status => {
+            if (status.includes(':approved:')) {
+              const parts = status.split(':');
+              if (parts.length >= 3) {
+                const validityDate = new Date(parts[2]);
+                return validityDate >= today && validityDate <= thirtyDaysFromNow;
+              }
+            }
+            return false;
+          });
+        }
         
-        const validUntilDate = new Date(license.validUntil);
-        return validUntilDate >= today && validUntilDate <= thirtyDaysFromNow;
+        // Fallback para validUntil se não houver stateStatuses
+        if (license.validUntil) {
+          const validUntilDate = new Date(license.validUntil);
+          return validUntilDate >= today && validUntilDate <= thirtyDaysFromNow;
+        }
+        
+        return false;
       }).length;
 
       const adminStats = {
@@ -1711,10 +1728,38 @@ export class DatabaseStorage implements IStorage {
       thirtyDaysFromNow.setDate(today.getDate() + 30);
       
       const userExpiringLicenses = issuedLicenses.filter(license => {
-        if (!license.validUntil) return false;
+        console.log(`[DEBUG EXPIRING] Verificando licença ${license.id} - ${license.requestNumber}`);
         
-        const validUntilDate = new Date(license.validUntil);
-        return validUntilDate >= today && validUntilDate <= thirtyDaysFromNow;
+        // Verificar datas de validade nos stateStatuses
+        if (license.stateStatuses && license.stateStatuses.length > 0) {
+          const hasExpiringState = license.stateStatuses.some(status => {
+            console.log(`[DEBUG EXPIRING] Status: ${status}`);
+            if (status.includes(':approved:')) {
+              const parts = status.split(':');
+              if (parts.length >= 3) {
+                const validityDate = new Date(parts[2]);
+                console.log(`[DEBUG EXPIRING] Data de validade: ${validityDate}, Hoje: ${today}, 30 dias: ${thirtyDaysFromNow}`);
+                const isExpiring = validityDate >= today && validityDate <= thirtyDaysFromNow;
+                console.log(`[DEBUG EXPIRING] É licença a vencer? ${isExpiring}`);
+                return isExpiring;
+              }
+            }
+            return false;
+          });
+          
+          console.log(`[DEBUG EXPIRING] Licença ${license.id} tem estado expirando? ${hasExpiringState}`);
+          return hasExpiringState;
+        }
+        
+        // Fallback para validUntil se não houver stateStatuses
+        if (license.validUntil) {
+          const validUntilDate = new Date(license.validUntil);
+          const isExpiring = validUntilDate >= today && validUntilDate <= thirtyDaysFromNow;
+          console.log(`[DEBUG EXPIRING] Fallback validUntil: ${validUntilDate}, é expirando? ${isExpiring}`);
+          return isExpiring;
+        }
+        
+        return false;
       }).length;
 
       const userStats = {
