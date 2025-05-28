@@ -408,145 +408,369 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
           </Button>
         </div>
         
-        <div className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="plate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm flex items-center">
-                    Placa <span className="text-red-500 ml-1">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="ABC-1234 ou BRA2E19" 
-                      value={plateDisplay}
-                      onChange={(e) => {
-                        const formatted = formatPlate(e.target.value);
-                        setPlateDisplay(formatted);
-                        
-                        // Só salva no form se for válido
-                        if (formatted.length >= 7 && validateBrazilianPlate(formatted)) {
-                          field.onChange(formatted);
-                        } else if (formatted.length < 7) {
-                          field.onChange(formatted);
-                        }
-                      }}
-                      className={`h-10 ${plateDisplay.length >= 7 && !validateBrazilianPlate(plateDisplay) ? 'border-red-500' : ''}`}
-                      maxLength={8}
-                      required 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  {plateDisplay.length >= 7 && !validateBrazilianPlate(plateDisplay) && (
-                    <p className="text-xs text-red-500 mt-1">
-                      Formato inválido. Use ABC-1234 (antigo) ou BRA2E19 (Mercosul)
-                    </p>
-                  )}
-                  {plateDisplay.length >= 3 && plateDisplay.length < 7 && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Continue digitando...
-                    </p>
-                  )}
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="renavam"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm flex items-center">
-                    Renavam <span className="text-red-500 ml-1">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="Renavam" {...field} className="h-10" required />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm flex items-center">
-                    Tipo de Veículo <span className="text-red-500 ml-1">*</span>
-                  </FormLabel>
-                  <Select 
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      setVehicleType(value);
-                      console.log("Selected vehicle type:", value);
-                    }} 
-                    value={field.value}
-                    defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="h-10">
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {vehicleTypeOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Campo de Status do Veículo - agora ao lado do tipo */}
-            {vehicle ? (
+        <div className="p-6 space-y-6">
+          {/* Grid principal de 2 colunas com distribuição uniforme */}
+          <div className="grid grid-cols-2 gap-6">
+            {/* Coluna 1 */}
+            <div className="space-y-4">
+              {/* Placa */}
               <FormField
                 control={form.control}
-                name="status"
+                name="plate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm">
-                      Status do Veículo
+                    <FormLabel className="text-sm font-medium">
+                      Placa <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="ABC-1234 ou BRA2E19" 
+                        value={plateDisplay}
+                        onChange={(e) => {
+                          const formatted = formatPlate(e.target.value);
+                          setPlateDisplay(formatted);
+                          
+                          // Só salva no form se for válido
+                          if (formatted.length >= 7 && validateBrazilianPlate(formatted)) {
+                            field.onChange(formatted);
+                          } else if (formatted.length < 7) {
+                            field.onChange(formatted);
+                          }
+                        }}
+                        className={`h-10 w-full ${plateDisplay.length >= 7 && !validateBrazilianPlate(plateDisplay) ? 'border-red-500' : ''}`}
+                        maxLength={8}
+                        required 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    {plateDisplay.length >= 7 && !validateBrazilianPlate(plateDisplay) && (
+                      <p className="text-xs text-red-500 mt-1">
+                        Formato inválido. Use ABC-1234 (antigo) ou BRA2E19 (Mercosul)
+                      </p>
+                    )}
+                    {plateDisplay.length >= 3 && plateDisplay.length < 7 && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Continue digitando...
+                      </p>
+                    )}
+                  </FormItem>
+                )}
+              />
+
+              {/* Tipo de Veículo */}
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">
+                      Tipo de Veículo <span className="text-red-500">*</span>
                     </FormLabel>
                     <Select 
-                      onValueChange={(value) => field.onChange(value)} 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setVehicleType(value);
+                        console.log("Selected vehicle type:", value);
+                      }} 
                       value={field.value}
                       defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className="h-10">
-                          <SelectValue placeholder="Selecione o status" />
+                        <SelectTrigger className="h-10 w-full">
+                          <SelectValue placeholder="Selecione" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="active">Ativo</SelectItem>
-                        <SelectItem value="maintenance">Em Manutenção</SelectItem>
-                        <SelectItem value="inactive">Inativo</SelectItem>
+                        {vehicleTypeOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            ) : (
-              <div></div> /* Div vazia para manter o alinhamento do grid */
-            )}
+
+              {/* Marca */}
+              <FormField
+                control={form.control}
+                name="brand"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">
+                      Marca <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <Select 
+                      value={field.value} 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setSelectedBrand(value);
+                        // Limpar o modelo quando trocar de marca
+                        form.setValue("model", "");
+                      }}
+                      disabled={!vehicleType}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-10 w-full">
+                          <SelectValue placeholder={vehicleType ? "Selecione a marca" : "Selecione primeiro o tipo"} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {getFilteredBrands(vehicleType).map((brand) => (
+                          <SelectItem key={brand} value={brand}>
+                            {brand}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Qtd. Eixos */}
+              <FormField
+                control={form.control}
+                name="axleCount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">
+                      Qtd. Eixos <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="Mínimo 1" 
+                        {...field} 
+                        value={field.value || ''} 
+                        onChange={(e) => {
+                          const value = e.target.valueAsNumber;
+                          field.onChange(value && value > 0 ? value : '');
+                        }}
+                        min="1"
+                        className="h-10 w-full"
+                        required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    {field.value === 0 && (
+                      <p className="text-xs text-red-500 mt-1">A quantidade de eixos não pode ser zero</p>
+                    )}
+                  </FormItem>
+                )}
+              />
+
+              {/* Tara */}
+              <FormField
+                control={form.control}
+                name="tare"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">
+                      Tara (kg) <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="text" 
+                        placeholder="Ex: 7.500 ou 7,500" 
+                        value={tareDisplay}
+                        onChange={(e) => {
+                          const rawValue = e.target.value;
+                          
+                          // Permite apenas números, vírgula e ponto
+                          const cleanValue = rawValue.replace(/[^\d.,]/g, '');
+                          
+                          // Atualiza o display sempre
+                          setTareDisplay(cleanValue);
+                          
+                          // Se está vazio, limpa o campo
+                          if (cleanValue === '') {
+                            field.onChange('');
+                            return;
+                          }
+                          
+                          // Converte vírgula para ponto para validação numérica
+                          const normalizedValue = cleanValue.replace(',', '.');
+                          const numericValue = parseFloat(normalizedValue);
+                          
+                          // Se é um número completo e válido, salva no form
+                          if (!isNaN(numericValue) && numericValue > 0) {
+                            field.onChange(numericValue);
+                          }
+                        }}
+                        className="h-10 w-full"
+                        required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    {field.value === 0 && (
+                      <p className="text-xs text-red-500 mt-1">O peso (TARA) não pode ser zero</p>
+                    )}
+                  </FormItem>
+                )}
+              />
+
+              {/* Ano de Fabricação */}
+              <FormField
+                control={form.control}
+                name="year"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">
+                      Ano de Fabricação <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="" 
+                        {...field} 
+                        value={field.value || ''} 
+                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                        className="h-10 w-full"
+                        required
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Coluna 2 */}
+            <div className="space-y-4">
+              {/* Renavam */}
+              <FormField
+                control={form.control}
+                name="renavam"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">
+                      Renavam <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Renavam" {...field} className="h-10 w-full" required />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Status do Veículo (só quando editando) */}
+              {vehicle ? (
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">
+                        Status do Veículo
+                      </FormLabel>
+                      <Select 
+                        onValueChange={(value) => field.onChange(value)} 
+                        value={field.value}
+                        defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="h-10 w-full">
+                            <SelectValue placeholder="Selecione o status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="active">Ativo</SelectItem>
+                          <SelectItem value="maintenance">Em Manutenção</SelectItem>
+                          <SelectItem value="inactive">Inativo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : (
+                <div className="h-[76px]"></div> /* Espaço vazio para manter alinhamento */
+              )}
+
+              {/* Modelo */}
+              <FormField
+                control={form.control}
+                name="model"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">
+                      Modelo <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <Select 
+                      value={field.value} 
+                      onValueChange={field.onChange}
+                      disabled={!selectedBrand || !vehicleType}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-10 w-full">
+                          <SelectValue placeholder={selectedBrand ? "Selecione o modelo" : "Selecione primeiro a marca"} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {getFilteredModels(selectedBrand, vehicleType).map((model) => (
+                          <SelectItem key={model} value={model}>
+                            {model}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* CMT (apenas para unidade tratora) */}
+              {vehicleType === "tractor_unit" ? (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">CMT (kg)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="" 
+                      value={cmt || ''} 
+                      onChange={(e) => setCmt(e.target.valueAsNumber || undefined)}
+                      className="h-10 w-full" 
+                    />
+                  </FormControl>
+                </FormItem>
+              ) : (
+                <div className="h-[76px]"></div> /* Espaço vazio para manter alinhamento */
+              )}
+
+              {/* Ano CRLV */}
+              <FormField
+                control={form.control}
+                name="crlvYear"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Ano CRLV</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="" 
+                        {...field}
+                        value={field.value || ''} 
+                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                        className="h-10 w-full" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
-          
-          {/* Mostrar campo Tipo de Carroceria apenas para tipos compatíveis */}
+
+          {/* Tipo de Carroceria (campo largo quando necessário) */}
           {(vehicleType === "truck" || vehicleType === "semi_trailer" || vehicleType === "trailer") && (
             <FormField
               control={form.control}
               name="bodyType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm">
+                  <FormLabel className="text-sm font-medium">
                     Tipo de Carroceria
                   </FormLabel>
                   <Select 
@@ -554,7 +778,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                     value={field.value}
                     defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="h-10">
+                      <SelectTrigger className="h-10 w-full">
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                     </FormControl>
@@ -571,232 +795,18 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
               )}
             />
           )}
-          
 
-          
-          <div className="grid grid-cols-3 gap-4">
-            <FormField
-              control={form.control}
-              name="brand"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm flex items-center">
-                    Marca <span className="text-red-500 ml-1">*</span>
-                  </FormLabel>
-                  <Select 
-                    value={field.value} 
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      setSelectedBrand(value);
-                      // Limpar o modelo quando trocar de marca
-                      form.setValue("model", "");
-                    }}
-                    disabled={!vehicleType}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="h-10">
-                        <SelectValue placeholder={vehicleType ? "Selecione a marca" : "Selecione primeiro o tipo"} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {getFilteredBrands(vehicleType).map((brand) => (
-                        <SelectItem key={brand} value={brand}>
-                          {brand}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="model"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm flex items-center">
-                    Modelo <span className="text-red-500 ml-1">*</span>
-                  </FormLabel>
-                  <Select 
-                    value={field.value} 
-                    onValueChange={field.onChange}
-                    disabled={!selectedBrand || !vehicleType}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="h-10">
-                        <SelectValue placeholder={selectedBrand ? "Selecione o modelo" : "Selecione primeiro a marca"} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {getFilteredModels(selectedBrand, vehicleType).map((model) => (
-                        <SelectItem key={model} value={model}>
-                          {model}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="axleCount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm flex items-center">
-                    Qtd. Eixos <span className="text-red-500 ml-1">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      placeholder="Mínimo 1" 
-                      {...field} 
-                      value={field.value || ''} 
-                      onChange={(e) => {
-                        const value = e.target.valueAsNumber;
-                        field.onChange(value && value > 0 ? value : '');
-                      }}
-                      min="1"
-                      className="h-10"
-                      required
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  {field.value === 0 && (
-                    <p className="text-xs text-red-500 mt-1">A quantidade de eixos não pode ser zero</p>
-                  )}
-                </FormItem>
-              )}
-            />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="tare"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm flex items-center">
-                    Tara (kg) <span className="text-red-500 ml-1">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="text" 
-                      placeholder="Ex: 7.500 ou 7,500" 
-                      value={tareDisplay}
-                      onChange={(e) => {
-                        const rawValue = e.target.value;
-                        
-                        // Permite apenas números, vírgula e ponto
-                        const cleanValue = rawValue.replace(/[^\d.,]/g, '');
-                        
-                        // Atualiza o display sempre
-                        setTareDisplay(cleanValue);
-                        
-                        // Se está vazio, limpa o campo
-                        if (cleanValue === '') {
-                          field.onChange('');
-                          return;
-                        }
-                        
-                        // Converte vírgula para ponto para validação numérica
-                        const normalizedValue = cleanValue.replace(',', '.');
-                        const numericValue = parseFloat(normalizedValue);
-                        
-                        // Se é um número completo e válido, salva no form
-                        if (!isNaN(numericValue) && numericValue > 0) {
-                          field.onChange(numericValue);
-                        }
-                      }}
-                      className="h-10"
-                      required
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  {field.value === 0 && (
-                    <p className="text-xs text-red-500 mt-1">O peso (TARA) não pode ser zero</p>
-                  )}
-                </FormItem>
-              )}
-            />
-            
-            {vehicleType === "tractor_unit" && (
-              <FormItem>
-                <FormLabel className="text-sm">CMT (kg)</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    placeholder="" 
-                    value={cmt || ''} 
-                    onChange={(e) => setCmt(e.target.valueAsNumber || undefined)}
-                    className="h-10" 
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="year"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm flex items-center">
-                    Ano de Fabricação <span className="text-red-500 ml-1">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      placeholder="" 
-                      {...field} 
-                      value={field.value || ''} 
-                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                      className="h-10"
-                      required
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="crlvYear"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm">Ano CRLV</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      placeholder="" 
-                      {...field}
-                      value={field.value || ''} 
-                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                      className="h-10" 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          
+          {/* Observações (campo largo) */}
           <FormField
             control={form.control}
             name="remarks"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm">Observações</FormLabel>
+                <FormLabel className="text-sm font-medium">Observações</FormLabel>
                 <FormControl>
                   <Textarea 
                     placeholder="Observações sobre o veículo..." 
-                    className="resize-none h-16" 
+                    className="resize-none h-16 w-full" 
                     {...field} 
                     value={field.value || ''} 
                   />
@@ -806,8 +816,9 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
             )}
           />
           
+          {/* Upload do CRLV (campo largo) */}
           <div>
-            <FormLabel htmlFor="crlvFile" className="text-sm">Upload do CRLV (PDF/imagem)</FormLabel>
+            <FormLabel htmlFor="crlvFile" className="text-sm font-medium">Upload do CRLV (PDF/imagem)</FormLabel>
             <div className="flex justify-center px-3 py-2 border-2 border-gray-300 border-dashed rounded-md">
               <div className="space-y-1 text-center py-1">
                 <UploadCloud className="mx-auto h-5 w-5 text-gray-400" />
