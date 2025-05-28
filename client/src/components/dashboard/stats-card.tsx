@@ -9,7 +9,7 @@ interface StatsCardProps {
   trend?: number;
   trendText?: string;
   secondaryText?: string;
-  color: "primary" | "yellow" | "blue";
+  color: "primary" | "yellow" | "blue" | "red";
 }
 
 export function StatsCard({ title, value, icon, trend, trendText, secondaryText, color }: StatsCardProps) {
@@ -28,6 +28,11 @@ export function StatsCard({ title, value, icon, trend, trendText, secondaryText,
       iconBg: "bg-blue-100",
       iconText: "text-blue-600",
       trendText: "text-blue-600",
+    },
+    red: {
+      iconBg: "bg-red-100",
+      iconText: "text-red-600",
+      trendText: "text-red-600",
     },
   };
 

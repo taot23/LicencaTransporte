@@ -499,20 +499,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return !license.stateStatuses.some(status => status.includes(':approved:'));
         });
         
-        // Calcular licenças a vencer (próximas 30 dias)
-        const userExpiringLicenses = userIssuedLicenses.filter(license => {
-          if (!license.stateValidityDates || license.stateValidityDates.length === 0) return false;
-          
-          const today = new Date();
-          const thirtyDaysFromNow = new Date();
-          thirtyDaysFromNow.setDate(today.getDate() + 30);
-          
-          return license.stateValidityDates.some(validity => {
-            if (!validity.date) return false;
-            const validityDate = new Date(validity.date);
-            return validityDate >= today && validityDate <= thirtyDaysFromNow;
-          });
-        });
+        // Por enquanto, implementação simples para licenças a vencer
+        // TODO: Implementar cálculo baseado nas datas de validade quando disponível
+        const userExpiringLicenses = [];
         
         // Buscar licenças recentes do usuário
         let recentUserLicenses = [];

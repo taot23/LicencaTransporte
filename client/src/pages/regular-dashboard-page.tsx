@@ -5,7 +5,7 @@ import { StatsCard } from "@/components/dashboard/stats-card";
 import { LicenseTable } from "@/components/dashboard/license-table";
 import { StatusChart } from "@/components/dashboard/status-chart";
 import { useDashboardStats } from "@/hooks/use-dashboard-stats";
-import { CheckCircle, Clock, Truck, AlertCircle } from "lucide-react";
+import { CheckCircle, Clock, Truck, AlertCircle, AlertTriangle } from "lucide-react";
 import { SkeletonCardGroup } from "@/components/ui/skeleton-card";
 import { PageTransition } from "@/components/ui/page-transition";
 import { useAuth } from "@/hooks/use-auth";
@@ -62,7 +62,7 @@ export default function RegularDashboardPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatsCard 
               title="Licenças Emitidas"
               value={stats?.issuedLicenses || 0}
@@ -78,6 +78,13 @@ export default function RegularDashboardPage() {
               trend={4}
               trendText="em processamento"
               color="yellow"
+            />
+            <StatsCard 
+              title="Licenças a Vencer"
+              value={stats?.expiringLicenses || 0}
+              icon={<AlertTriangle className="h-8 w-8" />}
+              secondaryText="próximos 30 dias"
+              color="red"
             />
             <StatsCard 
               title="Veículos Cadastrados"
