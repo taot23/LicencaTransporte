@@ -911,7 +911,7 @@ export class TransactionalStorage implements IStorage {
           .where(
             or(
               eq(licenseRequests.userId, userId),
-              sql`${licenseRequests.transporterId} = ANY(${transporterIds})`
+              eq(licenseRequests.transporterId, transporterIds[0])
             )
           );
       } else {
@@ -921,23 +921,21 @@ export class TransactionalStorage implements IStorage {
       }
       
       console.log(`[DASHBOARD NEW] TRANSPORTADOR - Licenças encontradas: ${userLicenses.length}`);
+      console.log(`[DEBUG] Primeiras 3 licenças:`, userLicenses.slice(0, 3).map(l => ({ id: l.id, isDraft: l.isDraft, stateStatuses: l.stateStatuses })));
       
       // Calcular licenças emitidas (com pelo menos um estado aprovado)
       const issuedLicenses = userLicenses.filter(license => {
-        console.log(`[DEBUG ISSUED] Verificando licença ${license.id} - isDraft: ${license.isDraft}`);
         if (license.isDraft) return false;
         
-        console.log(`[DEBUG ISSUED] StateStatuses da licença ${license.id}:`, license.stateStatuses);
-        const hasApprovedState = license.stateStatuses && license.stateStatuses.some(status => {
-          console.log(`[DEBUG ISSUED] Verificando status: ${status}`);
-          const isApproved = status.includes(':approved:');
-          console.log(`[DEBUG ISSUED] É aprovado? ${isApproved}`);
-          return isApproved;
-        });
+        // Verificar se tem pelo menos um estado aprovado
+        const hasApprovedState = license.stateStatuses && 
+          Array.isArray(license.stateStatuses) && 
+          license.stateStatuses.some(status => status && status.includes(':approved:'));
         
-        console.log(`[DEBUG ISSUED] Licença ${license.id} tem estado aprovado? ${hasApprovedState}`);
         return hasApprovedState;
       });
+      
+      console.log(`[DEBUG] Licenças emitidas encontradas: ${issuedLicenses.length}`);
       
       // Calcular licenças pendentes (não-draft e sem estados aprovados)
       const pendingLicenses = userLicenses.filter(license => {
