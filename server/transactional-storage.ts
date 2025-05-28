@@ -927,31 +927,36 @@ export class TransactionalStorage implements IStorage {
       userLicenses.forEach(license => {
         if (license.isDraft) return;
         
-        console.log(`[CONTAGEM] Licença ${license.id}: estados=${license.states?.length}, statuses=${license.stateStatuses?.length}`);
-        
-        license.states.forEach((state: string) => {
-          const stateStatusEntry = license.stateStatuses?.find((entry: string) => entry.startsWith(`${state}:`));
-          const stateStatus = stateStatusEntry?.split(':')?.[1];
-          
-          console.log(`[CONTAGEM] - Estado ${state}: entry=${stateStatusEntry}, status=${stateStatus}`);
-          
-          if (stateStatus === 'approved') {
-            issuedLicensesCount++;
-            console.log(`[CONTAGEM] ✓ APROVADO - Total agora: ${issuedLicensesCount}`);
-            
-            // Verificar se vence em 30 dias
-            if (stateStatusEntry && stateStatusEntry.split(':').length > 2) {
-              const stateValidUntil = stateStatusEntry.split(':')[2];
-              const validDate = new Date(stateValidUntil);
-              const today = new Date();
-              const diffInDays = Math.ceil((validDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        // Para cada estado da licença
+        if (license.states && Array.isArray(license.states)) {
+          license.states.forEach((state: string) => {
+            // Buscar o status deste estado específico
+            if (license.stateStatuses && Array.isArray(license.stateStatuses)) {
+              const stateStatusEntry = license.stateStatuses.find((entry: string) => entry.startsWith(`${state}:`));
               
-              if (diffInDays > 0 && diffInDays <= 30) {
-                expiringLicensesCount++;
+              if (stateStatusEntry) {
+                const parts = stateStatusEntry.split(':');
+                const stateStatus = parts[1];
+                
+                if (stateStatus === 'approved') {
+                  issuedLicensesCount++;
+                  
+                  // Verificar se vence em 30 dias
+                  if (parts.length > 2) {
+                    const stateValidUntil = parts[2];
+                    const validDate = new Date(stateValidUntil);
+                    const today = new Date();
+                    const diffInDays = Math.ceil((validDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                    
+                    if (diffInDays > 0 && diffInDays <= 30) {
+                      expiringLicensesCount++;
+                    }
+                  }
+                }
               }
             }
-          }
-        });
+          });
+        }
       });
       
       // Licenças pendentes (não emitidas)
