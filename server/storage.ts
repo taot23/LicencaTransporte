@@ -1575,56 +1575,97 @@ export class DatabaseStorage implements IStorage {
       
     } else {
       // Transportador vê apenas suas próprias estatísticas
-      console.log(`[DASHBOARD STATS] Coletando estatísticas específicas para transportador`);
+      console.log(`[DASHBOARD STATS] TRANSPORTADOR - Coletando estatísticas específicas para usuário ${userId}`);
+      
+      // Primeiro, verificar se o usuário tem transportadores associados
+      const userTransporters = await db.select()
+        .from(transporters)
+        .where(eq(transporters.userId, userId));
+      
+      const transporterIds = userTransporters.map(t => t.id);
+      console.log(`[DASHBOARD STATS] TRANSPORTADOR - Transportadores associados: ${transporterIds.join(', ')}`);
       
       // Buscar licenças específicas do usuário/transportador
-      const allUserLicenses = await this.getLicenseRequestsByUserId(userId);
-      console.log(`[DASHBOARD STATS] Total de licenças do usuário: ${allUserLicenses.length}`);
+      let userLicenses = [];
+      if (transporterIds.length > 0) {
+        userLicenses = await db.select()
+          .from(licenseRequests)
+          .where(
+            or(
+              eq(licenseRequests.userId, userId),
+              inArray(licenseRequests.transporterId, transporterIds)
+            )
+          );
+      } else {
+        userLicenses = await db.select()
+          .from(licenseRequests)
+          .where(eq(licenseRequests.userId, userId));
+      }
       
-      // Para licenças emitidas, usar o método que considera estados individuais aprovados
-      const issuedLicenses = await this.getIssuedLicensesByUserId(userId);
-      console.log(`[DASHBOARD STATS] Licenças emitidas encontradas: ${issuedLicenses.length}`);
+      console.log(`[DASHBOARD STATS] TRANSPORTADOR - Total de licenças encontradas: ${userLicenses.length}`);
       
-      // Para licenças pendentes, buscar todas as não-draft que não estão nas emitidas
-      const pendingLicenses = allUserLicenses.filter(license => 
-        !license.isDraft && 
-        !issuedLicenses.some(issued => issued.id === license.id)
-      );
-      console.log(`[DASHBOARD STATS] Licenças pendentes encontradas: ${pendingLicenses.length}`);
+      // Calcular licenças emitidas (com pelo menos um estado aprovado)
+      const issuedLicenses = userLicenses.filter(license => {
+        if (license.isDraft) return false;
+        const hasApprovedState = license.stateStatuses.some(status => 
+          status.includes(':approved:')
+        );
+        return hasApprovedState;
+      });
       
-      // Contar veículos registrados do usuário
-      const registeredVehiclesQuery = db.select({ count: sql`count(*)` })
+      // Calcular licenças pendentes (não-draft e sem estados aprovados)
+      const pendingLicenses = userLicenses.filter(license => {
+        if (license.isDraft) return false;
+        const hasApprovedState = license.stateStatuses.some(status => 
+          status.includes(':approved:')
+        );
+        return !hasApprovedState;
+      });
+      
+      console.log(`[DASHBOARD STATS] TRANSPORTADOR - Licenças emitidas: ${issuedLicenses.length}, pendentes: ${pendingLicenses.length}`);
+      
+      // Contar veículos registrados do usuário APENAS
+      const registeredVehiclesResult = await db.select({ count: sql`count(*)` })
         .from(vehicles)
         .where(eq(vehicles.userId, userId));
       
-      // Contar veículos ativos do usuário
-      const activeVehiclesQuery = db.select({ count: sql`count(*)` })
+      // Contar veículos ativos do usuário APENAS
+      const activeVehiclesResult = await db.select({ count: sql`count(*)` })
         .from(vehicles)
         .where(and(
           eq(vehicles.userId, userId),
           eq(vehicles.status, "active")
         ));
       
-      // Buscar licenças recentes do usuário
-      const recentLicensesQuery = db.select()
-        .from(licenseRequests)
-        .where(and(
-          eq(licenseRequests.userId, userId),
-          eq(licenseRequests.isDraft, false)
-        ))
-        .orderBy(desc(licenseRequests.createdAt))
-        .limit(5);
+      // Buscar licenças recentes do usuário APENAS
+      let recentLicensesResult = [];
+      if (transporterIds.length > 0) {
+        recentLicensesResult = await db.select()
+          .from(licenseRequests)
+          .where(and(
+            or(
+              eq(licenseRequests.userId, userId),
+              inArray(licenseRequests.transporterId, transporterIds)
+            ),
+            eq(licenseRequests.isDraft, false)
+          ))
+          .orderBy(desc(licenseRequests.createdAt))
+          .limit(5);
+      } else {
+        recentLicensesResult = await db.select()
+          .from(licenseRequests)
+          .where(and(
+            eq(licenseRequests.userId, userId),
+            eq(licenseRequests.isDraft, false)
+          ))
+          .orderBy(desc(licenseRequests.createdAt))
+          .limit(5);
+      }
       
-      // Executar as consultas em paralelo
-      const [
-        registeredVehiclesResult,
-        activeVehiclesResult,
-        recentLicensesResult
-      ] = await Promise.all([
-        registeredVehiclesQuery,
-        activeVehiclesQuery,
-        recentLicensesQuery
-      ]);
+      const registeredVehiclesCount = Number(registeredVehiclesResult[0]?.count || 0);
+      const activeVehiclesCount = Number(activeVehiclesResult[0]?.count || 0);
+      
+      console.log(`[DASHBOARD STATS] TRANSPORTADOR - Veículos registrados: ${registeredVehiclesCount}, ativos: ${activeVehiclesCount}`);
       
       // Formatar as licenças recentes
       const recentLicenses = recentLicensesResult.map(license => ({
@@ -1640,12 +1681,12 @@ export class DatabaseStorage implements IStorage {
       const userStats = {
         issuedLicenses: issuedLicenses.length,
         pendingLicenses: pendingLicenses.length,
-        registeredVehicles: Number(registeredVehiclesResult[0]?.count || 0),
-        activeVehicles: Number(activeVehiclesResult[0]?.count || 0),
+        registeredVehicles: registeredVehiclesCount,
+        activeVehicles: activeVehiclesCount,
         recentLicenses
       };
       
-      console.log(`[DASHBOARD STATS] Estatísticas específicas para usuário ${userId}:`, userStats);
+      console.log(`[DASHBOARD STATS] TRANSPORTADOR - Estatísticas FINAIS para usuário ${userId}:`, userStats);
       return userStats;
     }
   }
