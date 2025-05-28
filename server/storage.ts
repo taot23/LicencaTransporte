@@ -21,6 +21,7 @@ export interface DashboardStats {
   pendingLicenses: number;
   registeredVehicles: number;
   activeVehicles: number;
+  expiringLicenses: number;
   recentLicenses: Array<{
     id: number;
     requestNumber: string;
