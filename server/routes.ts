@@ -18,9 +18,10 @@ import {
   userRoleEnum,
   licenseRequests,
   transporters,
-  statusHistories
+  statusHistories,
+  vehicles
 } from "@shared/schema";
-import { eq, sql, or, inArray } from "drizzle-orm";
+import { eq, sql, or, inArray, and, desc } from "drizzle-orm";
 import { fromZodError } from "zod-validation-error";
 import { ZodError } from "zod";
 import multer from "multer";
@@ -386,61 +387,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Dashboard Stats
+  // Dashboard Stats - NOVA IMPLEMENTAÇÃO SEGMENTADA
   app.get('/api/dashboard/stats', requireAuth, async (req, res) => {
     try {
       const userId = req.user!.id;
-      console.log(`[DASHBOARD STATS API] Usuário ${userId} (${req.user!.email}) solicitando estatísticas`);
+      const userRole = req.user!.role;
+      const userEmail = req.user!.email;
       
-      // Evitar cache para debug
+      console.log(`[DASHBOARD NEW] Usuário ${userId} (${userEmail}) role: ${userRole}`);
+      
+      // Evitar cache
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.set('Pragma', 'no-cache');
-      res.set('Expires', '0');
       
-      // Verificar role do usuário
-      const isAdmin = req.user!.role === 'admin' || req.user!.role === 'supervisor' || req.user!.role === 'manager';
-      console.log(`[DASHBOARD STATS API] Role do usuário: ${req.user!.role}, É admin: ${isAdmin}`);
+      const isAdmin = userRole === 'admin' || userRole === 'supervisor' || userRole === 'manager';
       
       if (isAdmin) {
-        // Admin vê estatísticas globais
-        console.log(`[DASHBOARD STATS API] ADMIN - Retornando dados globais`);
-        const stats = await storage.getDashboardStats(userId);
-        console.log(`[DASHBOARD STATS API] ADMIN - Estatísticas:`, stats);
-        res.json(stats);
-      } else {
-        // Transportador vê apenas seus próprios dados
-        console.log(`[DASHBOARD STATS API] TRANSPORTADOR - Calculando dados específicos do usuário ${userId}`);
+        console.log(`[DASHBOARD NEW] ADMIN - Coletando dados globais`);
         
-        // Buscar licenças do usuário
-        const userLicenses = await storage.getLicenseRequestsByUserId(userId);
-        const issuedLicenses = await storage.getIssuedLicensesByUserId(userId);
-        const pendingLicenses = userLicenses.filter(license => 
-          !license.isDraft && 
-          !issuedLicenses.some(issued => issued.id === license.id)
-        );
+        // Estatísticas globais para admin
+        const allLicenses = await db.select().from(licenseRequests).where(eq(licenseRequests.isDraft, false));
+        const allVehicles = await db.select().from(vehicles);
+        const allActiveVehicles = allVehicles.filter(v => v.status === 'active');
         
-        // Buscar veículos do usuário
-        const userVehicles = await db.select()
-          .from(vehicles)
-          .where(eq(vehicles.userId, userId));
+        // Contar licenças emitidas (com pelo menos um estado aprovado)
+        const globalIssuedLicenses = allLicenses.filter(license => {
+          if (!license.stateStatuses || license.stateStatuses.length === 0) return false;
+          return license.stateStatuses.some(status => status.includes(':approved:'));
+        });
         
-        const activeVehicles = userVehicles.filter(v => v.status === 'active');
+        const globalPendingLicenses = allLicenses.filter(license => {
+          if (!license.stateStatuses || license.stateStatuses.length === 0) return true;
+          return !license.stateStatuses.some(status => status.includes(':approved:'));
+        });
         
-        // Buscar licenças recentes do usuário
         const recentLicenses = await db.select()
           .from(licenseRequests)
-          .where(and(
-            eq(licenseRequests.userId, userId),
-            eq(licenseRequests.isDraft, false)
-          ))
+          .where(eq(licenseRequests.isDraft, false))
           .orderBy(desc(licenseRequests.createdAt))
           .limit(5);
         
-        const userStats = {
-          issuedLicenses: issuedLicenses.length,
-          pendingLicenses: pendingLicenses.length,
-          registeredVehicles: userVehicles.length,
-          activeVehicles: activeVehicles.length,
+        const adminStats = {
+          issuedLicenses: globalIssuedLicenses.length,
+          pendingLicenses: globalPendingLicenses.length,
+          registeredVehicles: allVehicles.length,
+          activeVehicles: allActiveVehicles.length,
           recentLicenses: recentLicenses.map(license => ({
             id: license.id,
             requestNumber: license.requestNumber,
@@ -452,11 +442,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }))
         };
         
-        console.log(`[DASHBOARD STATS API] TRANSPORTADOR - Estatísticas específicas:`, userStats);
-        res.json(userStats);
+        console.log(`[DASHBOARD NEW] ADMIN - Retornando:`, adminStats);
+        res.json(adminStats);
+        
+      } else {
+        console.log(`[DASHBOARD NEW] TRANSPORTADOR - Coletando dados específicos do usuário ${userId}`);
+        
+        // Buscar transportadores associados ao usuário
+        const userTransporters = await db.select()
+          .from(transporters)
+          .where(eq(transporters.userId, userId));
+        
+        const transporterIds = userTransporters.map(t => t.id);
+        console.log(`[DASHBOARD NEW] TRANSPORTADOR - IDs dos transportadores: ${transporterIds.join(', ')}`);
+        
+        // Buscar apenas veículos do usuário específico
+        const userVehicles = await db.select()
+          .from(vehicles)
+          .where(eq(vehicles.userId, userId));
+        
+        const userActiveVehicles = userVehicles.filter(v => v.status === 'active');
+        
+        console.log(`[DASHBOARD NEW] TRANSPORTADOR - Veículos: ${userVehicles.length} total, ${userActiveVehicles.length} ativos`);
+        
+        // Buscar licenças do usuário e transportadores associados
+        let userLicenses = [];
+        if (transporterIds.length > 0) {
+          userLicenses = await db.select()
+            .from(licenseRequests)
+            .where(and(
+              eq(licenseRequests.isDraft, false),
+              or(
+                eq(licenseRequests.userId, userId),
+                inArray(licenseRequests.transporterId, transporterIds)
+              )
+            ));
+        } else {
+          userLicenses = await db.select()
+            .from(licenseRequests)
+            .where(and(
+              eq(licenseRequests.userId, userId),
+              eq(licenseRequests.isDraft, false)
+            ));
+        }
+        
+        console.log(`[DASHBOARD NEW] TRANSPORTADOR - Licenças encontradas: ${userLicenses.length}`);
+        
+        // Contar licenças emitidas do usuário
+        const userIssuedLicenses = userLicenses.filter(license => {
+          if (!license.stateStatuses || license.stateStatuses.length === 0) return false;
+          return license.stateStatuses.some(status => status.includes(':approved:'));
+        });
+        
+        const userPendingLicenses = userLicenses.filter(license => {
+          if (!license.stateStatuses || license.stateStatuses.length === 0) return true;
+          return !license.stateStatuses.some(status => status.includes(':approved:'));
+        });
+        
+        // Buscar licenças recentes do usuário
+        let recentUserLicenses = [];
+        if (transporterIds.length > 0) {
+          recentUserLicenses = await db.select()
+            .from(licenseRequests)
+            .where(and(
+              eq(licenseRequests.isDraft, false),
+              or(
+                eq(licenseRequests.userId, userId),
+                inArray(licenseRequests.transporterId, transporterIds)
+              )
+            ))
+            .orderBy(desc(licenseRequests.createdAt))
+            .limit(5);
+        } else {
+          recentUserLicenses = await db.select()
+            .from(licenseRequests)
+            .where(and(
+              eq(licenseRequests.userId, userId),
+              eq(licenseRequests.isDraft, false)
+            ))
+            .orderBy(desc(licenseRequests.createdAt))
+            .limit(5);
+        }
+        
+        const transporterStats = {
+          issuedLicenses: userIssuedLicenses.length,
+          pendingLicenses: userPendingLicenses.length,
+          registeredVehicles: userVehicles.length,
+          activeVehicles: userActiveVehicles.length,
+          recentLicenses: recentUserLicenses.map(license => ({
+            id: license.id,
+            requestNumber: license.requestNumber,
+            type: license.type,
+            mainVehiclePlate: license.mainVehiclePlate,
+            states: license.states,
+            status: license.status,
+            createdAt: license.createdAt
+          }))
+        };
+        
+        console.log(`[DASHBOARD NEW] TRANSPORTADOR - Retornando:`, transporterStats);
+        res.json(transporterStats);
       }
     } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
+      console.error('[DASHBOARD NEW] Erro:', error);
       res.status(500).json({ message: 'Erro ao buscar estatísticas do dashboard' });
     }
   });
