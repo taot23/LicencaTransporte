@@ -390,12 +390,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/dashboard/stats', requireAuth, async (req, res) => {
     try {
       const userId = req.user!.id;
-      console.log(`[DASHBOARD STATS API] Usuário ${userId} solicitando estatísticas`);
+      console.log(`[DASHBOARD STATS API] Usuário ${userId} (${req.user!.email}) solicitando estatísticas`);
       
       // Evitar cache para debug
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');
+      
+      // Verificar role do usuário
+      const isAdmin = req.user!.role === 'admin' || req.user!.role === 'supervisor' || req.user!.role === 'manager';
+      console.log(`[DASHBOARD STATS API] Role do usuário: ${req.user!.role}, É admin: ${isAdmin}`);
       
       const stats = await storage.getDashboardStats(userId);
       console.log(`[DASHBOARD STATS API] Retornando estatísticas:`, stats);

@@ -9,7 +9,7 @@ import {
 } from "@shared/schema";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
-import { eq, and, desc, asc, sql } from "drizzle-orm";
+import { eq, and, desc, asc, sql, or, inArray } from "drizzle-orm";
 import { db, pool } from "./db";
 
 // Configuração do store de sessão PostgreSQL
@@ -1607,7 +1607,7 @@ export class DatabaseStorage implements IStorage {
       // Calcular licenças emitidas (com pelo menos um estado aprovado)
       const issuedLicenses = userLicenses.filter(license => {
         if (license.isDraft) return false;
-        const hasApprovedState = license.stateStatuses.some(status => 
+        const hasApprovedState = license.stateStatuses && license.stateStatuses.some(status => 
           status.includes(':approved:')
         );
         return hasApprovedState;
@@ -1616,7 +1616,7 @@ export class DatabaseStorage implements IStorage {
       // Calcular licenças pendentes (não-draft e sem estados aprovados)
       const pendingLicenses = userLicenses.filter(license => {
         if (license.isDraft) return false;
-        const hasApprovedState = license.stateStatuses.some(status => 
+        const hasApprovedState = license.stateStatuses && license.stateStatuses.some(status => 
           status.includes(':approved:')
         );
         return !hasApprovedState;
