@@ -958,13 +958,20 @@ export class TransactionalStorage implements IStorage {
       });
       
       console.log(`[DEBUG LICENÇAS EMITIDAS] Total de licenças emitidas para o usuário ${userId}: ${issuedLicenses.length}`);
+      console.log(`[DEBUG LICENÇAS EMITIDAS] IDs das licenças: ${issuedLicenses.map(l => l.id).join(', ')}`);
       
       // Expandir por estado como a página faz
       const expandedLicenses: any[] = [];
       issuedLicenses.forEach(license => {
+        console.log(`[DEBUG DASHBOARD] Processando licença ${license.id}, estados: ${license.states?.length || 0}`);
+        console.log(`[DEBUG DASHBOARD] Estados da licença ${license.id}:`, license.states);
+        console.log(`[DEBUG DASHBOARD] stateStatuses da licença ${license.id}:`, license.stateStatuses);
+        
         license.states.forEach((state: string, index: number) => {
           const stateStatusEntry = license.stateStatuses?.find((entry: string) => entry.startsWith(`${state}:`));
           const stateStatus = stateStatusEntry?.split(':')?.[1] || 'pending_registration';
+          
+          console.log(`[DEBUG DASHBOARD] Estado ${state}: status=${stateStatus}, entry=${stateStatusEntry}`);
           
           if (stateStatus === 'approved') {
             let stateValidUntil = license.validUntil ? license.validUntil.toString() : null;
@@ -981,9 +988,15 @@ export class TransactionalStorage implements IStorage {
               requestNumber: license.requestNumber,
               mainVehiclePlate: license.mainVehiclePlate
             });
+            
+            console.log(`[DEBUG DASHBOARD] ✓ Adicionada licença expandida: ${state} - ${license.requestNumber}`);
+          } else {
+            console.log(`[DEBUG DASHBOARD] ✗ Estado ${state} NÃO aprovado (status: ${stateStatus})`);
           }
         });
       });
+      
+      console.log(`[DEBUG DASHBOARD] Total de licenças expandidas (estados aprovados): ${expandedLicenses.length}`);
       
       // Total de licenças emitidas = expandedLicenses.length (igual à página)
       const issuedLicensesCount = expandedLicenses.length;
