@@ -265,7 +265,167 @@ export function Sidebar({ className }: SidebarProps) {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 bg-gray-800 text-white w-[250px] sm:w-[280px] overflow-y-auto max-h-screen">
-              <NavItems />
+              <div className="flex items-center justify-center h-16 px-4 bg-gray-900">
+                <Logo width={120} className="py-2" />
+              </div>
+              
+              <div className="px-2 py-4 space-y-1">
+                {/* Menu items sem o footer de usuário */}
+                {!isOperational && (
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start text-white hover:bg-gray-700",
+                      (location === "/" || location === "/dashboard") ? "bg-gray-700" : "bg-transparent"
+                    )}
+                    onClick={() => handleNavigate("/")}
+                  >
+                    <Home className="mr-3 h-5 w-5" />
+                    Dashboard
+                  </Button>
+                )}
+                
+                {(isSupervisor || isOperational) && (
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start text-white hover:bg-gray-700",
+                      location === "/my-companies" ? "bg-gray-700" : "bg-transparent"
+                    )}
+                    onClick={() => handleNavigate("/my-companies")}
+                  >
+                    <Building2 className="mr-3 h-5 w-5" />
+                    Minhas Empresas
+                  </Button>
+                )}
+                
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start text-white hover:bg-gray-700",
+                    location === "/vehicles" ? "bg-gray-700" : "bg-transparent"
+                  )}
+                  onClick={() => handleNavigate("/vehicles")}
+                >
+                  <Truck className="mr-3 h-5 w-5" />
+                  Veículos Cadastrados
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start text-white hover:bg-gray-700",
+                    location === "/request-license" ? "bg-gray-700" : "bg-transparent"
+                  )}
+                  onClick={() => handleNavigate("/request-license")}
+                >
+                  <FileText className="mr-3 h-5 w-5" />
+                  Solicitar Licença
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start text-white hover:bg-gray-700",
+                    location === "/track-license" ? "bg-gray-700" : "bg-transparent"
+                  )}
+                  onClick={() => handleNavigate("/track-license")}
+                >
+                  <ClipboardList className="mr-3 h-5 w-5" />
+                  Acompanhar Licença
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start text-white hover:bg-gray-700",
+                    location === "/issued-licenses" ? "bg-gray-700" : "bg-transparent"
+                  )}
+                  onClick={() => handleNavigate("/issued-licenses")}
+                >
+                  <ListChecks className="mr-3 h-5 w-5" />
+                  Licenças Emitidas
+                </Button>
+                
+                {(isAdmin || isSupervisor || isOperational) && (
+                  <>
+                    <div className="pt-2 pb-2">
+                      <Separator className="bg-gray-700" />
+                      <p className="text-xs text-gray-400 uppercase mt-2 ml-2 font-semibold">Administração</p>
+                    </div>
+                    
+                    {isAdmin && (
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start text-white hover:bg-gray-700",
+                          location === "/admin" ? "bg-gray-700" : "bg-transparent"
+                        )}
+                        onClick={() => handleNavigate("/admin")}
+                      >
+                        <LayoutDashboard className="mr-3 h-5 w-5" />
+                        Relatórios
+                      </Button>
+                    )}
+                    
+                    {isOperational && (
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start text-white hover:bg-gray-700",
+                          (location === "/admin/licenses" || location === "/gerenciar-licencas") ? "bg-gray-700" : "bg-transparent"
+                        )}
+                        onClick={() => handleNavigate("/admin/licenses")}
+                      >
+                        <ClipboardEdit className="mr-3 h-5 w-5" />
+                        Gerenciar Licenças
+                      </Button>
+                    )}
+                    
+                    {isOperational && (
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start text-white hover:bg-gray-700",
+                          location === "/admin/transporters" ? "bg-gray-700" : "bg-transparent"
+                        )}
+                        onClick={() => handleNavigate("/admin/transporters")}
+                      >
+                        <Building2 className="mr-3 h-5 w-5" />
+                        Transportadores
+                      </Button>
+                    )}
+                    
+                    {isAdmin && (
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start text-white hover:bg-gray-700",
+                          location === "/admin/users" ? "bg-gray-700" : "bg-transparent"
+                        )}
+                        onClick={() => handleNavigate("/admin/users")}
+                      >
+                        <Users className="mr-3 h-5 w-5" />
+                        Usuários
+                      </Button>
+                    )}
+                    
+                    {isAdmin && (
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start text-white hover:bg-gray-700",
+                          location === "/admin/vehicle-models" ? "bg-gray-700" : "bg-transparent"
+                        )}
+                        onClick={() => handleNavigate("/admin/vehicle-models")}
+                      >
+                        <Car className="mr-3 h-5 w-5" />
+                        Modelos de Veículos
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
             </SheetContent>
           </Sheet>
           <Logo width={90} className="ml-1" />
@@ -288,8 +448,194 @@ export function Sidebar({ className }: SidebarProps) {
       <div className="pt-16 md:pt-0"></div>
     </>
   ) : (
-    <div className={cn("hidden md:flex md:flex-col md:w-56 lg:w-64 xl:w-72 fixed inset-y-0 bg-gray-800 text-white shadow-lg z-10", className)}>
-      <NavItems />
-    </div>
+    <>
+      {/* Header superior para desktop */}
+      <div className="hidden md:block fixed top-0 right-0 left-56 lg:left-64 xl:left-72 z-20 bg-white border-b border-gray-200 h-16">
+        <div className="flex items-center justify-end h-full px-6">
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <p className="text-sm font-medium text-gray-700">{user?.fullName}</p>
+              <p className="text-xs text-gray-500">{user?.email}</p>
+            </div>
+            <Avatar className="h-10 w-10 bg-gray-500">
+              <AvatarFallback className="text-white font-medium">{userInitials}</AvatarFallback>
+            </Avatar>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-gray-500 hover:text-gray-700 h-8 w-8"
+              onClick={handleLogout}
+              title="Sair"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+      
+      {/* Sidebar desktop sem footer de usuário */}
+      <div className={cn("hidden md:flex md:flex-col md:w-56 lg:w-64 xl:w-72 fixed inset-y-0 bg-gray-800 text-white shadow-lg z-10", className)}>
+        <div className="flex items-center justify-center h-16 px-4 bg-gray-900">
+          <Logo width={120} className="py-2" />
+        </div>
+        
+        <div className="px-2 py-4 space-y-1 flex-1">
+          {!isOperational && (
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full justify-start text-white hover:bg-gray-700",
+                (location === "/" || location === "/dashboard") ? "bg-gray-700" : "bg-transparent"
+              )}
+              onClick={() => handleNavigate("/")}
+            >
+              <Home className="mr-3 h-5 w-5" />
+              Dashboard
+            </Button>
+          )}
+          
+          {(isSupervisor || isOperational) && (
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full justify-start text-white hover:bg-gray-700",
+                location === "/my-companies" ? "bg-gray-700" : "bg-transparent"
+              )}
+              onClick={() => handleNavigate("/my-companies")}
+            >
+              <Building2 className="mr-3 h-5 w-5" />
+              Minhas Empresas
+            </Button>
+          )}
+          
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-white hover:bg-gray-700",
+              location === "/vehicles" ? "bg-gray-700" : "bg-transparent"
+            )}
+            onClick={() => handleNavigate("/vehicles")}
+          >
+            <Truck className="mr-3 h-5 w-5" />
+            Veículos Cadastrados
+          </Button>
+          
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-white hover:bg-gray-700",
+              location === "/request-license" ? "bg-gray-700" : "bg-transparent"
+            )}
+            onClick={() => handleNavigate("/request-license")}
+          >
+            <FileText className="mr-3 h-5 w-5" />
+            Solicitar Licença
+          </Button>
+          
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-white hover:bg-gray-700",
+              location === "/track-license" ? "bg-gray-700" : "bg-transparent"
+            )}
+            onClick={() => handleNavigate("/track-license")}
+          >
+            <ClipboardList className="mr-3 h-5 w-5" />
+            Acompanhar Licença
+          </Button>
+          
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-white hover:bg-gray-700",
+              location === "/issued-licenses" ? "bg-gray-700" : "bg-transparent"
+            )}
+            onClick={() => handleNavigate("/issued-licenses")}
+          >
+            <ListChecks className="mr-3 h-5 w-5" />
+            Licenças Emitidas
+          </Button>
+          
+          {(isAdmin || isSupervisor || isOperational) && (
+            <>
+              <div className="pt-2 pb-2">
+                <Separator className="bg-gray-700" />
+                <p className="text-xs text-gray-400 uppercase mt-2 ml-2 font-semibold">Administração</p>
+              </div>
+              
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start text-white hover:bg-gray-700",
+                    location === "/admin" ? "bg-gray-700" : "bg-transparent"
+                  )}
+                  onClick={() => handleNavigate("/admin")}
+                >
+                  <LayoutDashboard className="mr-3 h-5 w-5" />
+                  Relatórios
+                </Button>
+              )}
+              
+              {isOperational && (
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start text-white hover:bg-gray-700",
+                    (location === "/admin/licenses" || location === "/gerenciar-licencas") ? "bg-gray-700" : "bg-transparent"
+                  )}
+                  onClick={() => handleNavigate("/admin/licenses")}
+                >
+                  <ClipboardEdit className="mr-3 h-5 w-5" />
+                  Gerenciar Licenças
+                </Button>
+              )}
+              
+              {isOperational && (
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start text-white hover:bg-gray-700",
+                    location === "/admin/transporters" ? "bg-gray-700" : "bg-transparent"
+                  )}
+                  onClick={() => handleNavigate("/admin/transporters")}
+                >
+                  <Building2 className="mr-3 h-5 w-5" />
+                  Transportadores
+                </Button>
+              )}
+              
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start text-white hover:bg-gray-700",
+                    location === "/admin/users" ? "bg-gray-700" : "bg-transparent"
+                  )}
+                  onClick={() => handleNavigate("/admin/users")}
+                >
+                  <Users className="mr-3 h-5 w-5" />
+                  Usuários
+                </Button>
+              )}
+              
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start text-white hover:bg-gray-700",
+                    location === "/admin/vehicle-models" ? "bg-gray-700" : "bg-transparent"
+                  )}
+                  onClick={() => handleNavigate("/admin/vehicle-models")}
+                >
+                  <Car className="mr-3 h-5 w-5" />
+                  Modelos de Veículos
+                </Button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </>
   );
 }
