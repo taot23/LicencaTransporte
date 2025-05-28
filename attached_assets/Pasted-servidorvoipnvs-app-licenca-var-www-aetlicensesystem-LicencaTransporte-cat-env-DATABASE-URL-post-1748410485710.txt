@@ -1,0 +1,67 @@
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ cat .env
+DATABASE_URL=postgresql://aetuser:AET@License2025!@localhost:5432/aetlicensesystem
+SESSION_SECRET=chave_secreta_super_longa_e_unica_para_producao_2025
+NODE_ENV=production
+PORT=5000
+PGHOST=localhost
+PGPORT=5432
+PGUSER=aetuser
+PGPASSWORD=AET@License2025!
+PGDATABASE=aetlicensesystem
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ echo $DATABASE_URL
+postgresql://nvsantt:nvs123L@localhost:5432/nvs_antt
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ # Criar um arquivo .env com conexão local
+cat > .env << EOF
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/aet_database
+NODE_ENV=production
+PORT=5000
+EOF^C
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ echo $DATABASE_URL^C
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ cat > .env << EOF
+DATABASE_URL=postgresql://nvsantt:nvs123@localhost:5432/aet_database
+NODE_ENV=production
+PORT=5000
+EOF
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ # Reiniciar a aplicação
+pm2 restart aet-license-system
+
+# Verificar os logs novamente
+pm2 logs aet-license-system --lines 20
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [aet-license-system](ids: [ 11 ])
+[PM2] [aet-license-system](11) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 11 │ aet-license-system │ fork     │ 1    │ online    │ 0%       │ 10.9mb   │
+│ 3  │ vendas-app-atuali… │ fork     │ 127… │ online    │ 0%       │ 106.3mb  │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+Module
+┌────┬────────────────────┬──────────┬──────────┬──────────┐
+│ id │ name               │ status   │ cpu      │ mem      │
+├────┼────────────────────┼──────────┼──────────┼──────────┤
+│ 0  │ pm2-logrotate      │ online   │ 0%       │ 61.5mb   │
+└────┴────────────────────┴──────────┴──────────┴──────────┘
+[TAILING] Tailing last 20 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out.log last 20 lines:
+11|aet-lic | 5:30:51 AM [express] serving on port 5000
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error.log last 20 lines:
+11|aet-lic |     at async PGStore._rawEnsureSessionStoreTable (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:177:19)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:315:7)
+11|aet-lic | Error
+11|aet-lic |     at file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/@neondatabase/serverless/index.mjs:1345:74
+11|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:322:21)
+11|aet-lic |     at async PGStore._rawEnsureSessionStoreTable (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:177:19)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:315:7)
+11|aet-lic | Error
+11|aet-lic |     at file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/@neondatabase/serverless/index.mjs:1345:74
+11|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:322:21)
+11|aet-lic |     at async PGStore._rawEnsureSessionStoreTable (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:177:19)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:315:7)
+11|aet-lic | Error
+11|aet-lic |     at file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/@neondatabase/serverless/index.mjs:1345:74
+11|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:322:21)

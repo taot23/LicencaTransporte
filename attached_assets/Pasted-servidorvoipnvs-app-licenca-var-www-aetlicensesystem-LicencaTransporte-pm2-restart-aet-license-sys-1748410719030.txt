@@ -1,0 +1,108 @@
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ pm2 restart aet-license-system --update-env
+# Verificar os logs
+pm2 logs aet-license-system --lines 10
+[PM2] Applying action restartProcessId on app [aet-license-system](ids: [ 11 ])
+[PM2] [aet-license-system](11) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 11 │ aet-license-system │ fork     │ 2    │ online    │ 0%       │ 19.0mb   │
+│ 3  │ vendas-app-atuali… │ fork     │ 127… │ online    │ 0%       │ 105.9mb  │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+Module
+┌────┬────────────────────┬──────────┬──────────┬──────────┐
+│ id │ name               │ status   │ cpu      │ mem      │
+├────┼────────────────────┼──────────┼──────────┼──────────┤
+│ 0  │ pm2-logrotate      │ online   │ 0%       │ 60.8mb   │
+└────┴────────────────────┴──────────┴──────────┴──────────┘
+[TAILING] Tailing last 10 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error.log last 10 lines:
+11|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:322:21)
+11|aet-lic |     at async PGStore._rawEnsureSessionStoreTable (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:177:19)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:315:7)
+11|aet-lic | Error
+11|aet-lic |     at file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/@neondatabase/serverless/index.mjs:1345:74
+11|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:322:21)
+11|aet-lic |     at async PGStore._rawEnsureSessionStoreTable (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:177:19)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:315:7)
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out.log last 10 lines:
+11|aet-lic | 5:30:51 AM [express] serving on port 5000
+11|aet-lic | 5:34:37 AM [express] serving on port 5000
+
+11|aet-license-system  | 5:36:52 AM [express] serving on port 5000
+^C
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ # Executar migrações do banco 
+npm run db:push
+
+# Depois reiniciar novamente
+pm2 restart aet-license-system --update-env
+
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/var/www/aetlicensesystem/LicencaTransporte/drizzle.config.ts'
+Using 'pg' driver for database querying
+[⣷] Pulling schema from database...
+error: password authentication failed for user "nvsantt"
+    at /var/www/aetlicensesystem/LicencaTransporte/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/var/www/aetlicensesystem/LicencaTransporte/node_modules/drizzle-kit/bin.cjs:66575:26)
+    at async fromDatabase2 (/var/www/aetlicensesystem/LicencaTransporte/node_modules/drizzle-kit/bin.cjs:18700:25) {
+  length: 103,
+  severity: 'FATAL',
+  code: '28P01',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'auth.c',
+  line: '326',
+  routine: 'auth_failed'
+}
+[PM2] Applying action restartProcessId on app [aet-license-system](ids: [ 11 ])
+[PM2] [aet-license-system](11) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 11 │ aet-license-system │ fork     │ 3    │ online    │ 0%       │ 16.9mb   │
+│ 3  │ vendas-app-atuali… │ fork     │ 127… │ online    │ 0%       │ 105.6mb  │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+Module
+┌────┬────────────────────┬──────────┬──────────┬──────────┐
+│ id │ name               │ status   │ cpu      │ mem      │
+├────┼────────────────────┼──────────┼──────────┼──────────┤
+│ 0  │ pm2-logrotate      │ online   │ 0%       │ 60.7mb   │
+└────┴────────────────────┴──────────┴──────────┴──────────┘
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ pm2 logs aet-license-system --lines 10
+[TAILING] Tailing last 10 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error.log last 10 lines:
+11|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:322:21)
+11|aet-lic |     at async PGStore._rawEnsureSessionStoreTable (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:177:19)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:315:7)
+11|aet-lic | Error
+11|aet-lic |     at file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/@neondatabase/serverless/index.mjs:1345:74
+11|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:322:21)
+11|aet-lic |     at async PGStore._rawEnsureSessionStoreTable (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:177:19)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:315:7)
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out.log last 10 lines:
+11|aet-lic | 5:30:51 AM [express] serving on port 5000
+11|aet-lic | 5:34:37 AM [express] serving on port 5000
+11|aet-lic | 5:36:52 AM [express] serving on port 5000
+11|aet-lic | 5:37:15 AM [express] serving on port 5000
+
+^C
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ 

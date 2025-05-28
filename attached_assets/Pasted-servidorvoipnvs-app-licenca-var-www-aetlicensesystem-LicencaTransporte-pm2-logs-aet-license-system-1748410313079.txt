@@ -1,0 +1,21 @@
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ pm2 logs aet-license-system
+[TAILING] Tailing last 15 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out.log last 15 lines:
+11|aet-lic | 5:30:51 AM [express] serving on port 5000
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error.log last 15 lines:
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:322:21)
+11|aet-lic |     at async PGStore._rawEnsureSessionStoreTable (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:177:19)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:315:7)
+11|aet-lic | Error
+11|aet-lic |     at file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/@neondatabase/serverless/index.mjs:1345:74
+11|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:322:21)
+11|aet-lic |     at async PGStore._rawEnsureSessionStoreTable (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:177:19)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:315:7)
+11|aet-lic | Error
+11|aet-lic |     at file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/@neondatabase/serverless/index.mjs:1345:74
+11|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:322:21)
+11|aet-lic |     at async PGStore._rawEnsureSessionStoreTable (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:177:19)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:315:7)

@@ -1,0 +1,43 @@
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ cat server/db.ts | head -5
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import ws from "ws";
+import * as schema from "@shared/schema";
+
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ sed -i 's/import { Pool, neonConfig } from .@neondatabase\/serverless./import { Pool } from '\''pg'\'';/' server/db.ts
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ cat server/db.ts | head -5
+import { Pool } from 'pg';;
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import ws from "ws";
+import * as schema from "@shared/schema";
+
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ pm2 restart aet-license-system --update-env
+[PM2] Applying action restartProcessId on app [aet-license-system](ids: [ 11 ])
+[PM2] [aet-license-system](11) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 11 │ aet-license-system │ fork     │ 119  │ online    │ 0%       │ 16.9mb   │
+│ 3  │ vendas-app-atuali… │ fork     │ 127… │ online    │ 0%       │ 107.2mb  │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+Module
+┌────┬────────────────────┬──────────┬──────────┬──────────┐
+│ id │ name               │ status   │ cpu      │ mem      │
+├────┼────────────────────┼──────────┼──────────┼──────────┤
+│ 0  │ pm2-logrotate      │ online   │ 0%       │ 60.7mb   │
+└────┴────────────────────┴──────────┴──────────┴──────────┘
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ pm2 logs aet-license-system --lines 5
+[TAILING] Tailing last 5 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out.log last 5 lines:
+11|aet-lic | 5:37:15 AM [express] serving on port 5000
+11|aet-lic | 5:41:54 AM [express] serving on port 5000
+11|aet-lic | Re-optimizing dependencies because lockfile has changed
+11|aet-lic | 5:42:56 AM [express] serving on port 5000
+11|aet-lic | 5:43:48 AM [express] serving on port 5000
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error.log last 5 lines:
+11|aet-lic |     at Hooks.resolve (node:internal/modules/esm/hooks:306:30) {
+11|aet-lic |   code: 'ERR_MODULE_NOT_FOUND'
+11|aet-lic | }
+11|aet-lic | 
+11|aet-lic | Node.js v20.19.2

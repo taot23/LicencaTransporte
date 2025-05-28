@@ -1,0 +1,31 @@
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out.log last 15 lines:
+11|aet-lic | 5:30:51 AM [express] serving on port 5000
+11|aet-lic | 5:34:37 AM [express] serving on port 5000
+11|aet-lic | 5:36:52 AM [express] serving on port 5000
+11|aet-lic | 5:37:15 AM [express] serving on port 5000
+11|aet-lic | 5:41:54 AM [express] serving on port 5000
+11|aet-lic | Re-optimizing dependencies because lockfile has changed
+11|aet-lic | 5:42:56 AM [express] serving on port 5000
+11|aet-lic | 5:43:48 AM [express] serving on port 5000
+11|aet-lic | 5:54:19 AM [express] serving on port 5000
+11|aet-lic | 5:54:38 AM [express] serving on port 5000
+11|aet-lic | 5:55:56 AM [express] serving on port 5000
+11|aet-lic | 5:57:41 AM [express] GET /api/vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php 200 in 4ms
+11|aet-lic | 5:58:28 AM [express] serving on port 5000
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error.log last 15 lines:
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:322:21)
+11|aet-lic |     at async PGStore._rawEnsureSessionStoreTable (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:177:19)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:315:7)
+11|aet-lic | error: password authentication failed for user "nvsantt"
+11|aet-lic |     at /var/www/aetlicensesystem/LicencaTransporte/node_modules/pg-pool/index.js:45:11
+11|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:322:21)
+11|aet-lic |     at async PGStore._rawEnsureSessionStoreTable (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:177:19)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:315:7)
+11|aet-lic | error: password authentication failed for user "nvsantt"
+11|aet-lic |     at /var/www/aetlicensesystem/LicencaTransporte/node_modules/pg-pool/index.js:45:11
+11|aet-lic |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:322:21)
+11|aet-lic |     at async PGStore._rawEnsureSessionStoreTable (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:177:19)
+11|aet-lic |     at async PGStore._asyncQuery (/var/www/aetlicensesystem/LicencaTransporte/node_modules/connect-pg-simple/index.js:315:7)

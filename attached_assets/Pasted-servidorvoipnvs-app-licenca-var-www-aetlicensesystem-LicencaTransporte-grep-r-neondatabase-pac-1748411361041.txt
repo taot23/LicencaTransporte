@@ -1,0 +1,89 @@
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ grep -r "@neondatabase" package.json
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ npm uninstall @neondatabase/serverless --save
+
+up to date, audited 514 packages in 8s
+
+65 packages are looking for funding
+  run `npm fund` for details
+
+5 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ rep -r "@neondatabase" server/ shared/ client/
+-bash: rep: command not found
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ grep -r "@neondatabase" server/ shared/ client/
+server/db.ts:import { Pool, neonConfig } from '@neondatabase/serverless';
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ npm install
+
+up to date, audited 514 packages in 7s
+
+65 packages are looking for funding
+  run `npm fund` for details
+
+5 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ pm2 restart aet-license-system --update-env
+[PM2] Applying action restartProcessId on app [aet-license-system](ids: [ 11 ])
+[PM2] [aet-license-system](11) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 11 │ aet-license-system │ fork     │ 94   │ online    │ 0%       │ 736.0kb  │
+│ 3  │ vendas-app-atuali… │ fork     │ 127… │ online    │ 0%       │ 107.6mb  │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+Module
+┌────┬────────────────────┬──────────┬──────────┬──────────┐
+│ id │ name               │ status   │ cpu      │ mem      │
+├────┼────────────────────┼──────────┼──────────┼──────────┤
+│ 0  │ pm2-logrotate      │ online   │ 0%       │ 60.9mb   │
+└────┴────────────────────┴──────────┴──────────┴──────────┘
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ pm2 logs aet-license-system --lines 10
+[TAILING] Tailing last 10 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out.log last 10 lines:
+11|aet-lic | 5:30:51 AM [express] serving on port 5000
+11|aet-lic | 5:34:37 AM [express] serving on port 5000
+11|aet-lic | 5:36:52 AM [express] serving on port 5000
+11|aet-lic | 5:37:15 AM [express] serving on port 5000
+11|aet-lic | 5:41:54 AM [express] serving on port 5000
+11|aet-lic | Re-optimizing dependencies because lockfile has changed
+11|aet-lic | 5:42:56 AM [express] serving on port 5000
+11|aet-lic | 5:43:48 AM [express] serving on port 5000
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error.log last 10 lines:
+11|aet-lic |     at resolveBase (file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/tsx/dist/esm/index.mjs?1748411330336:2:3212)
+11|aet-lic |     at resolveDirectory (file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/tsx/dist/esm/index.mjs?1748411330336:2:3584)
+11|aet-lic |     at resolveTsPaths (file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/tsx/dist/esm/index.mjs?1748411330336:2:4073)
+11|aet-lic |     at async resolve (file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/tsx/dist/esm/index.mjs?1748411330336:2:4441)
+11|aet-lic |     at async nextResolve (node:internal/modules/esm/hooks:864:22)
+11|aet-lic |     at async Hooks.resolve (node:internal/modules/esm/hooks:306:24) {
+11|aet-lic |   code: 'ERR_MODULE_NOT_FOUND'
+11|aet-lic | }
+11|aet-lic | 
+11|aet-lic | Node.js v20.19.2
+
+11|aet-license-system  | node:internal/modules/run_main:123
+11|aet-license-system  |     triggerUncaughtException(
+11|aet-license-system  |     ^
+11|aet-license-system  | Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@neondatabase/serverless' imported from /var/www/aetlicensesystem/LicencaTransporte/server/db.ts
+11|aet-license-system  |     at packageResolve (node:internal/modules/esm/resolve:873:9)
+11|aet-license-system  |     at moduleResolve (node:internal/modules/esm/resolve:946:18)
+11|aet-license-system  |     at defaultResolve (node:internal/modules/esm/resolve:1188:11)
+11|aet-license-system  |     at nextResolve (node:internal/modules/esm/hooks:864:28)
+11|aet-license-system  |     at resolveBase (file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/tsx/dist/esm/index.mjs?1748411333128:2:3212)
+11|aet-license-system  |     at resolveDirectory (file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/tsx/dist/esm/index.mjs?1748411333128:2:3584)
+11|aet-license-system  |     at resolveTsPaths (file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/tsx/dist/esm/index.mjs?1748411333128:2:4073)
+11|aet-license-system  |     at async resolve (file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/tsx/dist/esm/index.mjs?1748411333128:2:4441)
+11|aet-license-system  |     at async nextResolve (node:internal/modules/esm/hooks:864:22)
+11|aet-license-system  |     at async Hooks.resolve (node:internal/modules/esm/hooks:306:24) {
+11|aet-license-system  |   code: 'ERR_MODULE_NOT_FOUND'
+11|aet-license-system  | }
+11|aet-license-system  | Node.js v20.19.2
+^C
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$ 
