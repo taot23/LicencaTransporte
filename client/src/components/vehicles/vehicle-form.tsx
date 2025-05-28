@@ -506,7 +506,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
             />
             
             {/* Campo de Status do Veículo - agora ao lado do tipo */}
-            {vehicle && (
+            {vehicle ? (
               <FormField
                 control={form.control}
                 name="status"
@@ -534,6 +534,8 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                   </FormItem>
                 )}
               />
+            ) : (
+              <div></div> /* Div vazia para manter o alinhamento do grid */
             )}
           </div>
           
