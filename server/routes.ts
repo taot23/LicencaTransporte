@@ -663,19 +663,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user!;
       const userId = user.id;
       
+      console.log(`[DEBUG TRANSPORTERS] Usuário ${user.email} (ID: ${userId}, role: ${user.role}) buscando transportadores`);
+      
+      // Buscar todos os transportadores
+      const allTransporters = await storage.getAllTransporters();
+      console.log(`[DEBUG TRANSPORTERS] Total de transportadores no sistema: ${allTransporters.length}`);
+      
       // Se for um usuário administrativo, retornar todos os transportadores
       if (isAdminUser(user)) {
-        console.log(`Usuário ${user.email} (${user.role}) tem acesso administrativo. Buscando todos os transportadores.`);
-        const allTransporters = await storage.getAllTransporters();
+        console.log(`[DEBUG TRANSPORTERS] Usuário admin - retornando todos os ${allTransporters.length} transportadores`);
         return res.json(allTransporters);
       }
       
-      // Para usuários comuns, buscar todos os transportadores e filtrar
-      const allTransporters = await storage.getAllTransporters();
-      // Filtrar apenas os vinculados ao usuário atual
+      // Para usuários comuns, filtrar apenas os vinculados ao usuário atual
       const userTransporters = allTransporters.filter(t => t.userId === userId);
+      console.log(`[DEBUG TRANSPORTERS] Usuário comum - encontrou ${userTransporters.length} transportadores vinculados de ${allTransporters.length} total`);
       
-      console.log(`Usuário ${user.email} encontrou ${userTransporters.length} transportadores vinculados.`);
+      if (userTransporters.length === 0) {
+        console.log(`[DEBUG TRANSPORTERS] IDs de transportadores disponíveis: ${allTransporters.map(t => `${t.id}:${t.userId}`).join(', ')}`);
+      }
+      
       res.json(userTransporters);
     } catch (error) {
       console.error('Error fetching user transporters:', error);
@@ -742,13 +749,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user!;
       let vehicles;
       
+      console.log(`[DEBUG VEHICLES] Usuário ${user.email} (ID: ${user.id}, role: ${user.role}) buscando veículos`);
+      
       // Se for usuário com papel administrativo, buscar todos os veículos
       if (isAdminUser(user)) {
-        console.log(`Usuário ${user.email} (${user.role}) tem acesso administrativo. Buscando todos os veículos.`);
+        console.log(`[DEBUG VEHICLES] Usuário admin - buscando todos os veículos`);
         vehicles = await storage.getAllVehicles();
+        console.log(`[DEBUG VEHICLES] Admin encontrou ${vehicles.length} veículos no total`);
       } else {
-        console.log(`Usuário ${user.email} (${user.role}) tem acesso comum. Buscando apenas seus veículos.`);
+        console.log(`[DEBUG VEHICLES] Usuário comum - buscando veículos do usuário ${user.id}`);
         vehicles = await storage.getVehiclesByUserId(user.id);
+        console.log(`[DEBUG VEHICLES] Usuário comum encontrou ${vehicles.length} veículos próprios`);
       }
       
       res.json(vehicles);
