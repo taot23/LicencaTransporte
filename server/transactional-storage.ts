@@ -920,52 +920,96 @@ export class TransactionalStorage implements IStorage {
           .where(eq(licenseRequests.userId, userId));
       }
       
-      // Aplicar a mesma lógica da página "Licenças Emitidas" (expandedLicenses)
-      let issuedLicensesCount = 0;
-      let expiringLicensesCount = 0;
-      
-      console.log(`[DASHBOARD CONTAGEM] Iniciando contagem para ${userLicenses.length} licenças do usuário`);
+      // USAR EXATAMENTE A MESMA FUNÇÃO expandedLicenses da página "Licenças Emitidas"
+      const expandedLicenses: any[] = [];
       
       userLicenses.forEach(license => {
         if (license.isDraft) return;
         
-        console.log(`[DASHBOARD CONTAGEM] Licença ${license.id}: estados=${JSON.stringify(license.states)}, stateStatuses=${JSON.stringify(license.stateStatuses)}`);
-        
-        // Para cada estado da licença, verificar se foi aprovado
-        if (license.states && Array.isArray(license.states)) {
-          license.states.forEach((state) => {
-            // Verificar se este estado específico foi aprovado
-            const stateStatusEntry = license.stateStatuses?.find(entry => entry.startsWith(`${state}:`));
-            const stateStatus = stateStatusEntry?.split(':')?.[1] || 'pending_registration';
+        // Para cada licença, expandir para uma linha por estado que tenha sido aprovado
+        license.states.forEach((state, index) => {
+          // Verifica se este estado específico foi aprovado
+          const stateStatusEntry = license.stateStatuses?.find(entry => entry.startsWith(`${state}:`));
+          const stateStatus = stateStatusEntry?.split(':')?.[1] || 'pending_registration';
+          const stateFileEntry = license.stateFiles?.find(entry => entry.startsWith(`${state}:`));
+          const stateFileUrl = stateFileEntry?.split(':')?.[1] || null;
+          
+          // Só incluir estados com status "approved"
+          if (stateStatus === 'approved') {
+            // Obter data de validade específica para este estado, se disponível
+            let stateValidUntil = license.validUntil ? license.validUntil.toString() : null;
             
-            console.log(`[DASHBOARD CONTAGEM] Estado ${state}: statusEntry=${stateStatusEntry}, status=${stateStatus}`);
+            // Novo formato: "estado:status:data_validade"
+            if (stateStatusEntry && stateStatusEntry.split(':').length > 2) {
+              // Extrair data de validade do formato estado:status:data
+              stateValidUntil = stateStatusEntry.split(':')[2];
+            }
             
-            // Só contar estados com status "approved"
-            if (stateStatus === 'approved') {
-              issuedLicensesCount++;
-              console.log(`[DASHBOARD CONTAGEM] ✓ Estado ${state} aprovado! Total agora: ${issuedLicensesCount}`);
-              
-              // Verificar se vence em 30 dias
-              if (stateStatusEntry && stateStatusEntry.split(':').length > 2) {
-                const stateValidUntil = stateStatusEntry.split(':')[2];
-                try {
-                  const validDate = new Date(stateValidUntil);
-                  const today = new Date();
-                  const diffInDays = Math.ceil((validDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                  
-                  if (diffInDays > 0 && diffInDays <= 30) {
-                    expiringLicensesCount++;
-                  }
-                } catch (e) {
-                  // Ignorar erros de data
+            // Obter número AET específico para este estado, se disponível
+            let stateAETNumber = null;
+            
+            // Verificar primeiro no array stateAETNumbers (formato "SP:123456")
+            if (license.stateAETNumbers && Array.isArray(license.stateAETNumbers)) {
+              const aetEntry = license.stateAETNumbers.find(entry => entry.startsWith(`${state}:`));
+              if (aetEntry) {
+                const parts = aetEntry.split(':');
+                if (parts.length >= 2) {
+                  stateAETNumber = parts[1];
                 }
               }
             }
-          });
-        }
+            
+            // Se não encontrou no stateAETNumbers, tentar no campo aetNumber (legado)
+            if (!stateAETNumber && license.aetNumber) {
+              stateAETNumber = license.aetNumber;
+            }
+            
+            expandedLicenses.push({
+              id: license.id * 100 + index, // Gerar ID único para a linha
+              licenseId: license.id,
+              requestNumber: license.requestNumber,
+              type: license.type,
+              mainVehiclePlate: license.mainVehiclePlate,
+              state,
+              status: stateStatus,
+              stateStatus,
+              emissionDate: license.updatedAt ? license.updatedAt.toString() : null,
+              validUntil: stateValidUntil,
+              licenseFileUrl: license.licenseFileUrl,
+              stateFileUrl,
+              transporterId: license.transporterId || 0,
+              aetNumber: stateAETNumber // Usar o número AET específico do estado
+            });
+          }
+        });
       });
       
-      console.log(`[DASHBOARD CONTAGEM] FINAL: ${issuedLicensesCount} licenças emitidas, ${expiringLicensesCount} a vencer`);
+      // Função getLicenseStatus IDÊNTICA à da página "Licenças Emitidas"
+      const getLicenseStatus = (validUntil: string | null): 'active' | 'expired' | 'expiring_soon' => {
+        if (!validUntil) return 'active';
+        
+        const validDate = new Date(validUntil);
+        const today = new Date();
+        
+        // Se a validade é antes de hoje (vencida)
+        if (validDate < today) {
+          return 'expired';
+        }
+        
+        // Se a validade é menos de 30 dias a partir de hoje
+        const diffInDays = Math.ceil((validDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffInDays <= 30) {
+          return 'expiring_soon';
+        }
+        
+        return 'active';
+      };
+      
+      // Contar usando expandedLicenses (EXATAMENTE como na página "Licenças Emitidas")
+      const issuedLicensesCount = expandedLicenses.length;
+      const expiringLicensesCount = expandedLicenses.filter(l => getLicenseStatus(l.validUntil) === 'expiring_soon').length;
+      
+      console.log(`[DASHBOARD EXPANDEDLICENSES] Total: ${issuedLicensesCount}, A vencer: ${expiringLicensesCount}`);
       
       // Licenças pendentes (não emitidas)
       const pendingLicenses = userLicenses.filter(license => {
