@@ -80,7 +80,7 @@ export function StatusChart({ type, isLoading }: StatusChartProps) {
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
-            <YAxis />
+            <YAxis tickFormatter={(value) => Math.floor(value).toString()} />
             <Tooltip />
             <Bar dataKey="value" fill="#3B82F6" />
           </BarChart>
