@@ -881,6 +881,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Debug: log the request body
       console.log('Vehicle data received:', vehicleData);
       
+      // Converter campos numéricos que chegam como string
+      if (vehicleData.year && typeof vehicleData.year === 'string') {
+        vehicleData.year = parseInt(vehicleData.year);
+      }
+      if (vehicleData.axleCount && typeof vehicleData.axleCount === 'string') {
+        vehicleData.axleCount = parseInt(vehicleData.axleCount);
+      }
+      if (vehicleData.tare && typeof vehicleData.tare === 'string') {
+        vehicleData.tare = parseFloat(vehicleData.tare);
+      }
+      if (vehicleData.crlvYear && typeof vehicleData.crlvYear === 'string') {
+        vehicleData.crlvYear = parseInt(vehicleData.crlvYear);
+      }
+
       // Validate vehicle data
       try {
         insertVehicleSchema.parse(vehicleData);
