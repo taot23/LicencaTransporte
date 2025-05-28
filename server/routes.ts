@@ -968,14 +968,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       delete vehicleData.vehicleData; // Remove o campo vehicleData se presente
       console.log('Using processed vehicle update data:', vehicleData);
       
+      // Forçar conversão de campos numéricos para update também
+      const processedUpdateData = {
+        ...vehicleData,
+        ...(vehicleData.year && { year: parseInt(vehicleData.year) }),
+        ...(vehicleData.axleCount && { axleCount: parseInt(vehicleData.axleCount) }),
+        ...(vehicleData.tare && { tare: parseFloat(vehicleData.tare) }),
+        ...(vehicleData.crlvYear && { crlvYear: parseInt(vehicleData.crlvYear) })
+      };
+
+      console.log('Data after conversion for update:', processedUpdateData);
+
       // Validate vehicle data
-      try {
-        insertVehicleSchema.partial().parse(vehicleData);
-      } catch (error: any) {
-        console.log('Validation error on update:', error);
-        const validationError = fromZodError(error);
+      const updateValidationResult = insertVehicleSchema.partial().safeParse(processedUpdateData);
+      if (!updateValidationResult.success) {
+        console.log('Validation error on update:', updateValidationResult.error);
+        const validationError = fromZodError(updateValidationResult.error);
         return res.status(400).json({ message: validationError.message });
       }
+      
+      // Usar os dados validados
+      vehicleData = updateValidationResult.data;
       
       // Add file URL if provided
       if (req.file) {
