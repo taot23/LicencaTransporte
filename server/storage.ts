@@ -1499,87 +1499,163 @@ export class DatabaseStorage implements IStorage {
   
   // Dashboard stats
   async getDashboardStats(userId: number): Promise<DashboardStats> {
-    console.log(`[STATS CORRECT] Obtendo estatísticas para usuário ${userId}`);
+    console.log(`[DASHBOARD STATS] Obtendo estatísticas para usuário ${userId}`);
     
-    // Buscar licenças específicas do usuário/transportador
-    const allUserLicenses = await this.getLicenseRequestsByUserId(userId);
-    console.log(`[STATS CORRECT] Total de licenças do usuário: ${allUserLicenses.length}`);
+    // Verificar se o usuário é admin baseado no role
+    const user = await this.getUser(userId);
+    const isAdmin = user?.role === 'admin' || user?.role === 'supervisor' || user?.role === 'manager';
     
-    // Para licenças emitidas, usar o método que considera estados individuais aprovados
-    const issuedLicenses = await this.getIssuedLicensesByUserId(userId);
-    console.log(`[STATS CORRECT] Licenças emitidas encontradas: ${issuedLicenses.length}`);
+    console.log(`[DASHBOARD STATS] Usuário ${user?.email} (${user?.role}) - É admin: ${isAdmin}`);
     
-    // Para licenças pendentes, buscar todas as não-draft que não estão nas emitidas
-    const pendingLicenses = allUserLicenses.filter(license => 
-      !license.isDraft && 
-      !issuedLicenses.some(issued => issued.id === license.id)
-    );
-    console.log(`[STATS CORRECT] Licenças pendentes encontradas: ${pendingLicenses.length}`);
-    
-    // Contar veículos registrados
-    const registeredVehiclesQuery = db.select({ count: sql`count(*)` })
-      .from(vehicles)
-      .where(userId !== 0 ? eq(vehicles.userId, userId) : sql`1=1`);
-    
-    // Contar veículos ativos
-    const activeVehiclesQuery = db.select({ count: sql`count(*)` })
-      .from(vehicles)
-      .where(and(
-        userId !== 0 ? eq(vehicles.userId, userId) : sql`1=1`,
-        eq(vehicles.status, "active")
-      ));
-    
-    // Buscar licenças recentes
-    const recentLicensesQuery = db.select()
-      .from(licenseRequests)
-      .where(and(
-        userId !== 0 ? eq(licenseRequests.userId, userId) : sql`1=1`,
-        eq(licenseRequests.isDraft, false)
-      ))
-      .orderBy(desc(licenseRequests.createdAt))
-      .limit(5);
-    
-    // Executar as consultas em paralelo
-    const [
-      registeredVehiclesResult,
-      activeVehiclesResult,
-      recentLicensesResult
-    ] = await Promise.all([
-      registeredVehiclesQuery,
-      activeVehiclesQuery,
-      recentLicensesQuery
-    ]);
-    
-    // Formatar as licenças recentes
-    const recentLicenses = recentLicensesResult.map(license => ({
-      id: license.id,
-      requestNumber: license.requestNumber,
-      type: license.type,
-      mainVehiclePlate: license.mainVehiclePlate,
-      states: license.states,
-      status: license.status,
-      createdAt: license.createdAt
-    }));
-    
-    const stats = {
-      issuedLicenses: issuedLicenses.length,
-      pendingLicenses: pendingLicenses.length,
-      registeredVehicles: Number(registeredVehiclesResult[0]?.count || 0),
-      activeVehicles: Number(activeVehiclesResult[0]?.count || 0),
-      recentLicenses
-    };
-    
-    console.log(`[STATS] Estatísticas finais para usuário ${userId}:`, stats);
-    return stats;
+    if (isAdmin) {
+      // Admin vê todas as estatísticas globais do sistema
+      console.log(`[DASHBOARD STATS] Coletando estatísticas globais para admin`);
+      
+      // Contar todas as licenças emitidas do sistema
+      const allIssuedLicenses = await db.select()
+        .from(licenseRequests)
+        .where(and(
+          eq(licenseRequests.isDraft, false),
+          sql`EXISTS (
+            SELECT 1 FROM json_each(license_requests.status_by_state) 
+            WHERE json_each.value = 'liberada'
+          )`
+        ));
+      
+      // Contar todas as licenças pendentes do sistema
+      const allPendingLicenses = await db.select({ count: sql`count(*)` })
+        .from(licenseRequests)
+        .where(and(
+          eq(licenseRequests.isDraft, false),
+          sql`NOT EXISTS (
+            SELECT 1 FROM json_each(license_requests.status_by_state) 
+            WHERE json_each.value = 'liberada'
+          )`
+        ));
+      
+      // Contar todos os veículos registrados
+      const allRegisteredVehicles = await db.select({ count: sql`count(*)` })
+        .from(vehicles);
+      
+      // Contar todos os veículos ativos
+      const allActiveVehicles = await db.select({ count: sql`count(*)` })
+        .from(vehicles)
+        .where(eq(vehicles.status, "active"));
+      
+      // Buscar licenças recentes de todo o sistema
+      const allRecentLicenses = await db.select()
+        .from(licenseRequests)
+        .where(eq(licenseRequests.isDraft, false))
+        .orderBy(desc(licenseRequests.createdAt))
+        .limit(5);
+      
+      const adminStats = {
+        issuedLicenses: allIssuedLicenses.length,
+        pendingLicenses: Number(allPendingLicenses[0]?.count || 0),
+        registeredVehicles: Number(allRegisteredVehicles[0]?.count || 0),
+        activeVehicles: Number(allActiveVehicles[0]?.count || 0),
+        recentLicenses: allRecentLicenses.map(license => ({
+          id: license.id,
+          requestNumber: license.requestNumber,
+          type: license.type,
+          mainVehiclePlate: license.mainVehiclePlate,
+          states: license.states,
+          status: license.status,
+          createdAt: license.createdAt
+        }))
+      };
+      
+      console.log(`[DASHBOARD STATS] Estatísticas globais para admin:`, adminStats);
+      return adminStats;
+      
+    } else {
+      // Transportador vê apenas suas próprias estatísticas
+      console.log(`[DASHBOARD STATS] Coletando estatísticas específicas para transportador`);
+      
+      // Buscar licenças específicas do usuário/transportador
+      const allUserLicenses = await this.getLicenseRequestsByUserId(userId);
+      console.log(`[DASHBOARD STATS] Total de licenças do usuário: ${allUserLicenses.length}`);
+      
+      // Para licenças emitidas, usar o método que considera estados individuais aprovados
+      const issuedLicenses = await this.getIssuedLicensesByUserId(userId);
+      console.log(`[DASHBOARD STATS] Licenças emitidas encontradas: ${issuedLicenses.length}`);
+      
+      // Para licenças pendentes, buscar todas as não-draft que não estão nas emitidas
+      const pendingLicenses = allUserLicenses.filter(license => 
+        !license.isDraft && 
+        !issuedLicenses.some(issued => issued.id === license.id)
+      );
+      console.log(`[DASHBOARD STATS] Licenças pendentes encontradas: ${pendingLicenses.length}`);
+      
+      // Contar veículos registrados do usuário
+      const registeredVehiclesQuery = db.select({ count: sql`count(*)` })
+        .from(vehicles)
+        .where(eq(vehicles.userId, userId));
+      
+      // Contar veículos ativos do usuário
+      const activeVehiclesQuery = db.select({ count: sql`count(*)` })
+        .from(vehicles)
+        .where(and(
+          eq(vehicles.userId, userId),
+          eq(vehicles.status, "active")
+        ));
+      
+      // Buscar licenças recentes do usuário
+      const recentLicensesQuery = db.select()
+        .from(licenseRequests)
+        .where(and(
+          eq(licenseRequests.userId, userId),
+          eq(licenseRequests.isDraft, false)
+        ))
+        .orderBy(desc(licenseRequests.createdAt))
+        .limit(5);
+      
+      // Executar as consultas em paralelo
+      const [
+        registeredVehiclesResult,
+        activeVehiclesResult,
+        recentLicensesResult
+      ] = await Promise.all([
+        registeredVehiclesQuery,
+        activeVehiclesQuery,
+        recentLicensesQuery
+      ]);
+      
+      // Formatar as licenças recentes
+      const recentLicenses = recentLicensesResult.map(license => ({
+        id: license.id,
+        requestNumber: license.requestNumber,
+        type: license.type,
+        mainVehiclePlate: license.mainVehiclePlate,
+        states: license.states,
+        status: license.status,
+        createdAt: license.createdAt
+      }));
+      
+      const userStats = {
+        issuedLicenses: issuedLicenses.length,
+        pendingLicenses: pendingLicenses.length,
+        registeredVehicles: Number(registeredVehiclesResult[0]?.count || 0),
+        activeVehicles: Number(activeVehiclesResult[0]?.count || 0),
+        recentLicenses
+      };
+      
+      console.log(`[DASHBOARD STATS] Estatísticas específicas para usuário ${userId}:`, userStats);
+      return userStats;
+    }
   }
   
   async getVehicleStats(userId: number): Promise<ChartData[]> {
+    // Verificar se o usuário é admin baseado no role
+    const user = await this.getUser(userId);
+    const isAdmin = user?.role === 'admin' || user?.role === 'supervisor' || user?.role === 'manager';
+    
     const query = db.select({
       type: vehicles.type,
       count: sql`count(*)`
     })
     .from(vehicles)
-    .where(userId !== 0 ? eq(vehicles.userId, userId) : sql`1=1`)
+    .where(isAdmin ? sql`1=1` : eq(vehicles.userId, userId))
     .groupBy(vehicles.type);
     
     const results = await query;
@@ -1591,6 +1667,10 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getStateStats(userId: number): Promise<ChartData[]> {
+    // Verificar se o usuário é admin baseado no role
+    const user = await this.getUser(userId);
+    const isAdmin = user?.role === 'admin' || user?.role === 'supervisor' || user?.role === 'manager';
+    
     // Esta consulta é uma aproximação, já que estamos trabalhando com arrays no PostgreSQL
     // Uma abordagem mais completa exigiria uma tabela de relacionamento separada
     const query = db.select({
@@ -1598,7 +1678,7 @@ export class DatabaseStorage implements IStorage {
       count: sql`count(*)`.as('count')
     })
     .from(licenseRequests)
-    .where(userId !== 0 ? eq(licenseRequests.userId, userId) : sql`1=1`)
+    .where(isAdmin ? sql`1=1` : eq(licenseRequests.userId, userId))
     .groupBy(sql`unnest(states)`);
     
     const results = await query;
