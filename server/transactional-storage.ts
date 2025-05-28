@@ -937,6 +937,16 @@ export class TransactionalStorage implements IStorage {
           } else if (typeof license.stateStatuses === 'object') {
             // Se é um objeto, converter para formato string array
             stateStatusesArray = Object.entries(license.stateStatuses).map(([state, status]) => `${state}:${status}`);
+          } else if (typeof license.stateStatuses === 'string') {
+            // Se é uma string JSON, fazer parse
+            try {
+              const parsed = JSON.parse(license.stateStatuses);
+              if (typeof parsed === 'object') {
+                stateStatusesArray = Object.entries(parsed).map(([state, status]) => `${state}:${status}`);
+              }
+            } catch (e) {
+              console.log(`[DASHBOARD DEBUG] Erro ao fazer parse de stateStatuses para licença ${license.id}:`, e);
+            }
           }
         }
         
