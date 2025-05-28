@@ -1667,6 +1667,8 @@ export class DatabaseStorage implements IStorage {
       });
       
       console.log(`[DASHBOARD STATS] TRANSPORTADOR - Licenças emitidas: ${issuedLicenses.length}, pendentes: ${pendingLicenses.length}`);
+      console.log(`[DEBUG STATS] IDs das licenças emitidas:`, issuedLicenses.map(l => l.id));
+      console.log(`[DEBUG STATS] Iniciando cálculo de licenças a vencer...`);
       
       // Contar veículos registrados do usuário APENAS
       const registeredVehiclesResult = await db.select({ count: sql`count(*)` })
