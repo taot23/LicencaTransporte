@@ -1,4 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+import { useWebSocketContext } from "./use-websocket-context";
+import { useEffect } from "react";
+import { queryClient } from "@/lib/queryClient";
 
 export type DashboardStats = {
   issuedLicenses: number;
@@ -18,8 +21,10 @@ export type DashboardStats = {
 };
 
 export function useDashboardStats() {
-  return useQuery<DashboardStats>({
-    queryKey: ["/api/dashboard/stats", "v2"], // Nova versão para invalidar cache
+  const { lastMessage } = useWebSocketContext();
+  
+  const query = useQuery<DashboardStats>({
+    queryKey: ["/api/dashboard/stats"],
     queryFn: async () => {
       const res = await fetch("/api/dashboard/stats", {
         credentials: "include"
@@ -29,7 +34,37 @@ export function useDashboardStats() {
       }
       return res.json();
     },
-    staleTime: 0, // Sem cache
-    refetchOnMount: true
+    staleTime: 30000, // Cache por 30 segundos
+    refetchInterval: 60000, // Refetch a cada 60 segundos
   });
+
+  // Atualizar dashboard em tempo real quando houver mudanças via WebSocket
+  useEffect(() => {
+    if (lastMessage?.data) {
+      try {
+        const message = JSON.parse(lastMessage.data);
+        
+        // Invalidar cache do dashboard quando houver mudanças relevantes
+        if (message.type === 'LICENSE_STATUS_UPDATE' || 
+            message.type === 'LICENSE_CREATED' ||
+            message.type === 'LICENSE_APPROVED' ||
+            message.type === 'VEHICLE_CREATED' ||
+            message.type === 'VEHICLE_UPDATED') {
+          
+          console.log('📊 Atualizando dashboard em tempo real:', message.type);
+          
+          // Invalidar múltiplas queries relacionadas ao dashboard
+          queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/dashboard/vehicle-stats"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/dashboard/state-stats"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/licenses/issued"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/admin/dashboard/stats"] });
+        }
+      } catch (error) {
+        // Ignorar mensagens que não são JSON válido
+      }
+    }
+  }, [lastMessage]);
+
+  return query;
 }

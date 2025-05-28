@@ -49,7 +49,7 @@ export function StatsCard({ title, value, icon, trend, trendText, secondaryText,
             <p className="text-gray-500 text-sm">{title}</p>
             <h3 className="font-bold text-3xl text-gray-800">{Math.floor(value)}</h3>
             {trend !== undefined && trendText && (
-              <p className={cn("text-sm flex items-center", classes.trendText)}>
+              <p className="text-sm flex items-center text-yellow-600 ml-[-22px] mr-[-22px] mt-[0px] mb-[0px]">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                 </svg>

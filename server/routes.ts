@@ -1645,6 +1645,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Submit the draft as a real license request
         const licenseRequest = await storage.submitLicenseDraft(draftId, requestNumber);
         
+        // Enviar notificação WebSocket para nova licença criada
+        broadcastMessage({
+          type: 'LICENSE_UPDATE',
+          data: {
+            licenseId: licenseRequest.id,
+            userId: licenseRequest.userId,
+            status: licenseRequest.status,
+            action: 'CREATED',
+            createdAt: new Date().toISOString(),
+            license: licenseRequest
+          }
+        });
+        
         return res.json(licenseRequest);
       }
       
@@ -2852,7 +2865,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       
       // Enviar notificação em tempo real via WebSocket
       broadcastMessage({
-        type: 'STATUS_UPDATE',
+        type: 'LICENSE_STATUS_UPDATE',
         data: {
           licenseId: updatedLicense.id,
           state: statusData.state,

@@ -1012,7 +1012,8 @@ export class TransactionalStorage implements IStorage {
         recentLicenses
       };
       
-      console.log(`[DASHBOARD FINAL] Contagem de estados aprovados: ${issuedLicensesCount}, A vencer: ${expiringLicensesCount}`);
+      console.log(`[DASHBOARD FINAL] Estados aprovados encontrados: ${issuedLicensesCount}`);
+      console.log(`[DASHBOARD FINAL] Licenças com estados aprovados:`, userLicenses.filter(l => !l.isDraft && l.stateStatuses?.some(s => s.includes(':approved'))).map(l => ({ id: l.id, stateStatuses: l.stateStatuses })));
       return result;
     }
   }
