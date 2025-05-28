@@ -38,6 +38,7 @@ interface VehicleFormProps {
 export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) {
   const { toast } = useToast();
   const [file, setFile] = useState<File | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
   
   // Extend the schema to handle file upload
   const formSchema = insertVehicleSchema.extend({
@@ -382,6 +383,49 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const droppedFiles = e.dataTransfer.files;
+    if (droppedFiles.length > 0) {
+      const file = droppedFiles[0];
+      
+      // Verificar se é um tipo de arquivo aceito
+      const acceptedTypes = ['.pdf', '.jpg', '.jpeg', '.png'];
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      
+      if (acceptedTypes.includes(fileExtension)) {
+        // Verificar tamanho (10MB)
+        if (file.size <= 10 * 1024 * 1024) {
+          setFile(file);
+        } else {
+          toast({
+            title: "Arquivo muito grande",
+            description: "O arquivo deve ter no máximo 10MB",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Tipo de arquivo não suportado",
+          description: "Use apenas arquivos PDF, JPG, JPEG ou PNG",
+          variant: "destructive",
+        });
+      }
     }
   };
   
@@ -819,9 +863,18 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
           {/* Upload do CRLV (campo largo) */}
           <div>
             <FormLabel htmlFor="crlvFile" className="text-sm font-medium">Upload do CRLV (PDF/imagem)</FormLabel>
-            <div className="flex justify-center px-3 py-2 border-2 border-gray-300 border-dashed rounded-md">
+            <div 
+              className={`flex justify-center px-3 py-2 border-2 border-dashed rounded-md transition-colors ${
+                isDragOver 
+                  ? 'border-blue-400 bg-blue-50' 
+                  : 'border-gray-300'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
               <div className="space-y-1 text-center py-1">
-                <UploadCloud className="mx-auto h-5 w-5 text-gray-400" />
+                <UploadCloud className={`mx-auto h-5 w-5 ${isDragOver ? 'text-blue-500' : 'text-gray-400'}`} />
                 <div className="flex text-xs text-gray-600">
                   <label
                     htmlFor="crlvFile"
