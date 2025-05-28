@@ -1,0 +1,38 @@
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ echo "DATABASE_URL=postgresql://aetuser:nvs123@localhost:5432/aetlicensesystem" > .env
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ GPASSWORD=nvs123 npm run db:push
+
+> rest-express@1.0.0 db:push
+> drizzle-kit push
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/var/www/aetlicensesystem/LicencaTransporte/drizzle.config.ts'
+Using 'pg' driver for database querying
+[✓] Pulling schema from database...
+[✓] Changes applied
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ PGPASSWORD=nvs123 psql -h localhost -U aetuser -d aetlicensesystem -c "
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) DEFAULT '11999999999',
+    role VARCHAR(50) DEFAULT 'admin',
+    is_admin BOOLEAN DEFAULT true
+);"
+NOTICE:  relation "users" already exists, skipping
+CREATE TABLE
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ PGPASSWORD=nvs123 psql -h localhost -U aetuser -d aetlicensesystem -c "
+INSERT INTO users (email, password, full_name, is_admin) 
+VALUES ('admin@sistema.com', 'admin123', 'Administrador', true);"
+ERROR:  null value in column "phone" of relation "users" violates not-null constraint
+DETAIL:  Failing row contains (2, admin@sistema.com, admin123, Administrador, null, user, t, 2025-05-28 14:17:38.643448).
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ pm2 restart aet-license-system
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [aet-license-system](ids: [ 0 ])
+[PM2] [aet-license-system](0) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ aet-license-system │ fork     │ 2    │ online    │ 0%       │ 16.7mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ 

@@ -1,0 +1,32 @@
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ aet-licencas       │ fork     │ 0    │ online    │ 0%       │ 87.1mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+Use --update-env to update environment variables
+[PM2][ERROR] Process or Namespace aet-license-system not found
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ pm2 logs
+[TAILING] Tailing last 15 lines for [all] processes (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/pm2.log last 15 lines:
+PM2        | 2025-05-28T13:00:19: PM2 log: Node.js version      : 20.19.2
+PM2        | 2025-05-28T13:00:19: PM2 log: Current arch         : x64
+PM2        | 2025-05-28T13:00:19: PM2 log: PM2 home             : /home/servidorvoipnvs/.pm2
+PM2        | 2025-05-28T13:00:19: PM2 log: PM2 PID file         : /home/servidorvoipnvs/.pm2/pm2.pid
+PM2        | 2025-05-28T13:00:19: PM2 log: RPC socket file      : /home/servidorvoipnvs/.pm2/rpc.sock
+PM2        | 2025-05-28T13:00:19: PM2 log: BUS socket file      : /home/servidorvoipnvs/.pm2/pub.sock
+PM2        | 2025-05-28T13:00:19: PM2 log: Application log path : /home/servidorvoipnvs/.pm2/logs
+PM2        | 2025-05-28T13:00:19: PM2 log: Worker Interval      : 30000
+PM2        | 2025-05-28T13:00:19: PM2 log: Process dump file    : /home/servidorvoipnvs/.pm2/dump.pm2
+PM2        | 2025-05-28T13:00:19: PM2 log: Concurrent actions   : 2
+PM2        | 2025-05-28T13:00:19: PM2 log: SIGTERM timeout      : 1600
+PM2        | 2025-05-28T13:00:19: PM2 log: Runtime Binary       : /usr/bin/node
+PM2        | 2025-05-28T13:00:19: PM2 log: ===============================================================================
+PM2        | 2025-05-28T13:02:23: PM2 log: App [aet-licencas:0] starting in -fork mode-
+PM2        | 2025-05-28T13:02:23: PM2 log: App [aet-licencas:0] online
+
+/home/servidorvoipnvs/.pm2/logs/aet-licencas-out.log last 15 lines:
+/home/servidorvoipnvs/.pm2/logs/aet-licencas-error.log last 15 lines:
+0|aet-lice | Error: DATABASE_URL must be set. Did you forget to provision a database?
+0|aet-lice |     at file:///var/www/aetlicensesystem/LicencaTransporte/dist/index.js:605:9
+0|aet-lice |     at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+0|aet-lice |     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+

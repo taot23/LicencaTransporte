@@ -1,0 +1,139 @@
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ # Parar o processo atual
+pm2 stop aet-license-system
+
+# Fazer o build da aplicação para produção
+npm run build
+
+# Verificar se o build foi criado
+ls -la dist/
+
+# Iniciar novamente
+pm2 start aet-license-system
+
+# Verificar se funcionou
+pm2 logs aet-license-system --lines 5
+[PM2] Applying action stopProcessId on app [aet-license-system](ids: [ 0 ])
+[PM2] [aet-license-system](0) ✓
+┌────┬───────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                  │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼───────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ aet-license-system    │ default     │ N/A     │ fork    │ 0        │ 0      │ 12   │ stopped   │ 0%       │ 0b       │ ser… │ disabled │
+└────┴───────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+failed to load config from /var/www/aetlicensesystem/LicencaTransporte/vite.config.ts
+error during build:
+Error: EACCES: permission denied, open '/var/www/aetlicensesystem/LicencaTransporte/vite.config.ts.timestamp-1748437837974-5a46f8cf97f6f.mjs'
+    at async open (node:internal/fs/promises:639:25)
+    at async Object.writeFile (node:internal/fs/promises:1216:14)
+    at async loadConfigFromBundledFile (file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:66864:5)
+    at async loadConfigFromFile (file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:66707:24)
+    at async resolveConfig (file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:66307:24)
+    at async build (file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:65395:18)
+    at async CAC.<anonymous> (file:///var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/cli.js:829:5)
+total 180
+drwxr-xr-x 3 root     root       4096 May 28 13:00 .
+drwxr-xr-x 9 www-data www-data   4096 May 28 13:09 ..
+-rw-r--r-- 1 root     root     168947 May 28 13:00 index.js
+drwxr-xr-x 3 root     root       4096 May 28 13:00 public
+[PM2] Applying action restartProcessId on app [aet-license-system](ids: [ 0 ])
+[PM2] [aet-license-system](0) ✓
+[PM2] Process successfully started
+┌────┬───────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                  │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼───────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ aet-license-system    │ default     │ N/A     │ fork    │ 158170   │ 0s     │ 12   │ online    │ 0%       │ 12.0mb   │ ser… │ disabled │
+└────┴───────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+[TAILING] Tailing last 5 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error-0.log last 5 lines:
+0|aet-lice | 2025-05-28T13:10:34: Error: Could not find the build directory: /var/www/aetlicensesystem/LicencaTransporte/server/public, make sure to build the client first
+0|aet-lice | 2025-05-28T13:10:34:     at serveStatic (/var/www/aetlicensesystem/LicencaTransporte/server/vite.ts:77:11)
+0|aet-lice | 2025-05-28T13:10:34:     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/index.ts:64:5)
+0|aet-lice | 2025-05-28T13:10:34: 
+0|aet-lice | 2025-05-28T13:10:34: Node.js v20.19.2
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out-0.log last 5 lines:
+0|aet-lice | 2025-05-28T13:10:31: 
+0|aet-lice | 2025-05-28T13:10:34: 
+0|aet-lice | 2025-05-28T13:10:34: > rest-express@1.0.0 dev
+0|aet-lice | 2025-05-28T13:10:34: > tsx server/index.ts
+0|aet-lice | 2025-05-28T13:10:34: 
+
+0|aet-license-system  | 2025-05-28T13:10:38: 
+0|aet-license-system  | 2025-05-28T13:10:38: > rest-express@1.0.0 dev
+0|aet-license-system  | 2025-05-28T13:10:38: > tsx server/index.ts
+0|aet-license-system  | 2025-05-28T13:10:38: 
+^C
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ # Verificar os scripts disponíveis
+npm run
+
+# Se não tiver build, vamos usar o método direto do tsx
+pm2 stop aet-license-system
+pm2 delete aet-license-system
+
+# Iniciar diretamente com tsx
+pm2 start "npx tsx server/index.ts" --name aet-license-system --update-env
+
+# Verificar status
+pm2 status
+pm2 logs aet-license-system --lines 5
+Lifecycle scripts included in rest-express@1.0.0:
+  start
+    NODE_ENV=production node dist/index.js
+available via `npm run-script`:
+  dev
+    tsx server/index.ts
+  build
+    vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+  check
+    tsc
+  db:push
+    drizzle-kit push
+[PM2] Applying action stopProcessId on app [aet-license-system](ids: [ 0 ])
+[PM2] [aet-license-system](0) ✓
+┌────┬───────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                  │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼───────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ aet-license-system    │ default     │ N/A     │ fork    │ 0        │ 0      │ 14   │ stopped   │ 0%       │ 0b       │ ser… │ disabled │
+└────┴───────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+[PM2] Applying action deleteProcessId on app [aet-license-system](ids: [ 0 ])
+[PM2] [aet-license-system](0) ✓
+┌────┬───────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name      │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+└────┴───────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+[PM2] Starting /usr/bin/bash in fork_mode (1 instance)
+[PM2] Done.
+┌────┬───────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                  │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼───────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ aet-license-system    │ default     │ N/A     │ fork    │ 158322   │ 0s     │ 0    │ online    │ 0%       │ 7.9mb    │ ser… │ disabled │
+└────┴───────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+┌────┬───────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                  │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼───────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ aet-license-system    │ default     │ N/A     │ fork    │ 158322   │ 0s     │ 0    │ online    │ 0%       │ 60.7mb   │ ser… │ disabled │
+└────┴───────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+[TAILING] Tailing last 5 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out.log last 5 lines:
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error.log last 5 lines:
+0|aet-license-system  | /var/www/aetlicensesystem/LicencaTransporte/server/db.ts:6
+0|aet-license-system  |   throw new Error(
+0|aet-license-system  |         ^
+0|aet-license-system  | Error: DATABASE_URL must be set. Did you forget to provision a database?
+0|aet-license-system  |     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/db.ts:6:9)
+0|aet-license-system  |     at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+0|aet-license-system  |     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+0|aet-license-system  |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+0|aet-license-system  | Node.js v20.19.2
+0|aet-license-system  | /var/www/aetlicensesystem/LicencaTransporte/server/db.ts:6
+0|aet-license-system  |   throw new Error(
+0|aet-license-system  |         ^
+0|aet-license-system  | Error: DATABASE_URL must be set. Did you forget to provision a database?
+0|aet-license-system  |     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/db.ts:6:9)
+0|aet-license-system  |     at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+0|aet-license-system  |     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+0|aet-license-system  |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+0|aet-license-system  | Node.js v20.19.2
+^C
