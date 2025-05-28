@@ -1,8 +1,8 @@
 export default {
   apps: [{
     name: 'aet-license-system',
-    script: 'npm',
-    args: 'start',
+    script: './node_modules/.bin/tsx',
+    args: 'server/index.ts',
     cwd: '/var/www/aetlicensesystem/LicencaTransporte',
     env: {
       NODE_ENV: 'production',
