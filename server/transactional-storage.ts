@@ -924,43 +924,50 @@ export class TransactionalStorage implements IStorage {
       let issuedLicensesCount = 0;
       let expiringLicensesCount = 0;
       
-      console.log(`[DASHBOARD FIXED] Iniciando contagem para ${userLicenses.length} licenças`);
-      
       userLicenses.forEach(license => {
         if (license.isDraft) return;
         
-        console.log(`[DASHBOARD FIXED] Processando licença ${license.id}`);
-        console.log(`[DASHBOARD FIXED] - stateStatuses:`, license.stateStatuses);
-        console.log(`[DASHBOARD FIXED] - type of stateStatuses:`, typeof license.stateStatuses);
-        
-        // Contar estados aprovados diretamente do objeto stateStatuses
-        if (license.stateStatuses && typeof license.stateStatuses === 'object') {
-          Object.entries(license.stateStatuses).forEach(([state, status]) => {
-            console.log(`[DASHBOARD FIXED] - Estado ${state}: ${status}`);
-            
-            if (typeof status === 'string' && status.startsWith('approved')) {
-              issuedLicensesCount++;
-              console.log(`[DASHBOARD FIXED] - Estado aprovado encontrado! Total: ${issuedLicensesCount}`);
-              
-              // Verificar se vence em 30 dias
-              if (status.includes(':')) {
-                const datePart = status.split(':')[1];
-                if (datePart) {
-                  const validDate = new Date(datePart);
-                  const today = new Date();
-                  const diffInDays = Math.ceil((validDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                  
-                  if (diffInDays > 0 && diffInDays <= 30) {
-                    expiringLicensesCount++;
+        // Processar stateStatuses para contar estados aprovados
+        if (license.stateStatuses) {
+          let statusesData = license.stateStatuses;
+          
+          // Se for string, fazer parse JSON
+          if (typeof statusesData === 'string') {
+            try {
+              statusesData = JSON.parse(statusesData);
+            } catch (e) {
+              return;
+            }
+          }
+          
+          // Se for objeto, contar estados aprovados
+          if (typeof statusesData === 'object' && statusesData !== null) {
+            Object.entries(statusesData).forEach(([state, status]) => {
+              if (typeof status === 'string' && status.startsWith('approved')) {
+                issuedLicensesCount++;
+                
+                // Verificar se vence em 30 dias
+                if (status.includes(':')) {
+                  const datePart = status.split(':')[1];
+                  if (datePart) {
+                    try {
+                      const validDate = new Date(datePart);
+                      const today = new Date();
+                      const diffInDays = Math.ceil((validDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                      
+                      if (diffInDays > 0 && diffInDays <= 30) {
+                        expiringLicensesCount++;
+                      }
+                    } catch (e) {
+                      // Ignorar erros de data
+                    }
                   }
                 }
               }
-            }
-          });
+            });
+          }
         }
       });
-      
-      console.log(`[DASHBOARD FIXED] Total de estados aprovados: ${issuedLicensesCount}`);
       
       // Licenças pendentes (não emitidas)
       const pendingLicenses = userLicenses.filter(license => {
