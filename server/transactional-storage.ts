@@ -920,60 +920,22 @@ export class TransactionalStorage implements IStorage {
           .where(eq(licenseRequests.userId, userId));
       }
       
-      // COPIAR EXATAMENTE A LÓGICA DA PÁGINA DE LICENÇAS EMITIDAS
+      // Usar diretamente os dados da função getAllIssuedLicenses
+      const allIssuedLicenses = await this.getAllIssuedLicenses();
+      const userIssuedLicenses = allIssuedLicenses.filter(license => license.userId === userId);
       
-      // 1. Expandir licenças (mesma lógica da página)
-      const expandedLicenses: any[] = [];
-      userLicenses.forEach(license => {
-        if (license.isDraft) return;
+      // Calcular licenças que expiram em 30 dias
+      const today = new Date();
+      const expiringLicenses = userIssuedLicenses.filter(license => {
+        if (!license.validUntil) return false;
         
-        if (license.stateStatuses && Array.isArray(license.stateStatuses)) {
-          license.stateStatuses.forEach((ss: string) => {
-            if (ss.includes(':approved:')) {
-              const parts = ss.split(':');
-              if (parts.length >= 3) {
-                const state = parts[0];
-                const validUntil = parts[2] || null;
-                
-                expandedLicenses.push({
-                  licenseId: license.id,
-                  state: state,
-                  validUntil: validUntil,
-                  requestNumber: license.requestNumber,
-                  mainVehiclePlate: license.mainVehiclePlate,
-                  transporterId: license.transporterId,
-                  userId: license.userId
-                });
-              }
-            }
-          });
-        }
-      });
-      
-      // 2. Função getLicenseStatus (exatamente igual à página)
-      const getLicenseStatus = (validUntil: string | null): 'active' | 'expired' | 'expiring_soon' => {
-        if (!validUntil) return 'active';
-        
-        const validDate = new Date(validUntil);
-        const today = new Date();
-        
-        if (validDate < today) {
-          return 'expired';
-        }
-        
+        const validDate = new Date(license.validUntil);
         const diffInDays = Math.ceil((validDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-        if (diffInDays <= 30) {
-          return 'expiring_soon';
-        }
         
-        return 'active';
-      };
+        return diffInDays > 0 && diffInDays <= 30;
+      }).length;
       
-      // 3. Calcular totais (exatamente como na página)
-      const issuedLicenses = expandedLicenses; // Total de licenças = expandedLicenses.length
-      const expiringLicenses = expandedLicenses.filter(l => getLicenseStatus(l.validUntil) === 'expiring_soon').length;
-      
-      // 4. Licenças pendentes (sem estados aprovados)
+      // Licenças pendentes (não emitidas)
       const pendingLicenses = userLicenses.filter(license => {
         if (license.isDraft) return false;
         const hasApprovedState = license.stateStatuses && 
@@ -1018,7 +980,7 @@ export class TransactionalStorage implements IStorage {
       }));
       
       const result = {
-        issuedLicenses: issuedLicenses.length,
+        issuedLicenses: userIssuedLicenses.length,
         pendingLicenses: pendingLicenses.length,
         registeredVehicles,
         activeVehicles,
