@@ -52,10 +52,10 @@ export function setupAuth(app: Express) {
     secret: process.env.SESSION_SECRET || "aet-license-control-system-secret",
     resave: false,
     saveUninitialized: false,
-    store: storage.sessionStore, // Usa o armazenamento de sessão do storage
+    // Usar sessões em memória para evitar problemas de autenticação do PostgreSQL
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      secure: process.env.NODE_ENV === "production",
+      secure: false, // Permitir HTTP em produção
     }
   };
 
