@@ -921,6 +921,12 @@ export class TransactionalStorage implements IStorage {
       }
       
       console.log(`[DASHBOARD NEW] TRANSPORTADOR - Licenças encontradas: ${userLicenses.length}`);
+      console.log(`[DEBUG DASHBOARD] Primeira licença:`, userLicenses[0] ? {
+        id: userLicenses[0].id,
+        isDraft: userLicenses[0].isDraft,
+        statusByState: userLicenses[0].statusByState,
+        stateStatuses: userLicenses[0].stateStatuses
+      } : 'Nenhuma licença');
       
       // Usar a mesma lógica da rota /api/licenses/issued para calcular licenças emitidas
       const expandedLicenses: any[] = [];
