@@ -2803,7 +2803,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.patch('/api/admin/transporters/:id', requireAdmin, transporterUpload.any(), async (req, res) => {
+  app.patch('/api/admin/transporters/:id', requireAuth, transporterUpload.any(), async (req, res) => {
+    const user = req.user!;
+    
+    // Verificar se o usuário pode gerenciar transportadores
+    if (!canManageTransporters(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
     try {
       const transporterId = parseInt(req.params.id);
       
@@ -2878,7 +2884,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.delete('/api/admin/transporters/:id', requireAdmin, async (req, res) => {
+  app.delete('/api/admin/transporters/:id', requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    // Verificar se o usuário pode gerenciar transportadores
+    if (!canManageTransporters(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
     try {
       const transporterId = parseInt(req.params.id);
       
@@ -3254,7 +3266,13 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // Listar todos os modelos de veículos (apenas admin)
-  app.get("/api/admin/vehicle-models", requireAuth, requireAdmin, async (req, res) => {
+  app.get("/api/admin/vehicle-models", requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    // Verificar se o usuário pode gerenciar modelos de veículos
+    if (!canManageVehicleModels(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
     try {
       const models = await storage.getAllVehicleModels();
       res.json(models);
@@ -3265,7 +3283,13 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // Criar novo modelo de veículo (apenas admin)
-  app.post("/api/admin/vehicle-models", requireAuth, requireAdmin, async (req, res) => {
+  app.post("/api/admin/vehicle-models", requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    // Verificar se o usuário pode gerenciar modelos de veículos
+    if (!canManageVehicleModels(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
     try {
       const vehicleModelData = insertVehicleModelSchema.parse(req.body);
       const newModel = await storage.createVehicleModel(vehicleModelData);
@@ -3281,7 +3305,13 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // Atualizar modelo de veículo (apenas admin)
-  app.patch("/api/admin/vehicle-models/:id", requireAuth, requireAdmin, async (req, res) => {
+  app.patch("/api/admin/vehicle-models/:id", requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    // Verificar se o usuário pode gerenciar modelos de veículos
+    if (!canManageVehicleModels(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
     try {
       const id = parseInt(req.params.id);
       const vehicleModelData = insertVehicleModelSchema.parse(req.body);
@@ -3303,7 +3333,13 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // Deletar modelo de veículo (apenas admin)
-  app.delete("/api/admin/vehicle-models/:id", requireAuth, requireAdmin, async (req, res) => {
+  app.delete("/api/admin/vehicle-models/:id", requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    // Verificar se o usuário pode gerenciar modelos de veículos
+    if (!canManageVehicleModels(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
     try {
       const id = parseInt(req.params.id);
       await storage.deleteVehicleModel(id);
