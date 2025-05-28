@@ -4,7 +4,6 @@ echo "🔧 Aplicando correção final..."
 
 cd /var/www/aetlicensesystem/LicencaTransporte
 
-# Parar aplicação
 pm2 stop all
 
 # Corrigir permissões
