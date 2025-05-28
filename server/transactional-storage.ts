@@ -922,12 +922,19 @@ export class TransactionalStorage implements IStorage {
       
       // Expandir licenças por estado aprovado (mesma lógica da página)
       const expandedLicenses: any[] = [];
+      console.log(`[DASHBOARD EXPANDIR] Processando ${userLicenses.length} licenças do usuário`);
+      
       userLicenses.forEach(license => {
         if (license.isDraft) return;
+        
+        console.log(`[DASHBOARD EXPANDIR] Licença ${license.id} - Estados:`, license.states);
+        console.log(`[DASHBOARD EXPANDIR] Licença ${license.id} - StateStatuses:`, license.stateStatuses);
         
         license.states.forEach((state: string) => {
           const stateStatusEntry = license.stateStatuses?.find((entry: string) => entry.startsWith(`${state}:`));
           const stateStatus = stateStatusEntry?.split(':')?.[1] || 'pending_registration';
+          
+          console.log(`[DASHBOARD EXPANDIR] Licença ${license.id} - Estado ${state} - Status: ${stateStatus}`);
           
           if (stateStatus === 'approved') {
             let stateValidUntil = license.validUntil ? license.validUntil.toString() : null;
@@ -945,9 +952,13 @@ export class TransactionalStorage implements IStorage {
               transporterId: license.transporterId,
               userId: license.userId
             });
+            
+            console.log(`[DASHBOARD EXPANDIR] Adicionado estado aprovado: ${state} da licença ${license.id}`);
           }
         });
       });
+      
+      console.log(`[DASHBOARD EXPANDIR] Total de estados aprovados: ${expandedLicenses.length}`);
       
       // Calcular licenças que expiram em 30 dias usando expandedLicenses
       const today = new Date();
