@@ -2073,7 +2073,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                     Escolha um ou mais estados onde a licença será utilizada
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-96 overflow-y-auto border rounded-md p-4">
+                <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
                   {brazilianStates.map((state) => (
                     <FormField
                       key={state.code}
@@ -2088,7 +2088,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                           >
                             <FormControl>
                               <div 
-                                className={`cursor-pointer flex items-center justify-between p-3 rounded-md border ${
+                                className={`cursor-pointer flex flex-col items-center justify-center p-2 rounded-md border ${
                                   isSelected 
                                     ? 'bg-blue-50 border-blue-300 text-blue-700 font-medium' 
                                     : 'border-gray-200 hover:bg-gray-50'
@@ -2101,15 +2101,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                                   }
                                 }}
                               >
-                                <div className="flex items-center gap-3">
-                                  <span className="text-sm font-medium w-8">{state.code}</span>
-                                  <span className="text-sm">{state.name}</span>
-                                </div>
-                                {isSelected && (
-                                  <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
-                                    <span className="text-white text-xs">✓</span>
-                                  </div>
-                                )}
+                                <span className="text-base font-medium">{state.code}</span>
+                                <span className="text-xs mt-1 text-center hidden md:block text-gray-500">{state.name}</span>
                               </div>
                             </FormControl>
                           </FormItem>
