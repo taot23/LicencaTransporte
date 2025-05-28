@@ -401,9 +401,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isAdmin = req.user!.role === 'admin' || req.user!.role === 'supervisor' || req.user!.role === 'manager';
       console.log(`[DASHBOARD STATS API] Role do usuário: ${req.user!.role}, É admin: ${isAdmin}`);
       
-      const stats = await storage.getDashboardStats(userId);
-      console.log(`[DASHBOARD STATS API] Retornando estatísticas:`, stats);
-      res.json(stats);
+      if (isAdmin) {
+        // Admin vê estatísticas globais
+        console.log(`[DASHBOARD STATS API] ADMIN - Retornando dados globais`);
+        const stats = await storage.getDashboardStats(userId);
+        console.log(`[DASHBOARD STATS API] ADMIN - Estatísticas:`, stats);
+        res.json(stats);
+      } else {
+        // Transportador vê apenas seus próprios dados
+        console.log(`[DASHBOARD STATS API] TRANSPORTADOR - Calculando dados específicos do usuário ${userId}`);
+        
+        // Buscar licenças do usuário
+        const userLicenses = await storage.getLicenseRequestsByUserId(userId);
+        const issuedLicenses = await storage.getIssuedLicensesByUserId(userId);
+        const pendingLicenses = userLicenses.filter(license => 
+          !license.isDraft && 
+          !issuedLicenses.some(issued => issued.id === license.id)
+        );
+        
+        // Buscar veículos do usuário
+        const userVehicles = await db.select()
+          .from(vehicles)
+          .where(eq(vehicles.userId, userId));
+        
+        const activeVehicles = userVehicles.filter(v => v.status === 'active');
+        
+        // Buscar licenças recentes do usuário
+        const recentLicenses = await db.select()
+          .from(licenseRequests)
+          .where(and(
+            eq(licenseRequests.userId, userId),
+            eq(licenseRequests.isDraft, false)
+          ))
+          .orderBy(desc(licenseRequests.createdAt))
+          .limit(5);
+        
+        const userStats = {
+          issuedLicenses: issuedLicenses.length,
+          pendingLicenses: pendingLicenses.length,
+          registeredVehicles: userVehicles.length,
+          activeVehicles: activeVehicles.length,
+          recentLicenses: recentLicenses.map(license => ({
+            id: license.id,
+            requestNumber: license.requestNumber,
+            type: license.type,
+            mainVehiclePlate: license.mainVehiclePlate,
+            states: license.states,
+            status: license.status,
+            createdAt: license.createdAt
+          }))
+        };
+        
+        console.log(`[DASHBOARD STATS API] TRANSPORTADOR - Estatísticas específicas:`, userStats);
+        res.json(userStats);
+      }
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
       res.status(500).json({ message: 'Erro ao buscar estatísticas do dashboard' });
