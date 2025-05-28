@@ -883,29 +883,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Debug: log the request body
       console.log('Vehicle data received:', vehicleData);
       
-      // Converter campos numéricos que chegam como string
-      if (vehicleData.year && typeof vehicleData.year === 'string') {
-        vehicleData.year = parseInt(vehicleData.year);
-      }
-      if (vehicleData.axleCount && typeof vehicleData.axleCount === 'string') {
-        vehicleData.axleCount = parseInt(vehicleData.axleCount);
-      }
-      if (vehicleData.tare && typeof vehicleData.tare === 'string') {
-        vehicleData.tare = parseFloat(vehicleData.tare);
-      }
-      if (vehicleData.crlvYear && typeof vehicleData.crlvYear === 'string') {
-        vehicleData.crlvYear = parseInt(vehicleData.crlvYear);
-      }
+      // Forçar conversão de todos os campos numéricos
+      const processedData = {
+        ...vehicleData,
+        year: parseInt(vehicleData.year),
+        axleCount: parseInt(vehicleData.axleCount),
+        tare: parseFloat(vehicleData.tare),
+        crlvYear: vehicleData.crlvYear ? parseInt(vehicleData.crlvYear) : undefined
+      };
 
-      // Validate vehicle data (usar safeParse para capturar e transformar dados automaticamente)
-      const validationResult = insertVehicleSchema.safeParse(vehicleData);
+      console.log('Data after conversion:', processedData);
+
+      // Validate vehicle data com dados já convertidos
+      const validationResult = insertVehicleSchema.safeParse(processedData);
       if (!validationResult.success) {
         console.log('Validation error:', validationResult.error);
         const validationError = fromZodError(validationResult.error);
         return res.status(400).json({ message: validationError.message });
       }
       
-      // Usar os dados validados e transformados
+      // Usar os dados validados
       vehicleData = validationResult.data;
       
       // Add file URL if provided
