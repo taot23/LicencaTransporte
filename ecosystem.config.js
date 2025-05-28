@@ -1,9 +1,9 @@
-module.exports = {
+export default {
   apps: [{
     name: 'aet-license-system',
     script: 'npm',
     args: 'start',
-    cwd: '/var/www/aetlicensesystem',
+    cwd: '/var/www/aetlicensesystem/LicencaTransporte',
     env: {
       NODE_ENV: 'production',
       PORT: 5000
