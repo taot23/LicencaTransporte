@@ -1,0 +1,43 @@
+servidorvoipnvs@app-licenca:/var/www/aetlicensesystem/LicencaTransporte$  # Testar acesso local (sabemos que funciona)
+curl -I http://localhost:5000
+
+# Verificar qual interface a aplicação está usando
+ss -tulpn | grep :5000
+
+# Verificar se há algum proxy ou nginx rodando
+sudo systemctl status nginx
+
+# Verificar se há iptables bloqueando
+sudo iptables -L -n | grep 5000
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Vary: Origin
+Content-Type: text/html; charset=utf-8
+Date: Wed, 28 May 2025 06:20:53 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+tcp   LISTEN 0      511            0.0.0.0:5000       0.0.0.0:*    users:(("node",pid=3125342,fd=27))           
+● nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (/lib/systemd/system/nginx.service; enabled; preset: enabled)
+     Active: active (running) since Sat 2025-05-24 13:47:52 UTC; 3 days ago
+       Docs: man:nginx(8)
+    Process: 1257784 ExecStartPre=/usr/sbin/nginx -t -q -g daemon on; master_process on; (code=exited,>
+    Process: 1257785 ExecStart=/usr/sbin/nginx -g daemon on; master_process on; (code=exited, status=0>
+    Process: 3125269 ExecReload=/usr/sbin/nginx -g daemon on; master_process on; -s reload (code=exite>
+   Main PID: 1257786 (nginx)
+      Tasks: 3 (limit: 4682)
+     Memory: 3.2M
+        CPU: 4.550s
+     CGroup: /system.slice/nginx.service
+             ├─1257786 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
+             ├─3125270 "nginx: worker process"
+             └─3125271 "nginx: worker process"
+
+May 24 13:47:52 app-licenca systemd[1]: Starting nginx.service - A high performance web server and a r>
+May 24 13:47:52 app-licenca systemd[1]: Started nginx.service - A high performance web server and a re>
+May 28 06:15:23 app-licenca systemd[1]: Reloading nginx.service - A high performance web server and a >
+May 28 06:15:23 app-licenca nginx[3125269]: 2025/05/28 06:15:23 [warn] 3125269#3125269: conflicting se>
+May 28 06:15:23 app-licenca nginx[3125269]: 2025/05/28 06:15:23 [notice] 3125269#3125269: signal proce>
+May 28 06:15:23 app-licenca systemd[1]: Reloaded nginx.service - A high performance web server and a r>
+lines 1-22/22 (END)
