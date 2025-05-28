@@ -10,7 +10,6 @@ import RequestLicensePage from "@/pages/request-license-page";
 import TrackLicensePage from "@/pages/track-license-page";
 import IssuedLicensesPage from "@/pages/issued-licenses-page";
 import MyCompaniesPage from "@/pages/my-companies-page";
-import GamificationPage from "@/pages/gamification-page";
 import AdminDashboardPage from "@/pages/admin/admin-dashboard";
 import AdminLicensesPage from "@/pages/admin/admin-licenses";
 import AdminTransportersPage from "@/pages/admin/admin-transporters";
@@ -72,10 +71,6 @@ function Router() {
       <ProtectedRoute 
         path="/issued-licenses" 
         component={isMobile ? MobileIssuedLicensesPage : IssuedLicensesPage} 
-      />
-      <ProtectedRoute 
-        path="/gamification" 
-        component={GamificationPage} 
       />
       
       <Route component={NotFound} />
