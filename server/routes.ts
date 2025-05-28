@@ -822,6 +822,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         crlvUrl
       });
       
+      // Enviar notificação WebSocket para novo veículo criado
+      broadcastMessage({
+        type: 'LICENSE_UPDATE',
+        data: {
+          vehicleId: vehicle.id,
+          userId: vehicle.userId,
+          action: 'VEHICLE_CREATED',
+          createdAt: new Date().toISOString(),
+          vehicle: vehicle
+        }
+      });
+      
       res.status(201).json(vehicle);
     } catch (error) {
       console.error('Error creating vehicle:', error);
@@ -877,6 +889,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const updatedVehicle = await storage.updateVehicle(vehicleId, vehicleData);
+      
+      // Enviar notificação WebSocket para veículo atualizado
+      broadcastMessage({
+        type: 'LICENSE_UPDATE',
+        data: {
+          vehicleId: updatedVehicle.id,
+          userId: updatedVehicle.userId,
+          action: 'VEHICLE_UPDATED',
+          updatedAt: new Date().toISOString(),
+          vehicle: updatedVehicle
+        }
+      });
       
       res.json(updatedVehicle);
     } catch (error) {
@@ -2865,7 +2889,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       
       // Enviar notificação em tempo real via WebSocket
       broadcastMessage({
-        type: 'LICENSE_STATUS_UPDATE',
+        type: 'STATUS_UPDATE',
         data: {
           licenseId: updatedLicense.id,
           state: statusData.state,

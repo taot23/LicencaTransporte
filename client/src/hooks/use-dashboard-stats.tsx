@@ -45,9 +45,8 @@ export function useDashboardStats() {
         const message = JSON.parse(lastMessage.data);
         
         // Invalidar cache do dashboard quando houver mudanças relevantes
-        if (message.type === 'LICENSE_STATUS_UPDATE' || 
-            message.type === 'LICENSE_CREATED' ||
-            message.type === 'LICENSE_APPROVED' ||
+        if (message.type === 'STATUS_UPDATE' || 
+            message.type === 'LICENSE_UPDATE' ||
             message.type === 'VEHICLE_CREATED' ||
             message.type === 'VEHICLE_UPDATED') {
           
