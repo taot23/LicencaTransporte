@@ -920,80 +920,79 @@ export class TransactionalStorage implements IStorage {
           .where(eq(licenseRequests.userId, userId));
       }
       
-      console.log(`[DASHBOARD NEW] TRANSPORTADOR - Licenças encontradas: ${userLicenses.length}`);
-      console.log(`[DEBUG DASHBOARD] Primeira licença:`, userLicenses[0] ? {
-        id: userLicenses[0].id,
-        isDraft: userLicenses[0].isDraft,
-        statusByState: userLicenses[0].statusByState,
-        stateStatuses: userLicenses[0].stateStatuses
-      } : 'Nenhuma licença');
-      
-      // Usar a mesma lógica da rota /api/licenses/issued para calcular licenças emitidas
-      const expandedLicenses: any[] = [];
+      // Usar exatamente a mesma lógica da rota /api/licenses/issued
+      const issuedLicensesExpanded: any[] = [];
       
       userLicenses.forEach(license => {
         if (license.isDraft) return;
         
-        // Verificar statusByState para estados aprovados
-        if (license.statusByState) {
-          const statusEntries = Object.entries(license.statusByState);
-          statusEntries.forEach(([state, status]) => {
-            if (status === 'liberada') {
-              // Buscar data de validade nos stateStatuses
-              let validUntil = null;
-              if (license.stateStatuses && Array.isArray(license.stateStatuses)) {
-                const stateStatusEntry = license.stateStatuses.find((s: string) => 
-                  s.startsWith(`${state}:approved:`)
-                );
-                if (stateStatusEntry) {
-                  const parts = stateStatusEntry.split(':');
-                  if (parts.length >= 3) {
-                    validUntil = parts[2];
-                  }
-                }
+        if (license.stateStatuses && Array.isArray(license.stateStatuses)) {
+          license.stateStatuses.forEach((ss: string) => {
+            if (ss.includes(':approved:')) {
+              const parts = ss.split(':');
+              if (parts.length >= 3) {
+                const state = parts[0];
+                const validUntil = parts[2] || null;
+                
+                issuedLicensesExpanded.push({
+                  id: license.id,
+                  userId: license.userId,
+                  transporterId: license.transporterId,
+                  requestNumber: license.requestNumber,
+                  type: license.type,
+                  mainVehiclePlate: license.mainVehiclePlate,
+                  states: license.states,
+                  originCity: license.originCity,
+                  originState: license.originState,
+                  destinationCity: license.destinationCity,
+                  destinationState: license.destinationState,
+                  route: license.route,
+                  cargoType: license.cargoType,
+                  cargoDescription: license.cargoDescription,
+                  length: license.length,
+                  width: license.width,
+                  height: license.height,
+                  weight: license.weight,
+                  axleCount: license.axleCount,
+                  statusByState: license.statusByState,
+                  comments: license.comments,
+                  createdAt: license.createdAt,
+                  updatedAt: license.updatedAt,
+                  licenseFileUrl: license.licenseFileUrl,
+                  validUntil: validUntil,
+                  state: state,
+                  status: 'liberada'
+                });
               }
-              
-              expandedLicenses.push({
-                licenseId: license.id,
-                state,
-                validUntil
-              });
             }
           });
         }
       });
       
-      const issuedLicenses = expandedLicenses; // Licenças expandidas são as emitidas
+      const issuedLicenses = issuedLicensesExpanded;
       
-      console.log(`[DEBUG] Licenças emitidas encontradas: ${issuedLicenses.length}`);
-      
-      // Calcular licenças pendentes (não-draft e sem estados aprovados)
+      // Calcular licenças pendentes
       const pendingLicenses = userLicenses.filter(license => {
         if (license.isDraft) return false;
         
-        // Verificar se tem pelo menos um estado aprovado no statusByState
-        if (license.statusByState) {
-          const hasApprovedState = Object.values(license.statusByState).some(status => 
-            status === 'liberada'
-          );
-          return !hasApprovedState;
-        }
+        const hasApprovedState = license.stateStatuses && 
+          Array.isArray(license.stateStatuses) && 
+          license.stateStatuses.some((ss: string) => ss.includes(':approved:'));
         
-        return true; // Se não tem statusByState, é pendente
+        return !hasApprovedState;
       });
       
-      // Calcular licenças que expiram nos próximos 30 dias
-      const today = new Date();
+      // Calcular licenças que expiram em 30 dias (mesma lógica da página)
       const getLicenseStatus = (validUntil: string | null): 'active' | 'expired' | 'expiring_soon' => {
         if (!validUntil) return 'active';
         
         const validDate = new Date(validUntil);
+        const today = new Date();
         
         if (validDate < today) {
           return 'expired';
         }
         
-        // Se a validade é menos de 30 dias a partir de hoje
         const diffInDays = Math.ceil((validDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
         if (diffInDays <= 30) {
           return 'expiring_soon';
@@ -1002,7 +1001,7 @@ export class TransactionalStorage implements IStorage {
         return 'active';
       };
       
-      const expiringLicenses = expandedLicenses.filter(license => 
+      const expiringLicenses = issuedLicenses.filter(license => 
         getLicenseStatus(license.validUntil) === 'expiring_soon'
       ).length;
       
