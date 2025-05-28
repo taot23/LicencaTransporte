@@ -920,74 +920,27 @@ export class TransactionalStorage implements IStorage {
           .where(eq(licenseRequests.userId, userId));
       }
       
-      // Usar exatamente a mesma lógica da rota /api/licenses/issued
-      const issuedLicensesExpanded: any[] = [];
+      // Usar a função da rota issued para calcular licenças emitidas
+      const issuedLicensesData = await this.getAllIssuedLicenses();
+      const userIssuedLicenses = issuedLicensesData.filter(license => 
+        license.userId === userId
+      );
       
-      userLicenses.forEach(license => {
-        if (license.isDraft) return;
-        
-        if (license.stateStatuses && Array.isArray(license.stateStatuses)) {
-          license.stateStatuses.forEach((ss: string) => {
-            if (ss.includes(':approved:')) {
-              const parts = ss.split(':');
-              if (parts.length >= 3) {
-                const state = parts[0];
-                const validUntil = parts[2] || null;
-                
-                issuedLicensesExpanded.push({
-                  id: license.id,
-                  userId: license.userId,
-                  transporterId: license.transporterId,
-                  requestNumber: license.requestNumber,
-                  type: license.type,
-                  mainVehiclePlate: license.mainVehiclePlate,
-                  states: license.states,
-                  originCity: license.originCity,
-                  originState: license.originState,
-                  destinationCity: license.destinationCity,
-                  destinationState: license.destinationState,
-                  route: license.route,
-                  cargoType: license.cargoType,
-                  cargoDescription: license.cargoDescription,
-                  length: license.length,
-                  width: license.width,
-                  height: license.height,
-                  weight: license.weight,
-                  axleCount: license.axleCount,
-                  statusByState: license.statusByState,
-                  comments: license.comments,
-                  createdAt: license.createdAt,
-                  updatedAt: license.updatedAt,
-                  licenseFileUrl: license.licenseFileUrl,
-                  validUntil: validUntil,
-                  state: state,
-                  status: 'liberada'
-                });
-              }
-            }
-          });
-        }
-      });
-      
-      const issuedLicenses = issuedLicensesExpanded;
-      
-      // Calcular licenças pendentes
+      const issuedLicenses = userIssuedLicenses;
       const pendingLicenses = userLicenses.filter(license => {
         if (license.isDraft) return false;
-        
         const hasApprovedState = license.stateStatuses && 
           Array.isArray(license.stateStatuses) && 
           license.stateStatuses.some((ss: string) => ss.includes(':approved:'));
-        
         return !hasApprovedState;
       });
       
-      // Calcular licenças que expiram em 30 dias (mesma lógica da página)
+      // Calcular licenças que expiram em 30 dias usando a mesma lógica da página
+      const today = new Date();
       const getLicenseStatus = (validUntil: string | null): 'active' | 'expired' | 'expiring_soon' => {
         if (!validUntil) return 'active';
         
         const validDate = new Date(validUntil);
-        const today = new Date();
         
         if (validDate < today) {
           return 'expired';
