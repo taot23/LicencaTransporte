@@ -920,13 +920,38 @@ export class TransactionalStorage implements IStorage {
           .where(eq(licenseRequests.userId, userId));
       }
       
-      // Usar diretamente os dados da função getAllIssuedLicenses
-      const allIssuedLicenses = await this.getAllIssuedLicenses();
-      const userIssuedLicenses = allIssuedLicenses.filter(license => license.userId === userId);
+      // Expandir licenças por estado aprovado (mesma lógica da página)
+      const expandedLicenses: any[] = [];
+      userLicenses.forEach(license => {
+        if (license.isDraft) return;
+        
+        license.states.forEach((state: string) => {
+          const stateStatusEntry = license.stateStatuses?.find((entry: string) => entry.startsWith(`${state}:`));
+          const stateStatus = stateStatusEntry?.split(':')?.[1] || 'pending_registration';
+          
+          if (stateStatus === 'approved') {
+            let stateValidUntil = license.validUntil ? license.validUntil.toString() : null;
+            
+            if (stateStatusEntry && stateStatusEntry.split(':').length > 2) {
+              stateValidUntil = stateStatusEntry.split(':')[2];
+            }
+            
+            expandedLicenses.push({
+              licenseId: license.id,
+              state: state,
+              validUntil: stateValidUntil,
+              requestNumber: license.requestNumber,
+              mainVehiclePlate: license.mainVehiclePlate,
+              transporterId: license.transporterId,
+              userId: license.userId
+            });
+          }
+        });
+      });
       
-      // Calcular licenças que expiram em 30 dias
+      // Calcular licenças que expiram em 30 dias usando expandedLicenses
       const today = new Date();
-      const expiringLicenses = userIssuedLicenses.filter(license => {
+      const expiringLicenses = expandedLicenses.filter(license => {
         if (!license.validUntil) return false;
         
         const validDate = new Date(license.validUntil);
@@ -980,7 +1005,7 @@ export class TransactionalStorage implements IStorage {
       }));
       
       const result = {
-        issuedLicenses: userIssuedLicenses.length,
+        issuedLicenses: expandedLicenses.length,
         pendingLicenses: pendingLicenses.length,
         registeredVehicles,
         activeVehicles,
