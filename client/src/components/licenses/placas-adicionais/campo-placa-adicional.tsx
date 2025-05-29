@@ -74,6 +74,96 @@ export function CampoPlacaAdicional({ form, vehicles, isLoadingVehicles, license
     }
   }, [highlightedIndex]);
   
+  // Obter placas já selecionadas na linha de frente
+  const getSelectedFrontLinePlates = (): string[] => {
+    const plates: string[] = [];
+    const tractorUnitId = form.getValues('tractorUnitId');
+    const firstTrailerId = form.getValues('firstTrailerId');
+    const dollyId = form.getValues('dollyId');
+    const secondTrailerId = form.getValues('secondTrailerId');
+    const flatbedId = form.getValues('flatbedId');
+    
+    if (tractorUnitId && vehicles) {
+      const vehicle = vehicles.find(v => v.id === tractorUnitId);
+      if (vehicle) plates.push(vehicle.plate);
+    }
+    
+    if (firstTrailerId && vehicles) {
+      const vehicle = vehicles.find(v => v.id === firstTrailerId);
+      if (vehicle) plates.push(vehicle.plate);
+    }
+    
+    if (dollyId && vehicles) {
+      const vehicle = vehicles.find(v => v.id === dollyId);
+      if (vehicle) plates.push(vehicle.plate);
+    }
+    
+    if (secondTrailerId && vehicles) {
+      const vehicle = vehicles.find(v => v.id === secondTrailerId);
+      if (vehicle) plates.push(vehicle.plate);
+    }
+    
+    if (flatbedId && vehicles) {
+      const vehicle = vehicles.find(v => v.id === flatbedId);
+      if (vehicle) plates.push(vehicle.plate);
+    }
+    
+    return plates;
+  };
+
+  // Filtrar veículos disponíveis para placas adicionais baseado no tipo de conjunto
+  const getAvailableVehiclesForAdditionalPlates = (): Vehicle[] => {
+    if (!vehicles) return [];
+    
+    const selectedFrontLinePlates = getSelectedFrontLinePlates();
+    
+    return vehicles.filter(v => {
+      // Excluir cavalos mecânicos e caminhões
+      if (v.type === 'tractor_unit' || v.type === 'truck') {
+        return false;
+      }
+      
+      // Excluir veículos já selecionados na linha de frente
+      if (selectedFrontLinePlates.includes(v.plate)) {
+        return false;
+      }
+      
+      // Aplicar filtros específicos por tipo de conjunto
+      if (licenseType === 'roadtrain_9_axles') {
+        // Rodotrem 9 eixos: semi-reboques de 2 eixos e dollys de 2 eixos
+        if (v.type === 'semi_trailer') {
+          return v.axleCount === 2;
+        }
+        if (v.type === 'dolly') {
+          return v.axleCount === 2;
+        }
+        // Permitir outros tipos como flatbed, trailer
+        return v.type === 'flatbed' || v.type === 'trailer';
+      }
+      
+      if (licenseType === 'bitrain_9_axles') {
+        // Bitrem 9 eixos: semi-reboques de 3 eixos
+        if (v.type === 'semi_trailer') {
+          return v.axleCount === 3;
+        }
+        // Permitir outros tipos como flatbed, trailer, dolly
+        return v.type === 'flatbed' || v.type === 'trailer' || v.type === 'dolly';
+      }
+      
+      if (licenseType === 'bitrain_7_axles' || licenseType === 'bitrain_6_axles') {
+        // Bitrem 7 e 6 eixos: semi-reboques de 2 eixos
+        if (v.type === 'semi_trailer') {
+          return v.axleCount === 2;
+        }
+        // Permitir outros tipos como flatbed, trailer, dolly
+        return v.type === 'flatbed' || v.type === 'trailer' || v.type === 'dolly';
+      }
+      
+      // Para outros tipos, permitir todos exceto cavalos e caminhões
+      return v.type !== 'tractor_unit' && v.type !== 'truck';
+    });
+  };
+
   // Atualizar sugestões com base no input - sem interromper digitação
   useEffect(() => {
     if (!vehicles) return;
@@ -82,9 +172,12 @@ export function CampoPlacaAdicional({ form, vehicles, isLoadingVehicles, license
     const normalized = plateInput.toUpperCase();
     
     if (normalized.length > 0) {
+      // Obter veículos disponíveis para placas adicionais
+      const availableVehicles = getAvailableVehiclesForAdditionalPlates();
+      
       // Filtrar veículos que correspondem ao padrão de busca
       // Utiliza .includes() para buscar parcial mesmo com vírgulas/espaços
-      const filtered = vehicles.filter(v => 
+      const filtered = availableVehicles.filter(v => 
         v.plate.toUpperCase().includes(normalized.replace(/[,\s]/g, ''))
       );
       
