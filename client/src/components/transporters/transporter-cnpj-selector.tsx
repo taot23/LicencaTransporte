@@ -89,19 +89,43 @@ export function TransporterCnpjSelector({
   });
 
   // Adicionar filiais
-  const subsidiaries = Array.isArray(transporter.subsidiaries)
-    ? transporter.subsidiaries
-    : [];
+  let subsidiaries = [];
+  if (transporter.subsidiaries) {
+    try {
+      // Tentar analisar como JSON se for string
+      subsidiaries = typeof transporter.subsidiaries === 'string' 
+        ? JSON.parse(transporter.subsidiaries) 
+        : transporter.subsidiaries;
+    } catch (e) {
+      console.log('Erro ao processar subsidiárias:', e);
+      subsidiaries = [];
+    }
+  }
+
+  // Garantir que é um array
+  if (!Array.isArray(subsidiaries)) {
+    subsidiaries = [];
+  }
+
+  console.log('[CNPJ Selector] Subsidiárias processadas:', subsidiaries);
+
   subsidiaries.forEach((subsidiary) => {
-    cnpjOptions.push({
-      value: subsidiary.documentNumber,
-      label: `${subsidiary.name} - ${subsidiary.documentNumber}`,
-      type: "filial",
-      location: `${subsidiary.city}/${subsidiary.state}`,
-    });
+    // Verificar se tem documentNumber ou cnpj
+    const cnpj = subsidiary.documentNumber || subsidiary.cnpj;
+    if (cnpj) {
+      cnpjOptions.push({
+        value: cnpj,
+        label: `${subsidiary.name} - ${cnpj}`,
+        type: "filial",
+        location: `${subsidiary.city}/${subsidiary.state}`,
+      });
+    }
   });
 
+  console.log('[CNPJ Selector] Opções de CNPJ geradas:', cnpjOptions);
+
   const handleCnpjChange = (value: string) => {
+    console.log('[CNPJ Selector] CNPJ selecionado:', value);
     setSelectedCnpj(value);
     const selectedOption = cnpjOptions.find((option) => option.value === value);
     if (selectedOption && onCnpjSelect) {
@@ -118,7 +142,12 @@ export function TransporterCnpjSelector({
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Selecione um CNPJ cadastrado" />
         </SelectTrigger>
-        <SelectContent className="z-[60] max-h-60 overflow-auto" position="popper" sideOffset={4}>
+        <SelectContent 
+          className="z-[9999] max-h-60 overflow-auto" 
+          position="popper" 
+          sideOffset={4}
+          container={document.body}
+        >
           {cnpjOptions.map((option, index) => (
             <SelectItem key={`${option.value}-${index}`} value={option.value}>
               <div className="flex items-center space-x-2 w-full">
