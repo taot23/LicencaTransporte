@@ -339,26 +339,24 @@ export function VehicleList({ vehicles, isLoading, onEdit, onRefresh }: VehicleL
           </DialogHeader>
           
           {selectedVehicle?.crlvUrl ? (
-            <div className="aspect-video">
-              <div className="w-full h-[500px] flex flex-col items-center justify-center text-gray-500 bg-gray-50 rounded border p-6">
-                <FileText className="h-16 w-16 text-gray-400 mb-4" />
-                <p className="mb-4">O sistema não consegue exibir o documento diretamente.</p>
-                <Button asChild>
-                  <a 
-                    href={selectedVehicle.crlvUrl || '#'} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    onClick={(e) => {
-                      if (!selectedVehicle.crlvUrl) {
-                        e.preventDefault();
-                        alert('Arquivo não disponível no momento.');
-                      }
-                    }}
-                  >
-                    Abrir documento em nova aba
-                  </a>
-                </Button>
-              </div>
+            <div className="w-full h-[500px] flex flex-col items-center justify-center text-gray-500 bg-gray-50 rounded border p-6">
+              <FileText className="h-16 w-16 text-gray-400 mb-4" />
+              <p className="mb-4">O sistema não consegue exibir o documento diretamente.</p>
+              <Button asChild>
+                <a 
+                  href={selectedVehicle.crlvUrl || '#'} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (!selectedVehicle.crlvUrl) {
+                      e.preventDefault();
+                      alert('Arquivo não disponível no momento.');
+                    }
+                  }}
+                >
+                  Abrir documento em nova aba
+                </a>
+              </Button>
             </div>
           ) : (
             <div className="py-12 text-center text-gray-500">
@@ -367,26 +365,7 @@ export function VehicleList({ vehicles, isLoading, onEdit, onRefresh }: VehicleL
             </div>
           )}
           
-          {selectedVehicle?.crlvUrl && (
-            <div className="flex justify-center mt-4">
-              <Button asChild>
-                <a 
-                  href={selectedVehicle.crlvUrl || '#'} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-full sm:w-auto"
-                  onClick={(e) => {
-                    if (!selectedVehicle.crlvUrl) {
-                      e.preventDefault();
-                      alert('Arquivo não disponível no momento.');
-                    }
-                  }}
-                >
-                  Abrir em Nova Aba
-                </a>
-              </Button>
-            </div>
-          )}
+
         </DialogContent>
       </Dialog>
     </>
