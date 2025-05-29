@@ -600,7 +600,14 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                         value={tareDisplay}
                         onChange={(e) => {
                           const rawValue = e.target.value;
-                          const cleanValue = rawValue.replace(/[^\d.,]/g, '');
+                          let cleanValue = rawValue.replace(/[^\d.,]/g, '');
+                          
+                          // Limitar a 3 casas decimais após vírgula ou ponto
+                          const decimalMatch = cleanValue.match(/^(\d+)[.,](\d{0,3})/);
+                          if (decimalMatch) {
+                            cleanValue = decimalMatch[1] + ',' + decimalMatch[2];
+                          }
+                          
                           setTareDisplay(cleanValue);
                           
                           if (cleanValue === '') {
