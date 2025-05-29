@@ -1001,6 +1001,21 @@ export default function AdminLicensesPage() {
               </ul>
             </div>
             <form onSubmit={stateStatusForm.handleSubmit(onSubmitStateStatus)} className="space-y-6">
+              {/* Campo Transportador */}
+              <div className="mb-4">
+                <FormLabel className="text-sm font-medium text-gray-700 mb-2 block">Transportador</FormLabel>
+                {selectedLicense?.transporterId ? (
+                  <TransporterWithSubsidiaries 
+                    transporterId={selectedLicense.transporterId} 
+                    compact={false}
+                  />
+                ) : (
+                  <div className="text-sm text-gray-500 p-3 border border-gray-200 rounded-lg">
+                    Nenhum transportador vinculado
+                  </div>
+                )}
+              </div>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={stateStatusForm.control}
