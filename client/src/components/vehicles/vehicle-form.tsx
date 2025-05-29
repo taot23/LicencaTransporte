@@ -68,7 +68,14 @@ const vehicleSchema = z.object({
   model: z.string().min(1, "Modelo é obrigatório"),
   year: z.number().min(1900, "Ano deve ser maior que 1900"),
   renavam: z.string().min(1, "Renavam é obrigatório"),
-  tare: z.number().min(1, "Tara deve ser maior que 0"),
+  tare: z.union([z.number(), z.string()]).transform((val) => {
+    if (typeof val === 'string') {
+      const parsed = parseFloat(val.replace(',', '.'));
+      if (isNaN(parsed)) return 0;
+      return parsed;
+    }
+    return val;
+  }).refine((val) => val > 0, "Tara deve ser maior que 0"),
   axleCount: z.number().min(1, "Quantidade de eixos deve ser maior que 0"),
   bodyType: z.string().optional(),
   crlvYear: z.number().optional(),
@@ -680,6 +687,19 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                           
                           if (!isNaN(numericValue) && numericValue > 0) {
                             field.onChange(numericValue);
+                          }
+                        }}
+                        onBlur={(e) => {
+                          // Formatizar com 3 casas decimais quando sair do campo
+                          const currentValue = e.target.value;
+                          if (currentValue && currentValue !== '') {
+                            const normalizedValue = currentValue.replace(',', '.');
+                            const numericValue = parseFloat(normalizedValue);
+                            if (!isNaN(numericValue) && numericValue > 0) {
+                              const formattedValue = numericValue.toFixed(3).replace('.', ',');
+                              setTareDisplay(formattedValue);
+                              field.onChange(numericValue);
+                            }
                           }
                         }}
                         className="h-10 w-full"
