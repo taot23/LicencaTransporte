@@ -209,20 +209,29 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
   // Mutations
   const createMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      return fetch("/api/vehicles", {
+      const response = await fetch("/api/vehicles", {
         method: "POST",
         body: data,
-      }).then(res => res.json());
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(errorData || `Erro HTTP: ${response.status}`);
+      }
+      
+      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Veículo cadastrado com sucesso:', data);
       toast({ title: "Veículo cadastrado com sucesso!" });
       queryClient.invalidateQueries({ queryKey: ["/api/vehicles"] });
       onSuccess();
     },
     onError: (error: Error) => {
+      console.error('Erro ao cadastrar veículo:', error);
       toast({
         title: "Erro ao cadastrar veículo",
-        description: error.message,
+        description: error.message || "Erro desconhecido",
         variant: "destructive",
       });
     },
@@ -230,20 +239,29 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
 
   const updateMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      return fetch(`/api/vehicles/${vehicle?.id}`, {
+      const response = await fetch(`/api/vehicles/${vehicle?.id}`, {
         method: "PUT",
         body: data,
-      }).then(res => res.json());
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(errorData || `Erro HTTP: ${response.status}`);
+      }
+      
+      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Veículo atualizado com sucesso:', data);
       toast({ title: "Veículo atualizado com sucesso!" });
       queryClient.invalidateQueries({ queryKey: ["/api/vehicles"] });
       onSuccess();
     },
     onError: (error: Error) => {
+      console.error('Erro ao atualizar veículo:', error);
       toast({
         title: "Erro ao atualizar veículo",
-        description: error.message,
+        description: error.message || "Erro desconhecido",
         variant: "destructive",
       });
     },
