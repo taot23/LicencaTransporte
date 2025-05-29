@@ -314,7 +314,11 @@ export default function AdminLicensesPage() {
         console.log('selectedCnpj adicionado ao FormData:', data.selectedCnpj);
       }
       
+      console.log('[Form] Enviando requisição PATCH para:', `/api/admin/licenses/${id}/state-status`);
+      console.log('[Form] FormData completo:', Object.fromEntries(formData.entries()));
+      
       const response = await apiRequest("PATCH", `/api/admin/licenses/${id}/state-status`, formData);
+      console.log('[Form] Resposta recebida:', response.status);
       return await response.json();
     },
     onSuccess: (updatedLicense) => {
