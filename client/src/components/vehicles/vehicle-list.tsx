@@ -344,7 +344,10 @@ export function VehicleList({ vehicles, isLoading, onEdit, onRefresh }: VehicleL
               <p className="mb-4">O sistema não consegue exibir o documento diretamente.</p>
               <Button asChild>
                 <a 
-                  href={selectedVehicle.crlvUrl || '#'} 
+                  href={selectedVehicle.crlvUrl?.startsWith('http') 
+                    ? selectedVehicle.crlvUrl 
+                    : `${window.location.origin}${selectedVehicle.crlvUrl}`
+                  } 
                   target="_blank" 
                   rel="noopener noreferrer"
                   onClick={(e) => {
