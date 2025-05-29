@@ -3059,8 +3059,11 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       }
       
       // Add selectedCnpj if provided
+      console.log('Dados recebidos no body:', req.body);
+      console.log('selectedCnpj no body:', req.body.selectedCnpj);
       if (req.body.selectedCnpj) {
         statusData.selectedCnpj = req.body.selectedCnpj;
+        console.log('selectedCnpj adicionado ao statusData:', statusData.selectedCnpj);
       }
       
       // Validate status data
