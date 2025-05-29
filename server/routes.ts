@@ -1361,6 +1361,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Dados para atualização de rascunho recebidos:", JSON.stringify(draftData, null, 2));
       
       // Garantir que todos os campos obrigatórios não sejam nulos
+      // Sempre preservar o cargoType do existingDraft se não estiver presente no draftData
+      if (!draftData.cargoType && existingDraft.cargoType) {
+        draftData.cargoType = existingDraft.cargoType;
+        console.log(`Preservando cargoType existente: ${existingDraft.cargoType}`);
+      }
+      
       if (draftData.type === "flatbed" || existingDraft.type === "flatbed") {
         // Para prancha: verifica requisitos específicos
         console.log("Atualização de rascunho: É prancha");
