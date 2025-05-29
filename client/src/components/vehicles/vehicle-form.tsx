@@ -683,23 +683,6 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
 
             {/* Coluna 2 */}
             <div className="space-y-4">
-              {/* Renavam */}
-              <FormField
-                control={form.control}
-                name="renavam"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">
-                      Renavam <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Renavam" {...field} className="h-10 w-full" required />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {/* Veículo (Próprio/Terceiro) */}
               <FormField
                 control={form.control}
@@ -736,6 +719,23 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="Nome do proprietário" {...field} className="h-10 w-full" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Renavam */}
+              <FormField
+                control={form.control}
+                name="renavam"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">
+                      Renavam <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Renavam" {...field} className="h-10 w-full" required />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
