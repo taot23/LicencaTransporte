@@ -245,7 +245,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
           limits = currentCargoType === 'oversized' 
             ? DIMENSION_LIMITS.oversized 
             : DIMENSION_LIMITS.flatbed;
-        } else if (currentCargoType === 'agricultural_machinery') {
+        } else if (currentCargoType === 'agricultural_machinery' || currentCargoType === 'indivisible') {
           limits = DIMENSION_LIMITS.agricultural_machinery;
         }
         
@@ -341,20 +341,26 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
         const lengthDesc = currentType === 'flatbed' && currentCargoType === 'oversized'
           ? 'Digite o comprimento em metros (sem limite para carga superdimensionada)'
           : currentType === 'flatbed'
-            ? `Digite o comprimento em metros (max: ${limits.maxLength.toFixed(2).replace('.', ',')})`
-            : `Digite o comprimento em metros (min: ${limits.minLength.toFixed(2).replace('.', ',')} - max: ${limits.maxLength.toFixed(2).replace('.', ',')})`;
+            ? `Digite o comprimento em metros - Comprimento Máximo ${limits.maxLength.toFixed(2).replace('.', ',')} Metros`
+            : currentCargoType === 'agricultural_machinery' || currentCargoType === 'indivisible'
+              ? `Digite o comprimento em metros - Comprimento Máximo ${limits.maxLength.toFixed(2).replace('.', ',')} Metros`
+              : `Digite o comprimento em metros (min: ${limits.minLength.toFixed(2).replace('.', ',')} - max: ${limits.maxLength.toFixed(2).replace('.', ',')})`;
             
         const widthDesc = currentType === 'flatbed' && currentCargoType === 'oversized'
           ? 'Informe a largura total do conjunto em metros (sem limite para carga superdimensionada)'
           : currentType === 'flatbed'
-            ? `Informe a largura total do conjunto em metros (max: ${limits.maxWidth.toFixed(2).replace('.', ',')})`
-            : `Informe a largura total do conjunto em metros (max: ${limits.maxWidth.toFixed(2).replace('.', ',')})`;
+            ? `Informe a largura total do conjunto em metros - Largura Máxima ${limits.maxWidth.toFixed(2).replace('.', ',')} metros`
+            : currentCargoType === 'agricultural_machinery' || currentCargoType === 'indivisible'
+              ? `Informe a largura total do conjunto em metros - Largura Máxima ${limits.maxWidth.toFixed(2).replace('.', ',')} metros`
+              : `Informe a largura total do conjunto em metros (max: ${limits.maxWidth.toFixed(2).replace('.', ',')})`;
             
         const heightDesc = currentType === 'flatbed' && currentCargoType === 'oversized'
           ? 'Informe a altura total do conjunto em metros (sem limite para carga superdimensionada)'
           : currentType === 'flatbed'
-            ? `Informe a altura total do conjunto em metros (max: ${limits.maxHeight.toFixed(2).replace('.', ',')})`
-            : `Informe a altura total do conjunto em metros (max: ${limits.maxHeight.toFixed(2).replace('.', ',')})`;
+            ? `Informe a altura total do conjunto em metros - Altura Máxima ${limits.maxHeight.toFixed(2).replace('.', ',')} metros`
+            : currentCargoType === 'agricultural_machinery' || currentCargoType === 'indivisible'
+              ? `Informe a altura total do conjunto em metros - Altura Máxima ${limits.maxHeight.toFixed(2).replace('.', ',')} metros`
+              : `Informe a altura total do conjunto em metros (max: ${limits.maxHeight.toFixed(2).replace('.', ',')})`;
       }
     });
     
