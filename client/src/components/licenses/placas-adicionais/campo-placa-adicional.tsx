@@ -13,7 +13,8 @@ import {
   CommandItem,
   CommandList
 } from "@/components/ui/command";
-import { Link } from "wouter";
+import { VehicleForm } from "@/components/vehicles/vehicle-form";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface CampoPlacaAdicionalProps {
@@ -37,7 +38,9 @@ export function CampoPlacaAdicional({ form, vehicles, isLoadingVehicles, license
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   
-  // Estado removido - não precisamos mais do modal
+  // Estado para controlar o modal de veículo
+  const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false);
+  const [plateToEdit, setPlateToEdit] = useState<string | undefined>();
   
   // Verificar se um veículo já está adicionado nas placas adicionais
   const isVehicleAlreadyInAdditionalPlates = (plate: string): boolean => {
@@ -260,7 +263,22 @@ export function CampoPlacaAdicional({ form, vehicles, isLoadingVehicles, license
     form.setValue('additionalPlatesDocuments', newDocs);
   };
 
-  // Função removida - não precisamos mais do modal
+  // Função para adicionar veículo após criação/edição
+  const handleVehicleSaved = (vehicle: Vehicle) => {
+    // Se a placa já está na lista, não precisamos fazer nada
+    if (isVehicleAlreadyInAdditionalPlates(vehicle.plate)) {
+      return;
+    }
+    
+    // Se a placa foi alterada durante a edição, vamos adicionar a nova placa
+    if (plateToEdit !== vehicle.plate) {
+      addSinglePlate(vehicle.plate);
+    }
+    
+    // Fechar o modal
+    setIsVehicleModalOpen(false);
+    setPlateToEdit(undefined);
+  };
 
   return (
     <FormField
@@ -270,14 +288,47 @@ export function CampoPlacaAdicional({ form, vehicles, isLoadingVehicles, license
         <FormItem>
           <FormLabel>Placas Adicionais</FormLabel>
           <div className="space-y-4">
-            {/* Link para cadastro de veículos */}
-            <div className="text-sm text-muted-foreground mb-2">
-              Para cadastrar um novo veículo, acesse a aba{" "}
-              <Link href="/vehicles" className="text-blue-600 hover:text-blue-800 underline">
-                Veículos
-              </Link>
-            </div>
+            {/* Modal com formulário completo de veículo */}
+            <Dialog open={isVehicleModalOpen} onOpenChange={(open) => !open && setIsVehicleModalOpen(false)}>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {plateToEdit ? `Cadastrar/Editar Veículo - ${plateToEdit}` : 'Cadastrar Novo Veículo'}
+                  </DialogTitle>
+                  <DialogDescription>
+                    Use o formulário completo para cadastrar ou editar veículo
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <VehicleForm
+                  vehicle={null}
+                  onComplete={handleVehicleSaved}
+                  onCancel={() => {
+                    setIsVehicleModalOpen(false);
+                    setPlateToEdit(undefined);
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
             
+            {/* Botão para cadastrar novo veículo */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>Precisa cadastrar um novo veículo?</span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setPlateToEdit(undefined);
+                  setIsVehicleModalOpen(true);
+                }}
+                className="h-8 px-3 text-xs"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Cadastrar Veículo
+              </Button>
+            </div>
+
             {/* Lista de placas adicionadas */}
             {field.value && field.value.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
@@ -289,8 +340,9 @@ export function CampoPlacaAdicional({ form, vehicles, isLoadingVehicles, license
                     vehicles={vehicles}
                     onRemove={handleRemovePlate}
                     onEdit={(plate) => {
-                      // Redirecionar para a aba de veículos para edição
-                      window.location.href = `/vehicles?edit=${plate}`;
+                      // Abrir modal para edição/cadastro de veículo
+                      setPlateToEdit(plate);
+                      setIsVehicleModalOpen(true);
                     }}
                   />
                 ))}
