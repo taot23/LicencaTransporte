@@ -3149,6 +3149,25 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     }
   });
   
+  // Endpoint simples para atualizar apenas o CNPJ selecionado
+  app.patch('/api/admin/licenses/:id/selected-cnpj', requireOperational, async (req, res) => {
+    try {
+      const licenseId = parseInt(req.params.id);
+      const { selectedCnpj } = req.body;
+      
+      console.log('Atualizando CNPJ selecionado para licença:', licenseId, 'CNPJ:', selectedCnpj);
+      
+      await db.update(licenseRequests)
+        .set({ selectedCnpj: selectedCnpj || null })
+        .where(eq(licenseRequests.id, licenseId));
+      
+      res.json({ success: true, selectedCnpj });
+    } catch (error) {
+      console.error('Erro ao atualizar CNPJ selecionado:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
   // Endpoint específico para atualizar o status de um estado específico em uma licença
   app.patch('/api/admin/licenses/:id/state-status', requireOperational, upload.single('stateFile'), async (req, res) => {
     console.log('=== ENDPOINT STATE-STATUS CHAMADO ===');

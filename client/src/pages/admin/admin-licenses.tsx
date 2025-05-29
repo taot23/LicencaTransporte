@@ -1071,11 +1071,21 @@ export default function AdminLicensesPage() {
                       <TransporterCnpjSelector 
                         transporterId={selectedLicense.transporterId!}
                         selectedCnpj={field.value}
-                        onCnpjSelect={(cnpj, label) => {
-                          console.log('[Form] CNPJ recebido no callback:', cnpj);
-                          console.log('[Form] Valor atual do campo:', field.value);
+                        onCnpjSelect={async (cnpj, label) => {
+                          console.log('[Form] CNPJ selecionado:', cnpj);
                           field.onChange(cnpj);
-                          console.log('[Form] Novo valor do campo após onChange:', cnpj);
+                          
+                          // Salvar imediatamente o CNPJ selecionado
+                          if (selectedLicense && cnpj) {
+                            try {
+                              await apiRequest("PATCH", `/api/admin/licenses/${selectedLicense.id}/selected-cnpj`, {
+                                selectedCnpj: cnpj
+                              });
+                              console.log('[Form] CNPJ salvo com sucesso:', cnpj);
+                            } catch (error) {
+                              console.error('[Form] Erro ao salvar CNPJ:', error);
+                            }
+                          }
                         }}
                       />
                       <FormMessage />
