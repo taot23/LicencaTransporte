@@ -979,7 +979,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/vehicles/:id', requireAuth, upload.single('crlvFile'), processVehicleData, async (req, res) => {
+  app.put('/api/vehicles/:id', requireAuth, upload.single('crlvFile'), processVehicleData, async (req, res) => {
     console.log('=== INICIO UPDATE VEHICLE ===');
     console.log('req.params.id:', req.params.id);
     console.log('req.body:', req.body);
