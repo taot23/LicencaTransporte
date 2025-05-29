@@ -169,8 +169,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
       secondTrailerId: undefined,
       flatbedId: undefined,
       length: undefined, // Valor não preenchido inicialmente
-      width: 2.60, // Valor padrão de 2,60 metros
-      height: 4.40, // Valor padrão de 4,40 metros
+      width: undefined, // Sem valor padrão inicialmente
+      height: undefined, // Sem valor padrão inicialmente
       additionalPlates: [],
       states: [],
       additionalPlatesDocuments: [],
@@ -203,12 +203,13 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
         form.setValue("cargoType", undefined);
         setCargoType("");
         
-        // Se mudou para prancha, limpar os valores pré-preenchidos de largura e altura
+        // Aplicar valores padrão apenas para tipos que não são prancha
         if (value.type === "flatbed") {
+          // Para pranchas, manter campos vazios
           form.setValue("width", undefined);
           form.setValue("height", undefined);
         } else {
-          // Se mudou para outro tipo, aplicar valores padrão
+          // Para outros tipos, aplicar valores padrão
           form.setValue("width", 2.60);
           form.setValue("height", 4.40);
         }
