@@ -1369,7 +1369,7 @@ export function LicenseForm({
                       Unidade Tratora (Cavalo Mecânico)
                     </FormLabel>
                     <Select
-                      onValueChange={(value) => field.onChange(parseInt(value))}
+                      onValueChange={(value) => handleVehicleSelection(parseInt(value), 'tractorUnitId')}
                       defaultValue={field.value?.toString()}
                     >
                       <FormControl>
@@ -1708,7 +1708,7 @@ export function LicenseForm({
                       Unidade Tratora (Cavalo Mecânico)
                     </FormLabel>
                     <Select
-                      onValueChange={(value) => field.onChange(parseInt(value))}
+                      onValueChange={(value) => handleVehicleSelection(parseInt(value), 'tractorUnitId')}
                       defaultValue={field.value?.toString()}
                     >
                       <FormControl>
@@ -1986,7 +1986,7 @@ export function LicenseForm({
                       Unidade Tratora (Cavalo Mecânico)
                     </FormLabel>
                     <Select
-                      onValueChange={(value) => field.onChange(parseInt(value))}
+                      onValueChange={(value) => handleVehicleSelection(parseInt(value), 'tractorUnitId')}
                       defaultValue={field.value?.toString()}
                     >
                       <FormControl>
@@ -2804,6 +2804,26 @@ export function LicenseForm({
           </Button>
         </div>
       </form>
+
+      {/* Modal de confirmação para veículos de terceiros */}
+      <AlertDialog open={showThirdPartyConfirmation} onOpenChange={setShowThirdPartyConfirmation}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Veículo em nome de Terceiro</AlertDialogTitle>
+            <AlertDialogDescription>
+              O veículo selecionado está registrado em nome de terceiro. Deseja continuar com esta seleção?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelThirdPartyVehicle}>
+              Não
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmThirdPartyVehicle}>
+              Sim
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Form>
   );
 }
