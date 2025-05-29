@@ -569,7 +569,7 @@ export function CampoPlacaAdicional({ form, vehicles, isLoadingVehicles, license
                     <span>Placa cadastrada</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="bg-red-100 text-red-800 px-2 py-1 rounded flex items-center gap-1">
+                    <div className="text-amber-800 px-2 py-1 rounded flex items-center gap-1 bg-amber-100">
                       <span>XYZ9W87</span>
                       <Plus className="h-3 w-3" />
                     </div>
