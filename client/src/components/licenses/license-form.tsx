@@ -1086,7 +1086,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                   cargoType={form.watch('cargoType')}
                   description={
                     licenseType === 'flatbed'
-                      ? 'Informe a largura total do conjunto em metros - sem limitações para Pranchas'
+                      ? 'Informe a largura total do conjunto em metros'
                       : form.watch('cargoType') === 'agricultural_machinery' || form.watch('cargoType') === 'indivisible_cargo'
                         ? 'Informe a largura total do conjunto em metros - Largura Máxima 3,20 metros'
                         : 'Informe a largura total do conjunto em metros (max: 2,60)'
@@ -1108,7 +1108,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                   cargoType={form.watch('cargoType')}
                   description={
                     licenseType === 'flatbed'
-                      ? 'Informe a altura total do conjunto em metros - sem limitações para Pranchas'
+                      ? 'Informe a altura total do conjunto em metros'
                       : form.watch('cargoType') === 'agricultural_machinery' || form.watch('cargoType') === 'indivisible_cargo'
                         ? 'Informe a altura total do conjunto em metros - Altura Máxima 4,95 metros'
                         : 'Informe a altura total do conjunto em metros (max: 4,40)'
