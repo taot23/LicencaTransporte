@@ -154,28 +154,7 @@ export function TransporterWithSubsidiaries({ transporterId, compact = false }: 
         </div>
       </div>
 
-      {hasSubsidiaries && (
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-gray-700">
-            Filiais ({subsidiaries.length})
-          </div>
-          {subsidiaries.map((subsidiary, index) => (
-            <div key={index} className="p-3 border border-gray-200 rounded-lg bg-green-50">
-              <div className="font-medium text-gray-800 flex items-center">
-                <Building2 className="h-4 w-4 mr-2 text-green-600" />
-                {subsidiary.name}
-              </div>
-              <div className="text-xs text-gray-500 mt-1 flex items-center">
-                <MapPin className="h-3 w-3 mr-1" />
-                {subsidiary.city}/{subsidiary.state}
-              </div>
-              <div className="text-xs text-gray-500 mt-1">
-                CNPJ: {subsidiary.documentNumber}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+
     </div>
   );
 }
