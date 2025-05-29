@@ -620,10 +620,22 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                           const rawValue = e.target.value;
                           let cleanValue = rawValue.replace(/[^\d.,]/g, '');
                           
+                          // Permitir apenas um separador decimal (vírgula ou ponto)
+                          const separatorCount = (cleanValue.match(/[.,]/g) || []).length;
+                          if (separatorCount > 1) {
+                            // Manter apenas o primeiro separador
+                            const firstSeparatorIndex = cleanValue.search(/[.,]/);
+                            cleanValue = cleanValue.substring(0, firstSeparatorIndex + 1) + 
+                                        cleanValue.substring(firstSeparatorIndex + 1).replace(/[.,]/g, '');
+                          }
+                          
                           // Limitar a 3 casas decimais após vírgula ou ponto
                           const decimalMatch = cleanValue.match(/^(\d+)[.,](\d{0,3})/);
                           if (decimalMatch) {
                             cleanValue = decimalMatch[1] + ',' + decimalMatch[2];
+                          } else if (cleanValue.match(/^(\d+)$/)) {
+                            // Apenas números inteiros são válidos
+                            cleanValue = cleanValue;
                           }
                           
                           setTareDisplay(cleanValue);
@@ -633,6 +645,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                             return;
                           }
                           
+                          // Converter vírgula para ponto para processamento numérico
                           const normalizedValue = cleanValue.replace(',', '.');
                           const numericValue = parseFloat(normalizedValue);
                           
