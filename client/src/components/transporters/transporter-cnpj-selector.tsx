@@ -107,7 +107,7 @@ export function TransporterCnpjSelector({ transporterId, onCnpjSelect }: Transpo
   return (
     <div className="mb-4">
       <Label className="text-sm font-medium text-gray-700 mb-2 block">
-        CNPJ Cadastrado
+        CNPJs da Empresa
       </Label>
       <Select value={selectedCnpj} onValueChange={handleCnpjChange}>
         <SelectTrigger className="w-full">
