@@ -12,6 +12,7 @@ import {
 
 interface TransporterCnpjSelectorProps {
   transporterId: number;
+  selectedCnpj?: string;
   onCnpjSelect?: (cnpj: string, name: string) => void;
 }
 
@@ -42,9 +43,10 @@ interface CnpjOption {
 
 export function TransporterCnpjSelector({
   transporterId,
+  selectedCnpj: externalSelectedCnpj,
   onCnpjSelect,
 }: TransporterCnpjSelectorProps) {
-  const [selectedCnpj, setSelectedCnpj] = useState<string>("");
+  const [selectedCnpj, setSelectedCnpj] = useState<string>(externalSelectedCnpj || "");
 
   const { data: transporter, isLoading } = useQuery<TransporterData>({
     queryKey: [`/api/public/transporters/${transporterId}`],
@@ -146,7 +148,6 @@ export function TransporterCnpjSelector({
           className="z-[9999] max-h-60 overflow-auto" 
           position="popper" 
           sideOffset={4}
-          container={document.body}
         >
           {cnpjOptions.map((option, index) => (
             <SelectItem key={`${option.value}-${index}`} value={option.value}>

@@ -87,6 +87,7 @@ const updateStateStatusSchema = z.object({
   comments: z.string().optional(),
   validUntil: z.string().optional(),
   aetNumber: z.string().optional(),
+  selectedCnpj: z.string().optional(),
   licenseFile: z
     .any()
     .optional()
@@ -324,6 +325,7 @@ export default function AdminLicensesPage() {
           status: "",
           comments: "",
           aetNumber: "",
+          selectedCnpj: "",
           licenseFile: undefined,
           validUntil: "",
         });
@@ -1050,8 +1052,24 @@ export default function AdminLicensesPage() {
 
               {/* Campo CNPJ Cadastrado */}
               {selectedLicense?.transporterId && (
-                <TransporterCnpjSelector 
-                  transporterId={selectedLicense.transporterId}
+                <FormField
+                  control={stateStatusForm.control}
+                  name="selectedCnpj"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-gray-700 mb-2 block">
+                        CNPJs da Empresa <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <TransporterCnpjSelector 
+                        transporterId={selectedLicense.transporterId}
+                        selectedCnpj={field.value}
+                        onCnpjSelect={(cnpj, label) => {
+                          field.onChange(cnpj);
+                        }}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               )}
               
