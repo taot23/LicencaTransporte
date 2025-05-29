@@ -3058,6 +3058,11 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         statusData.validUntil = new Date(req.body.validUntil).toISOString();
       }
       
+      // Add selectedCnpj if provided
+      if (req.body.selectedCnpj) {
+        statusData.selectedCnpj = req.body.selectedCnpj;
+      }
+      
       // Validate status data
       try {
         updateLicenseStatusSchema.parse(statusData);
@@ -3097,6 +3102,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         comments: statusData.comments,
         validUntil: statusData.validUntil,
         aetNumber: statusData.aetNumber,
+        selectedCnpj: statusData.selectedCnpj,
         file
       });
       

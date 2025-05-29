@@ -289,6 +289,7 @@ export const licenseRequests = pgTable("license_requests", {
   licenseFileUrl: text("license_file_url").default(''),
   validUntil: timestamp("valid_until"),
   aetNumber: text("aet_number"),
+  selectedCnpj: text("selected_cnpj"), // CNPJ selecionado da empresa transportadora
 }, (table) => {
   return {
     requestNumberIdx: uniqueIndex("idx_license_request_number").on(table.requestNumber),
@@ -476,6 +477,7 @@ export const updateLicenseStatusSchema = createInsertSchema(licenseRequests)
     state: z.string().optional(), // Estado específico sendo atualizado
     stateStatus: z.enum(licenseStatusEnum.options).optional(), // Status para o estado específico
     stateFile: z.any().optional(), // Arquivo para o estado específico
+    selectedCnpj: z.string().optional(), // CNPJ selecionado da empresa transportadora
   });
 
 // Schema para quando todos os estados forem setados, atualizar o status geral

@@ -306,6 +306,11 @@ export default function AdminLicensesPage() {
         formData.append("aetNumber", data.aetNumber);
       }
       
+      // Incluir CNPJ selecionado se fornecido
+      if (data.selectedCnpj) {
+        formData.append("selectedCnpj", data.selectedCnpj);
+      }
+      
       const response = await apiRequest("PATCH", `/api/admin/licenses/${id}/state-status`, formData);
       return await response.json();
     },
