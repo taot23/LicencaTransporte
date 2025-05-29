@@ -1012,7 +1012,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       delete vehicleData.vehicleData; // Remove o campo vehicleData se presente
       console.log('Using processed vehicle update data:', vehicleData);
       
-      // Forçar conversão de campos numéricos para update também
+      // Processar dados para validação - converter tipos conforme esperado pelo schema
       const processedUpdateData = {
         ...vehicleData,
         ...(vehicleData.year && { year: parseInt(vehicleData.year) }),
@@ -1031,15 +1031,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: validationError.message });
       }
       
-      // Usar os dados validados
-      vehicleData = updateValidationResult.data;
+      // Preparar dados para o storage com conversão de tipos explícita
+      const storageData: any = {};
+      
+      // Copiar todos os campos validados
+      Object.keys(updateValidationResult.data).forEach(key => {
+        const value = (updateValidationResult.data as any)[key];
+        if (value !== undefined) {
+          // Converter tare especificamente para string
+          if (key === 'tare') {
+            storageData[key] = value.toString();
+          } else {
+            storageData[key] = value;
+          }
+        }
+      });
       
       // Add file URL if provided
       if (req.file) {
-        vehicleData.crlvUrl = `/uploads/${req.file.filename}`;
+        storageData.crlvUrl = `/uploads/${req.file.filename}`;
       }
       
-      const updatedVehicle = await storage.updateVehicle(vehicleId, vehicleData);
+      const updatedVehicle = await storage.updateVehicle(vehicleId, storageData);
       
       // Enviar notificação WebSocket para veículo atualizado
       broadcastMessage({
