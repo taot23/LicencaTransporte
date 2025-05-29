@@ -118,9 +118,9 @@ export function TransporterCnpjSelector({
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Selecione um CNPJ cadastrado" />
         </SelectTrigger>
-        <SelectContent>
-          {cnpjOptions.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
+        <SelectContent className="z-[9999]">
+          {cnpjOptions.map((option, index) => (
+            <SelectItem key={`${option.value}-${index}`} value={option.value}>
               <div className="flex items-center space-x-2 w-full">
                 <Building2
                   className={`h-4 w-4 ${option.type === "matriz" ? "text-blue-600" : "text-green-600"}`}
