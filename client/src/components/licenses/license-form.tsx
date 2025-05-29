@@ -245,7 +245,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
           limits = currentCargoType === 'oversized' 
             ? DIMENSION_LIMITS.oversized 
             : DIMENSION_LIMITS.flatbed;
-        } else if (currentCargoType === 'agricultural_machinery' || currentCargoType === 'indivisible') {
+        } else if (currentCargoType === 'agricultural_machinery' || currentCargoType === 'indivisible_cargo') {
           limits = DIMENSION_LIMITS.agricultural_machinery;
         }
         
@@ -1065,7 +1065,9 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                   description={
                     licenseType === 'flatbed' 
                       ? 'Digite o comprimento em metros' 
-                      : 'Digite o comprimento em metros (min: 19,80 - max: 30,00)'
+                      : form.watch('cargoType') === 'agricultural_machinery' || form.watch('cargoType') === 'indivisible_cargo'
+                        ? 'Digite o comprimento em metros - Comprimento Máximo 25,00 Metros'
+                        : 'Digite o comprimento em metros (min: 19,80 - max: 30,00)'
                   }
                 />
               )}
@@ -1085,7 +1087,9 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                   description={
                     licenseType === 'flatbed'
                       ? 'Informe a largura total do conjunto em metros - sem limitações para Pranchas'
-                      : 'Informe a largura total do conjunto em metros (max: 2,60)'
+                      : form.watch('cargoType') === 'agricultural_machinery' || form.watch('cargoType') === 'indivisible_cargo'
+                        ? 'Informe a largura total do conjunto em metros - Largura Máxima 3,20 metros'
+                        : 'Informe a largura total do conjunto em metros (max: 2,60)'
                   }
                 />
               )}
@@ -1105,7 +1109,9 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                   description={
                     licenseType === 'flatbed'
                       ? 'Informe a altura total do conjunto em metros - sem limitações para Pranchas'
-                      : 'Informe a altura total do conjunto em metros (max: 4,40)'
+                      : form.watch('cargoType') === 'agricultural_machinery' || form.watch('cargoType') === 'indivisible_cargo'
+                        ? 'Informe a altura total do conjunto em metros - Altura Máxima 4,95 metros'
+                        : 'Informe a altura total do conjunto em metros (max: 4,40)'
                   }
                 />
               )}
