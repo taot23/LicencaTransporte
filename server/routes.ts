@@ -980,10 +980,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.patch('/api/vehicles/:id', requireAuth, upload.single('crlvFile'), processVehicleData, async (req, res) => {
+    console.log('=== INICIO UPDATE VEHICLE ===');
+    console.log('req.params.id:', req.params.id);
+    console.log('req.body:', req.body);
+    console.log('req.file:', req.file);
+    
     try {
       const user = req.user!;
       const userId = user.id;
       const vehicleId = parseInt(req.params.id);
+      
+      console.log('User ID:', userId, 'Vehicle ID:', vehicleId);
       
       // Check if vehicle exists
       const existingVehicle = await storage.getVehicleById(vehicleId);
