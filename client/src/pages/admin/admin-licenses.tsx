@@ -1004,7 +1004,7 @@ export default function AdminLicensesPage() {
             <form onSubmit={stateStatusForm.handleSubmit(onSubmitStateStatus)} className="space-y-6">
               {/* Campo Transportador */}
               <div className="mb-4">
-                <FormLabel className="text-sm font-medium text-gray-700 mb-2 block">Transportador</FormLabel>
+                <FormLabel className="text-sm font-medium text-gray-700 mb-2 block">Empresa Transportadora</FormLabel>
                 {selectedLicense?.transporterId ? (
                   <TransporterWithSubsidiaries 
                     transporterId={selectedLicense.transporterId} 
