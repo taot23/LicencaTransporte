@@ -246,10 +246,43 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
         const currentHeight = form.getValues('height');
         
         if (currentType === 'flatbed') {
-          // Para pranchas: REMOVER TODAS as validações de dimensões
-          form.clearErrors('length');
-          form.clearErrors('width');
-          form.clearErrors('height');
+          // Para pranchas: aplicar validações específicas para prancha
+          
+          // Validar comprimento para prancha
+          if (currentLength !== undefined && currentLength !== null) {
+            if (currentLength > limits.maxLength) {
+              form.setError('length', { 
+                type: 'manual', 
+                message: `O comprimento máximo para pranchas é ${limits.maxLength.toFixed(2).replace('.', ',')} metros` 
+              });
+            } else {
+              form.clearErrors('length');
+            }
+          }
+          
+          // Validar largura para prancha
+          if (currentWidth !== undefined && currentWidth !== null) {
+            if (currentWidth > limits.maxWidth) {
+              form.setError('width', { 
+                type: 'manual', 
+                message: `A largura máxima para pranchas é ${limits.maxWidth.toFixed(2).replace('.', ',')} metros` 
+              });
+            } else {
+              form.clearErrors('width');
+            }
+          }
+          
+          // Validar altura para prancha
+          if (currentHeight !== undefined && currentHeight !== null) {
+            if (currentHeight > limits.maxHeight) {
+              form.setError('height', { 
+                type: 'manual', 
+                message: `A altura máxima para pranchas é ${limits.maxHeight.toFixed(2).replace('.', ',')} metros` 
+              });
+            } else {
+              form.clearErrors('height');
+            }
+          }
         } else {
           // Para outros tipos que NÃO são prancha: aplicar validações
           
