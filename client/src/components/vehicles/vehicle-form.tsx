@@ -164,6 +164,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
         remarks: vehicle.remarks || "",
         ownerName: vehicle.ownerName || "",
         ownershipType: vehicle.ownershipType || undefined,
+        cmt: vehicle.cmt || undefined,
       });
     }
   }, [vehicle, form]);
