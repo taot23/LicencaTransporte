@@ -520,6 +520,45 @@ export function LicenseForm({
     return unregisteredPlates;
   };
 
+  // Função para verificar se há veículos de terceiros no pedido
+  const checkForThirdPartyVehicles = (data: z.infer<typeof insertLicenseRequestSchema>): string[] => {
+    const thirdPartyVehicles: string[] = [];
+    
+    // Verificar unidade tratora
+    if (data.tractorUnitId) {
+      const vehicle = vehicles?.find(v => v.id === data.tractorUnitId);
+      if (vehicle && vehicle.ownershipType === 'terceiro') {
+        thirdPartyVehicles.push(`${vehicle.plate} (Unidade Tratora)`);
+      }
+    }
+
+    // Verificar primeiro semi-reboque
+    if (data.firstTrailerId) {
+      const vehicle = vehicles?.find(v => v.id === data.firstTrailerId);
+      if (vehicle && vehicle.ownershipType === 'terceiro') {
+        thirdPartyVehicles.push(`${vehicle.plate} (Primeiro Semi-reboque)`);
+      }
+    }
+
+    // Verificar segundo semi-reboque
+    if (data.secondTrailerId) {
+      const vehicle = vehicles?.find(v => v.id === data.secondTrailerId);
+      if (vehicle && vehicle.ownershipType === 'terceiro') {
+        thirdPartyVehicles.push(`${vehicle.plate} (Segundo Semi-reboque)`);
+      }
+    }
+
+    // Verificar dolly
+    if (data.dollyId) {
+      const vehicle = vehicles?.find(v => v.id === data.dollyId);
+      if (vehicle && vehicle.ownershipType === 'terceiro') {
+        thirdPartyVehicles.push(`${vehicle.plate} (Dolly)`);
+      }
+    }
+    
+    return thirdPartyVehicles;
+  };
+
   const submitRequestMutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertLicenseRequestSchema>) => {
       try {
@@ -528,6 +567,28 @@ export function LicenseForm({
         
         if (unregisteredPlates.length > 0) {
           throw new Error(`Há veículos não cadastrados no pedido: ${unregisteredPlates.join(', ')}. Cadastre todos os veículos antes de finalizar o pedido.`);
+        }
+
+        // Verificar se há veículos de terceiros e mostrar aviso
+        const thirdPartyVehicles = checkForThirdPartyVehicles(data);
+        
+        if (thirdPartyVehicles.length > 0) {
+          // Mostrar modal de confirmação para veículos de terceiros
+          const confirmed = await new Promise<boolean>((resolve) => {
+            // Se já estamos mostrando o modal, aguardar resposta
+            if (showThirdPartyConfirmation) {
+              resolve(false);
+              return;
+            }
+            
+            // Criar um modal específico para confirmação de envio
+            const confirmMessage = `O pedido contém veículos em nome de terceiros:\n\n${thirdPartyVehicles.join('\n')}\n\nDeseja continuar com o envio?`;
+            resolve(window.confirm(confirmMessage));
+          });
+
+          if (!confirmed) {
+            throw new Error('Envio cancelado pelo usuário devido a veículos de terceiros.');
+          }
         }
 
         // Adicionar log detalhado para debug
