@@ -83,6 +83,7 @@ const vehicleSchema = z.object({
   remarks: z.string().optional(),
   ownerName: z.string().optional(),
   ownershipType: z.enum(["proprio", "terceiro"]).default("proprio"),
+  cmt: z.number().optional(),
 });
 
 type VehicleFormData = z.infer<typeof vehicleSchema>;
@@ -116,7 +117,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
   const [tareDisplay, setTareDisplay] = useState(vehicle?.tare ? vehicle.tare.toString() : "");
   const [file, setFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [cmt, setCmt] = useState<number | undefined>(undefined);
+
 
   const form = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleSchema),
@@ -135,6 +136,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       remarks: vehicle?.remarks || "",
       ownerName: vehicle?.ownerName || "",
       ownershipType: vehicle?.ownershipType || undefined,
+      cmt: undefined,
     },
   });
 
@@ -145,7 +147,6 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       setVehicleType(vehicle.type || "");
       setPlateDisplay(vehicle.plate || "");
       setTareDisplay(vehicle.tare ? vehicle.tare.toString() : "");
-      setCmt(undefined);
       
       // Resetar os valores do formulário
       form.reset({
@@ -358,8 +359,8 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       }
     });
 
-    if (cmt) {
-      formData.append("cmt", cmt.toString());
+    if (data.cmt) {
+      formData.append("cmt", data.cmt.toString());
     }
 
     if (file) {
@@ -738,20 +739,28 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
 
             {/* CMT (apenas para unidade tratora) */}
             {vehicleType === "tractor_unit" && (
-              <FormItem>
-                <FormLabel className="text-sm font-medium">
-                  CMT (kg) <span className="text-red-500">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input 
-                    type="number" 
-                    placeholder="" 
-                    value={cmt || ''} 
-                    onChange={(e) => setCmt(e.target.valueAsNumber || undefined)}
-                    className="h-10 w-full" 
-                  />
-                </FormControl>
-              </FormItem>
+              <FormField
+                control={form.control}
+                name="cmt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">
+                      CMT (kg) <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="" 
+                        {...field}
+                        value={field.value || ''} 
+                        onChange={(e) => field.onChange(e.target.valueAsNumber || undefined)}
+                        className="h-10 w-full" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
 
             {/* Status do Veículo (só quando editando) */}
