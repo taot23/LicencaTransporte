@@ -490,6 +490,7 @@ export default function AdminLicensesPage() {
       status: currentStateStatus,
       comments: "",
       aetNumber: "", // Resetar também o campo de número da AET
+      selectedCnpj: "", // Resetar o campo de CNPJ selecionado
       licenseFile: undefined, // Resetar o campo de arquivo
       validUntil: "", // Resetar a data de validade como string vazia, não undefined
     });
@@ -1061,7 +1062,7 @@ export default function AdminLicensesPage() {
                         CNPJs da Empresa <span className="text-red-500">*</span>
                       </FormLabel>
                       <TransporterCnpjSelector 
-                        transporterId={selectedLicense.transporterId}
+                        transporterId={selectedLicense.transporterId!}
                         selectedCnpj={field.value}
                         onCnpjSelect={(cnpj, label) => {
                           field.onChange(cnpj);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Building2, ChevronDown } from "lucide-react";
 import { Label } from "@/components/ui/label";
@@ -47,6 +47,11 @@ export function TransporterCnpjSelector({
   onCnpjSelect,
 }: TransporterCnpjSelectorProps) {
   const [selectedCnpj, setSelectedCnpj] = useState<string>(externalSelectedCnpj || "");
+
+  // Atualizar o estado interno quando a prop externa mudar
+  useEffect(() => {
+    setSelectedCnpj(externalSelectedCnpj || "");
+  }, [externalSelectedCnpj]);
 
   const { data: transporter, isLoading } = useQuery<TransporterData>({
     queryKey: [`/api/public/transporters/${transporterId}`],
