@@ -1318,8 +1318,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: validationError.message });
       }
       
-      // Generate a draft request number
-      const draftNumber = `RASCUNHO-${uuidv4().substring(0, 8)}`;
+      // Generate a draft request number with only numbers
+      const draftNumber = `RASCUNHO-${String(Math.floor(Math.random() * 90000) + 10000)}`;
       
       // Garantir que os campos obrigatórios sejam enviados corretamente para o banco de dados
       const sanitizedData = {
