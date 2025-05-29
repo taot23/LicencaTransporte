@@ -127,7 +127,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       status: vehicle?.status || "active",
       remarks: vehicle?.remarks || "",
       ownerName: vehicle?.ownerName || "",
-      ownershipType: vehicle?.ownershipType || "proprio",
+      ownershipType: vehicle?.ownershipType || undefined,
     },
   });
 
@@ -445,7 +445,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                     <FormLabel className="text-sm font-medium">
                       Veículo <span className="text-red-500">*</span>
                     </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} defaultValue="proprio">
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="h-10 w-full">
                           <SelectValue placeholder="Selecione" />
@@ -652,7 +652,9 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
             {/* CMT (apenas para unidade tratora) */}
             {vehicleType === "tractor_unit" && (
               <FormItem>
-                <FormLabel className="text-sm font-medium">CMT (kg)</FormLabel>
+                <FormLabel className="text-sm font-medium">
+                  CMT (kg) <span className="text-red-500">*</span>
+                </FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
@@ -704,7 +706,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">
-                      Tipo de Carroceria
+                      Tipo de Carroceria <span className="text-red-500">*</span>
                     </FormLabel>
                     <Select 
                       onValueChange={(value) => field.onChange(value)} 
