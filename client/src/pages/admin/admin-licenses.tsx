@@ -307,8 +307,11 @@ export default function AdminLicensesPage() {
       }
       
       // Incluir CNPJ selecionado se fornecido
+      console.log('Dados do formulário antes do envio:', data);
+      console.log('selectedCnpj no formulário:', data.selectedCnpj);
       if (data.selectedCnpj) {
         formData.append("selectedCnpj", data.selectedCnpj);
+        console.log('selectedCnpj adicionado ao FormData:', data.selectedCnpj);
       }
       
       const response = await apiRequest("PATCH", `/api/admin/licenses/${id}/state-status`, formData);
