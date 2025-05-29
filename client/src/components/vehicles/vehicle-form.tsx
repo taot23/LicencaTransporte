@@ -197,7 +197,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       plate: vehicle.plate,
       type: vehicle.type,
       bodyType: vehicle.bodyType || "",
-      tare: parseFloat(vehicle.tare) || undefined,
+      tare: Number(vehicle.tare) || 0,
       crlvYear: vehicle.crlvYear,
       brand: vehicle.brand || "",
       model: vehicle.model || "",
@@ -220,9 +220,9 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       renavam: "",
       axleCount: undefined,
       remarks: "",
-      ownerName: "",
-      ownershipType: "proprio" as const,
       status: "active",
+      ownerName: "",
+      ownershipType: "proprio",
     },
   });
 
@@ -773,6 +773,8 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
               ) : (
                 <div className="h-[76px]"></div> /* Espaço vazio para manter alinhamento */
               )}
+
+
 
               {/* CMT (apenas para unidade tratora) */}
               {vehicleType === "tractor_unit" ? (
