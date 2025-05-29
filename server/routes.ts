@@ -1168,6 +1168,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             createdAt: row.created_at,
             updatedAt: row.updated_at,
             comments: row.comments,
+            cargoType: row.cargo_type,
+            mainVehiclePlate: row.main_vehicle_plate,
+            type: row.type,
+            length: row.length,
+            width: row.width,
+            height: row.height,
+            additionalPlates: row.additional_plates || [],
+            additionalPlatesDocuments: row.additional_plates_documents || [],
           }
         });
         
@@ -1203,6 +1211,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               createdAt: row.created_at,
               updatedAt: row.updated_at,
               comments: row.comments,
+              cargoType: row.cargo_type,
+              mainVehiclePlate: row.main_vehicle_plate,
+              type: row.type,
+              length: row.length,
+              width: row.width,
+              height: row.height,
+              additionalPlates: row.additional_plates || [],
+              additionalPlatesDocuments: row.additional_plates_documents || [],
             }
           });
           
