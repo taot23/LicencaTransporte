@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import { apiRequest } from "@/lib/queryClient";
 import { Transporter } from "@shared/schema";
 import { AdminLayout } from "@/components/layout/admin-layout";
@@ -25,6 +26,27 @@ export default function AdminTransporters() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isLinkUserDialogOpen, setIsLinkUserDialogOpen] = useState(false);
   const [selectedTransporter, setSelectedTransporter] = useState<Transporter | null>(null);
+  const { lastMessage } = useWebSocketContext();
+
+  // Effect para invalidar cache quando houver atualizações via WebSocket
+  useEffect(() => {
+    if (lastMessage) {
+      const message = JSON.parse(lastMessage.data);
+      
+      // Invalidar cache para qualquer tipo de atualização
+      if (message.type === 'STATUS_UPDATE' || message.type === 'LICENSE_UPDATE') {
+        console.log('[REALTIME] Transporters: Recebida atualização, invalidando cache:', message);
+        
+        // Invalidar todas as queries relacionadas a transportadores
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/transporters'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/public/transporters'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+        
+        // Forçar refetch imediato
+        queryClient.refetchQueries({ queryKey: ['/api/admin/transporters'] });
+      }
+    }
+  }, [lastMessage, queryClient]);
 
   // Fetch transporters
   const { data: transporters = [], isLoading } = useQuery({

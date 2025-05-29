@@ -2807,6 +2807,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const transporter = await storage.createTransporter(transporterData);
         
+        // Enviar notificação em tempo real via WebSocket
+        broadcastMessage({
+          type: 'LICENSE_UPDATE',
+          data: {
+            type: 'TRANSPORTER_CREATED',
+            transporterId: transporter.id,
+            transporter: transporter
+          }
+        });
+        
         res.status(201).json(transporter);
       } catch (error) {
         console.error("Erro ao validar dados do transportador:", error);

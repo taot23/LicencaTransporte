@@ -147,6 +147,33 @@ export default function AdminLicensesPage() {
   const [sortField, setSortField] = useState<string>("createdAt");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const { lastMessage } = useWebSocketContext();
+
+  // Effect para invalidar cache quando houver atualizações via WebSocket
+  useEffect(() => {
+    if (lastMessage) {
+      const message = JSON.parse(lastMessage.data);
+      
+      // Invalidar cache para qualquer tipo de atualização
+      if (message.type === 'STATUS_UPDATE' || message.type === 'LICENSE_UPDATE') {
+        console.log('[REALTIME] Recebida atualização, invalidando cache:', message);
+        
+        // Invalidar todas as queries relacionadas
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/licenses'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/transporters'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/public/transporters'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/licenses'] });
+        
+        // Forçar refetch imediato
+        queryClient.refetchQueries({ queryKey: ['/api/admin/licenses'] });
+        
+        toast({
+          title: "Dados atualizados",
+          description: "As informações foram atualizadas automaticamente.",
+        });
+      }
+    }
+  }, [lastMessage, toast]);
   
   // Verificar se o usuário é do tipo operacional
   const isOperational = user?.role === 'operational';
