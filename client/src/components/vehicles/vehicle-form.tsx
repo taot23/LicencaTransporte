@@ -111,6 +111,26 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
   const [isDragOver, setIsDragOver] = useState(false);
   const [cmt, setCmt] = useState<number | undefined>(undefined);
 
+  const form = useForm<VehicleFormData>({
+    resolver: zodResolver(vehicleSchema),
+    defaultValues: {
+      plate: vehicle?.plate || "",
+      type: vehicle?.type || "",
+      brand: vehicle?.brand || "",
+      model: vehicle?.model || "",
+      year: vehicle?.year || undefined,
+      renavam: vehicle?.renavam || "",
+      tare: vehicle?.tare || undefined,
+      axleCount: vehicle?.axleCount || undefined,
+      bodyType: vehicle?.bodyType || "",
+      crlvYear: vehicle?.crlvYear || undefined,
+      status: vehicle?.status || "active",
+      remarks: vehicle?.remarks || "",
+      ownerName: vehicle?.ownerName || "",
+      ownershipType: vehicle?.ownershipType || undefined,
+    },
+  });
+
   // Sincronizar estados quando o vehicle prop muda
   useEffect(() => {
     if (vehicle) {
@@ -139,26 +159,6 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       });
     }
   }, [vehicle, form]);
-
-  const form = useForm<VehicleFormData>({
-    resolver: zodResolver(vehicleSchema),
-    defaultValues: {
-      plate: vehicle?.plate || "",
-      type: vehicle?.type || "",
-      brand: vehicle?.brand || "",
-      model: vehicle?.model || "",
-      year: vehicle?.year || undefined,
-      renavam: vehicle?.renavam || "",
-      tare: vehicle?.tare || undefined,
-      axleCount: vehicle?.axleCount || undefined,
-      bodyType: vehicle?.bodyType || "",
-      crlvYear: vehicle?.crlvYear || undefined,
-      status: vehicle?.status || "active",
-      remarks: vehicle?.remarks || "",
-      ownerName: vehicle?.ownerName || "",
-      ownershipType: vehicle?.ownershipType || undefined,
-    },
-  });
 
   // Query para buscar modelos de veículos
   const { data: vehicleModels = [] } = useQuery<VehicleModel[]>({
