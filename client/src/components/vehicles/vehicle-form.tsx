@@ -111,6 +111,35 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
   const [isDragOver, setIsDragOver] = useState(false);
   const [cmt, setCmt] = useState<number | undefined>(undefined);
 
+  // Sincronizar estados quando o vehicle prop muda
+  useEffect(() => {
+    if (vehicle) {
+      setSelectedBrand(vehicle.brand || "");
+      setVehicleType(vehicle.type || "");
+      setPlateDisplay(vehicle.plate || "");
+      setTareDisplay(vehicle.tare ? vehicle.tare.toString() : "");
+      setCmt(undefined);
+      
+      // Resetar os valores do formulário
+      form.reset({
+        plate: vehicle.plate || "",
+        type: vehicle.type || "",
+        brand: vehicle.brand || "",
+        model: vehicle.model || "",
+        year: vehicle.year || undefined,
+        renavam: vehicle.renavam || "",
+        tare: vehicle.tare || undefined,
+        axleCount: vehicle.axleCount || undefined,
+        bodyType: vehicle.bodyType || "",
+        crlvYear: vehicle.crlvYear || undefined,
+        status: vehicle.status || "active",
+        remarks: vehicle.remarks || "",
+        ownerName: vehicle.ownerName || "",
+        ownershipType: vehicle.ownershipType || undefined,
+      });
+    }
+  }, [vehicle, form]);
+
   const form = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleSchema),
     defaultValues: {
