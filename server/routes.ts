@@ -3147,6 +3147,9 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       const licenseId = parseInt(req.params.id);
       
       // Validar dados do status do estado
+      console.log('Dados recebidos no endpoint state-status:', req.body);
+      console.log('selectedCnpj recebido:', req.body.selectedCnpj);
+      
       const stateStatusData = {
         licenseId,
         state: req.body.state,
@@ -3154,6 +3157,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         comments: req.body.comments,
         validUntil: req.body.validUntil,
         aetNumber: req.body.aetNumber, // Incluir número da AET
+        selectedCnpj: req.body.selectedCnpj, // Incluir CNPJ selecionado
       };
       
       try {
