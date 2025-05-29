@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -138,57 +138,12 @@ export function LicenseForm({
       queryKey: ["/api/user/transporters"],
     });
 
-  // Define filtered vehicle lists based on type and license restrictions
+  // Define basic vehicle lists
   const tractorUnits = vehicles?.filter((v) => v.type === "tractor_unit") || [];
   const trucks = vehicles?.filter((v) => v.type === "truck") || [];
-  
-  // Filtrar semi-reboques baseado no tipo de conjunto
-  const semiTrailers = vehicles?.filter((v) => {
-    if (v.type !== "semi_trailer") return false;
-    
-    const licenseType = form.watch("type");
-    
-    // Rodotrem 9 eixos: pode selecionar semi-reboques de 2 eixos
-    if (licenseType === "roadtrain_9_axles") {
-      return v.axles === 2;
-    }
-    
-    // Bitrem 9 eixos: só pode selecionar semi-reboques de 3 eixos
-    if (licenseType === "bitrain_9_axles") {
-      return v.axles === 3;
-    }
-    
-    // Bitrem 7 eixos: pode selecionar semi-reboques de 2 eixos
-    if (licenseType === "bitrain_7_axles") {
-      return v.axles === 2;
-    }
-    
-    // Bitrem 6 eixos: pode selecionar semi-reboques de 2 eixos
-    if (licenseType === "bitrain_6_axles") {
-      return v.axles === 2;
-    }
-    
-    // Para outros tipos, permitir todos
-    return true;
-  }) || [];
-  
+  const allSemiTrailers = vehicles?.filter((v) => v.type === "semi_trailer") || [];
   const trailers = vehicles?.filter((v) => v.type === "trailer") || [];
-  
-  // Filtrar dollys baseado no tipo de conjunto
-  const dollys = vehicles?.filter((v) => {
-    if (v.type !== "dolly") return false;
-    
-    const licenseType = form.watch("type");
-    
-    // Rodotrem 9 eixos: pode selecionar dollys de 2 eixos
-    if (licenseType === "roadtrain_9_axles") {
-      return v.axles === 2;
-    }
-    
-    // Para outros tipos, permitir todos
-    return true;
-  }) || [];
-  
+  const allDollys = vehicles?.filter((v) => v.type === "dolly") || [];
   const flatbeds = vehicles?.filter((v) => v.type === "flatbed") || [];
 
   // Define a schema that can be validated partially (for drafts)
@@ -254,6 +209,46 @@ export function LicenseForm({
       }
     }
   }, [preSelectedTransporterId, transporters, toast]);
+
+  // Dynamic vehicle filters based on license type
+  const semiTrailers = useMemo(() => {
+    return allSemiTrailers.filter((v) => {
+      // Rodotrem 9 eixos: pode selecionar semi-reboques de 2 eixos
+      if (licenseType === "roadtrain_9_axles") {
+        return v.axleCount === 2;
+      }
+      
+      // Bitrem 9 eixos: só pode selecionar semi-reboques de 3 eixos
+      if (licenseType === "bitrain_9_axles") {
+        return v.axleCount === 3;
+      }
+      
+      // Bitrem 7 eixos: pode selecionar semi-reboques de 2 eixos
+      if (licenseType === "bitrain_7_axles") {
+        return v.axleCount === 2;
+      }
+      
+      // Bitrem 6 eixos: pode selecionar semi-reboques de 2 eixos
+      if (licenseType === "bitrain_6_axles") {
+        return v.axleCount === 2;
+      }
+      
+      // Para outros tipos, permitir todos
+      return true;
+    });
+  }, [allSemiTrailers, licenseType]);
+  
+  const dollys = useMemo(() => {
+    return allDollys.filter((v) => {
+      // Rodotrem 9 eixos: pode selecionar dollys de 2 eixos
+      if (licenseType === "roadtrain_9_axles") {
+        return v.axleCount === 2;
+      }
+      
+      // Para outros tipos, permitir todos
+      return true;
+    });
+  }, [allDollys, licenseType]);
 
   // Watch for type changes to conditionally render fields
   useEffect(() => {
