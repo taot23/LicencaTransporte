@@ -708,23 +708,6 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                 )}
               />
 
-              {/* Nome Proprietário */}
-              <FormField
-                control={form.control}
-                name="ownerName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">
-                      Nome Proprietário
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome do proprietário" {...field} className="h-10 w-full" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {/* Renavam */}
               <FormField
                 control={form.control}
@@ -848,6 +831,23 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
               />
             </div>
           </div>
+
+          {/* Nome Proprietário (campo largo) */}
+          <FormField
+            control={form.control}
+            name="ownerName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm font-medium">
+                  Nome Proprietário
+                </FormLabel>
+                <FormControl>
+                  <Input placeholder="Nome do proprietário" {...field} className="h-10 w-full" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {/* Tipo de Carroceria (campo largo quando necessário) */}
           {(vehicleType === "truck" || vehicleType === "semi_trailer" || vehicleType === "trailer") && (
