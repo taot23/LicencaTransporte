@@ -32,6 +32,7 @@ import { StatusBadge } from "@/components/licenses/status-badge";
 import { ProgressFlow, StateProgressFlow } from "@/components/licenses/progress-flow";
 import { LicenseDetailsCard } from "@/components/licenses/license-details-card";
 import { TransporterWithSubsidiaries } from "@/components/transporters/transporter-with-subsidiaries";
+import { TransporterCnpjSelector } from "@/components/transporters/transporter-cnpj-selector";
 import {
   Table,
   TableBody,
@@ -1015,6 +1016,13 @@ export default function AdminLicensesPage() {
                   </div>
                 )}
               </div>
+
+              {/* Campo CNPJ Cadastrado */}
+              {selectedLicense?.transporterId && (
+                <TransporterCnpjSelector 
+                  transporterId={selectedLicense.transporterId}
+                />
+              )}
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
