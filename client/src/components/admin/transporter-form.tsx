@@ -1009,9 +1009,9 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
                               <SelectValue placeholder="UF" />
                             </SelectTrigger>
                             <SelectContent>
-                              {brazilianStates.map((state) => (
+                              {allBrazilianStates.map((state) => (
                                 <SelectItem key={state.code} value={state.code}>
-                                  {state.code}
+                                  {state.code} - {state.name}
                                 </SelectItem>
                               ))}
                             </SelectContent>
