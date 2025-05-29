@@ -700,6 +700,48 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                 )}
               />
 
+              {/* Veículo (Próprio/Terceiro) */}
+              <FormField
+                control={form.control}
+                name="ownershipType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">
+                      Veículo <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} defaultValue="proprio">
+                      <FormControl>
+                        <SelectTrigger className="h-10 w-full">
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="proprio">Próprio</SelectItem>
+                        <SelectItem value="terceiro">Terceiro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Nome Proprietário */}
+              <FormField
+                control={form.control}
+                name="ownerName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">
+                      Nome Proprietário
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nome do proprietário" {...field} className="h-10 w-full" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {/* Status do Veículo (só quando editando) */}
               {vehicle ? (
                 <FormField

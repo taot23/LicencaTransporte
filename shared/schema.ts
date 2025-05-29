@@ -180,6 +180,8 @@ export const vehicles = pgTable("vehicles", {
   remarks: text("remarks"),
   crlvYear: integer("crlv_year").notNull(),
   crlvUrl: text("crlv_url"),
+  ownerName: text("owner_name"), // Nome do Proprietário
+  ownershipType: text("ownership_type").default("proprio").notNull(), // "proprio" ou "terceiro"
   status: text("status").default("active").notNull(),
 }, (table) => {
   return {
@@ -207,6 +209,8 @@ export const insertVehicleSchema = createInsertSchema(vehicles)
     remarks: z.string().optional(),
     status: z.string().optional(),
     crlvFile: z.any().optional(),
+    ownerName: z.string().optional(), // Nome do Proprietário
+    ownershipType: z.enum(["proprio", "terceiro"]).default("proprio"), // Tipo de propriedade
   });
 
 // Enums for license status
