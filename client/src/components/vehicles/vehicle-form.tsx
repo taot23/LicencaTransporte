@@ -197,7 +197,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       plate: vehicle.plate,
       type: vehicle.type,
       bodyType: vehicle.bodyType || "",
-      tare: vehicle.tare,
+      tare: Number(vehicle.tare) || 0,
       crlvYear: vehicle.crlvYear,
       brand: vehicle.brand || "",
       model: vehicle.model || "",
@@ -206,6 +206,8 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       axleCount: vehicle.axleCount || undefined,
       remarks: vehicle.remarks || "",
       status: vehicle.status || "active",
+      ownerName: vehicle.ownerName || "",
+      ownershipType: (vehicle.ownershipType as "proprio" | "terceiro") || "proprio",
     } : {
       plate: "",
       type: "", // Sem valor padrão para o tipo
@@ -219,6 +221,8 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       axleCount: undefined,
       remarks: "",
       status: "active",
+      ownerName: "",
+      ownershipType: "proprio",
     },
   });
 
@@ -731,48 +735,6 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="Renavam" {...field} className="h-10 w-full" required />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Veículo (Próprio/Terceiro) */}
-              <FormField
-                control={form.control}
-                name="ownershipType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">
-                      Veículo <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} defaultValue="proprio">
-                      <FormControl>
-                        <SelectTrigger className="h-10 w-full">
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="proprio">Próprio</SelectItem>
-                        <SelectItem value="terceiro">Terceiro</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Nome Proprietário */}
-              <FormField
-                control={form.control}
-                name="ownerName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">
-                      Nome Proprietário
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome do proprietário" {...field} className="h-10 w-full" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
