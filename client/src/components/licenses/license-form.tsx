@@ -540,11 +540,9 @@ export function LicenseForm({
     onError: (error: Error) => {
       console.error("Erro completo:", error);
 
-      // Criar elemento de erro detalhado para pranchas
+      // Criar elemento de erro detalhado
       const ErrorMessage = () => (
         <div className="space-y-2">
-          <p>Erro ao enviar pedido.</p>
-          <p className="text-sm">Detalhes para o suporte técnico:</p>
           <div className="bg-red-950 text-red-100 p-2 rounded text-xs overflow-auto max-h-32">
             {error.message || "Erro desconhecido ao processar o pedido"}
           </div>
