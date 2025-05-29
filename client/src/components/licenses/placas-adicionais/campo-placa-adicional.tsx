@@ -16,6 +16,7 @@ import {
 import { VehicleForm } from "@/components/vehicles/vehicle-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { queryClient } from "@/lib/queryClient";
 
 interface CampoPlacaAdicionalProps {
   form: UseFormReturn<any>;
@@ -263,22 +264,8 @@ export function CampoPlacaAdicional({ form, vehicles, isLoadingVehicles, license
     form.setValue('additionalPlatesDocuments', newDocs);
   };
 
-  // Função para adicionar veículo após criação/edição
-  const handleVehicleSaved = (vehicle: Vehicle) => {
-    // Se a placa já está na lista, não precisamos fazer nada
-    if (isVehicleAlreadyInAdditionalPlates(vehicle.plate)) {
-      return;
-    }
-    
-    // Se a placa foi alterada durante a edição, vamos adicionar a nova placa
-    if (plateToEdit !== vehicle.plate) {
-      addSinglePlate(vehicle.plate);
-    }
-    
-    // Fechar o modal
-    setIsVehicleModalOpen(false);
-    setPlateToEdit(undefined);
-  };
+  // Remover a função não utilizada
+  // handleVehicleSaved foi removida pois não é mais necessária
 
   return (
     <FormField
@@ -302,7 +289,14 @@ export function CampoPlacaAdicional({ form, vehicles, isLoadingVehicles, license
                 
                 <VehicleForm
                   vehicle={null}
-                  onComplete={handleVehicleSaved}
+                  onSuccess={() => {
+                    // Fechar o modal
+                    setIsVehicleModalOpen(false);
+                    setPlateToEdit(undefined);
+                    
+                    // Atualizar a lista de veículos
+                    queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+                  }}
                   onCancel={() => {
                     setIsVehicleModalOpen(false);
                     setPlateToEdit(undefined);
