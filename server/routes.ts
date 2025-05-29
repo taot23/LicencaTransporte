@@ -3203,7 +3203,13 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       
       // Atualizar status do estado da licença
       const updatedLicense = await storage.updateLicenseStateStatus({
-        ...stateStatusData,
+        licenseId: stateStatusData.licenseId,
+        state: stateStatusData.state!,
+        status: stateStatusData.status as LicenseStatus,
+        comments: stateStatusData.comments,
+        validUntil: stateStatusData.validUntil,
+        aetNumber: stateStatusData.aetNumber,
+        selectedCnpj: stateStatusData.selectedCnpj,
         file,
       });
       

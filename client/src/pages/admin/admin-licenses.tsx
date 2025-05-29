@@ -314,11 +314,7 @@ export default function AdminLicensesPage() {
         console.log('selectedCnpj adicionado ao FormData:', data.selectedCnpj);
       }
       
-      console.log('[Form] Enviando requisição PATCH para:', `/api/admin/licenses/${id}/state-status`);
-      console.log('[Form] FormData completo:', Object.fromEntries(formData.entries()));
-      
       const response = await apiRequest("PATCH", `/api/admin/licenses/${id}/state-status`, formData);
-      console.log('[Form] Resposta recebida:', response.status);
       return await response.json();
     },
     onSuccess: (updatedLicense) => {
@@ -497,12 +493,15 @@ export default function AdminLicensesPage() {
       }
     }
     
+    // Determinar o CNPJ já selecionado para esta licença, se houver
+    const currentSelectedCnpj = license.selectedCnpj || "";
+    
     stateStatusForm.reset({
       state: state,
       status: currentStateStatus,
       comments: "",
       aetNumber: "", // Resetar também o campo de número da AET
-      selectedCnpj: "", // Resetar o campo de CNPJ selecionado
+      selectedCnpj: currentSelectedCnpj, // Carregar o CNPJ já selecionado, se houver
       licenseFile: undefined, // Resetar o campo de arquivo
       validUntil: "", // Resetar a data de validade como string vazia, não undefined
     });
