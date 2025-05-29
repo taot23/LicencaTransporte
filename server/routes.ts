@@ -1032,6 +1032,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Preparar dados para o storage com conversão de tipos explícita
+      console.log('Dados validados recebidos:', updateValidationResult.data);
+      
       const storageData: any = {};
       
       // Copiar todos os campos validados
@@ -1040,6 +1042,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (value !== undefined) {
           // Converter tare especificamente para string
           if (key === 'tare') {
+            console.log(`Convertendo tare de ${value} (${typeof value}) para string`);
             storageData[key] = value.toString();
           } else {
             storageData[key] = value;
@@ -1052,7 +1055,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storageData.crlvUrl = `/uploads/${req.file.filename}`;
       }
       
+      console.log('Dados preparados para storage:', storageData);
+      
       const updatedVehicle = await storage.updateVehicle(vehicleId, storageData);
+      console.log('Veículo atualizado com sucesso:', updatedVehicle);
       
       // Enviar notificação WebSocket para veículo atualizado
       broadcastMessage({
