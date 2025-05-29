@@ -150,27 +150,31 @@ export default function AdminLicensesPage() {
 
   // Effect para invalidar cache quando houver atualizações via WebSocket
   useEffect(() => {
-    if (lastMessage) {
-      const message = JSON.parse(lastMessage.data);
-      
-      // Invalidar cache para qualquer tipo de atualização
-      if (message.type === 'STATUS_UPDATE' || message.type === 'LICENSE_UPDATE') {
-        console.log('[REALTIME] Recebida atualização, invalidando cache:', message);
+    if (lastMessage && lastMessage.data) {
+      try {
+        const message = JSON.parse(lastMessage.data);
         
-        // Invalidar todas as queries relacionadas
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/licenses'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/transporters'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/public/transporters'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/licenses'] });
-        
-        // Forçar refetch imediato
-        queryClient.refetchQueries({ queryKey: ['/api/admin/licenses'] });
-        
-        toast({
-          title: "Dados atualizados",
-          description: "As informações foram atualizadas automaticamente.",
-        });
+        // Invalidar cache para qualquer tipo de atualização
+        if (message.type === 'STATUS_UPDATE' || message.type === 'LICENSE_UPDATE') {
+          console.log('[REALTIME] Recebida atualização, invalidando cache:', message);
+          
+          // Invalidar todas as queries relacionadas
+          queryClient.invalidateQueries({ queryKey: ['/api/admin/licenses'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/admin/transporters'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/public/transporters'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/licenses'] });
+          
+          // Forçar refetch imediato
+          queryClient.refetchQueries({ queryKey: ['/api/admin/licenses'] });
+          
+          toast({
+            title: "Dados atualizados",
+            description: "As informações foram atualizadas automaticamente.",
+          });
+        }
+      } catch (error) {
+        console.log('[REALTIME] Erro ao processar mensagem WebSocket:', error);
       }
     }
   }, [lastMessage, toast]);

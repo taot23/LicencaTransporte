@@ -30,20 +30,24 @@ export default function AdminTransporters() {
 
   // Effect para invalidar cache quando houver atualizações via WebSocket
   useEffect(() => {
-    if (lastMessage) {
-      const message = JSON.parse(lastMessage.data);
-      
-      // Invalidar cache para qualquer tipo de atualização
-      if (message.type === 'STATUS_UPDATE' || message.type === 'LICENSE_UPDATE') {
-        console.log('[REALTIME] Transporters: Recebida atualização, invalidando cache:', message);
+    if (lastMessage && lastMessage.data) {
+      try {
+        const message = JSON.parse(lastMessage.data);
         
-        // Invalidar todas as queries relacionadas a transportadores
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/transporters'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/public/transporters'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-        
-        // Forçar refetch imediato
-        queryClient.refetchQueries({ queryKey: ['/api/admin/transporters'] });
+        // Invalidar cache para qualquer tipo de atualização
+        if (message.type === 'STATUS_UPDATE' || message.type === 'LICENSE_UPDATE') {
+          console.log('[REALTIME] Transporters: Recebida atualização, invalidando cache:', message);
+          
+          // Invalidar todas as queries relacionadas a transportadores
+          queryClient.invalidateQueries({ queryKey: ['/api/admin/transporters'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/public/transporters'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+          
+          // Forçar refetch imediato
+          queryClient.refetchQueries({ queryKey: ['/api/admin/transporters'] });
+        }
+      } catch (error) {
+        console.log('[REALTIME] Transporters: Erro ao processar mensagem WebSocket:', error);
       }
     }
   }, [lastMessage, queryClient]);
