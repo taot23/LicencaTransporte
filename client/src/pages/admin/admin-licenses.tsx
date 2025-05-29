@@ -1066,7 +1066,7 @@ export default function AdminLicensesPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700 mb-2 block">
-                        CNPJs da Empresa <span className="text-red-500">*</span>
+                        CNPJ Transportador <span className="text-red-500">*</span>
                       </FormLabel>
                       <TransporterCnpjSelector 
                         transporterId={selectedLicense.transporterId!}
