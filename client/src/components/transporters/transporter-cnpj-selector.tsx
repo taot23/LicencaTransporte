@@ -121,7 +121,22 @@ export function TransporterCnpjSelector({
         <SelectContent className="z-[9999]">
           {cnpjOptions.map((option, index) => (
             <SelectItem key={`${option.value}-${index}`} value={option.value}>
-              {option.type === "matriz" ? "(Matriz)" : "(Filial)"} {option.label.split(" - ")[0]} - {option.value}
+              <div className="flex items-center space-x-2 w-full">
+                <Building2
+                  className={`h-4 w-4 ${option.type === "matriz" ? "text-blue-600" : "text-green-600"}`}
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-sm">
+                    {option.type === "matriz" ? "(Matriz)" : "(Filial)"}{" "}
+                    {option.label.split(" - ")[0]}
+                  </div>
+                  <div className="text-xs text-gray-500 flex items-center space-x-2">
+                    <span>CNPJ: {option.value}</span>
+                    <span>•</span>
+                    <span>{option.location}</span>
+                  </div>
+                </div>
+              </div>
             </SelectItem>
           ))}
         </SelectContent>
