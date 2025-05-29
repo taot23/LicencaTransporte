@@ -172,7 +172,7 @@ export function LicenseForm({
           states: draft.states,
           isDraft: draft.isDraft,
           comments: draft.comments || undefined,
-          cargoType: undefined, // Adicionado para support ao tipo de carga
+          cargoType: draft.cargoType || undefined, // Preservar o tipo de carga do rascunho
         }
       : {
           type: "",
