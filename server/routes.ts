@@ -721,7 +721,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Transportador não encontrado" });
       }
       
-      // Retorne apenas os dados públicos necessários
+      // Retorne apenas os dados públicos necessários incluindo filiais
       const publicData = {
         id: transporter.id,
         name: transporter.name,
@@ -731,7 +731,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         city: transporter.city,
         state: transporter.state,
         email: transporter.email,
-        phone: transporter.phone
+        phone: transporter.phone,
+        subsidiaries: transporter.subsidiaries || []
       };
       
       res.json(publicData);
