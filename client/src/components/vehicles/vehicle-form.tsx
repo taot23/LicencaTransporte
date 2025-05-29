@@ -536,42 +536,79 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                 )}
               />
 
-              {/* Marca */}
-              <FormField
-                control={form.control}
-                name="brand"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">
-                      Marca <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <Select 
-                      value={field.value} 
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        setSelectedBrand(value);
-                        // Limpar o modelo quando trocar de marca
-                        form.setValue("model", "");
-                      }}
-                      disabled={!vehicleType}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="h-10 w-full">
-                          <SelectValue placeholder={vehicleType ? "Selecione a marca" : "Selecione primeiro o tipo"} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {getFilteredBrands(vehicleType).map((brand) => (
-                          <SelectItem key={brand} value={brand}>
-                            {brand}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Marca e Modelo lado a lado */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Marca */}
+                <FormField
+                  control={form.control}
+                  name="brand"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">
+                        Marca <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <Select 
+                        value={field.value} 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          setSelectedBrand(value);
+                          // Limpar o modelo quando trocar de marca
+                          form.setValue("model", "");
+                        }}
+                        disabled={!vehicleType}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-10 w-full">
+                            <SelectValue placeholder={vehicleType ? "Selecione a marca" : "Selecione primeiro o tipo"} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {getFilteredBrands(vehicleType).map((brand) => (
+                            <SelectItem key={brand} value={brand}>
+                              {brand}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Modelo */}
+                <FormField
+                  control={form.control}
+                  name="model"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">
+                        Modelo <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <Select 
+                        value={field.value} 
+                        onValueChange={field.onChange}
+                        disabled={!selectedBrand || !vehicleType}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-10 w-full">
+                            <SelectValue placeholder={selectedBrand ? "Selecione o modelo" : "Selecione primeiro a marca"} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {getFilteredModels(selectedBrand, vehicleType).map((model) => (
+                            <SelectItem key={model} value={model}>
+                              {model}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+
 
               {/* Qtd. Eixos */}
               <FormField
@@ -847,6 +884,49 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                 )}
               />
             </div>
+          </div>
+
+          {/* Nome Proprietário (campo largo que se estende pelas duas colunas) */}
+          <div className="grid grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="ownerName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">
+                    Nome Proprietário
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="Nome do proprietário" {...field} className="h-10 w-full" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="ownershipType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium">
+                    Veículo <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value} defaultValue="proprio">
+                    <FormControl>
+                      <SelectTrigger className="h-10 w-full">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="proprio">Próprio</SelectItem>
+                      <SelectItem value="terceiro">Terceiro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           {/* Tipo de Carroceria (campo largo quando necessário) */}
