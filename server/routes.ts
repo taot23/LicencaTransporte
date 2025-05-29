@@ -1253,7 +1253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Log detalhado dos rascunhos
       console.log(`[DEBUG DETALHES] Retornando ${drafts.length} licenças com os seguintes IDs:`);
       drafts.forEach(d => {
-        console.log(`- ID: ${d.id}, isDraft: ${d.isDraft}, status: ${d.status}, transporterId: ${d.transporterId}, comments: ${d.comments?.substring(0, 30)}`);
+        console.log(`- ID: ${d.id}, isDraft: ${d.isDraft}, status: ${d.status}, transporterId: ${d.transporterId}, cargoType: ${d.cargoType}, comments: ${d.comments?.substring(0, 30)}`);
       });
       
       res.json(drafts);
