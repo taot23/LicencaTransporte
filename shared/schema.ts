@@ -505,12 +505,13 @@ export type InsertDraftLicense = z.infer<typeof insertDraftLicenseSchema>;
 export type UpdateLicenseStatus = z.infer<typeof updateLicenseStatusSchema>;
 export type UpdateLicenseState = z.infer<typeof updateLicenseStateSchema>;
 
+// Estados disponíveis para solicitação de licenças AET
 export const brazilianStates = [
   { code: "AL", name: "Alagoas" },
   { code: "BA", name: "Bahia" },
   { code: "CE", name: "Ceará" },
   { code: "DF", name: "Distrito Federal" },
-  { code: "DNIT", name: "DNIT" },
+  { code: "DNIT", name: "FEDERAL" },
   { code: "ES", name: "Espírito Santo" },
   { code: "GO", name: "Goiás" },
   { code: "MA", name: "Maranhão" },
@@ -525,6 +526,37 @@ export const brazilianStates = [
   { code: "SC", name: "Santa Catarina" },
   { code: "SE", name: "Sergipe" },
   { code: "SP", name: "São Paulo" },
+  { code: "TO", name: "Tocantins" },
+];
+
+// Todos os estados brasileiros (em ordem alfabética) para cadastro de endereço
+export const allBrazilianStates = [
+  { code: "AC", name: "Acre" },
+  { code: "AL", name: "Alagoas" },
+  { code: "AP", name: "Amapá" },
+  { code: "AM", name: "Amazonas" },
+  { code: "BA", name: "Bahia" },
+  { code: "CE", name: "Ceará" },
+  { code: "DF", name: "Distrito Federal" },
+  { code: "ES", name: "Espírito Santo" },
+  { code: "GO", name: "Goiás" },
+  { code: "MA", name: "Maranhão" },
+  { code: "MT", name: "Mato Grosso" },
+  { code: "MS", name: "Mato Grosso do Sul" },
+  { code: "MG", name: "Minas Gerais" },
+  { code: "PA", name: "Pará" },
+  { code: "PB", name: "Paraíba" },
+  { code: "PR", name: "Paraná" },
+  { code: "PE", name: "Pernambuco" },
+  { code: "PI", name: "Piauí" },
+  { code: "RJ", name: "Rio de Janeiro" },
+  { code: "RN", name: "Rio Grande do Norte" },
+  { code: "RS", name: "Rio Grande do Sul" },
+  { code: "RO", name: "Rondônia" },
+  { code: "RR", name: "Roraima" },
+  { code: "SC", name: "Santa Catarina" },
+  { code: "SP", name: "São Paulo" },
+  { code: "SE", name: "Sergipe" },
   { code: "TO", name: "Tocantins" },
 ];
 

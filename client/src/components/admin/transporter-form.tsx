@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Transporter, InsertTransporter, personTypeEnum, documentSchema, subsidiarySchema, brazilianStates } from "@shared/schema";
+import { Transporter, InsertTransporter, personTypeEnum, documentSchema, subsidiarySchema, allBrazilianStates } from "@shared/schema";
 import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -675,9 +675,9 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
                                 <SelectValue placeholder="UF" />
                               </SelectTrigger>
                               <SelectContent>
-                                {brazilianStates.map((state) => (
+                                {allBrazilianStates.map((state) => (
                                   <SelectItem key={state.code} value={state.code}>
-                                    {state.code}
+                                    {state.code} - {state.name}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -846,9 +846,9 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
                                   <SelectValue placeholder="UF" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {brazilianStates.map((state) => (
+                                  {allBrazilianStates.map((state) => (
                                     <SelectItem key={state.code} value={state.code}>
-                                      {state.code}
+                                      {state.code} - {state.name}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
