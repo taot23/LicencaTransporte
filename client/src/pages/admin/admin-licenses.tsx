@@ -806,10 +806,14 @@ export default function AdminLicensesPage() {
                               </TableCell>
                               <TableCell>{license.mainVehiclePlate}</TableCell>
                               <TableCell>
-                                <TransporterWithSubsidiaries 
-                                  transporterId={license.transporterId} 
-                                  compact={true}
-                                />
+                                {license.transporterId ? (
+                                  <TransporterWithSubsidiaries 
+                                    transporterId={license.transporterId} 
+                                    compact={true}
+                                  />
+                                ) : (
+                                  <div className="text-sm text-gray-500">Sem transportador</div>
+                                )}
                               </TableCell>
                               <TableCell>
                                 <div className="flex flex-wrap gap-1">

@@ -11,6 +11,7 @@ import { StatusHistory } from "@/components/licenses/status-history";
 import { StatusHistoryNew } from "@/components/licenses/status-history-new";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { TransporterWithSubsidiaries } from "@/components/transporters/transporter-with-subsidiaries";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
