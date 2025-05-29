@@ -88,11 +88,20 @@ const processVehicleData = (req: any, res: any, next: any) => {
     // Campos individuais já estão acessíveis em req.body
     console.log('Using form-data fields directly:', req.body);
     
+    // Tratar campos que podem vir como arrays (problema do form-data duplicado)
+    Object.keys(req.body).forEach(key => {
+      if (Array.isArray(req.body[key])) {
+        // Usar o primeiro valor se for array
+        req.body[key] = req.body[key][0];
+      }
+    });
+    
     // Garantir que números são convertidos corretamente
     if (req.body.tare) req.body.tare = Number(req.body.tare);
     if (req.body.crlvYear) req.body.crlvYear = Number(req.body.crlvYear);
     if (req.body.year) req.body.year = Number(req.body.year);
     if (req.body.axleCount) req.body.axleCount = Number(req.body.axleCount);
+    if (req.body.cmt) req.body.cmt = Number(req.body.cmt);
   }
   // Caso 3: JSON direto (nossa nova abordagem para requests sem arquivo)
   else if (contentType.includes('application/json')) {
