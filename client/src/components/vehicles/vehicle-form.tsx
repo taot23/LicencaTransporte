@@ -774,37 +774,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                 <div className="h-[76px]"></div> /* Espaço vazio para manter alinhamento */
               )}
 
-              {/* Modelo */}
-              <FormField
-                control={form.control}
-                name="model"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">
-                      Modelo <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <Select 
-                      value={field.value} 
-                      onValueChange={field.onChange}
-                      disabled={!selectedBrand || !vehicleType}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="h-10 w-full">
-                          <SelectValue placeholder={selectedBrand ? "Selecione o modelo" : "Selecione primeiro a marca"} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {getFilteredModels(selectedBrand, vehicleType).map((model) => (
-                          <SelectItem key={model} value={model}>
-                            {model}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
 
               {/* CMT (apenas para unidade tratora) */}
               {vehicleType === "tractor_unit" ? (
