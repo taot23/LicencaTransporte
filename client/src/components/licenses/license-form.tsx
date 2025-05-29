@@ -138,12 +138,57 @@ export function LicenseForm({
       queryKey: ["/api/user/transporters"],
     });
 
-  // Define filtered vehicle lists based on type
+  // Define filtered vehicle lists based on type and license restrictions
   const tractorUnits = vehicles?.filter((v) => v.type === "tractor_unit") || [];
   const trucks = vehicles?.filter((v) => v.type === "truck") || [];
-  const semiTrailers = vehicles?.filter((v) => v.type === "semi_trailer") || [];
+  
+  // Filtrar semi-reboques baseado no tipo de conjunto
+  const semiTrailers = vehicles?.filter((v) => {
+    if (v.type !== "semi_trailer") return false;
+    
+    const licenseType = form.watch("type");
+    
+    // Rodotrem 9 eixos: pode selecionar semi-reboques de 2 eixos
+    if (licenseType === "roadtrain_9_axles") {
+      return v.axles === 2;
+    }
+    
+    // Bitrem 9 eixos: só pode selecionar semi-reboques de 3 eixos
+    if (licenseType === "bitrain_9_axles") {
+      return v.axles === 3;
+    }
+    
+    // Bitrem 7 eixos: pode selecionar semi-reboques de 2 eixos
+    if (licenseType === "bitrain_7_axles") {
+      return v.axles === 2;
+    }
+    
+    // Bitrem 6 eixos: pode selecionar semi-reboques de 2 eixos
+    if (licenseType === "bitrain_6_axles") {
+      return v.axles === 2;
+    }
+    
+    // Para outros tipos, permitir todos
+    return true;
+  }) || [];
+  
   const trailers = vehicles?.filter((v) => v.type === "trailer") || [];
-  const dollys = vehicles?.filter((v) => v.type === "dolly") || [];
+  
+  // Filtrar dollys baseado no tipo de conjunto
+  const dollys = vehicles?.filter((v) => {
+    if (v.type !== "dolly") return false;
+    
+    const licenseType = form.watch("type");
+    
+    // Rodotrem 9 eixos: pode selecionar dollys de 2 eixos
+    if (licenseType === "roadtrain_9_axles") {
+      return v.axles === 2;
+    }
+    
+    // Para outros tipos, permitir todos
+    return true;
+  }) || [];
+  
   const flatbeds = vehicles?.filter((v) => v.type === "flatbed") || [];
 
   // Define a schema that can be validated partially (for drafts)
