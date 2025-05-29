@@ -202,6 +202,16 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
         // Reset cargo type when changing license type
         form.setValue("cargoType", undefined);
         setCargoType("");
+        
+        // Se mudou para prancha, limpar os valores pré-preenchidos de largura e altura
+        if (value.type === "flatbed") {
+          form.setValue("width", undefined);
+          form.setValue("height", undefined);
+        } else {
+          // Se mudou para outro tipo, aplicar valores padrão
+          form.setValue("width", 2.60);
+          form.setValue("height", 4.40);
+        }
       }
       
       if (name === "cargoType") {
