@@ -31,6 +31,7 @@ import {
 import { StatusBadge } from "@/components/licenses/status-badge";
 import { ProgressFlow, StateProgressFlow } from "@/components/licenses/progress-flow";
 import { LicenseDetailsCard } from "@/components/licenses/license-details-card";
+import { TransporterWithSubsidiaries } from "@/components/transporters/transporter-with-subsidiaries";
 import {
   Table,
   TableBody,
@@ -805,7 +806,7 @@ export default function AdminLicensesPage() {
                               </TableCell>
                               <TableCell>{license.mainVehiclePlate}</TableCell>
                               <TableCell>
-                                <TransporterInfo 
+                                <TransporterWithSubsidiaries 
                                   transporterId={license.transporterId} 
                                   compact={true}
                                 />
