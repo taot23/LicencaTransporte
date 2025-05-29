@@ -141,6 +141,11 @@ export function LicenseForm({
     vehicleId: number;
     fieldName: string;
   } | null>(null);
+  
+  // Estados para confirmação de envio com veículos de terceiros
+  const [showSubmitConfirmation, setShowSubmitConfirmation] = useState(false);
+  const [pendingSubmitData, setPendingSubmitData] = useState<any>(null);
+  const [thirdPartyVehiclesInSubmit, setThirdPartyVehiclesInSubmit] = useState<string[]>([]);
 
   // Fetch vehicles for the dropdown selectors
   const { data: vehicles, isLoading: isLoadingVehicles } = useQuery<Vehicle[]>({
@@ -251,6 +256,41 @@ export function LicenseForm({
   const cancelThirdPartyVehicle = () => {
     setShowThirdPartyConfirmation(false);
     setPendingVehicleSelection(null);
+  };
+
+  // Função para confirmar o envio com veículos de terceiros
+  const confirmSubmitWithThirdParty = async () => {
+    if (pendingSubmitData) {
+      try {
+        const url = draft ? `/api/licenses/drafts/${draft.id}/submit` : '/api/licenses';
+        const method = "POST";
+        const res = await apiRequest(method, url, pendingSubmitData);
+        const result = await res.json();
+        
+        toast({
+          title: "Solicitação enviada",
+          description: "A solicitação de licença foi enviada com sucesso",
+        });
+        onComplete();
+      } catch (error: any) {
+        toast({
+          title: "Erro",
+          description: error.message || "Não foi possível enviar a solicitação",
+          variant: "destructive",
+        });
+      } finally {
+        setShowSubmitConfirmation(false);
+        setPendingSubmitData(null);
+        setThirdPartyVehiclesInSubmit([]);
+      }
+    }
+  };
+
+  // Função para cancelar o envio com veículos de terceiros
+  const cancelSubmitWithThirdParty = () => {
+    setShowSubmitConfirmation(false);
+    setPendingSubmitData(null);
+    setThirdPartyVehiclesInSubmit([]);
   };
 
   // Dynamic vehicle filters based on license type
@@ -573,22 +613,11 @@ export function LicenseForm({
         const thirdPartyVehicles = checkForThirdPartyVehicles(data);
         
         if (thirdPartyVehicles.length > 0) {
-          // Mostrar modal de confirmação para veículos de terceiros
-          const confirmed = await new Promise<boolean>((resolve) => {
-            // Se já estamos mostrando o modal, aguardar resposta
-            if (showThirdPartyConfirmation) {
-              resolve(false);
-              return;
-            }
-            
-            // Criar um modal específico para confirmação de envio
-            const confirmMessage = `O pedido contém veículos em nome de terceiros:\n\n${thirdPartyVehicles.join('\n')}\n\nDeseja continuar com o envio?`;
-            resolve(window.confirm(confirmMessage));
-          });
-
-          if (!confirmed) {
-            throw new Error('Envio cancelado pelo usuário devido a veículos de terceiros.');
-          }
+          // Preparar dados para confirmação no modal
+          setPendingSubmitData(data);
+          setThirdPartyVehiclesInSubmit(thirdPartyVehicles);
+          setShowSubmitConfirmation(true);
+          throw new Error('Aguardando confirmação do usuário para veículos de terceiros.');
         }
 
         // Adicionar log detalhado para debug
@@ -2866,7 +2895,7 @@ export function LicenseForm({
         </div>
       </form>
 
-      {/* Modal de confirmação para veículos de terceiros */}
+      {/* Modal de confirmação para veículos de terceiros na seleção */}
       <AlertDialog open={showThirdPartyConfirmation} onOpenChange={setShowThirdPartyConfirmation}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -2881,6 +2910,36 @@ export function LicenseForm({
             </AlertDialogCancel>
             <AlertDialogAction onClick={confirmThirdPartyVehicle}>
               Sim
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Modal de confirmação para envio com veículos de terceiros */}
+      <AlertDialog open={showSubmitConfirmation} onOpenChange={setShowSubmitConfirmation}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Envio com Veículos de Terceiros</AlertDialogTitle>
+            <AlertDialogDescription>
+              O pedido contém os seguintes veículos em nome de terceiros:
+              <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-md">
+                {thirdPartyVehiclesInSubmit.map((vehicle, index) => (
+                  <div key={index} className="text-sm font-medium text-orange-800">
+                    • {vehicle}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3">
+                Deseja continuar com o envio da solicitação?
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelSubmitWithThirdParty}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmSubmitWithThirdParty}>
+              Confirmar Envio
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
