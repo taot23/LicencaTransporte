@@ -84,8 +84,8 @@ export function DimensionField({
       return;
     }
     
-    // Para campo de comprimento: adicionar zeros após vírgula se necessário
-    if (fieldType === "comprimento" && displayValue.includes(',')) {
+    // Para todos os campos de dimensão: adicionar zeros após vírgula se necessário
+    if (displayValue.includes(',')) {
       const parts = displayValue.split(',');
       if (parts[1] === '') {
         // Se tem vírgula mas nada depois, adiciona "00"
@@ -96,7 +96,7 @@ export function DimensionField({
         setDisplayValue(parts[0] + ',' + parts[1] + '0');
         updateFormValue(parts[0] + ',' + parts[1] + '0');
       }
-    } else if (fieldType === "comprimento" && !displayValue.includes(',')) {
+    } else if (displayValue && !displayValue.includes(',')) {
       // Se não tem vírgula, adicionar ,00
       setDisplayValue(displayValue + ',00');
       updateFormValue(displayValue + ',00');
