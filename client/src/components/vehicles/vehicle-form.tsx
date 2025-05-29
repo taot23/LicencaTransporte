@@ -321,18 +321,18 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b bg-primary text-white rounded-t-lg">
-            <h2 className="text-lg font-semibold">
-              {vehicle ? "Editar Veículo" : "Cadastrar Novo Veículo"}
-            </h2>
-            <Button type="button" variant="ghost" size="icon" onClick={onCancel} className="h-5 w-5 text-white hover:bg-primary/90">
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
-          
+      <div className="bg-white w-full">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b bg-primary text-white rounded-t-lg">
+          <h2 className="text-lg font-semibold">
+            {vehicle ? "Editar Veículo" : "Cadastrar Novo Veículo"}
+          </h2>
+          <Button type="button" variant="ghost" size="icon" onClick={onCancel} className="h-5 w-5 text-white hover:bg-primary/90">
+            <X className="h-3 w-3" />
+          </Button>
+        </div>
+        
+        <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="p-6 space-y-4">
             {/* Primeira linha: PLACA | RENAVAM */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -800,8 +800,8 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
               </div>
             </div>
           </div>
-          
-          <div className="flex justify-end gap-2 py-2 px-4 border-t">
+            
+          <div className="flex justify-end gap-2 py-4 px-6 border-t">
             <Button type="button" variant="outline" onClick={onCancel} className="h-10 px-4">
               Cancelar
             </Button>
@@ -810,8 +810,8 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
               {vehicle ? "Atualizar" : "Cadastrar Veículo"}
             </Button>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </Form>
   );
 }
