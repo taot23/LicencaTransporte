@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 // Types
 interface Vehicle {
@@ -185,7 +185,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
     );
     console.log("filteredModels:", filteredModels.length);
 
-    const brands = [...new Set(filteredModels.map(model => model.brand))].sort();
+    const brands = Array.from(new Set(filteredModels.map(model => model.brand))).sort();
     console.log("final brands:", brands);
     
     return brands;
@@ -197,22 +197,22 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
     const allowedTypes = type === "tractor_unit" ? ["tractor_unit", "truck"] : 
                         type === "semi_trailer" ? ["semi_trailer", "trailer"] : [type];
 
-    return [...new Set(
+    return Array.from(new Set(
       vehicleModels
         .filter(model => 
           model.brand === brand && allowedTypes.includes(model.vehicleType)
         )
         .map(model => model.model)
-    )].sort();
+    )).sort();
   };
 
   // Mutations
   const createMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      return apiRequest("/api/vehicles", {
+      return fetch("/api/vehicles", {
         method: "POST",
         body: data,
-      });
+      }).then(res => res.json());
     },
     onSuccess: () => {
       toast({ title: "Veículo cadastrado com sucesso!" });
@@ -230,10 +230,10 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
 
   const updateMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      return apiRequest(`/api/vehicles/${vehicle?.id}`, {
+      return fetch(`/api/vehicles/${vehicle?.id}`, {
         method: "PUT",
         body: data,
-      });
+      }).then(res => res.json());
     },
     onSuccess: () => {
       toast({ title: "Veículo atualizado com sucesso!" });
