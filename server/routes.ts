@@ -2918,6 +2918,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Atualizar transportador
       const updatedTransporter = await storage.updateTransporter(transporterId, transporterData);
       
+      // Enviar notificação em tempo real via WebSocket
+      broadcastMessage({
+        type: 'LICENSE_UPDATE',
+        data: {
+          type: 'TRANSPORTER_UPDATED',
+          transporterId: transporterId,
+          transporter: updatedTransporter
+        }
+      });
+      
       res.json(updatedTransporter);
     } catch (error) {
       console.error("Erro ao atualizar transportador:", error);
@@ -2942,6 +2952,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       await storage.deleteTransporter(transporterId);
+      
+      // Enviar notificação em tempo real via WebSocket
+      broadcastMessage({
+        type: 'LICENSE_UPDATE',
+        data: {
+          type: 'TRANSPORTER_DELETED',
+          transporterId: transporterId
+        }
+      });
       
       res.status(204).send();
     } catch (error) {
