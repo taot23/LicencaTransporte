@@ -204,7 +204,7 @@ export default function AdminTransporters() {
                 Novo
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Novo Transportador</DialogTitle>
               </DialogHeader>
@@ -225,7 +225,7 @@ export default function AdminTransporters() {
         {/* Modal de edição de transportador */}
         {selectedTransporter && (
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Editar Transportador</DialogTitle>
               </DialogHeader>
