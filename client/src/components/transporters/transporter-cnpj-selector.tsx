@@ -133,9 +133,11 @@ export function TransporterCnpjSelector({
 
   const handleCnpjChange = (value: string) => {
     console.log('[CNPJ Selector] CNPJ selecionado:', value);
+    console.log('[CNPJ Selector] onCnpjSelect callback existe:', !!onCnpjSelect);
     setSelectedCnpj(value);
     const selectedOption = cnpjOptions.find((option) => option.value === value);
     if (selectedOption && onCnpjSelect) {
+      console.log('[CNPJ Selector] Chamando callback onCnpjSelect com:', value, selectedOption.label);
       onCnpjSelect(value, selectedOption.label);
     }
   };

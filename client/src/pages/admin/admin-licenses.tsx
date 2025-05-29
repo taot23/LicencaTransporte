@@ -1073,7 +1073,10 @@ export default function AdminLicensesPage() {
                         transporterId={selectedLicense.transporterId!}
                         selectedCnpj={field.value}
                         onCnpjSelect={(cnpj, label) => {
+                          console.log('[Form] CNPJ recebido no callback:', cnpj);
+                          console.log('[Form] Valor atual do campo:', field.value);
                           field.onChange(cnpj);
+                          console.log('[Form] Novo valor do campo após onChange:', cnpj);
                         }}
                       />
                       <FormMessage />
