@@ -1493,6 +1493,11 @@ export class DatabaseStorage implements IStorage {
       updateData.validUntil = new Date(data.validUntil);
     }
     
+    // Atualizar CNPJ selecionado, se fornecido
+    if (data.selectedCnpj) {
+      updateData.selectedCnpj = data.selectedCnpj;
+    }
+    
     // Para status approved, atualizar o status geral para approved
     if (data.status === 'approved') {
       updateData.status = 'approved';

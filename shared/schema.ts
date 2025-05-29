@@ -489,6 +489,7 @@ export const updateLicenseStateSchema = z.object({
   comments: z.string().optional(),
   validUntil: z.string().optional(),
   aetNumber: z.string().optional(), // Número da AET para o status "Análise do Órgão"
+  selectedCnpj: z.string().optional(), // CNPJ selecionado da empresa transportadora
 });
 
 // Type definitions
