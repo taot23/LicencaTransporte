@@ -169,8 +169,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
       secondTrailerId: undefined,
       flatbedId: undefined,
       length: undefined, // Valor não preenchido inicialmente
-      width: undefined,
-      height: undefined,
+      width: 2.60, // Valor padrão de 2,60 metros
+      height: 4.40, // Valor padrão de 4,40 metros
       additionalPlates: [],
       states: [],
       additionalPlatesDocuments: [],
