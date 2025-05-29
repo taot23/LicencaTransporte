@@ -84,6 +84,12 @@ const DIMENSION_LIMITS = {
     maxWidth: 3.20,
     maxHeight: 4.95
   },
+  agricultural_machinery: {
+    maxLength: 25.00,
+    minLength: 0,
+    maxWidth: 3.20,
+    maxHeight: 4.95
+  },
   oversized: {
     // Sem limites pré-definidos
     maxLength: 999.99,
@@ -239,6 +245,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
           limits = currentCargoType === 'oversized' 
             ? DIMENSION_LIMITS.oversized 
             : DIMENSION_LIMITS.flatbed;
+        } else if (currentCargoType === 'agricultural_machinery') {
+          limits = DIMENSION_LIMITS.agricultural_machinery;
         }
         
         // Verificar e validar dimensões atuais
