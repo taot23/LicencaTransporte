@@ -208,6 +208,14 @@ const broadcastMessage = (message: WSMessage) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Log para todas as requisições PATCH
+  app.use((req, res, next) => {
+    if (req.method === 'PATCH') {
+      console.log(`=== PATCH REQUEST: ${req.url} ===`);
+    }
+    next();
+  });
+  
   // Setup authentication routes
   setupAuth(app);
 
@@ -3143,6 +3151,10 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   
   // Endpoint específico para atualizar o status de um estado específico em uma licença
   app.patch('/api/admin/licenses/:id/state-status', requireOperational, upload.single('stateFile'), async (req, res) => {
+    console.log('=== ENDPOINT STATE-STATUS CHAMADO ===');
+    console.log('URL completa:', req.url);
+    console.log('Método:', req.method);
+    console.log('Params:', req.params);
     try {
       const licenseId = parseInt(req.params.id);
       
