@@ -37,6 +37,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { CampoPlacaAdicional } from "./placas-adicionais";
 import { VehicleSelectCard } from "./vehicle-select-card";
 import {
@@ -126,6 +136,11 @@ export function LicenseForm({
   const [showVehicleDialog, setShowVehicleDialog] = useState(false);
   const [showRequiredFieldsWarning, setShowRequiredFieldsWarning] =
     useState(false);
+  const [showThirdPartyConfirmation, setShowThirdPartyConfirmation] = useState(false);
+  const [pendingVehicleSelection, setPendingVehicleSelection] = useState<{
+    vehicleId: number;
+    fieldName: string;
+  } | null>(null);
 
   // Fetch vehicles for the dropdown selectors
   const { data: vehicles, isLoading: isLoadingVehicles } = useQuery<Vehicle[]>({
@@ -209,6 +224,34 @@ export function LicenseForm({
       }
     }
   }, [preSelectedTransporterId, transporters, toast]);
+
+  // Função para verificar e confirmar seleção de veículo de terceiro
+  const handleVehicleSelection = (vehicleId: number, fieldName: string) => {
+    const vehicle = vehicles?.find(v => v.id === vehicleId);
+    if (vehicle && vehicle.ownershipType === 'terceiro') {
+      // Se é veículo de terceiro, mostrar modal de confirmação
+      setPendingVehicleSelection({ vehicleId, fieldName });
+      setShowThirdPartyConfirmation(true);
+    } else {
+      // Se é veículo próprio, aplicar diretamente
+      form.setValue(fieldName as any, vehicleId);
+    }
+  };
+
+  // Função para confirmar a seleção de veículo de terceiro
+  const confirmThirdPartyVehicle = () => {
+    if (pendingVehicleSelection) {
+      form.setValue(pendingVehicleSelection.fieldName as any, pendingVehicleSelection.vehicleId);
+      setShowThirdPartyConfirmation(false);
+      setPendingVehicleSelection(null);
+    }
+  };
+
+  // Função para cancelar a seleção de veículo de terceiro
+  const cancelThirdPartyVehicle = () => {
+    setShowThirdPartyConfirmation(false);
+    setPendingVehicleSelection(null);
+  };
 
   // Dynamic vehicle filters based on license type
   const semiTrailers = useMemo(() => {
