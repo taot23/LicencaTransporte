@@ -463,9 +463,30 @@ export function LicenseForm({
     },
   });
 
+  // Função para verificar se há veículos não cadastrados
+  const checkForUnregisteredVehicles = (): string[] => {
+    const additionalPlates = form.getValues('additionalPlates') || [];
+    const unregisteredPlates: string[] = [];
+    
+    additionalPlates.forEach((plate: string) => {
+      if (plate && !vehicles?.some(v => v.plate === plate)) {
+        unregisteredPlates.push(plate);
+      }
+    });
+    
+    return unregisteredPlates;
+  };
+
   const submitRequestMutation = useMutation({
     mutationFn: async (data: z.infer<typeof insertLicenseRequestSchema>) => {
       try {
+        // Verificar se há veículos não cadastrados antes de enviar
+        const unregisteredPlates = checkForUnregisteredVehicles();
+        
+        if (unregisteredPlates.length > 0) {
+          throw new Error(`Há veículos não cadastrados no pedido: ${unregisteredPlates.join(', ')}. Cadastre todos os veículos antes de finalizar o pedido.`);
+        }
+
         // Adicionar log detalhado para debug
         console.log("Enviando licença:", JSON.stringify(data, null, 2));
 
