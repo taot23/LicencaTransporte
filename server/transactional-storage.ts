@@ -699,6 +699,19 @@ export class TransactionalStorage implements IStorage {
       aetNumber = data.aetNumber;
     }
     
+    // Processar CNPJ específico por estado se fornecido
+    let stateCnpjs = [...(license.stateCnpjs || [])];
+    if (data.stateCnpj) {
+      const newStateCnpj = `${data.state}:${data.stateCnpj}`;
+      const existingCnpjIndex = stateCnpjs.findIndex(s => s.startsWith(`${data.state}:`));
+      
+      if (existingCnpjIndex >= 0) {
+        stateCnpjs[existingCnpjIndex] = newStateCnpj;
+      } else {
+        stateCnpjs.push(newStateCnpj);
+      }
+    }
+
     // Se recebemos data de validade para status aprovado, armazenar como licença principal também
     let validUntil = license.validUntil;
     if (data.status === "approved" && data.validUntil) {
@@ -737,6 +750,7 @@ export class TransactionalStorage implements IStorage {
         stateStatuses,
         stateFiles,
         stateAETNumbers, // Incluir o array de números AET específicos por estado
+        stateCnpjs, // Incluir o array de CNPJs específicos por estado
         updatedAt: new Date(),
         licenseFileUrl,
         validUntil,

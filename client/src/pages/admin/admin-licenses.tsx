@@ -308,6 +308,9 @@ export default function AdminLicensesPage() {
       
       // Incluir CNPJ selecionado sempre (pode ser string vazia)
       formData.append("selectedCnpj", data.selectedCnpj || "");
+      
+      // Incluir CNPJ específico para este estado
+      formData.append("stateCnpj", data.selectedCnpj || "");
       console.log('Enviando dados - selectedCnpj:', data.selectedCnpj);
       
       const response = await apiRequest("PATCH", `/api/admin/licenses/${id}/state-status`, formData);
@@ -489,15 +492,29 @@ export default function AdminLicensesPage() {
       }
     }
     
-    // Determinar o CNPJ já selecionado para esta licença, se houver
-    const currentSelectedCnpj = license.selectedCnpj || "";
+    // Determinar o CNPJ específico para este estado
+    let currentStateCnpj = "";
+    if (license.stateCnpjs && license.stateCnpjs.length > 0) {
+      const stateCnpjEntry = license.stateCnpjs.find(entry => entry.startsWith(`${state}:`));
+      if (stateCnpjEntry) {
+        const [_, cnpj] = stateCnpjEntry.split(':');
+        if (cnpj) {
+          currentStateCnpj = cnpj;
+        }
+      }
+    }
+    
+    // Fallback para o CNPJ global se não houver CNPJ específico para o estado
+    if (!currentStateCnpj && license.selectedCnpj) {
+      currentStateCnpj = license.selectedCnpj;
+    }
     
     stateStatusForm.reset({
       state: state,
       status: currentStateStatus,
       comments: "",
       aetNumber: "", // Resetar também o campo de número da AET
-      selectedCnpj: currentSelectedCnpj, // Carregar o CNPJ já selecionado, se houver
+      selectedCnpj: currentStateCnpj, // Carregar o CNPJ específico do estado
       licenseFile: undefined, // Resetar o campo de arquivo
       validUntil: "", // Resetar a data de validade como string vazia, não undefined
     });
