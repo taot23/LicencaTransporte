@@ -144,9 +144,6 @@ export function TransporterCnpjSelector({
 
   return (
     <div className="mb-4">
-      <Label className="text-sm font-medium text-gray-700 mb-2 block">
-        CNPJs da Empresa <span className="text-red-500">*</span>
-      </Label>
       <Select value={selectedCnpj} onValueChange={handleCnpjChange}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Selecione um CNPJ cadastrado" />
