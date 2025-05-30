@@ -280,9 +280,18 @@ export function VehicleList({ vehicles, isLoading, onEdit, onRefresh }: VehicleL
                         <Button 
                           variant="link" 
                           className="p-0 h-auto text-blue-600"
-                          onClick={() => handleDocumentPreview(vehicle)}
+                          asChild
                         >
-                          Ver CRLV
+                          <a 
+                            href={vehicle.crlvUrl?.startsWith('http') 
+                              ? vehicle.crlvUrl 
+                              : `${window.location.origin}${vehicle.crlvUrl}`
+                            } 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            Ver CRLV
+                          </a>
                         </Button>
                       ) : (
                         <span className="text-gray-500 text-sm">Não disponível</span>

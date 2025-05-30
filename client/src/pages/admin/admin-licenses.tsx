@@ -325,26 +325,8 @@ export default function AdminLicensesPage() {
         description: "Status do estado atualizado com sucesso!",
       });
       
-      // Limpar o formulário e fechar o diálogo com um pequeno atraso
-      // para garantir que o DOM tenha tempo de processar as mudanças
-      setTimeout(() => {
-        // Limpar o formulário completamente
-        stateStatusForm.reset({
-          state: "",
-          status: "",
-          comments: "",
-          aetNumber: "",
-          selectedCnpj: "",
-          licenseFile: undefined,
-          validUntil: "",
-        });
-        
-        // Fechar o diálogo
-        setStateStatusDialogOpen(false);
-        
-        // Redefinir estado selecionado
-        setSelectedState("");
-      }, 100);
+      // NÃO limpar o formulário - manter os dados após salvar
+      // Apenas invalidar as queries para atualizar os dados
       
       // Invalidar todas as queries relacionadas para garantir dados atualizados
       setTimeout(() => {
@@ -511,11 +493,28 @@ export default function AdminLicensesPage() {
       currentStateCnpj = license.selectedCnpj;
     }
     
+    // Determinar o número da AET específico para este estado
+    let currentStateAetNumber = "";
+    if (license.stateAETNumbers && license.stateAETNumbers.length > 0) {
+      const stateAetEntry = license.stateAETNumbers.find(entry => entry.startsWith(`${state}:`));
+      if (stateAetEntry) {
+        const [_, aetNumber] = stateAetEntry.split(':');
+        if (aetNumber) {
+          currentStateAetNumber = aetNumber;
+        }
+      }
+    }
+    
+    // Fallback para o número AET global se não houver específico para o estado
+    if (!currentStateAetNumber && license.aetNumber) {
+      currentStateAetNumber = license.aetNumber;
+    }
+    
     stateStatusForm.reset({
       state: state,
       status: currentStateStatus,
       comments: "",
-      aetNumber: "", // Resetar também o campo de número da AET
+      aetNumber: currentStateAetNumber, // Preservar o número da AET existente
       selectedCnpj: currentStateCnpj, // Carregar o CNPJ específico do estado
       licenseFile: undefined, // Resetar o campo de arquivo
       validUntil: "", // Resetar a data de validade como string vazia, não undefined
