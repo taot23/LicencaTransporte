@@ -1,0 +1,34 @@
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ aet-license-system │ fork     │ 0    │ online    │ 0%       │ 16.6mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[TAILING] Tailing last 3 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out.log last 3 lines:
+0|aet-lice | [DEBUG VEHICLES] Usuário tem 1 transportadores vinculados
+0|aet-lice | 12:56:10 AM [express] GET /api/vehicles 500 in 15ms :: {"message":"Erro ao buscar veículos"}
+0|aet-lice | 12:56:10 AM [express] GET /api/vehicle-models 304 in 28ms :: [{"id":1,"brand":"DAF","model":"CF FT 41…
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error.log last 3 lines:
+0|aet-lice |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+0|aet-lice | 
+0|aet-lice | Node.js v20.19.2
+
+0|aet-license-system  | /var/www/aetlicensesystem/LicencaTransporte/server/db.ts:6
+0|aet-license-system  |   throw new Error(
+0|aet-license-system  |         ^
+0|aet-license-system  | Error: DATABASE_URL must be set. Did you forget to provision a database?
+0|aet-license-system  |     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/db.ts:6:9)
+0|aet-license-system  |     at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+0|aet-license-system  |     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+0|aet-license-system  |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+0|aet-license-system  | Node.js v20.19.2
+0|aet-license-system  | /var/www/aetlicensesystem/LicencaTransporte/server/db.ts:6
+0|aet-license-system  |   throw new Error(
+0|aet-license-system  |         ^
+0|aet-license-system  | Error: DATABASE_URL must be set. Did you forget to provision a database?
+0|aet-license-system  |     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/db.ts:6:9)
+0|aet-license-system  |     at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+0|aet-license-system  |     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+0|aet-license-system  |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+0|aet-license-system  | Node.js v20.19.2
+^C
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ 
