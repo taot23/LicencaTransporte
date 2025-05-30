@@ -3223,7 +3223,8 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         comments: req.body.comments,
         validUntil: req.body.validUntil,
         aetNumber: req.body.aetNumber, // Incluir número da AET
-        selectedCnpj: req.body.selectedCnpj, // Incluir CNPJ selecionado
+        selectedCnpj: req.body.selectedCnpj, // Incluir CNPJ selecionado (global - legado)
+        stateCnpj: req.body.stateCnpj, // Incluir CNPJ específico para este estado
       };
       
       try {

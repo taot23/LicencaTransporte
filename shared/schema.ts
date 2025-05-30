@@ -294,7 +294,8 @@ export const licenseRequests = pgTable("license_requests", {
   licenseFileUrl: text("license_file_url").default(''),
   validUntil: timestamp("valid_until"),
   aetNumber: text("aet_number"),
-  selectedCnpj: text("selected_cnpj"), // CNPJ selecionado da empresa transportadora
+  selectedCnpj: text("selected_cnpj"), // CNPJ selecionado da empresa transportadora (global - legado)
+  stateCnpjs: text("state_cnpjs").array(), // Array com formato "ESTADO:CNPJ" (ex: "SP:12345678000100")
 }, (table) => {
   return {
     requestNumberIdx: uniqueIndex("idx_license_request_number").on(table.requestNumber),
@@ -482,7 +483,8 @@ export const updateLicenseStatusSchema = createInsertSchema(licenseRequests)
     state: z.string().optional(), // Estado específico sendo atualizado
     stateStatus: z.enum(licenseStatusEnum.options).optional(), // Status para o estado específico
     stateFile: z.any().optional(), // Arquivo para o estado específico
-    selectedCnpj: z.string().optional(), // CNPJ selecionado da empresa transportadora
+    selectedCnpj: z.string().optional(), // CNPJ selecionado da empresa transportadora (global - legado)
+    stateCnpj: z.string().optional(), // CNPJ específico para este estado
   });
 
 // Schema para quando todos os estados forem setados, atualizar o status geral
@@ -494,7 +496,8 @@ export const updateLicenseStateSchema = z.object({
   comments: z.string().optional(),
   validUntil: z.string().optional(),
   aetNumber: z.string().optional(), // Número da AET para o status "Análise do Órgão"
-  selectedCnpj: z.string().optional(), // CNPJ selecionado da empresa transportadora
+  selectedCnpj: z.string().optional(), // CNPJ selecionado da empresa transportadora (global - legado)
+  stateCnpj: z.string().optional(), // CNPJ específico para este estado
 });
 
 // Type definitions
