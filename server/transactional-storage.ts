@@ -845,14 +845,20 @@ export class TransactionalStorage implements IStorage {
   }
   
   async deleteLicenseRequest(id: number): Promise<void> {
-    const result = await db
-      .delete(licenseRequests)
-      .where(eq(licenseRequests.id, id))
-      .returning();
-    
-    if (!result.length) {
-      throw new Error("Pedido de licença não encontrado");
-    }
+    return await withTransaction(async (tx) => {
+      // Primeiro, excluir todos os históricos associados
+      await tx.delete(statusHistories).where(eq(statusHistories.licenseId, id));
+      
+      // Depois, excluir a licença
+      const result = await tx
+        .delete(licenseRequests)
+        .where(eq(licenseRequests.id, id))
+        .returning();
+      
+      if (!result.length) {
+        throw new Error("Pedido de licença não encontrado");
+      }
+    });
   }
   
   // Métodos para obter estatísticas
