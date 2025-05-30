@@ -554,7 +554,7 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
       <div className="space-y-2">
         <h3 className="text-lg font-semibold">Dados do Conjunto</h3>
         <div className="bg-white p-4 rounded-md shadow-sm border border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
               <div className="text-gray-600 text-sm">Tipo de Conjunto:</div>
               <div className="font-medium">{getLicenseTypeLabel(license.type)}</div>
@@ -562,6 +562,16 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
             <div>
               <div className="text-gray-600 text-sm">Tipo de Carga:</div>
               <div className="font-medium">{getCargoTypeLabel(licenseData.cargoType)}</div>
+            </div>
+            <div>
+              <div className="text-gray-600 text-sm">Veículo:</div>
+              <div className="font-medium">
+                {license.tractorUnitId && vehicles[license.tractorUnitId]?.ownershipType === 'terceiro' ? (
+                  <span className="text-orange-600">Terceiro</span>
+                ) : (
+                  <span className="text-green-600">Próprio</span>
+                )}
+              </div>
             </div>
           </div>
           
