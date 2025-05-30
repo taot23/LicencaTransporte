@@ -1106,18 +1106,22 @@ export default function AdminLicensesPage() {
                         licenseId={selectedLicense.id}
                         state={selectedState}
                         onCnpjSelect={async (cnpj, label) => {
-                          console.log('[Form] CNPJ selecionado:', cnpj);
+                          console.log('[Form] CNPJ selecionado para estado:', selectedState, cnpj);
                           field.onChange(cnpj);
                           
-                          // Salvar imediatamente o CNPJ selecionado
-                          if (selectedLicense && cnpj) {
+                          // Salvar CNPJ específico por estado
+                          if (selectedLicense && cnpj && selectedState) {
                             try {
-                              await apiRequest("PATCH", `/api/admin/licenses/${selectedLicense.id}/selected-cnpj`, {
-                                selectedCnpj: cnpj
+                              await apiRequest("PATCH", `/api/admin/licenses/${selectedLicense.id}/state-cnpj`, {
+                                state: selectedState,
+                                cnpj: cnpj
                               });
-                              console.log('[Form] CNPJ salvo com sucesso:', cnpj);
+                              console.log('[Form] CNPJ salvo para estado:', selectedState, cnpj);
+                              
+                              // Recarregar dados da licença para atualizar a interface
+                              queryClient.invalidateQueries({ queryKey: ['/api/admin/licenses'] });
                             } catch (error) {
-                              console.error('[Form] Erro ao salvar CNPJ:', error);
+                              console.error('[Form] Erro ao salvar CNPJ por estado:', error);
                             }
                           }
                         }}
