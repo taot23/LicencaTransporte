@@ -3203,6 +3203,48 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     }
   });
 
+  // Endpoint específico para salvar CNPJ por estado
+  app.patch('/api/admin/licenses/:id/state-cnpj', requireOperational, async (req, res) => {
+    try {
+      const licenseId = parseInt(req.params.id);
+      const { state, cnpj } = req.body;
+      
+      console.log('Atualizando CNPJ por estado - Licença:', licenseId, 'Estado:', state, 'CNPJ:', cnpj);
+      
+      // Buscar a licença atual
+      const [license] = await db.select().from(licenseRequests).where(eq(licenseRequests.id, licenseId));
+      if (!license) {
+        return res.status(404).json({ message: 'Licença não encontrada' });
+      }
+      
+      // Atualizar o array de CNPJs por estado
+      let stateCnpjs = [...(license.stateCnpjs || [])];
+      const newStateCnpj = `${state}:${cnpj}`;
+      const existingIndex = stateCnpjs.findIndex(s => s.startsWith(`${state}:`));
+      
+      if (existingIndex >= 0) {
+        stateCnpjs[existingIndex] = newStateCnpj;
+      } else {
+        stateCnpjs.push(newStateCnpj);
+      }
+      
+      console.log('Atualizando stateCnpjs:', stateCnpjs);
+      
+      await db.update(licenseRequests)
+        .set({ 
+          stateCnpjs,
+          selectedCnpj: cnpj, // Também atualizar o campo global
+          updatedAt: new Date() 
+        })
+        .where(eq(licenseRequests.id, licenseId));
+      
+      res.json({ success: true, state, cnpj, stateCnpjs });
+    } catch (error) {
+      console.error('Erro ao atualizar CNPJ por estado:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
   // Endpoint específico para atualizar o status de um estado específico em uma licença
   app.patch('/api/admin/licenses/:id/state-status', requireOperational, upload.single('stateFile'), async (req, res) => {
     console.log('=== ENDPOINT STATE-STATUS CHAMADO ===');

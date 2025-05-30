@@ -131,10 +131,38 @@ export function TransporterCnpjSelector({
 
   console.log('[CNPJ Selector] Opções de CNPJ geradas:', cnpjOptions);
 
-  const handleCnpjChange = (value: string) => {
+  const handleCnpjChange = async (value: string) => {
     console.log('[CNPJ Selector] CNPJ selecionado:', value);
     console.log('[CNPJ Selector] onCnpjSelect callback existe:', !!onCnpjSelect);
     setSelectedCnpj(value);
+    
+    // Se temos licenceId e state, salvar diretamente no banco
+    if (licenseId && state) {
+      try {
+        console.log('[CNPJ Selector] Salvando CNPJ por estado - Licença:', licenseId, 'Estado:', state, 'CNPJ:', value);
+        
+        const response = await fetch(`/api/admin/licenses/${licenseId}/state-cnpj`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            state: state,
+            cnpj: value
+          })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('[CNPJ Selector] CNPJ salvo com sucesso:', result);
+        } else {
+          console.error('[CNPJ Selector] Erro ao salvar CNPJ:', response.status);
+        }
+      } catch (error) {
+        console.error('[CNPJ Selector] Erro na requisição:', error);
+      }
+    }
+    
     const selectedOption = cnpjOptions.find((option) => option.value === value);
     if (selectedOption && onCnpjSelect) {
       console.log('[CNPJ Selector] Chamando callback onCnpjSelect com:', value, selectedOption.label);
