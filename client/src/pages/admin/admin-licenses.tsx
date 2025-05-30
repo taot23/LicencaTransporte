@@ -1095,8 +1095,12 @@ export default function AdminLicensesPage() {
                             const stateEntry = selectedLicense.stateCnpjs.find((entry: string) => 
                               entry.startsWith(`${selectedState}:`)
                             );
-                            return stateEntry ? stateEntry.split(':')[1] : field.value;
+                            const stateCnpj = stateEntry ? stateEntry.split(':')[1] : field.value;
+                            console.log(`[CNPJ Display] Estado: ${selectedState}, CNPJ encontrado:`, stateCnpj);
+                            console.log(`[CNPJ Display] stateCnpjs disponíveis:`, selectedLicense.stateCnpjs);
+                            return stateCnpj;
                           }
+                          console.log(`[CNPJ Display] Usando field.value:`, field.value);
                           return field.value;
                         })()}
                         licenseId={selectedLicense.id}
