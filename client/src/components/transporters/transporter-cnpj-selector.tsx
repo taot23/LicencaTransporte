@@ -133,6 +133,7 @@ export function TransporterCnpjSelector({
 
   const handleCnpjChange = async (value: string) => {
     console.log('[CNPJ Selector] CNPJ selecionado:', value);
+    console.log('[CNPJ Selector] Props recebidas - licenseId:', licenseId, 'state:', state);
     console.log('[CNPJ Selector] onCnpjSelect callback existe:', !!onCnpjSelect);
     setSelectedCnpj(value);
     
@@ -157,10 +158,14 @@ export function TransporterCnpjSelector({
           console.log('[CNPJ Selector] CNPJ salvo com sucesso:', result);
         } else {
           console.error('[CNPJ Selector] Erro ao salvar CNPJ:', response.status);
+          const errorText = await response.text();
+          console.error('[CNPJ Selector] Resposta do erro:', errorText);
         }
       } catch (error) {
         console.error('[CNPJ Selector] Erro na requisição:', error);
       }
+    } else {
+      console.log('[CNPJ Selector] Não salvando - licenseId ou state ausentes');
     }
     
     const selectedOption = cnpjOptions.find((option) => option.value === value);
