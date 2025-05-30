@@ -198,8 +198,18 @@ const requireOwnerOrStaff = (req: any, res: any, next: any) => {
 
 // Tipo para as mensagens WebSocket
 interface WSMessage {
-  type: 'STATUS_UPDATE' | 'LICENSE_UPDATE';
+  type: 'STATUS_UPDATE' | 'LICENSE_UPDATE' | 'USER_ACTIVITY';
   data: any;
+}
+
+interface UserActivity {
+  userId: number;
+  userName: string;
+  userEmail: string;
+  action: 'viewing' | 'editing' | 'commenting';
+  licenseId?: number;
+  state?: string;
+  timestamp: number;
 }
 
 // Armazenamento de clientes WebSocket
@@ -237,12 +247,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Configurar o WebSocketServer
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
   
-  wss.on('connection', (ws) => {
+  // Armazenamento de atividades de usuários
+  const userActivities: Map<string, UserActivity> = new Map();
+
+  wss.on('connection', (ws, request) => {
     console.log('Novo cliente WebSocket conectado');
     wsClients.add(ws);
     
-    ws.on('message', (message) => {
-      console.log('Mensagem recebida:', message.toString());
+    ws.on('message', (data) => {
+      try {
+        const message = JSON.parse(data.toString()) as WSMessage;
+        console.log('Mensagem recebida:', message);
+        
+        if (message.type === 'USER_ACTIVITY') {
+          // Processar atividade do usuário
+          const session = (request as any).session;
+          if (session?.passport?.user) {
+            const user = session.passport.user;
+            const activity: UserActivity = {
+              userId: user.id,
+              userName: user.name || user.email,
+              userEmail: user.email,
+              action: message.data.action || 'viewing',
+              licenseId: message.data.licenseId,
+              state: message.data.state,
+              timestamp: Date.now()
+            };
+            
+            // Criar chave única para a atividade
+            const activityKey = `${user.id}-${activity.licenseId || 'global'}-${activity.state || 'all'}`;
+            userActivities.set(activityKey, activity);
+            
+            console.log(`Atividade registrada: ${user.email} ${activity.action} licença ${activity.licenseId} no estado ${activity.state}`);
+            
+            // Broadcast para todos os clientes conectados
+            broadcastMessage({
+              type: 'USER_ACTIVITY',
+              data: activity
+            });
+            
+            // Limpar atividades antigas (mais de 1 minuto)
+            const oneMinuteAgo = Date.now() - 60000;
+            for (const [key, act] of userActivities.entries()) {
+              if (act.timestamp < oneMinuteAgo) {
+                userActivities.delete(key);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao processar mensagem WebSocket:', error);
+      }
     });
     
     ws.on('close', () => {
@@ -256,7 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
     
     // Enviar mensagem inicial para confirmar conexão
-    ws.send(JSON.stringify({ type: 'CONNECTED', message: 'Conectado ao servidor' }));
+    ws.send(JSON.stringify({ type: 'CONNECTED', data: 'Conectado ao servidor WebSocket' }));age: 'Conectado ao servidor' }));
   });
 
   // Cache para armazenar tokens de acesso
