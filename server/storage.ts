@@ -1031,27 +1031,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createVehicle(userId: number, vehicleData: InsertVehicle & { crlvUrl?: string | null }): Promise<Vehicle> {
-    const vehicle = {
+    // Usar spread operator para preservar todos os campos do vehicleData
+    const vehicleToInsert = {
+      ...vehicleData,
       userId,
-      plate: vehicleData.plate,
-      type: vehicleData.type,
-      brand: vehicleData.brand || null,
-      model: vehicleData.model || null,
-      year: vehicleData.year || null,
-      renavam: vehicleData.renavam || null,
-      tare: vehicleData.tare,
-      axleCount: vehicleData.axleCount || null,
-      remarks: vehicleData.remarks || null,
-      crlvYear: vehicleData.crlvYear,
-      crlvUrl: vehicleData.crlvUrl || null,
       status: vehicleData.status || "active",
-      bodyType: vehicleData.bodyType || null,
-      cmt: vehicleData.cmt || null,
-      ownershipType: vehicleData.ownershipType || "proprio",
-      ownerName: vehicleData.ownerName || null
+      crlvUrl: vehicleData.crlvUrl || null,
+      ownershipType: vehicleData.ownershipType || "proprio"
     };
     
-    const results = await db.insert(vehicles).values(vehicle).returning();
+    const results = await db.insert(vehicles).values(vehicleToInsert).returning();
     return results[0];
   }
 
