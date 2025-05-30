@@ -214,12 +214,47 @@ export default function AdminLicensesPage() {
         // Criar uma cópia atualizada da licença selecionada
         setSelectedLicense(prevLicense => {
           if (!prevLicense) return null;
-          return {
+          const updatedLicense = {
             ...prevLicense,
             stateStatuses: updatedStateStatuses,
+            // Se também recebemos uma atualização completa da licença, usar todos os dados
+            ...(lastMessage.data.license && lastMessage.data.license),
             // Se também recebemos uma atualização para o status geral da licença
             ...(lastMessage.data.license?.status && { status: lastMessage.data.license.status })
           };
+          
+          // Se o modal de edição de status está aberto para este estado, atualizar o formulário
+          if (stateStatusDialogOpen && selectedState === lastMessage.data.state) {
+            console.log('[WebSocket] Atualizando formulário em tempo real para estado:', lastMessage.data.state);
+            // Usar setTimeout para garantir que o estado foi atualizado
+            setTimeout(() => {
+              // Determinar o CNPJ específico para este estado
+              let currentStateCnpj = "";
+              if (updatedLicense.stateCnpjs && updatedLicense.stateCnpjs.length > 0) {
+                const stateCnpjEntry = updatedLicense.stateCnpjs.find(entry => entry.startsWith(`${lastMessage.data.state}:`));
+                if (stateCnpjEntry) {
+                  const [_, cnpj] = stateCnpjEntry.split(':');
+                  if (cnpj) {
+                    currentStateCnpj = cnpj;
+                  }
+                }
+              }
+              
+              // Fallback para o CNPJ global se não houver CNPJ específico para o estado
+              if (!currentStateCnpj && updatedLicense.selectedCnpj) {
+                currentStateCnpj = updatedLicense.selectedCnpj;
+              }
+              
+              // Atualizar apenas o campo selectedCnpj do formulário se necessário
+              const currentFormCnpj = stateStatusForm.getValues("selectedCnpj");
+              if (currentFormCnpj !== currentStateCnpj) {
+                console.log('[WebSocket] Atualizando CNPJ no formulário de', currentFormCnpj, 'para', currentStateCnpj);
+                stateStatusForm.setValue("selectedCnpj", currentStateCnpj);
+              }
+            }, 100);
+          }
+          
+          return updatedLicense;
         });
         
         console.log(`StatusUpdate em tempo real: Licença ${selectedLicense.id} estado ${lastMessage.data.state} => ${lastMessage.data.status}`);
