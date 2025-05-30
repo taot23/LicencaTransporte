@@ -1082,12 +1082,6 @@ export default function AdminLicensesPage() {
                                 selectedCnpj: cnpj
                               });
                               console.log('[Form] CNPJ salvo com sucesso:', cnpj);
-                              
-                              // Atualizar o selectedLicense local para refletir a mudança
-                              setSelectedLicense(prev => prev ? { ...prev, selectedCnpj: cnpj } : null);
-                              
-                              // Invalidar as queries para atualizar a lista
-                              queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
                             } catch (error) {
                               console.error('[Form] Erro ao salvar CNPJ:', error);
                             }
