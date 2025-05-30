@@ -1056,8 +1056,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateVehicle(id: number, vehicleData: Partial<Vehicle>): Promise<Vehicle> {
+    // Mapear os campos corretamente, filtrando undefined
+    const updateData: any = {};
+    
+    if (vehicleData.plate !== undefined) updateData.plate = vehicleData.plate;
+    if (vehicleData.type !== undefined) updateData.type = vehicleData.type;
+    if (vehicleData.brand !== undefined) updateData.brand = vehicleData.brand;
+    if (vehicleData.model !== undefined) updateData.model = vehicleData.model;
+    if (vehicleData.year !== undefined) updateData.year = vehicleData.year;
+    if (vehicleData.renavam !== undefined) updateData.renavam = vehicleData.renavam;
+    if (vehicleData.tare !== undefined) updateData.tare = vehicleData.tare;
+    if (vehicleData.axleCount !== undefined) updateData.axleCount = vehicleData.axleCount;
+    if (vehicleData.remarks !== undefined) updateData.remarks = vehicleData.remarks;
+    if (vehicleData.crlvYear !== undefined) updateData.crlvYear = vehicleData.crlvYear;
+    if (vehicleData.crlvUrl !== undefined) updateData.crlvUrl = vehicleData.crlvUrl;
+    if (vehicleData.status !== undefined) updateData.status = vehicleData.status;
+    if (vehicleData.bodyType !== undefined) updateData.bodyType = vehicleData.bodyType;
+    if (vehicleData.cmt !== undefined) updateData.cmt = vehicleData.cmt;
+    if (vehicleData.ownershipType !== undefined) updateData.ownershipType = vehicleData.ownershipType;
+    if (vehicleData.ownerName !== undefined) updateData.ownerName = vehicleData.ownerName;
+    
     const results = await db.update(vehicles)
-      .set(vehicleData)
+      .set(updateData)
       .where(eq(vehicles.id, id))
       .returning();
     
