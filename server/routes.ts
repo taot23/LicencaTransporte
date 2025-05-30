@@ -966,7 +966,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const vehicle = await storage.createVehicle(userId, {
         ...vehicleData,
-        crlvUrl
+        crlvUrl,
+        userId
       });
       
       // Enviar notificação WebSocket para novo veículo criado
