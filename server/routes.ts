@@ -3449,8 +3449,36 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     }
   });
 
-  // Atualizar modelo de veículo (apenas admin)
+  // Atualizar modelo de veículo (apenas admin) - PATCH
   app.patch("/api/admin/vehicle-models/:id", requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    // Verificar se o usuário pode gerenciar modelos de veículos
+    if (!canManageVehicleModels(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+    try {
+      const id = parseInt(req.params.id);
+      const vehicleModelData = insertVehicleModelSchema.parse(req.body);
+      const updatedModel = await storage.updateVehicleModel(id, vehicleModelData);
+      
+      if (!updatedModel) {
+        return res.status(404).json({ message: "Modelo de veículo não encontrado" });
+      }
+      
+      res.json(updatedModel);
+    } catch (error) {
+      console.error("Erro ao atualizar modelo de veículo:", error);
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Erro ao atualizar modelo de veículo" });
+      }
+    }
+  });
+
+  // Atualizar modelo de veículo (apenas admin) - PUT (compatibilidade com frontend)
+  app.put("/api/admin/vehicle-models/:id", requireAuth, async (req, res) => {
     const user = req.user!;
     
     // Verificar se o usuário pode gerenciar modelos de veículos
