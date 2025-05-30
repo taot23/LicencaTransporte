@@ -513,6 +513,10 @@ export default function AdminLicensesPage() {
       currentStateAetNumber = license.aetNumber;
     }
     
+    console.log('[Form Reset] Estado selecionado:', state);
+    console.log('[Form Reset] CNPJ atual do estado:', currentStateCnpj);
+    console.log('[Form Reset] stateCnpjs disponíveis:', license.stateCnpjs);
+    
     stateStatusForm.reset({
       state: state,
       status: currentStateStatus,
