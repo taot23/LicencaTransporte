@@ -1089,7 +1089,16 @@ export default function AdminLicensesPage() {
                       </FormLabel>
                       <TransporterCnpjSelector 
                         transporterId={selectedLicense.transporterId!}
-                        selectedCnpj={field.value}
+                        selectedCnpj={(() => {
+                          // Obter CNPJ específico do estado atual
+                          if (selectedLicense.stateCnpjs && selectedState) {
+                            const stateEntry = selectedLicense.stateCnpjs.find((entry: string) => 
+                              entry.startsWith(`${selectedState}:`)
+                            );
+                            return stateEntry ? stateEntry.split(':')[1] : field.value;
+                          }
+                          return field.value;
+                        })()}
                         licenseId={selectedLicense.id}
                         state={selectedState}
                         onCnpjSelect={async (cnpj, label) => {
