@@ -3308,6 +3308,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         validUntil: stateStatusData.validUntil,
         aetNumber: stateStatusData.aetNumber,
         selectedCnpj: stateStatusData.selectedCnpj,
+        stateCnpj: stateStatusData.selectedCnpj, // Usar selectedCnpj como stateCnpj
         file,
       });
       
