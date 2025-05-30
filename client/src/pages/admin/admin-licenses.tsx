@@ -325,8 +325,11 @@ export default function AdminLicensesPage() {
         description: "Status do estado atualizado com sucesso!",
       });
       
-      // NÃO limpar o formulário - manter os dados após salvar
-      // Apenas invalidar as queries para atualizar os dados
+      // Fechar o modal após sucesso
+      setTimeout(() => {
+        setStateStatusDialogOpen(false);
+        setSelectedState("");
+      }, 500);
       
       // Invalidar todas as queries relacionadas para garantir dados atualizados
       setTimeout(() => {
