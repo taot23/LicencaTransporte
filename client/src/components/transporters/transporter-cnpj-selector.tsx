@@ -54,6 +54,7 @@ export function TransporterCnpjSelector({
 
   // Atualizar o estado interno quando a prop externa mudar
   useEffect(() => {
+    console.log('[CNPJ Selector] Prop externa mudou:', externalSelectedCnpj);
     setSelectedCnpj(externalSelectedCnpj || "");
   }, [externalSelectedCnpj]);
 
