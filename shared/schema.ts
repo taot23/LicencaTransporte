@@ -12,7 +12,6 @@ export const users = pgTable('users', {
   isAdmin: boolean('is_admin').default(false),
   role: text('role', { enum: ['transporter', 'operational', 'supervisor'] }).default('transporter'),
   createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 // Transporters table
