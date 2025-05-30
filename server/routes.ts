@@ -3215,6 +3215,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       // Validar dados do status do estado
       console.log('Dados recebidos no endpoint state-status:', req.body);
       console.log('selectedCnpj recebido:', req.body.selectedCnpj);
+      console.log('stateCnpj recebido:', req.body.stateCnpj);
       
       const stateStatusData = {
         licenseId,

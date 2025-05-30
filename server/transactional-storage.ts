@@ -701,15 +701,27 @@ export class TransactionalStorage implements IStorage {
     
     // Processar CNPJ específico por estado se fornecido
     let stateCnpjs = [...(license.stateCnpjs || [])];
-    if (data.stateCnpj) {
+    console.log('[BACKEND] data.stateCnpj recebido:', data.stateCnpj);
+    console.log('[BACKEND] stateCnpjs atual antes da atualização:', stateCnpjs);
+    
+    if (data.stateCnpj && data.stateCnpj.trim() !== '') {
       const newStateCnpj = `${data.state}:${data.stateCnpj}`;
       const existingCnpjIndex = stateCnpjs.findIndex(s => s.startsWith(`${data.state}:`));
       
+      console.log('[BACKEND] Processando CNPJ para estado:', data.state, 'CNPJ:', data.stateCnpj);
+      console.log('[BACKEND] Novo formato:', newStateCnpj);
+      
       if (existingCnpjIndex >= 0) {
         stateCnpjs[existingCnpjIndex] = newStateCnpj;
+        console.log('[BACKEND] Atualizando CNPJ existente no índice:', existingCnpjIndex);
       } else {
         stateCnpjs.push(newStateCnpj);
+        console.log('[BACKEND] Adicionando novo CNPJ ao array');
       }
+      
+      console.log('[BACKEND] stateCnpjs após atualização:', stateCnpjs);
+    } else {
+      console.log('[BACKEND] CNPJ não fornecido ou vazio, mantendo array atual');
     }
 
     // Se recebemos data de validade para status aprovado, armazenar como licença principal também
