@@ -2920,17 +2920,19 @@ export function LicenseForm({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Envio com Veículos de Terceiros</AlertDialogTitle>
-            <AlertDialogDescription>
-              O pedido contém os seguintes veículos em nome de terceiros:
-              <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-md">
-                {thirdPartyVehiclesInSubmit.map((vehicle, index) => (
-                  <div key={index} className="text-sm font-medium text-orange-800">
-                    • {vehicle}
-                  </div>
-                ))}
-              </div>
-              <div className="mt-3">
-                Deseja continuar com o envio da solicitação?
+            <AlertDialogDescription asChild>
+              <div>
+                O pedido contém os seguintes veículos em nome de terceiros:
+                <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-md">
+                  {thirdPartyVehiclesInSubmit.map((vehicle, index) => (
+                    <div key={index} className="text-sm font-medium text-orange-800">
+                      • {vehicle}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3">
+                  Deseja continuar com o envio da solicitação?
+                </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
