@@ -33,6 +33,7 @@ import { ProgressFlow, StateProgressFlow } from "@/components/licenses/progress-
 import { LicenseDetailsCard } from "@/components/licenses/license-details-card";
 import { TransporterWithSubsidiaries } from "@/components/transporters/transporter-with-subsidiaries";
 import { TransporterCnpjSelector } from "@/components/transporters/transporter-cnpj-selector";
+import { CollaborationBubbles } from "@/components/notifications/collaboration-bubbles";
 import {
   Table,
   TableBody,
@@ -705,6 +706,11 @@ export default function AdminLicensesPage() {
             <p className="text-sm md:text-base text-muted-foreground mt-1">
               Gerencie todas as licenças no sistema.
             </p>
+          </div>
+          
+          {/* Notificações de Colaboração em Tempo Real */}
+          <div className="mt-4 md:mt-0">
+            <CollaborationBubbles className="justify-end" />
           </div>
         </div>
 

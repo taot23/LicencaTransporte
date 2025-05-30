@@ -311,7 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
     
     // Enviar mensagem inicial para confirmar conexão
-    ws.send(JSON.stringify({ type: 'CONNECTED', data: 'Conectado ao servidor WebSocket' }));age: 'Conectado ao servidor' }));
+    ws.send(JSON.stringify({ type: 'CONNECTED', data: 'Conectado ao servidor WebSocket' }));
   });
 
   // Cache para armazenar tokens de acesso
