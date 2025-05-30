@@ -529,6 +529,9 @@ export default function AdminLicensesPage() {
   const onSubmitStateStatus = (data: z.infer<typeof updateStateStatusSchema>) => {
     if (!selectedLicense) return;
     
+    console.log('[Form Submit] Dados do formulário recebidos:', data);
+    console.log('[Form Submit] CNPJ selecionado:', data.selectedCnpj);
+    
     // Validação adicional para o status "approved": exigir arquivo PDF e data de validade
     if (data.status === "approved") {
       if (!data.licenseFile) {
@@ -564,6 +567,8 @@ export default function AdminLicensesPage() {
     
     // Garantir que useEffect não crie conflitos durante o processamento
     const licenseId = selectedLicense.id;
+    
+    console.log('[Form Submit] Enviando dados para backend:', { id: licenseId, data });
     
     updateStateStatusMutation.mutate({ 
       id: licenseId,
