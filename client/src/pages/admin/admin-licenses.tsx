@@ -312,6 +312,8 @@ export default function AdminLicensesPage() {
       // Incluir CNPJ específico para este estado
       formData.append("stateCnpj", data.selectedCnpj || "");
       console.log('Enviando dados - selectedCnpj:', data.selectedCnpj);
+      console.log('Enviando dados - stateCnpj:', data.selectedCnpj);
+      console.log('Enviando dados - state:', data.state);
       
       const response = await apiRequest("PATCH", `/api/admin/licenses/${id}/state-status`, formData);
       return await response.json();
