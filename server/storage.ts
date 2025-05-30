@@ -1031,13 +1031,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createVehicle(userId: number, vehicleData: InsertVehicle & { crlvUrl?: string | null }): Promise<Vehicle> {
-    // Usar spread operator para preservar todos os campos do vehicleData
+    // Remover campos que não pertencem ao schema do banco
+    const { crlvFile, ...cleanVehicleData } = vehicleData as any;
+    
+    // Usar spread operator para preservar todos os campos válidos
     const vehicleToInsert = {
-      ...vehicleData,
+      ...cleanVehicleData,
       userId,
-      status: vehicleData.status || "active",
-      crlvUrl: vehicleData.crlvUrl || null,
-      ownershipType: vehicleData.ownershipType || "proprio"
+      status: cleanVehicleData.status || "active",
+      crlvUrl: cleanVehicleData.crlvUrl || null,
+      ownershipType: cleanVehicleData.ownershipType || "proprio"
     };
     
     const results = await db.insert(vehicles).values(vehicleToInsert).returning();
