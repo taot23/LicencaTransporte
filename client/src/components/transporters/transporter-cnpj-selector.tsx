@@ -52,10 +52,30 @@ export function TransporterCnpjSelector({
 }: TransporterCnpjSelectorProps) {
   const [selectedCnpj, setSelectedCnpj] = useState<string>(externalSelectedCnpj || "");
 
-  // Atualizar o estado interno quando a prop externa mudar
+  // Função para obter CNPJ específico do estado da licença
+  const getStateCnpj = (stateCnpjs: string[], targetState: string): string => {
+    if (!stateCnpjs || !targetState) return "";
+    const stateEntry = stateCnpjs.find(entry => entry.startsWith(`${targetState}:`));
+    return stateEntry ? stateEntry.split(':')[1] : "";
+  };
+
+  // Buscar dados da licença para obter CNPJs por estado
+  const { data: licenseData } = useQuery<any>({
+    queryKey: [`/api/admin/licenses/${licenseId}`],
+    enabled: !!licenseId,
+  });
+
+  // Atualizar o estado interno quando a prop externa mudar ou quando tivermos dados da licença
   useEffect(() => {
+    if (licenseData && state) {
+      const stateCnpj = getStateCnpj(licenseData.stateCnpjs || [], state);
+      if (stateCnpj) {
+        setSelectedCnpj(stateCnpj);
+        return;
+      }
+    }
     setSelectedCnpj(externalSelectedCnpj || "");
-  }, [externalSelectedCnpj]);
+  }, [externalSelectedCnpj, licenseData, state]);
 
   const { data: transporter, isLoading } = useQuery<TransporterData>({
     queryKey: [`/api/public/transporters/${transporterId}`],
