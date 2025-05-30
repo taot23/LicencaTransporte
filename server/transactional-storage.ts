@@ -244,12 +244,15 @@ export class TransactionalStorage implements IStorage {
   }
   
   async createVehicle(userId: number, vehicleData: InsertVehicle & { crlvUrl?: string | null }): Promise<Vehicle> {
+    console.log('DEBUG TransactionalStorage createVehicle - vehicleData recebido:', vehicleData);
+    
     const [vehicle] = await db
       .insert(vehicles)
       .values({
         userId: userId,
         plate: vehicleData.plate,
         type: vehicleData.type,
+        bodyType: vehicleData.bodyType || null,
         brand: vehicleData.brand || null,
         model: vehicleData.model || null,
         year: vehicleData.year || null,
@@ -259,9 +262,14 @@ export class TransactionalStorage implements IStorage {
         remarks: vehicleData.remarks || null,
         crlvYear: vehicleData.crlvYear,
         crlvUrl: vehicleData.crlvUrl || null,
+        ownerName: vehicleData.ownerName || null,
+        ownershipType: vehicleData.ownershipType || "proprio",
+        cmt: vehicleData.cmt || null,
         status: vehicleData.status || "active"
       })
       .returning();
+    
+    console.log('DEBUG TransactionalStorage createVehicle - vehicle salvo:', vehicle);
     
     return vehicle;
   }
