@@ -14,6 +14,8 @@ interface TransporterCnpjSelectorProps {
   transporterId: number;
   selectedCnpj?: string;
   onCnpjSelect?: (cnpj: string, name: string) => void;
+  licenseId?: number;
+  state?: string;
 }
 
 interface Subsidiary {
@@ -45,6 +47,8 @@ export function TransporterCnpjSelector({
   transporterId,
   selectedCnpj: externalSelectedCnpj,
   onCnpjSelect,
+  licenseId,
+  state,
 }: TransporterCnpjSelectorProps) {
   const [selectedCnpj, setSelectedCnpj] = useState<string>(externalSelectedCnpj || "");
 

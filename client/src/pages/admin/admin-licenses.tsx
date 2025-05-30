@@ -1090,6 +1090,8 @@ export default function AdminLicensesPage() {
                       <TransporterCnpjSelector 
                         transporterId={selectedLicense.transporterId!}
                         selectedCnpj={field.value}
+                        licenseId={selectedLicense.id}
+                        state={selectedState}
                         onCnpjSelect={async (cnpj, label) => {
                           console.log('[Form] CNPJ selecionado:', cnpj);
                           field.onChange(cnpj);
