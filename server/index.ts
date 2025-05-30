@@ -65,14 +65,45 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
+  // Serve static files and handle client-side routing
+  const distPath = path.resolve(process.cwd(), "dist/public");
+  
+  // Check if dist directory exists, if not serve a basic response
+  try {
+    app.use(express.static(distPath));
+  } catch (error) {
+    console.log("Dist directory not found, serving basic HTML");
   }
+  
+  // Catch all handler for client-side routing
+  app.get("*", (req, res) => {
+    if (req.path.startsWith("/api")) {
+      return res.status(404).json({ message: "API endpoint not found" });
+    }
+    
+    // Try to serve the built index.html, fallback to basic HTML
+    try {
+      res.sendFile(path.resolve(distPath, "index.html"));
+    } catch (error) {
+      // Fallback HTML when built files are not available
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>AET License System</title>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body>
+          <div id="root"></div>
+          <script type="module">
+            window.location.href = '/api/user';
+          </script>
+        </body>
+        </html>
+      `);
+    }
+  });
 
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
