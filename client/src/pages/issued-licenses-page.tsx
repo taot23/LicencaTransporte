@@ -152,6 +152,12 @@ export default function IssuedLicensesPage() {
             stateAETNumber = license.aetNumber;
           }
           
+          console.log(`[DEBUG] Licença ${license.id} - Estado ${state}:`);
+          console.log(`  - stateEmissionDate: ${stateEmissionDate}`);
+          console.log(`  - license.issuedAt: ${license.issuedAt}`);
+          console.log(`  - stateAETNumber: ${stateAETNumber}`);
+          console.log(`  - Usando data emissão: ${stateEmissionDate || 'null'}`);
+          
           result.push({
             id: license.id * 100 + index, // Gerar ID único para a linha
             licenseId: license.id,
