@@ -606,7 +606,7 @@ export default function IssuedLicensesPage() {
                           )}
                         </TableCell>
                         <TableCell>
-                          {license.emissionDate ? new Intl.DateTimeFormat('pt-BR').format(new Date(license.emissionDate)) : '-'}
+                          {license.emissionDate ? new Intl.DateTimeFormat('pt-BR').format(new Date(license.emissionDate + 'T00:00:00')) : '-'}
                         </TableCell>
                         <TableCell>
                           {license.validUntil ? (
@@ -855,7 +855,7 @@ export default function IssuedLicensesPage() {
                       </div>
                       <div>
                         <span className="text-xs text-gray-500">Emissão:</span>
-                        <div>{license.emissionDate ? new Intl.DateTimeFormat('pt-BR').format(new Date(license.emissionDate)) : '-'}</div>
+                        <div>{license.emissionDate ? new Intl.DateTimeFormat('pt-BR').format(new Date(license.emissionDate + 'T00:00:00')) : '-'}</div>
                       </div>
                       <div>
                         <span className="text-xs text-gray-500">Validade:</span>
