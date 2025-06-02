@@ -107,14 +107,31 @@ export default function IssuedLicensesPage() {
         
         // Só incluir estados com status "approved"
         if (stateStatus === 'approved') {
-          // Obter data de validade específica para este estado, se disponível
+          // Obter data de validade e emissão específicas para este estado, se disponível
           let stateValidUntil = license.validUntil ? license.validUntil.toString() : null;
+          let stateEmissionDate = null;
           
-          // Novo formato: "estado:status:data_validade"
+          // Novo formato: "estado:status:data_validade" ou "estado:status:data_validade:data_emissao"
           if (stateStatusEntry && stateStatusEntry.split(':').length > 2) {
+            const statusParts = stateStatusEntry.split(':');
             // Extrair data de validade do formato estado:status:data
-            stateValidUntil = stateStatusEntry.split(':')[2];
+            stateValidUntil = statusParts[2];
             console.log(`Data de validade extraída para ${state}: ${stateValidUntil}`);
+            
+            // Se tiver 4 partes, pode incluir data de emissão
+            if (statusParts.length > 3) {
+              // A última parte poderia ser data de emissão se estiver no formato de data
+              const lastPart = statusParts[statusParts.length - 1];
+              if (lastPart.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                stateEmissionDate = lastPart;
+                console.log(`Data de emissão extraída para ${state}: ${stateEmissionDate}`);
+              }
+            }
+          }
+          
+          // Se não encontrou data de emissão específica, usar a data de atualização da licença
+          if (!stateEmissionDate && license.updatedAt) {
+            stateEmissionDate = license.updatedAt.toString();
           }
           
           // Obter número AET específico para este estado, se disponível
@@ -145,7 +162,7 @@ export default function IssuedLicensesPage() {
             state,
             status: stateStatus,
             stateStatus,
-            emissionDate: license.updatedAt ? license.updatedAt.toString() : null,
+            emissionDate: stateEmissionDate,
             validUntil: stateValidUntil,
             licenseFileUrl: license.licenseFileUrl,
             stateFileUrl,
