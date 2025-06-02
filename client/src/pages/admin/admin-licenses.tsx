@@ -518,13 +518,24 @@ export default function AdminLicensesPage() {
     // Determinar o status atual deste estado
     let currentStateStatus = "pending";
     
-    // Parse dos stateStatuses (que são armazenados como "ESTADO:STATUS")
+    // Parse dos stateStatuses (que são armazenados como "ESTADO:STATUS:VALIDUNTIL:ISSUEDAT")
+    let currentValidUntil = "";
+    let currentIssuedAt = "";
+    
     if (license.stateStatuses && license.stateStatuses.length > 0) {
       const stateStatusEntry = license.stateStatuses.find(entry => entry.startsWith(`${state}:`));
       if (stateStatusEntry) {
-        const [_, status] = stateStatusEntry.split(':');
-        if (status) {
-          currentStateStatus = status;
+        const parts = stateStatusEntry.split(':');
+        if (parts[1]) {
+          currentStateStatus = parts[1];
+        }
+        // Extrair data de validade (3ª parte)
+        if (parts[2]) {
+          currentValidUntil = parts[2];
+        }
+        // Extrair data de emissão (4ª parte)
+        if (parts[3]) {
+          currentIssuedAt = parts[3];
         }
       }
     }
@@ -574,7 +585,8 @@ export default function AdminLicensesPage() {
       aetNumber: currentStateAetNumber, // Preservar o número da AET existente
       selectedCnpj: currentStateCnpj, // Carregar o CNPJ específico do estado
       licenseFile: undefined, // Resetar o campo de arquivo
-      validUntil: "", // Resetar a data de validade como string vazia, não undefined
+      validUntil: currentValidUntil, // Preservar a data de validade existente
+      issuedAt: currentIssuedAt, // Preservar a data de emissão existente
     });
     
     setStateStatusDialogOpen(true);
