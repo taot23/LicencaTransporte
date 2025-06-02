@@ -1,0 +1,139 @@
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ sudo psql $DATABASE_URL < backup_a
+et_database_20250602_195327.sql
+SET
+SET
+SET
+SET
+SET
+ set_config 
+------------
+ 
+(1 row)
+
+SET
+SET
+SET
+SET
+ERROR:  function "update_updated_at_column" already exists with same argument types
+ERROR:  role "neondb_owner" does not exist
+SET
+SET
+ERROR:  relation "license_requests" already exists
+ERROR:  role "neondb_owner" does not exist
+ERROR:  relation "license_requests_id_seq" already exists
+ERROR:  role "neondb_owner" does not exist
+ALTER SEQUENCE
+ERROR:  relation "session" already exists
+ERROR:  role "neondb_owner" does not exist
+ERROR:  relation "status_histories" already exists
+ERROR:  role "neondb_owner" does not exist
+ERROR:  relation "status_histories_id_seq" already exists
+ERROR:  role "neondb_owner" does not exist
+ALTER SEQUENCE
+ERROR:  relation "transporters" already exists
+ERROR:  role "neondb_owner" does not exist
+ERROR:  relation "transporters_id_seq" already exists
+ERROR:  role "neondb_owner" does not exist
+ALTER SEQUENCE
+ERROR:  relation "users" already exists
+ERROR:  role "neondb_owner" does not exist
+ERROR:  relation "users_id_seq" already exists
+ERROR:  role "neondb_owner" does not exist
+ALTER SEQUENCE
+ERROR:  relation "vehicle_models" already exists
+ERROR:  role "neondb_owner" does not exist
+ERROR:  relation "vehicle_models_id_seq" already exists
+ERROR:  role "neondb_owner" does not exist
+ALTER SEQUENCE
+ERROR:  relation "vehicles" already exists
+ERROR:  role "neondb_owner" does not exist
+ERROR:  relation "vehicles_id_seq" already exists
+ERROR:  role "neondb_owner" does not exist
+ALTER SEQUENCE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ERROR:  insert or update on table "license_requests" violates foreign key constraint "license_requests_transporter_id_transporters_id_fk"
+DETAIL:  Key (transporter_id)=(4) is not present in table "transporters".
+ERROR:  duplicate key value violates unique constraint "session_pkey"
+DETAIL:  Key (sid)=(1NPWqCrU0oXCmAnHm21uQ-W6Q02uxf4D) already exists.
+CONTEXT:  COPY session, line 1
+ERROR:  insert or update on table "status_histories" violates foreign key constraint "status_histories_license_id_license_requests_id_fk"
+DETAIL:  Key (license_id)=(121) is not present in table "license_requests".
+ERROR:  duplicate key value violates unique constraint "transporters_pkey"
+DETAIL:  Key (id)=(1) already exists.
+CONTEXT:  COPY transporters, line 2
+ERROR:  column "updated_at" of relation "users" does not exist
+invalid command \.
+ERROR:  syntax error at or near "2"
+LINE 1: 2 transportador@teste.com $2b$10$oDIUQbw08yuv3aX/uAHWoO8BDC5...
+        ^
+invalid command \.
+ERROR:  syntax error at or near "1"
+LINE 1: 1 DAF CF FT 410 tractor_unit 2025-05-27 14:04:59.586528
+        ^
+invalid command \N
+invalid command \N
+invalid command \N
+invalid command \.
+ERROR:  syntax error at or near "49"
+LINE 1: 49 8 BCB-0886 semi_trailer RANDON TQ PP 03E 2019 1149103644 ...
+        ^
+ setval 
+--------
+    130
+(1 row)
+
+ setval 
+--------
+      5
+(1 row)
+
+ setval 
+--------
+      9
+(1 row)
+
+ setval 
+--------
+    465
+(1 row)
+
+ setval 
+--------
+     52
+(1 row)
+
+ERROR:  multiple primary keys for table "license_requests" are not allowed
+ERROR:  relation "license_requests_request_number_unique" already exists
+ERROR:  multiple primary keys for table "session" are not allowed
+ERROR:  multiple primary keys for table "status_histories" are not allowed
+ERROR:  relation "transporters_document_number_unique" already exists
+ERROR:  multiple primary keys for table "transporters" are not allowed
+ERROR:  relation "users_email_unique" already exists
+ERROR:  multiple primary keys for table "users" are not allowed
+ERROR:  multiple primary keys for table "vehicle_models" are not allowed
+ERROR:  multiple primary keys for table "vehicles" are not allowed
+ERROR:  relation "IDX_session_expire" already exists
+ERROR:  relation "idx_status_history_created_at" already exists
+ERROR:  relation "idx_status_history_license_id" already exists
+ERROR:  relation "idx_status_history_state" already exists
+ERROR:  relation "idx_status_history_user_id" already exists
+ERROR:  trigger "update_users_updated_at" for relation "users" already exists
+ERROR:  constraint "license_requests_dolly_id_vehicles_id_fk" for relation "license_requests" already exists
+ERROR:  constraint "license_requests_first_trailer_id_vehicles_id_fk" for relation "license_requests" already exists
+ERROR:  constraint "license_requests_flatbed_id_vehicles_id_fk" for relation "license_requests" already exists
+ERROR:  constraint "license_requests_second_trailer_id_vehicles_id_fk" for relation "license_requests" already exists
+ERROR:  constraint "license_requests_tractor_unit_id_vehicles_id_fk" for relation "license_requests" already exists
+ERROR:  constraint "license_requests_transporter_id_transporters_id_fk" for relation "license_requests" already exists
+ERROR:  constraint "license_requests_user_id_users_id_fk" for relation "license_requests" already exists
+ERROR:  constraint "status_histories_license_id_fkey" for relation "status_histories" already exists
+ERROR:  constraint "status_histories_user_id_fkey" for relation "status_histories" already exists
+ERROR:  constraint "transporters_user_id_users_id_fk" for relation "transporters" already exists
+ERROR:  constraint "vehicles_user_id_users_id_fk" for relation "vehicles" already exists
+ERROR:  role "neon_superuser" does not exist
+ERROR:  role "neon_superuser" does not exist
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ 
