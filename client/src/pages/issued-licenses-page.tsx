@@ -108,7 +108,7 @@ export default function IssuedLicensesPage() {
         // Só incluir estados com status "approved"
         if (stateStatus === 'approved') {
           // Obter data de validade e emissão específicas para este estado, se disponível
-          let stateValidUntil = license.validUntil ? license.validUntil.toString() : null;
+          let stateValidUntil = null;
           let stateEmissionDate = null;
           
           // Novo formato: "estado:status:data_validade" ou "estado:status:data_validade:data_emissao"
