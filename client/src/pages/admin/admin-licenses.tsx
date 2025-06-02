@@ -336,14 +336,15 @@ export default function AdminLicensesPage() {
         formData.append("comments", data.comments);
       }
       
-      // Incluir data de validade se o status for "approved" (Liberada)
-      if (data.validUntil && data.status === "approved") {
+      // Incluir data de validade se fornecida
+      if (data.validUntil) {
         formData.append("validUntil", data.validUntil);
       }
       
-      // Incluir data de emissão se o status for "approved" (Liberada)
-      if (data.issuedAt && data.status === "approved") {
+      // Incluir data de emissão se fornecida  
+      if (data.issuedAt) {
         formData.append("issuedAt", data.issuedAt);
+        console.log('[Frontend] Data de emissão sendo enviada:', data.issuedAt);
       }
       
       // Incluir arquivo da licença se o status for "approved" (Liberada)
