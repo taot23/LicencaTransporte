@@ -856,7 +856,7 @@ export default function IssuedLicensesPage() {
                       </div>
                       <div>
                         <span className="text-xs text-gray-500">Emissão:</span>
-                        <div>{license.emissionDate ? new Intl.DateTimeFormat('pt-BR').format(new Date(license.emissionDate)) : '-'}</div>
+                        <div>{license.issuedAt ? new Intl.DateTimeFormat('pt-BR').format(new Date(license.issuedAt)) : '-'}</div>
                       </div>
                       <div>
                         <span className="text-xs text-gray-500">Validade:</span>

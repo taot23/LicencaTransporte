@@ -760,20 +760,29 @@ export class TransactionalStorage implements IStorage {
       }
     }
     
+    // Preparar dados de atualização
+    const updateData: any = {
+      stateStatuses,
+      stateFiles,
+      stateAETNumbers, // Incluir o array de números AET específicos por estado
+      stateCnpjs, // Incluir o array de CNPJs específicos por estado
+      updatedAt: new Date(),
+      licenseFileUrl,
+      validUntil,
+      aetNumber,
+      status: overallStatus // Atualizar status geral se todos estados estiverem aprovados
+    };
+
+    // Adicionar data de emissão se fornecida
+    if (data.issuedAt) {
+      updateData.issuedAt = new Date(data.issuedAt);
+      console.log('[TransactionalStorage] Salvando data de emissão:', data.issuedAt, '-> banco:', updateData.issuedAt);
+    }
+
     // Executar a atualização com todos os campos corretos
     const [updatedLicense] = await db
       .update(licenseRequests)
-      .set({
-        stateStatuses,
-        stateFiles,
-        stateAETNumbers, // Incluir o array de números AET específicos por estado
-        stateCnpjs, // Incluir o array de CNPJs específicos por estado
-        updatedAt: new Date(),
-        licenseFileUrl,
-        validUntil,
-        aetNumber,
-        status: overallStatus // Atualizar status geral se todos estados estiverem aprovados
-      })
+      .set(updateData)
       .where(eq(licenseRequests.id, data.licenseId))
       .returning();
     

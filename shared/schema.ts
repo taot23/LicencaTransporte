@@ -293,6 +293,7 @@ export const licenseRequests = pgTable("license_requests", {
   comments: text("comments"),
   licenseFileUrl: text("license_file_url").default(''),
   validUntil: timestamp("valid_until"),
+  issuedAt: timestamp("issued_at"),
   aetNumber: text("aet_number"),
   selectedCnpj: text("selected_cnpj"), // CNPJ selecionado da empresa transportadora (global - legado)
   stateCnpjs: text("state_cnpjs").array(), // Array com formato "ESTADO:CNPJ" (ex: "SP:12345678000100")
@@ -486,6 +487,7 @@ export const updateLicenseStatusSchema = createInsertSchema(licenseRequests)
     stateFile: z.any().optional(), // Arquivo para o estado específico
     selectedCnpj: z.string().optional(), // CNPJ selecionado da empresa transportadora (global - legado)
     stateCnpj: z.string().optional(), // CNPJ específico para este estado
+    aetNumber: z.string().optional(), // Número AET
   });
 
 // Schema para quando todos os estados forem setados, atualizar o status geral
