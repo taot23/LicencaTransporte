@@ -3261,6 +3261,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     console.log('URL completa:', req.url);
     console.log('Método:', req.method);
     console.log('Params:', req.params);
+    console.log('Body completo:', req.body);
     try {
       const licenseId = parseInt(req.params.id);
       
