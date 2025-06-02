@@ -607,7 +607,7 @@ export default function IssuedLicensesPage() {
                           )}
                         </TableCell>
                         <TableCell>
-                          {license.emissionDate ? new Intl.DateTimeFormat('pt-BR').format(new Date(license.emissionDate)) : '-'}
+                          {license.issuedAt ? new Intl.DateTimeFormat('pt-BR').format(new Date(license.issuedAt)) : '-'}
                         </TableCell>
                         <TableCell>
                           {license.validUntil ? (
