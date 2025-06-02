@@ -1,0 +1,97 @@
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ pm2 restart aet-license-system
+pm2 logs aet-license-system --lines 15
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [aet-license-system](ids: [ 0 ])
+[PM2] [aet-license-system](0) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ aet-license-system │ fork     │ 6    │ online    │ 0%       │ 12.0mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[TAILING] Tailing last 15 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error.log last 15 lines:
+0|aet-lice |   detail: undefined,
+0|aet-lice |   hint: undefined,
+0|aet-lice |   position: undefined,
+0|aet-lice |   internalPosition: undefined,
+0|aet-lice |   internalQuery: undefined,
+0|aet-lice |   where: 'PL/pgSQL function update_updated_at_column() line 3 at assignment',
+0|aet-lice |   schema: undefined,
+0|aet-lice |   table: undefined,
+0|aet-lice |   column: undefined,
+0|aet-lice |   dataType: undefined,
+0|aet-lice |   constraint: undefined,
+0|aet-lice |   file: 'pl_exec.c',
+0|aet-lice |   line: '5231',
+0|aet-lice |   routine: 'exec_assign_value'
+0|aet-lice | }
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out.log last 15 lines:
+0|aet-lice | 3:04:50 PM [express] GET /api/admin/users 401 in 2ms :: {"message":"Não autenticado"}
+0|aet-lice | 3:04:51 PM [express] GET /api/admin/users 401 in 1ms :: {"message":"Não autenticado"}
+0|aet-lice | 3:04:51 PM [express] GET /api/admin/transporters 401 in 3ms :: {"message":"Não autenticado"}
+0|aet-lice | 3:04:52 PM [express] GET /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+0|aet-lice | 3:04:55 PM [express] GET /api/dashboard/vehicle-stats 401 in 2ms :: {"message":"Não autenticado"}
+0|aet-lice | 3:04:55 PM [express] GET /api/admin/dashboard/stats 401 in 2ms :: {"message":"Não autenticado"}
+0|aet-lice | 3:04:55 PM [express] GET /api/admin/dashboard/vehicle-stats 401 in 2ms :: {"message":"Não autenticad…
+0|aet-lice | 3:04:55 PM [express] GET /api/dashboard/state-stats 401 in 4ms :: {"message":"Não autenticado"}
+0|aet-lice | 3:04:55 PM [express] GET /api/admin/dashboard/state-stats 401 in 2ms :: {"message":"Não autenticado"}
+0|aet-lice | 3:04:55 PM [express] GET /api/admin/licenses 401 in 1ms :: {"message":"Não autenticado"}
+0|aet-lice | 3:04:56 PM [express] GET /api/admin/licenses 401 in 2ms :: {"message":"Não autenticado"}
+0|aet-lice | 3:04:58 PM [express] GET /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+0|aet-lice | 3:04:59 PM [express] GET /api/admin/transporters 401 in 2ms :: {"message":"Não autenticado"}
+0|aet-lice | 3:05:00 PM [express] GET /api/admin/users 401 in 1ms :: {"message":"Não autenticado"}
+0|aet-lice | 3:05:01 PM [express] GET /api/admin/users 401 in 1ms :: {"message":"Não autenticado"}
+
+0|aet-license-system  | 3:06:45 PM [express] serving on port 5000
+0|aet-license-system  | Novo cliente WebSocket conectado
+^C
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ sudo -u postgres psql -d aetlicensesystem
+psql (13.21 (Debian 13.21-0+deb11u1))
+Type "help" for help.
+
+aetlicensesystem=# \d vehicles
+aetlicensesystem=# 
+aetlicensesystem=# ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW() NOT NULL;
+NOTICE:  column "updated_at" of relation "vehicles" already exists, skipping
+ALTER TABLE
+aetlicensesystem=# ALTER TABLE license_requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW() NOT NULL;
+NOTICE:  column "updated_at" of relation "license_requests" already exists, skipping
+ALTER TABLE
+aetlicensesystem=# ALTER TABLE vehicle_models ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW() NOT NULL;
+ALTER TABLE
+aetlicensesystem=# CREATE TRIGGER update_vehicles_updated_at BEFORE UPDATE ON vehicles FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+ERROR:  trigger "update_vehicles_updated_at" for relation "vehicles" already exists
+aetlicensesystem=# CREATE TRIGGER update_license_requests_updated_at BEFORE UPDATE ON license_requests FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+ERROR:  trigger "update_license_requests_updated_at" for relation "license_requests" already exists
+aetlicensesystem=# CREATE TRIGGER update_vehicle_models_updated_at BEFORE UPDATE ON vehicle_models FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+CREATE TRIGGER
+aetlicensesystem=# SELECT COUNT(*) FROM users;
+ count 
+-------
+     8
+(1 row)
+
+aetlicensesystem=# SELECT COUNT(*) FROM vehicle_models;
+ count 
+-------
+   178
+(1 row)
+
+aetlicensesystem=# SELECT COUNT(*) FROM transporters;
+ count 
+-------
+     1
+(1 row)
+
+aetlicensesystem=# \q
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ pm2 restart aet-license-system
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [aet-license-system](ids: [ 0 ])
+[PM2] [aet-license-system](0) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ aet-license-system │ fork     │ 7    │ online    │ 0%       │ 16.7mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ 

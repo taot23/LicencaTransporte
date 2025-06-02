@@ -1,0 +1,166 @@
+^C
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ sudo -u postgres psql -d aetlicensesystem
+psql (13.21 (Debian 13.21-0+deb11u1))
+Type "help" for help.
+
+aetlicensesystem=# -- Verificar vehicles
+\d vehicles
+
+-- Verificar license_requests  
+\d license_requests
+
+-- Verificar vehicle_models
+\d vehicle_models
+
+-- Se alguma não tiver updated_at, adicionar:
+ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW() NOT NULL;
+ALTER TABLE license_requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW() NOT NULL;
+ALTER TABLE vehicle_models ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW() NOT NULL;
+
+-- Criar triggers se necessário:
+CREATE TRIGGER IF NOT EXISTS update_vehicles_updated_at 
+BEFORE UPDATE ON vehicles 
+FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+CREATE TRIGGER IF NOT EXISTS update_license_requests_updated_at 
+BEFORE UPDATE ON license_requests 
+FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+CREATE TRIGGER IF NOT EXISTS update_vehicle_models_updated_at 
+BEFORE UPDATE ON vehicle_models 
+FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+-- Verificar se os dados ainda existem
+SELECT COUNT(*) FROM users;
+SELECT COUNT(*) FROM vehicle_models;
+SELECT COUNT(*) FROM transporters;
+
+\q
+\d: extra argument "--" ignored
+\d: extra argument "Verificar" ignored
+\d: extra argument "license_requests" ignored
+\d: extra argument "--" ignored
+\d: extra argument "Verificar" ignored
+\d: extra argument "vehicle_models" ignored
+\d: extra argument "--" ignored
+\d: extra argument "Se" ignored
+\d: extra argument "alguma" ignored
+\d: extra argument "não" ignored
+\d: extra argument "tiver" ignored
+\d: extra argument "updated_at," ignored
+\d: extra argument "adicionar:" ignored
+\d: extra argument "ALTER" ignored
+\d: extra argument "TABLE" ignored
+\d: extra argument "vehicles" ignored
+\d: extra argument "ADD" ignored
+\d: extra argument "COLUMN" ignored
+\d: extra argument "IF" ignored
+\d: extra argument "NOT" ignored
+\d: extra argument "EXISTS" ignored
+\d: extra argument "updated_at" ignored
+\d: extra argument "TIMESTAMP" ignored
+\d: extra argument "DEFAULT" ignored
+\d: extra argument "NOW()" ignored
+\d: extra argument "NOT" ignored
+\d: extra argument "NULL;" ignored
+\d: extra argument "ALTER" ignored
+\d: extra argument "TABLE" ignored
+\d: extra argument "license_requests" ignored
+\d: extra argument "ADD" ignored
+\d: extra argument "COLUMN" ignored
+\d: extra argument "IF" ignored
+\d: extra argument "NOT" ignored
+\d: extra argument "EXISTS" ignored
+\d: extra argument "updated_at" ignored
+\d: extra argument "TIMESTAMP" ignored
+\d: extra argument "DEFAULT" ignored
+\d: extra argument "NOW()" ignored
+\d: extra argument "NOT" ignored
+\d: extra argument "NULL;" ignored
+\d: extra argument "ALTER" ignored
+\d: extra argument "TABLE" ignored
+\d: extra argument "vehicle_models" ignored
+\d: extra argument "ADD" ignored
+\d: extra argument "COLUMN" ignored
+\d: extra argument "IF" ignored
+\d: extra argument "NOT" ignored
+\d: extra argument "EXISTS" ignored
+\d: extra argument "updated_at" ignored
+\d: extra argument "TIMESTAMP" ignored
+\d: extra argument "DEFAULT" ignored
+\d: extra argument "NOW()" ignored
+\d: extra argument "NOT" ignored
+\d: extra argument "NULL;" ignored
+\d: extra argument "--" ignored
+\d: extra argument "Criar" ignored
+\d: extra argument "triggers" ignored
+\d: extra argument "se" ignored
+\d: extra argument "necessário:" ignored
+\d: extra argument "CREATE" ignored
+\d: extra argument "TRIGGER" ignored
+\d: extra argument "IF" ignored
+\d: extra argument "NOT" ignored
+\d: extra argument "EXISTS" ignored
+\d: extra argument "update_vehicles_updated_at" ignored
+\d: extra argument "BEFORE" ignored
+\d: extra argument "UPDATE" ignored
+\d: extra argument "ON" ignored
+\d: extra argument "vehicles" ignored
+\d: extra argument "FOR" ignored
+\d: extra argument "EACH" ignored
+\d: extra argument "ROW" ignored
+\d: extra argument "EXECUTE" ignored
+\d: extra argument "PROCEDURE" ignored
+\d: extra argument "update_updated_at_column();" ignored
+\d: extra argument "CREATE" ignored
+\d: extra argument "TRIGGER" ignored
+\d: extra argument "IF" ignored
+\d: extra argument "NOT" ignored
+\d: extra argument "EXISTS" ignored
+\d: extra argument "update_license_requests_updated_at" ignored
+\d: extra argument "BEFORE" ignored
+\d: extra argument "UPDATE" ignored
+\d: extra argument "ON" ignored
+\d: extra argument "license_requests" ignored
+\d: extra argument "FOR" ignored
+\d: extra argument "EACH" ignored
+\d: extra argument "ROW" ignored
+\d: extra argument "EXECUTE" ignored
+\d: extra argument "PROCEDURE" ignored
+\d: extra argument "update_updated_at_column();" ignored
+\d: extra argument "CREATE" ignored
+\d: extra argument "TRIGGER" ignored
+\d: extra argument "IF" ignored
+\d: extra argument "NOT" ignored
+\d: extra argument "EXISTS" ignored
+\d: extra argument "update_vehicle_models_updated_at" ignored
+\d: extra argument "BEFORE" ignored
+\d: extra argument "UPDATE" ignored
+\d: extra argument "ON" ignored
+\d: extra argument "vehicle_models" ignored
+\d: extra argument "FOR" ignored
+\d: extra argument "EACH" ignored
+\d: extra argument "ROW" ignored
+\d: extra argument "EXECUTE" ignored
+\d: extra argument "PROCEDURE" ignored
+\d: extra argument "update_updated_at_column();" ignored
+\d: extra argument "--" ignored
+\d: extra argument "Verificar" ignored
+\d: extra argument "se" ignored
+\d: extra argument "os" ignored
+\d: extra argument "dados" ignored
+\d: extra argument "ainda" ignored
+\d: extra argument "existem" ignored
+\d: extra argument "SELECT" ignored
+\d: extra argument "COUNT(*)" ignored
+\d: extra argument "FROM" ignored
+\d: extra argument "users;" ignored
+\d: extra argument "SELECT" ignored
+\d: extra argument "COUNT(*)" ignored
+\d: extra argument "FROM" ignored
+\d: extra argument "vehicle_models;" ignored
+\d: extra argument "SELECT" ignored
+\d: extra argument "COUNT(*)" ignored
+\d: extra argument "FROM" ignored
+\d: extra argument "transporters;" ignored
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ 

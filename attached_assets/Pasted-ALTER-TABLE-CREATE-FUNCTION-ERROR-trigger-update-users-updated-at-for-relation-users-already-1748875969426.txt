@@ -1,0 +1,68 @@
+ALTER TABLE
+CREATE FUNCTION
+ERROR:  trigger "update_users_updated_at" for relation "users" already exists
+                                        Table "public.users"
+   Column   |            Type             | Collation | Nullable |              Default              
+------------+-----------------------------+-----------+----------+-----------------------------------
+ id         | integer                     |           | not null | nextval('users_id_seq'::regclass)
+ email      | text                        |           | not null | 
+ password   | text                        |           | not null | 
+ full_name  | text                        |           | not null | 
+ phone      | text                        |           | not null | 
+ role       | text                        |           | not null | 'user'::text
+ is_admin   | boolean                     |           | not null | false
+ created_at | timestamp without time zone |           | not null | now()
+ updated_at | timestamp without time zone |           | not null | now()
+Indexes:
+    "users_pkey" PRIMARY KEY, btree (id)
+    "idx_user_email" UNIQUE, btree (email)
+    "idx_user_role" btree (role)
+    "users_email_unique" UNIQUE CONSTRAINT, btree (email)
+Referenced by:
+    TABLE "license_requests" CONSTRAINT "license_requests_user_id_users_id_fk" FOREIGN KEY (user_id) REFERENCES users(id)
+    TABLE "license_status_history" CONSTRAINT "license_status_history_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id)
+    TABLE "status_histories" CONSTRAINT "status_histories_user_id_users_id_fk" FOREIGN KEY (user_id) REFERENCES users(id)
+    TABLE "transporters" CONSTRAINT "transporters_user_id_users_id_fk" FOREIGN KEY (user_id) REFERENCES users(id)
+    TABLE "user_transporters" CONSTRAINT "user_transporters_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    TABLE "vehicles" CONSTRAINT "vehicles_user_id_users_id_fk" FOREIGN KEY (user_id) REFERENCES users(id)
+Triggers:
+    update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column()
+
+\d: extra argument "--" ignored
+\d: extra argument "Sair" ignored
+\d: extra argument "do" ignored
+\d: extra argument "PostgreSQL" ignored
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ pm2 restart aet-license-system
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [aet-license-system](ids: [ 0 ])
+[PM2] [aet-license-system](0) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ aet-license-system │ fork     │ 2    │ online    │ 0%       │ 13.4mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ pm2 logs aet-license-system --lines 10
+[TAILING] Tailing last 10 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out.log last 10 lines:
+0|aet-lice | [DEBUG] Total de usuários recuperados: 8
+0|aet-lice | 2:48:01 PM [express] GET /api/admin/users 304 in 4ms :: [{"id":1,"email":"admin@sistema.com","passwo…
+0|aet-lice | === PATCH REQUEST: /api/admin/users/9 ===
+0|aet-lice | 2:48:08 PM [express] PATCH /api/admin/users/9 500 in 11ms :: {"message":"Erro ao atualizar usuário"}
+0|aet-lice | === PATCH REQUEST: /api/admin/users/9 ===
+0|aet-lice | 2:48:09 PM [express] PATCH /api/admin/users/9 500 in 11ms :: {"message":"Erro ao atualizar usuário"}
+0|aet-lice | === PATCH REQUEST: /api/admin/users/6 ===
+0|aet-lice | 2:48:21 PM [express] PATCH /api/admin/users/6 500 in 16ms :: {"message":"Erro ao atualizar usuário"}
+0|aet-lice | === PATCH REQUEST: /api/admin/users/6 ===
+0|aet-lice | 2:48:22 PM [express] PATCH /api/admin/users/6 500 in 15ms :: {"message":"Erro ao atualizar usuário"}
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error.log last 10 lines:
+0|aet-lice |   where: 'PL/pgSQL function update_updated_at_column() line 3 at assignment',
+0|aet-lice |   schema: undefined,
+0|aet-lice |   table: undefined,
+0|aet-lice |   column: undefined,
+0|aet-lice |   dataType: undefined,
+0|aet-lice |   constraint: undefined,
+0|aet-lice |   file: 'pl_exec.c',
+0|aet-lice |   line: '5231',
+0|aet-lice |   routine: 'exec_assign_value'
+0|aet-lice | }
