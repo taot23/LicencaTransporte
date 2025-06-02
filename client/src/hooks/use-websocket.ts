@@ -13,6 +13,8 @@ export function useWebSocket() {
   const [isConnected, setIsConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
+  const reconnectAttempts = useRef(0);
+  const maxReconnectAttempts = 5;
 
   // Função para invalidar o cache e forçar o recarregamento de dados
   const invalidateQueryData = useCallback((type: string, data: any) => {
@@ -90,6 +92,25 @@ export function useWebSocket() {
     }
   }, []);
 
+  // Limpeza periódica de cache para garantir dados atualizados
+  useEffect(() => {
+    const cacheCleanupInterval = setInterval(() => {
+      console.log('🧹 Limpeza automática de cache executada');
+      
+      // Limpar queries antigas (mais de 5 minutos)
+      queryClient.getQueryCache().getAll().forEach(query => {
+        const dataUpdatedAt = query.state.dataUpdatedAt;
+        const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+        
+        if (dataUpdatedAt && dataUpdatedAt < fiveMinutesAgo) {
+          queryClient.removeQueries({ queryKey: query.queryKey });
+        }
+      });
+    }, 10 * 60 * 1000); // A cada 10 minutos
+
+    return () => clearInterval(cacheCleanupInterval);
+  }, []);
+
   // Inicializar a conexão WebSocket
   useEffect(() => {
     // Função para conectar ao WebSocket
@@ -105,13 +126,28 @@ export function useWebSocket() {
       socket.onopen = () => {
         console.log('WebSocket conectado');
         setIsConnected(true);
+        reconnectAttempts.current = 0;
+        
+        // Ao reconectar, invalidar cache para garantir dados atualizados
+        if (reconnectAttempts.current > 0) {
+          console.log('Reconectado - invalidando cache para atualizar dados');
+          queryClient.invalidateQueries();
+        }
       };
       
       socket.onclose = () => {
         console.log('WebSocket desconectado');
         setIsConnected(false);
-        // Tentar reconectar após 3 segundos
-        setTimeout(connectWebSocket, 3000);
+        
+        // Tentar reconectar com backoff exponencial
+        if (reconnectAttempts.current < maxReconnectAttempts) {
+          const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
+          console.log(`Tentativa de reconexão ${reconnectAttempts.current + 1}/${maxReconnectAttempts} em ${delay}ms`);
+          reconnectAttempts.current++;
+          setTimeout(connectWebSocket, delay);
+        } else {
+          console.error('Máximo de tentativas de reconexão excedido');
+        }
       };
       
       socket.onerror = (error) => {

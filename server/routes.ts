@@ -1152,16 +1152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Veículo atualizado com sucesso:', updatedVehicle);
       
       // Enviar notificação WebSocket para veículo atualizado
-      broadcastMessage({
-        type: 'LICENSE_UPDATE',
-        data: {
-          vehicleId: updatedVehicle.id,
-          userId: updatedVehicle.userId,
-          action: 'VEHICLE_UPDATED',
-          updatedAt: new Date().toISOString(),
-          vehicle: updatedVehicle
-        }
-      });
+      broadcastVehicleUpdate(updatedVehicle.id, 'updated', updatedVehicle);
       
       res.json(updatedVehicle);
     } catch (error) {
@@ -2072,6 +2063,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const licenseRequest = await storage.createLicenseRequest(userId, sanitizedData);
       
       console.log('License request saved to database:', JSON.stringify(licenseRequest, null, 2));
+      
+      // Enviar notificação WebSocket para nova licença criada
+      broadcastLicenseUpdate(licenseRequest.id, 'created', licenseRequest);
+      broadcastDashboardUpdate();
       
       res.json(licenseRequest);
     } catch (error) {
@@ -3251,16 +3246,16 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       
       console.log(`Histórico de status criado para licença ${licenseId}, estado ${statusData.state}: ${previousStateStatus} -> ${statusData.status}`);
       
-      // Enviar notificação em tempo real via WebSocket
-      broadcastMessage({
-        type: 'STATUS_UPDATE',
-        data: {
-          licenseId: updatedLicense.id,
-          state: statusData.state,
-          status: statusData.status,
-          updatedAt: new Date().toISOString(),
-          license: updatedLicense
-        }
+      // Enviar notificações WebSocket para atualização de status
+      broadcastLicenseUpdate(updatedLicense.id, 'status_changed', updatedLicense);
+      broadcastDashboardUpdate();
+      broadcastActivityLog({
+        licenseId: updatedLicense.id,
+        state: statusData.state,
+        oldStatus: previousStateStatus,
+        newStatus: statusData.status,
+        userId: req.user!.id,
+        timestamp: new Date().toISOString()
       });
       
       res.json(updatedLicense);
