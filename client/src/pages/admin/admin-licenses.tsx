@@ -1600,22 +1600,7 @@ export default function AdminLicensesPage() {
                   </div>
                 )}
 
-                {selectedLicense.licenseFileUrl && (
-                  <div className="bg-gray-50 p-3 rounded-md">
-                    <h3 className="font-medium text-sm text-gray-500 mb-2">Documento da Licença</h3>
-                    <div className="bg-white p-3 rounded border">
-                      <a 
-                        href={selectedLicense.licenseFileUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center text-blue-600 hover:text-blue-800"
-                      >
-                        <FileText className="h-5 w-5 mr-2" />
-                        Ver documento
-                      </a>
-                    </div>
-                  </div>
-                )}
+
               </div>
 
               <div className="flex justify-center items-center gap-4 mt-6 mb-2">
