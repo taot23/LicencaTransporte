@@ -3263,6 +3263,8 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     console.log('Método:', req.method);
     console.log('Params:', req.params);
     console.log('Body completo:', req.body);
+    console.log('issuedAt no body:', req.body.issuedAt);
+    console.log('Tipo do issuedAt:', typeof req.body.issuedAt);
     try {
       const licenseId = parseInt(req.params.id);
       
