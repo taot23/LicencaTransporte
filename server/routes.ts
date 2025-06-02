@@ -198,7 +198,7 @@ const requireOwnerOrStaff = (req: any, res: any, next: any) => {
 
 // Tipo para as mensagens WebSocket
 interface WSMessage {
-  type: 'STATUS_UPDATE' | 'LICENSE_UPDATE';
+  type: 'STATUS_UPDATE' | 'LICENSE_UPDATE' | 'DASHBOARD_UPDATE' | 'VEHICLE_UPDATE' | 'TRANSPORTER_UPDATE' | 'USER_UPDATE' | 'ACTIVITY_LOG_UPDATE' | 'CACHE_INVALIDATION';
   data: any;
 }
 
@@ -207,11 +207,86 @@ const wsClients: Set<WebSocket> = new Set();
 
 // Função para transmitir mensagens a todos os clientes conectados
 const broadcastMessage = (message: WSMessage) => {
-  console.log(`Enviando atualização por WebSocket: ${message.type}`);
+  console.log(`📡 Enviando atualização WebSocket: ${message.type}`);
   
   wsClients.forEach(client => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(message));
+    try {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(message));
+      } else {
+        wsClients.delete(client);
+      }
+    } catch (error) {
+      console.error('Erro ao enviar mensagem WebSocket:', error);
+      wsClients.delete(client);
+    }
+  });
+};
+
+// Funções auxiliares para diferentes tipos de atualizações
+const broadcastLicenseUpdate = (licenseId: number, action: string, license?: any) => {
+  broadcastMessage({
+    type: 'LICENSE_UPDATE',
+    data: {
+      licenseId,
+      action, // 'created', 'updated', 'deleted', 'status_changed'
+      license,
+      timestamp: new Date().toISOString()
+    }
+  });
+};
+
+const broadcastDashboardUpdate = () => {
+  broadcastMessage({
+    type: 'DASHBOARD_UPDATE',
+    data: {
+      action: 'refresh_stats',
+      timestamp: new Date().toISOString()
+    }
+  });
+};
+
+const broadcastVehicleUpdate = (vehicleId: number, action: string, vehicle?: any) => {
+  broadcastMessage({
+    type: 'VEHICLE_UPDATE',
+    data: {
+      vehicleId,
+      action, // 'created', 'updated', 'deleted'
+      vehicle,
+      timestamp: new Date().toISOString()
+    }
+  });
+};
+
+const broadcastTransporterUpdate = (transporterId: number, action: string, transporter?: any) => {
+  broadcastMessage({
+    type: 'TRANSPORTER_UPDATE',
+    data: {
+      transporterId,
+      action, // 'created', 'updated', 'deleted'
+      transporter,
+      timestamp: new Date().toISOString()
+    }
+  });
+};
+
+const broadcastActivityLog = (logEntry: any) => {
+  broadcastMessage({
+    type: 'ACTIVITY_LOG_UPDATE',
+    data: {
+      action: 'new_entry',
+      logEntry,
+      timestamp: new Date().toISOString()
+    }
+  });
+};
+
+const broadcastCacheInvalidation = (queryKeys: string[]) => {
+  broadcastMessage({
+    type: 'CACHE_INVALIDATION',
+    data: {
+      queryKeys,
+      timestamp: new Date().toISOString()
     }
   });
 };

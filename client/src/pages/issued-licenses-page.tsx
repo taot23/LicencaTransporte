@@ -161,13 +161,7 @@ export default function IssuedLicensesPage() {
             console.log(`[DEBUG] Usando data validade global para ${state}: ${stateValidUntil}`);
           }
           
-          console.log(`[DEBUG] Licença ${license.id} - Estado ${state}:`);
-          console.log(`  - stateEmissionDate: ${stateEmissionDate}`);
-          console.log(`  - stateValidUntil: ${stateValidUntil}`);
-          console.log(`  - license.issuedAt: ${license.issuedAt}`);
-          console.log(`  - license.validUntil: ${license.validUntil}`);
-          console.log(`  - stateAETNumber: ${stateAETNumber}`);
-          console.log(`  - DADOS FINAIS: emissão=${stateEmissionDate}, validade=${stateValidUntil}`);
+
           
           result.push({
             id: license.id * 100 + index, // Gerar ID único para a linha
