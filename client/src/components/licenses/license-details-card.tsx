@@ -520,7 +520,7 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {validUntil ? (
                           <span className="font-medium">
-                            {new Date(validUntil).toLocaleDateString('pt-BR')}
+                            {new Date(validUntil + 'T00:00:00').toLocaleDateString('pt-BR')}
                           </span>
                         ) : (
                           <span className="text-gray-400">-</span>
