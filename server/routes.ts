@@ -3101,6 +3101,11 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         statusData.validUntil = new Date(req.body.validUntil).toISOString();
       }
       
+      // Add issuedAt if provided
+      if (req.body.issuedAt) {
+        statusData.issuedAt = new Date(req.body.issuedAt).toISOString();
+      }
+      
       // Add selectedCnpj if provided
       console.log('Dados recebidos no body:', req.body);
       console.log('selectedCnpj no body:', req.body.selectedCnpj);

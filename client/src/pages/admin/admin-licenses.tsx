@@ -86,6 +86,7 @@ const updateStateStatusSchema = z.object({
   }),
   comments: z.string().optional(),
   validUntil: z.string().optional(),
+  issuedAt: z.string().optional(),
   aetNumber: z.string().optional(),
   selectedCnpj: z.string().optional(),
   licenseFile: z
@@ -102,13 +103,22 @@ const updateStateStatusSchema = z.object({
       }
     ),
 }).superRefine((data, ctx) => {
-  // Se o status for "approved", validade é obrigatória
-  if (data.status === "approved" && !data.validUntil) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "A data de validade é obrigatória quando o status é Liberada",
-      path: ["validUntil"]
-    });
+  // Se o status for "approved", validade e data de emissão são obrigatórias
+  if (data.status === "approved") {
+    if (!data.validUntil) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "A data de validade é obrigatória quando o status é Liberada",
+        path: ["validUntil"]
+      });
+    }
+    if (!data.issuedAt) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "A data de emissão é obrigatória quando o status é Liberada",
+        path: ["issuedAt"]
+      });
+    }
   }
   
   // Se o status for "under_review" ou "pending_approval", número da AET é obrigatório
@@ -329,6 +339,11 @@ export default function AdminLicensesPage() {
       // Incluir data de validade se o status for "approved" (Liberada)
       if (data.validUntil && data.status === "approved") {
         formData.append("validUntil", data.validUntil);
+      }
+      
+      // Incluir data de emissão se o status for "approved" (Liberada)
+      if (data.issuedAt && data.status === "approved") {
+        formData.append("issuedAt", data.issuedAt);
       }
       
       // Incluir arquivo da licença se o status for "approved" (Liberada)
@@ -1261,6 +1276,33 @@ export default function AdminLicensesPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={stateStatusForm.control}
+                      name="issuedAt"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Data de Emissão <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="date"
+                              value={field.value || ""}
+                              onChange={field.onChange}
+                              onBlur={field.onBlur}
+                              name={field.name}
+                              max={new Date().toISOString().split('T')[0]}
+                              className="w-full"
+                            />
+                          </FormControl>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Data de emissão obrigatória para liberação
+                          </p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={stateStatusForm.control}
                       name="validUntil"
                       render={({ field }) => (
                         <FormItem>
@@ -1285,7 +1327,8 @@ export default function AdminLicensesPage() {
                         </FormItem>
                       )}
                     />
-                    
+                  </div>
+                  <div className="grid grid-cols-1 gap-4">
                     <FormField
                       control={stateStatusForm.control}
                       name="licenseFile"
