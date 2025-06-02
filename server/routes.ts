@@ -3279,10 +3279,14 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         status: req.body.status,
         comments: req.body.comments,
         validUntil: req.body.validUntil,
+        issuedAt: req.body.issuedAt, // Incluir data de emissão
         aetNumber: req.body.aetNumber, // Incluir número da AET
         selectedCnpj: req.body.selectedCnpj, // Incluir CNPJ selecionado (global - legado)
         stateCnpj: req.body.stateCnpj, // Incluir CNPJ específico para este estado
       };
+      
+      console.log('stateStatusData final:', stateStatusData);
+      console.log('issuedAt no stateStatusData:', stateStatusData.issuedAt);
       
       try {
         updateLicenseStateSchema.parse(stateStatusData);
@@ -3320,6 +3324,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         status: stateStatusData.status as LicenseStatus,
         comments: stateStatusData.comments,
         validUntil: stateStatusData.validUntil,
+        issuedAt: stateStatusData.issuedAt, // Incluir data de emissão
         aetNumber: stateStatusData.aetNumber,
         selectedCnpj: stateStatusData.selectedCnpj,
         stateCnpj: stateStatusData.selectedCnpj, // Usar selectedCnpj como stateCnpj
