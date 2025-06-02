@@ -215,7 +215,7 @@ export const insertVehicleSchema = createInsertSchema(vehicles)
     crlvFile: z.any().optional(),
     ownerName: z.string().optional(), // Nome do Proprietário
     ownershipType: z.enum(["proprio", "terceiro"]).default("proprio"), // Tipo de propriedade
-    cmt: z.coerce.number().positive().optional(), // Capacidade Máxima de Tração (apenas para unidade tratora)
+    cmt: z.union([z.string(), z.number()]).pipe(z.coerce.number().positive()).optional(), // Capacidade Máxima de Tração (apenas para unidade tratora)
   });
 
 // Enums for license status
