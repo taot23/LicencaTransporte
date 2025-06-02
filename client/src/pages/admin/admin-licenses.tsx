@@ -577,6 +577,10 @@ export default function AdminLicensesPage() {
     console.log('[Form Reset] Estado selecionado:', state);
     console.log('[Form Reset] CNPJ atual do estado:', currentStateCnpj);
     console.log('[Form Reset] stateCnpjs disponíveis:', license.stateCnpjs);
+    console.log('[Form Reset] stateStatuses disponíveis:', license.stateStatuses);
+    console.log('[Form Reset] Status atual:', currentStateStatus);
+    console.log('[Form Reset] Data de validade extraída:', currentValidUntil);
+    console.log('[Form Reset] Data de emissão extraída:', currentIssuedAt);
     
     stateStatusForm.reset({
       state: state,
