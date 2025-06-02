@@ -1294,7 +1294,21 @@ export default function AdminLicensesPage() {
                           <FormLabel>
                             Upload Licença para {selectedState} <span className="text-red-500">*</span>
                           </FormLabel>
-                          <div className="mt-1 flex justify-center px-4 pt-4 pb-5 border-2 border-gray-300 border-dashed rounded-md">
+                          <div 
+                            className="mt-1 flex justify-center px-4 pt-4 pb-5 border-2 border-gray-300 border-dashed rounded-md"
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              const files = e.dataTransfer.files;
+                              if (files && files[0]) {
+                                onChange(files[0]);
+                              }
+                            }}
+                          >
                             <div className="space-y-1 text-center">
                               <UploadCloud className="mx-auto h-10 w-10 text-gray-400" />
                               <div className="flex text-sm text-gray-600">
@@ -1374,7 +1388,21 @@ export default function AdminLicensesPage() {
                           <FormLabel>
                             Upload Documento de Reprovação <span className="text-red-500">*</span>
                           </FormLabel>
-                          <div className="mt-1 flex justify-center px-4 pt-4 pb-5 border-2 border-gray-300 border-dashed rounded-md">
+                          <div 
+                            className="mt-1 flex justify-center px-4 pt-4 pb-5 border-2 border-gray-300 border-dashed rounded-md"
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              const files = e.dataTransfer.files;
+                              if (files && files[0]) {
+                                onChange(files[0]);
+                              }
+                            }}
+                          >
                             <div className="space-y-1 text-center">
                               <UploadCloud className="mx-auto h-10 w-10 text-gray-400" />
                               <div className="flex text-sm text-gray-600">
