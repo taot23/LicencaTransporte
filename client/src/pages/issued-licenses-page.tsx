@@ -125,6 +125,7 @@ export default function IssuedLicensesPage() {
               if (lastPart.match(/^\d{4}-\d{2}-\d{2}$/)) {
                 stateEmissionDate = lastPart;
                 console.log(`Data de emissão extraída para ${state}: ${stateEmissionDate}`);
+                console.log(`Status completo para ${state}: ${stateStatusEntry}`);
               }
             }
           }
