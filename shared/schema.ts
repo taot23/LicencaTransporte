@@ -182,7 +182,7 @@ export const vehicles = pgTable("vehicles", {
   crlvUrl: text("crlv_url"),
   ownerName: text("owner_name"), // Nome do Proprietário
   ownershipType: text("ownership_type").default("proprio").notNull(), // "proprio" ou "terceiro"
-  cmt: numeric("cmt"), // Capacidade Máxima de Tração (apenas para unidade tratora)
+  cmt: integer("cmt"), // Capacidade Máxima de Tração (apenas para unidade tratora)
   status: text("status").default("active").notNull(),
 }, (table) => {
   return {
@@ -215,7 +215,7 @@ export const insertVehicleSchema = createInsertSchema(vehicles)
     crlvFile: z.any().optional(),
     ownerName: z.string().optional(), // Nome do Proprietário
     ownershipType: z.enum(["proprio", "terceiro"]).default("proprio"), // Tipo de propriedade
-    cmt: z.coerce.number().optional(), // Capacidade Máxima de Tração (apenas para unidade tratora)
+    cmt: z.coerce.number().int().positive().optional(), // Capacidade Máxima de Tração (apenas para unidade tratora)
   });
 
 // Enums for license status
