@@ -132,7 +132,7 @@ export default function IssuedLicensesPage() {
           
           // Se não encontrou data de emissão específica, usar a data global da licença
           if (!stateEmissionDate && license.issuedAt) {
-            stateEmissionDate = license.issuedAt.split('T')[0]; // Extrair apenas a parte da data
+            stateEmissionDate = typeof license.issuedAt === 'string' ? license.issuedAt.split('T')[0] : license.issuedAt.toISOString().split('T')[0];
             console.log(`[DEBUG] Usando data global para ${state}: ${stateEmissionDate}`);
           }
           
@@ -155,11 +155,18 @@ export default function IssuedLicensesPage() {
             stateAETNumber = license.aetNumber;
           }
           
+          // Se não encontrou data de validade específica, usar a data global da licença
+          if (!stateValidUntil && license.validUntil) {
+            stateValidUntil = typeof license.validUntil === 'string' ? license.validUntil.split('T')[0] : license.validUntil.toISOString().split('T')[0];
+            console.log(`[DEBUG] Usando data validade global para ${state}: ${stateValidUntil}`);
+          }
+          
           console.log(`[DEBUG] Licença ${license.id} - Estado ${state}:`);
           console.log(`  - stateEmissionDate: ${stateEmissionDate}`);
+          console.log(`  - stateValidUntil: ${stateValidUntil}`);
           console.log(`  - license.issuedAt: ${license.issuedAt}`);
+          console.log(`  - license.validUntil: ${license.validUntil}`);
           console.log(`  - stateAETNumber: ${stateAETNumber}`);
-          console.log(`  - Usando data emissão: ${stateEmissionDate || 'null'}`);
           
           result.push({
             id: license.id * 100 + index, // Gerar ID único para a linha
