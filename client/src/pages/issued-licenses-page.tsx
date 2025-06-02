@@ -632,7 +632,7 @@ export default function IssuedLicensesPage() {
                               validityStatus === 'expiring_soon' ? 'font-semibold text-amber-700' : 
                               'font-semibold text-green-700'
                             }>
-                              {new Intl.DateTimeFormat('pt-BR').format(new Date(license.validUntil))}
+                              {license.validUntil.split('-').reverse().join('/')}
                             </span>
                           ) : '-'}
                         </TableCell>
@@ -881,7 +881,7 @@ export default function IssuedLicensesPage() {
                           validityStatus === 'expiring_soon' ? 'font-semibold text-amber-700' : 
                           'font-semibold text-green-700'
                         }>
-                          {license.validUntil ? new Intl.DateTimeFormat('pt-BR').format(new Date(license.validUntil)) : '-'}
+                          {license.validUntil ? license.validUntil.split('-').reverse().join('/') : '-'}
                         </div>
                       </div>
                     </div>
