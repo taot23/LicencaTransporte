@@ -540,6 +540,7 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nº Licença</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Emissão</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Validade</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Documento</th>
                 </tr>
@@ -550,11 +551,17 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
                   const stateStatusEntry = stateStatuses.find(entry => entry.startsWith(`${state}:`));
                   let status = "pending_registration";
                   let validUntil = null;
+                  let issuedAt = null;
                   
                   if (stateStatusEntry) {
                     const parts = stateStatusEntry.split(':');
                     status = parts[1];
                     validUntil = parts.length > 2 ? parts[2] : null;
+                    
+                    // Se tiver 4 partes, a quarta é a data de emissão
+                    if (parts.length > 3) {
+                      issuedAt = parts[3];
+                    }
                   }
                   
                   // Encontrar arquivo para este estado (usando estado atualizado em tempo real)
@@ -578,6 +585,15 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {stateAETNumber ? (
                           <span className="font-semibold text-blue-700">{stateAETNumber}</span>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {issuedAt ? (
+                          <span className="font-medium">
+                            {new Date(issuedAt + 'T00:00:00').toLocaleDateString('pt-BR')}
+                          </span>
                         ) : (
                           <span className="text-gray-400">-</span>
                         )}

@@ -3152,6 +3152,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         status: statusData.status,
         comments: statusData.comments,
         validUntil: statusData.validUntil,
+        issuedAt: statusData.issuedAt,
         aetNumber: statusData.aetNumber,
         selectedCnpj: statusData.selectedCnpj,
         file

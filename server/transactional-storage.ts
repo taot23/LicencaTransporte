@@ -808,10 +808,14 @@ export class TransactionalStorage implements IStorage {
     
     // Atualizar status de um estado específico, se fornecido
     if (statusData.state && statusData.stateStatus) {
-      // Incluir data de validade no status se disponível
+      // Incluir data de validade e data de emissão no status se disponível
       let newStateStatus = `${statusData.state}:${statusData.stateStatus}`;
       if (statusData.validUntil) {
         newStateStatus = `${statusData.state}:${statusData.stateStatus}:${statusData.validUntil}`;
+        // Se também tiver data de emissão, incluir como 4ª parte
+        if (statusData.issuedAt) {
+          newStateStatus = `${statusData.state}:${statusData.stateStatus}:${statusData.validUntil}:${statusData.issuedAt}`;
+        }
       }
       
       let stateStatuses = [...(license.stateStatuses || [])];
