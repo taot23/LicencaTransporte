@@ -25,6 +25,10 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
   const [currentStatus, setCurrentStatus] = useState(license.status);
   // Estado para armazenar os status por estado (será atualizado pelo WebSocket)
   const [stateStatuses, setStateStatuses] = useState(license.stateStatuses || []);
+  // Estado para armazenar os números AET por estado (será atualizado pelo WebSocket)
+  const [stateAETNumbers, setStateAETNumbers] = useState(license.stateAETNumbers || []);
+  // Estado para armazenar os arquivos por estado (será atualizado pelo WebSocket)
+  const [stateFiles, setStateFiles] = useState(license.stateFiles || []);
   
   // Hook para acesso ao WebSocket
   const { lastMessage } = useWebSocketContext();
@@ -45,16 +49,77 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
             entry => entry.startsWith(`${lastMessage.data.state}:`)
           );
           
-          // Se o estado já existe nos status, atualizar
+          // Se o estado já existe nos status, atualizar com dados completos
           if (stateStatusIndex >= 0) {
-            updatedStatuses[stateStatusIndex] = `${lastMessage.data.state}:${lastMessage.data.status}`;
+            // Construir o novo status com os dados recebidos
+            let newStatus = `${lastMessage.data.state}:${lastMessage.data.status}`;
+            
+            // Adicionar data de validade se disponível
+            if (lastMessage.data.validUntil) {
+              newStatus += `:${lastMessage.data.validUntil}`;
+            }
+            
+            // Adicionar número AET se disponível
+            if (lastMessage.data.aetNumber) {
+              newStatus += `:${lastMessage.data.aetNumber}`;
+            }
+            
+            updatedStatuses[stateStatusIndex] = newStatus;
           } else {
-            // Se não existe, adicionar
-            updatedStatuses.push(`${lastMessage.data.state}:${lastMessage.data.status}`);
+            // Se não existe, adicionar com dados completos
+            let newStatus = `${lastMessage.data.state}:${lastMessage.data.status}`;
+            
+            // Adicionar data de validade se disponível
+            if (lastMessage.data.validUntil) {
+              newStatus += `:${lastMessage.data.validUntil}`;
+            }
+            
+            // Adicionar número AET se disponível
+            if (lastMessage.data.aetNumber) {
+              newStatus += `:${lastMessage.data.aetNumber}`;
+            }
+            
+            updatedStatuses.push(newStatus);
           }
           
           return updatedStatuses;
         });
+        
+        // Atualizar números AET se recebido
+        if (lastMessage.data.aetNumber && lastMessage.data.state) {
+          setStateAETNumbers(prevNumbers => {
+            const updatedNumbers = [...prevNumbers];
+            const aetIndex = updatedNumbers.findIndex(
+              entry => entry.startsWith(`${lastMessage.data.state}:`)
+            );
+            
+            if (aetIndex >= 0) {
+              updatedNumbers[aetIndex] = `${lastMessage.data.state}:${lastMessage.data.aetNumber}`;
+            } else {
+              updatedNumbers.push(`${lastMessage.data.state}:${lastMessage.data.aetNumber}`);
+            }
+            
+            return updatedNumbers;
+          });
+        }
+        
+        // Atualizar arquivos de estado se recebido
+        if (lastMessage.data.stateFileUrl && lastMessage.data.state) {
+          setStateFiles(prevFiles => {
+            const updatedFiles = [...prevFiles];
+            const fileIndex = updatedFiles.findIndex(
+              entry => entry.startsWith(`${lastMessage.data.state}:`)
+            );
+            
+            if (fileIndex >= 0) {
+              updatedFiles[fileIndex] = `${lastMessage.data.state}:${lastMessage.data.stateFileUrl}`;
+            } else {
+              updatedFiles.push(`${lastMessage.data.state}:${lastMessage.data.stateFileUrl}`);
+            }
+            
+            return updatedFiles;
+          });
+        }
         
         // Se também recebemos uma atualização para o status geral da licença
         if (lastMessage.data.license?.status) {
@@ -492,12 +557,12 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
                     validUntil = parts.length > 2 ? parts[2] : null;
                   }
                   
-                  // Encontrar arquivo para este estado
-                  const stateFileEntry = license.stateFiles?.find(entry => entry.startsWith(`${state}:`));
+                  // Encontrar arquivo para este estado (usando estado atualizado em tempo real)
+                  const stateFileEntry = stateFiles.find(entry => entry.startsWith(`${state}:`));
                   const stateFileUrl = stateFileEntry ? stateFileEntry.split(':')[1] : null;
                   
-                  // Encontrar número AET para este estado
-                  const stateAETEntry = license.stateAETNumbers?.find(entry => entry.startsWith(`${state}:`));
+                  // Encontrar número AET para este estado (usando estado atualizado em tempo real)
+                  const stateAETEntry = stateAETNumbers.find(entry => entry.startsWith(`${state}:`));
                   const stateAETNumber = stateAETEntry ? stateAETEntry.split(':')[1] : null;
                   
                   return (
