@@ -564,6 +564,13 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
                     }
                   }
                   
+                  // Usar a data de emissão do campo dedicado da licença se não encontrou no status
+                  if (!issuedAt && license.issuedAt) {
+                    // Converter para formato de data (YYYY-MM-DD)
+                    const issuedDate = new Date(license.issuedAt);
+                    issuedAt = issuedDate.toISOString().split('T')[0];
+                  }
+                  
                   // Encontrar arquivo para este estado (usando estado atualizado em tempo real)
                   const stateFileEntry = stateFiles.find(entry => entry.startsWith(`${state}:`));
                   const stateFileUrl = stateFileEntry ? stateFileEntry.split(':')[1] : null;
