@@ -751,14 +751,14 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                     <FormControl>
                       <Input 
                         type="number" 
-                        placeholder="Ex: 80000" 
-                        step="1000"
+                        placeholder="Ex: 80.00" 
+                        step="0.01"
                         min="0"
                         max="200000"
                         {...field}
                         value={field.value || ''} 
                         onChange={(e) => {
-                          const value = parseInt(e.target.value) || undefined;
+                          const value = parseFloat(e.target.value) || undefined;
                           field.onChange(value);
                         }}
                         className="h-10 w-full" 
