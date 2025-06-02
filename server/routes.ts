@@ -3104,6 +3104,10 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       // Add issuedAt if provided
       if (req.body.issuedAt) {
         statusData.issuedAt = new Date(req.body.issuedAt).toISOString();
+        console.log('[Routes] Data de emissão recebida:', req.body.issuedAt);
+        console.log('[Routes] Data de emissão convertida:', statusData.issuedAt);
+      } else {
+        console.log('[Routes] Nenhuma data de emissão recebida');
       }
       
       // Add selectedCnpj if provided
