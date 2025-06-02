@@ -811,6 +811,11 @@ export class TransactionalStorage implements IStorage {
       // Incluir data de validade e data de emissão no status se disponível
       let newStateStatus = `${statusData.state}:${statusData.stateStatus}`;
       
+      console.log('[Storage] Estado:', statusData.state);
+      console.log('[Storage] Status:', statusData.stateStatus);
+      console.log('[Storage] Data de validade recebida:', statusData.validUntil);
+      console.log('[Storage] Data de emissão recebida:', statusData.issuedAt);
+      
       // Adicionar data de validade se disponível
       if (statusData.validUntil) {
         newStateStatus += `:${statusData.validUntil}`;
@@ -825,6 +830,8 @@ export class TransactionalStorage implements IStorage {
       if (statusData.issuedAt) {
         newStateStatus += `:${statusData.issuedAt}`;
       }
+      
+      console.log('[Storage] Status formatado final:', newStateStatus);
       
       let stateStatuses = [...(license.stateStatuses || [])];
       
