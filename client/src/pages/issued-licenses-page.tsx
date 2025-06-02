@@ -130,8 +130,11 @@ export default function IssuedLicensesPage() {
             }
           }
           
-          // Se não encontrou data de emissão específica, deixar como null
-          // Não usar data de atualização como fallback para data de emissão
+          // Se não encontrou data de emissão específica, usar a data global da licença
+          if (!stateEmissionDate && license.issuedAt) {
+            stateEmissionDate = license.issuedAt.split('T')[0]; // Extrair apenas a parte da data
+            console.log(`[DEBUG] Usando data global para ${state}: ${stateEmissionDate}`);
+          }
           
           // Obter número AET específico para este estado, se disponível
           let stateAETNumber = null;
