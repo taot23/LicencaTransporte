@@ -1,4 +1,4 @@
-#!/bin/bash
+ls#!/bin/bash
 
 # Script para configurar o banco de dados no servidor Google
 # Execute este script como: bash setup_database.sh
