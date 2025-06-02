@@ -3149,13 +3149,13 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       const updatedLicense = await storage.updateLicenseStateStatus({
         licenseId,
         state: statusData.state,
-        status: statusData.status,
+        stateStatus: statusData.status,
         comments: statusData.comments,
         validUntil: statusData.validUntil,
         issuedAt: statusData.issuedAt,
         aetNumber: statusData.aetNumber,
         selectedCnpj: statusData.selectedCnpj,
-        file
+        stateFile: file
       });
       
       // Registrar mudança no histórico de status
