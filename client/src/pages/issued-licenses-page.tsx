@@ -129,10 +129,8 @@ export default function IssuedLicensesPage() {
             }
           }
           
-          // Se não encontrou data de emissão específica, usar a data de atualização da licença
-          if (!stateEmissionDate && license.updatedAt) {
-            stateEmissionDate = license.updatedAt.toString();
-          }
+          // Se não encontrou data de emissão específica, deixar como null
+          // Não usar data de atualização como fallback para data de emissão
           
           // Obter número AET específico para este estado, se disponível
           let stateAETNumber = null;
