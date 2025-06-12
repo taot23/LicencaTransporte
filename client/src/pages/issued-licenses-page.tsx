@@ -3,6 +3,7 @@ import { MainLayout } from "@/components/layout/main-layout";
 import { Input } from "@/components/ui/input";
 import { RefreshCw, Loader2 } from "lucide-react";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Select,
   SelectContent,
@@ -38,7 +39,6 @@ import { TransporterInfo } from "@/components/transporters/transporter-info";
 import { Badge } from "@/components/ui/badge";
 import { SortableHeader } from "@/components/ui/sortable-header";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 
 export default function IssuedLicensesPage() {
@@ -56,6 +56,7 @@ export default function IssuedLicensesPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const queryClient = useQueryClient();
   const { isConnected } = useWebSocketContext();
+  const { toast } = useToast();
   const itemsPerPage = 10;
 
   const { data: issuedLicenses, isLoading, refetch } = useQuery<LicenseRequest[]>({
@@ -330,7 +331,6 @@ export default function IssuedLicensesPage() {
   
   // Navegação para redirecionar após renovação
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
   
   // Mutação para renovar licença
   const renewLicenseMutation = useMutation({
@@ -420,11 +420,21 @@ export default function IssuedLicensesPage() {
         <Button 
           onClick={handleRefresh} 
           variant="outline" 
-          className="flex items-center gap-1 bg-white"
-          title="Atualizar lista de licenças"
+          className={`flex items-center gap-1 bg-white ${isConnected ? 'border-green-200' : 'border-gray-200'}`}
+          title={`Atualizar lista de licenças ${isConnected ? '(Tempo real ativo)' : '(Offline)'}`}
+          disabled={isRefreshing || isLoading}
         >
-          <RefreshCw className="h-4 w-4 mr-1" />
-          Atualizar
+          <div className="flex items-center">
+            {isRefreshing ? (
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-1" />
+            )}
+            {isConnected && (
+              <div className="w-2 h-2 bg-green-500 rounded-full mr-1" title="Conectado em tempo real" />
+            )}
+          </div>
+          {isRefreshing ? 'Atualizando...' : 'Atualizar'}
         </Button>
       </div>
 
