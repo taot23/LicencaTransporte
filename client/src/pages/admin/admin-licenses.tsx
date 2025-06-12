@@ -157,7 +157,10 @@ export default function AdminLicensesPage() {
   // Estado para ordenação
   const [sortField, setSortField] = useState<string>("createdAt");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const { lastMessage } = useWebSocketContext();
+  const { lastMessage, isConnected } = useWebSocketContext();
+  
+  // Estados para controle do botão de atualização
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Effect para invalidar cache quando houver atualizações via WebSocket
   useEffect(() => {
@@ -323,6 +326,33 @@ export default function AdminLicensesPage() {
       });
     },
   });
+
+  // Função de atualização melhorada com feedback visual e integração WebSocket
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // Invalidar cache primeiro
+      await queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/admin/transporters"] });
+      
+      // Fazer refetch
+      await refetch();
+      
+      toast({
+        title: "Sucesso",
+        description: "Lista de licenças atualizada com sucesso.",
+      });
+    } catch (error) {
+      console.error("Erro ao atualizar:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar a lista. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   // Mutação para atualização de status geral foi removida - agora só usamos atualização por estado
   
@@ -723,18 +753,22 @@ export default function AdminLicensesPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-9 bg-white"
-                onClick={() => {
-                  refetch();
-                }}
-                disabled={isLoading}
+                className={`h-9 bg-white ${isConnected ? 'border-green-200' : 'border-gray-200'}`}
+                onClick={handleRefresh}
+                disabled={isRefreshing || isLoading}
+                title={`Atualizar lista de licenças ${isConnected ? '(Tempo real ativo)' : '(Offline)'}`}
               >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                )}
-                Atualizar
+                <div className="flex items-center">
+                  {isRefreshing ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
+                  {isConnected && (
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-1" title="Conectado em tempo real" />
+                  )}
+                </div>
+                {isRefreshing ? 'Atualizando...' : 'Atualizar'}
               </Button>
             </div>
             <p className="text-sm md:text-base text-muted-foreground mt-1">

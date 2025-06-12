@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Input } from "@/components/ui/input";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Loader2 } from "lucide-react";
+import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import { 
   Select,
   SelectContent,
@@ -52,7 +53,9 @@ export default function IssuedLicensesPage() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>('desc');
   const [renewDialogOpen, setRenewDialogOpen] = useState(false);
   const [licenseToRenew, setLicenseToRenew] = useState<{licenseId: number, state: string} | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const queryClient = useQueryClient();
+  const { isConnected } = useWebSocketContext();
   const itemsPerPage = 10;
 
   const { data: issuedLicenses, isLoading, refetch } = useQuery<LicenseRequest[]>({
@@ -380,15 +383,31 @@ export default function IssuedLicensesPage() {
     }
   });
 
-  // Função para atualizar os dados
-  const handleRefresh = () => {
-    refetch();
-    // Toast para feedback ao usuário
-    toast({
-      title: "Atualizando dados",
-      description: "Buscando as informações mais recentes das licenças emitidas.",
-      duration: 2000,
-    });
+  // Função para atualizar os dados com feedback visual melhorado
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // Invalidar cache primeiro
+      await queryClient.invalidateQueries({ queryKey: ["/api/licenses/issued"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/licenses"] });
+      
+      // Fazer refetch
+      await refetch();
+      
+      toast({
+        title: "Sucesso",
+        description: "Lista de licenças emitidas atualizada com sucesso.",
+      });
+    } catch (error) {
+      console.error("Erro ao atualizar:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar a lista. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   return (
