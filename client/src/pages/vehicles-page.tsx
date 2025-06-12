@@ -5,9 +5,11 @@ import { VehicleForm } from "@/components/vehicles/vehicle-form";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Plus, RefreshCw } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Vehicle } from "@shared/schema";
 import { Input } from "@/components/ui/input";
+import { useWebSocket } from "@/hooks/use-websocket";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Select,
   SelectContent,
@@ -22,6 +24,11 @@ export default function VehiclesPage() {
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [currentVehicle, setCurrentVehicle] = useState<Vehicle | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { isConnected } = useWebSocket();
   
   // Checar se existe uma placa pré-preenchida no localStorage
   // (Vindo de outro componente como a tela de adicionar placas adicionais)
@@ -48,6 +55,31 @@ export default function VehiclesPage() {
     }
   });
 
+  // Função de atualização melhorada
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // Invalidar cache primeiro
+      await queryClient.invalidateQueries({ queryKey: ["/api/vehicles"] });
+      
+      // Forçar nova busca
+      await refetch();
+      
+      toast({
+        title: "Lista atualizada",
+        description: "A lista de veículos foi atualizada com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao atualizar",
+        description: "Não foi possível atualizar a lista de veículos.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   const filteredVehicles = vehicles?.filter(vehicle => {
     const matchesSearch = !searchTerm || 
       vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase());
@@ -71,10 +103,26 @@ export default function VehiclesPage() {
     setCurrentVehicle(null);
   };
 
-  const handleFormSuccess = () => {
-    refetch();
-    setIsFormOpen(false);
-    setCurrentVehicle(null);
+  const handleFormSuccess = async () => {
+    try {
+      // Invalidar cache e atualizar dados
+      await queryClient.invalidateQueries({ queryKey: ["/api/vehicles"] });
+      await refetch();
+      
+      toast({
+        title: "Sucesso",
+        description: "Veículo salvo com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Aviso",
+        description: "Veículo salvo, mas pode ser necessário atualizar a lista.",
+        variant: "default",
+      });
+    } finally {
+      setIsFormOpen(false);
+      setCurrentVehicle(null);
+    }
   };
 
   return (
@@ -86,13 +134,19 @@ export default function VehiclesPage() {
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <Button 
-            onClick={() => refetch()} 
+            onClick={handleRefresh}
             variant="outline" 
-            className="flex items-center gap-1 bg-white"
-            title="Atualizar lista de veículos"
+            className={`flex items-center gap-1 bg-white ${isConnected ? 'border-green-200' : 'border-gray-200'}`}
+            title={`Atualizar lista de veículos ${isConnected ? '(Tempo real ativo)' : '(Offline)'}`}
+            disabled={isRefreshing || isLoading}
           >
-            <RefreshCw className="h-4 w-4 mr-1" />
-            Atualizar
+            <div className="flex items-center">
+              <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isConnected && (
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-1" title="Conectado em tempo real" />
+              )}
+            </div>
+            {isRefreshing ? 'Atualizando...' : 'Atualizar'}
           </Button>
           <Button onClick={handleAddVehicle} className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" /> Cadastrar Veículo
@@ -173,7 +227,7 @@ export default function VehiclesPage() {
             {currentVehicle ? "Editar Veículo" : "Cadastrar Veículo"}
           </DialogTitle>
           <VehicleForm 
-            vehicle={currentVehicle} 
+            vehicle={currentVehicle as any} 
             onSuccess={handleFormSuccess} 
             onCancel={handleFormClose}
           />
