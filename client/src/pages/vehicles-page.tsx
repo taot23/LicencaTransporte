@@ -218,7 +218,7 @@ export default function VehiclesPage() {
         vehicles={filteredVehicles || []} 
         isLoading={isLoading} 
         onEdit={handleEditVehicle}
-        onRefresh={refetch}
+        onRefresh={handleRefresh}
       />
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
