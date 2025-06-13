@@ -3679,5 +3679,11 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     }
   });
 
+  // Servir arquivos de upload da pasta externa
+  app.use('/uploads', express.static(uploadDir));
+  
+  // Log da configuração final de uploads
+  console.log(`[UPLOAD] Servindo arquivos de ${uploadDir} em /uploads`);
+
   return httpServer;
 }
