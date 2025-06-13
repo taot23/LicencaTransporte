@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AdminLayout } from "@/components/layout/admin-layout";
+import { exportToCSV, formatDateForCSV, formatCurrencyForCSV } from "@/lib/csv-export";
 
 interface Boleto {
   id: number;
@@ -118,8 +119,6 @@ export default function BoletosPage() {
     }
 
     try {
-      const { exportToCSV, formatDateForCSV, formatStatusForCSV } = require("@/lib/csv-export");
-      
       const headers = [
         "ID",
         "Transportador", 
@@ -134,16 +133,18 @@ export default function BoletosPage() {
       ];
 
       const formattedData = boletos.map(boleto => ({
-        id: boleto.id,
-        transportador: boleto.nomeTransportador,
-        "cpf/cnpj": boleto.cpfCnpj,
-        "número do boleto": boleto.numeroBoleto,
-        valor: boleto.valor,
-        "data emissão": formatDateForCSV(boleto.dataEmissao),
-        "data vencimento": formatDateForCSV(boleto.dataVencimento),
-        status: formatStatusForCSV(boleto.status),
-        observações: boleto.observacoes || "",
-        "criado em": formatDateForCSV(boleto.criadoEm)
+        ID: boleto.id,
+        Transportador: boleto.nomeTransportador,
+        "CPF/CNPJ": boleto.cpfCnpj,
+        "Número do Boleto": boleto.numeroBoleto,
+        Valor: formatCurrencyForCSV(boleto.valor),
+        "Data Emissão": formatDateForCSV(boleto.dataEmissao),
+        "Data Vencimento": formatDateForCSV(boleto.dataVencimento),
+        Status: boleto.status === "aguardando_pagamento" ? "Aguardando Pagamento" :
+                boleto.status === "pago" ? "Pago" :
+                boleto.status === "vencido" ? "Vencido" : boleto.status,
+        Observações: boleto.observacoes || "",
+        "Criado em": formatDateForCSV(boleto.criadoEm)
       }));
 
       exportToCSV({

@@ -10,6 +10,7 @@ import { Vehicle } from "@shared/schema";
 import { Input } from "@/components/ui/input";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { useToast } from "@/hooks/use-toast";
+import { exportToCSV } from "@/lib/csv-export";
 import { 
   Select,
   SelectContent,
@@ -136,8 +137,6 @@ export default function VehiclesPage() {
     }
 
     try {
-      const { exportToCSV, formatDateForCSV } = require("@/lib/csv-export");
-      
       const headers = [
         "ID",
         "Placa",
@@ -162,15 +161,15 @@ export default function VehiclesPage() {
       };
 
       const formattedData = vehicles.map((vehicle) => ({
-        id: vehicle.id,
-        placa: vehicle.plate,
-        tipo: getVehicleTypeLabel(vehicle.type),
-        marca: vehicle.brand || "-",
-        modelo: vehicle.model || "-",
-        ano: vehicle.year || "-",
-        "tara (kg)": vehicle.tare || "-",
-        eixos: vehicle.axleCount || "-",
-        status: vehicle.status === "active" ? "Ativo" : 
+        ID: vehicle.id,
+        Placa: vehicle.plate,
+        Tipo: getVehicleTypeLabel(vehicle.type),
+        Marca: vehicle.brand || "-",
+        Modelo: vehicle.model || "-",
+        Ano: vehicle.year || "-",
+        "Tara (kg)": vehicle.tare || "-",
+        Eixos: vehicle.axleCount || "-",
+        Status: vehicle.status === "active" ? "Ativo" : 
                 vehicle.status === "inactive" ? "Inativo" : 
                 vehicle.status === "maintenance" ? "Manutenção" : vehicle.status
       }));
