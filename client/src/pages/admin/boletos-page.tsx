@@ -1,0 +1,261 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Trash2, Plus, Edit, Download, FileText, Receipt } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { BoletoForm } from "@/components/boleto-form";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+interface Boleto {
+  id: number;
+  transportadorId: number;
+  nomeTransportador: string;
+  cpfCnpj: string;
+  numeroBoleto: string;
+  valor: string;
+  dataEmissao: string;
+  dataVencimento: string;
+  status: string;
+  uploadBoletoUrl?: string;
+  uploadNfUrl?: string;
+  observacoes?: string;
+  criadoEm: string;
+  atualizadoEm: string;
+}
+
+export function BoletosPage() {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingBoleto, setEditingBoleto] = useState<Boleto | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: boletos = [], isLoading } = useQuery({
+    queryKey: ["/api/boletos"],
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => apiRequest(`/api/boletos/${id}`, {
+      method: "DELETE",
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/boletos"] });
+      toast({
+        title: "Sucesso",
+        description: "Boleto excluído com sucesso",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao excluir boleto",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEdit = (boleto: Boleto) => {
+    setEditingBoleto(boleto);
+    setIsFormOpen(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (confirm("Tem certeza que deseja excluir este boleto?")) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  const handleFormClose = () => {
+    setIsFormOpen(false);
+    setEditingBoleto(null);
+  };
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case "pago":
+        return "default";
+      case "vencido":
+        return "destructive";
+      default:
+        return "secondary";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "aguardando_pagamento":
+        return "Aguardando Pagamento";
+      case "pago":
+        return "Pago";
+      case "vencido":
+        return "Vencido";
+      default:
+        return status;
+    }
+  };
+
+  const isVencido = (dataVencimento: string) => {
+    return new Date(dataVencimento) < new Date();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Carregando boletos...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto py-8 px-4">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Módulo Financeiro</h1>
+          <p className="text-gray-600 mt-2">
+            Gerencie boletos e pagamentos dos transportadores
+          </p>
+        </div>
+        <Button
+          onClick={() => setIsFormOpen(true)}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Novo Boleto
+        </Button>
+      </div>
+
+      {boletos.length === 0 ? (
+        <Card>
+          <CardContent className="py-8">
+            <div className="text-center">
+              <Receipt className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Nenhum boleto encontrado
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Ainda não há boletos cadastrados no sistema.
+              </p>
+              <Button onClick={() => setIsFormOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Criar Primeiro Boleto
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Lista de Boletos ({boletos.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Número</TableHead>
+                  <TableHead>Transportador</TableHead>
+                  <TableHead>CPF/CNPJ</TableHead>
+                  <TableHead>Valor</TableHead>
+                  <TableHead>Emissão</TableHead>
+                  <TableHead>Vencimento</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Arquivos</TableHead>
+                  <TableHead>Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {boletos.map((boleto: Boleto) => (
+                  <TableRow key={boleto.id}>
+                    <TableCell className="font-medium">
+                      {boleto.numeroBoleto}
+                    </TableCell>
+                    <TableCell>{boleto.nomeTransportador}</TableCell>
+                    <TableCell>{boleto.cpfCnpj}</TableCell>
+                    <TableCell>{formatCurrency(parseFloat(boleto.valor))}</TableCell>
+                    <TableCell>{formatDate(boleto.dataEmissao)}</TableCell>
+                    <TableCell>
+                      <div className={isVencido(boleto.dataVencimento) ? "text-red-600" : ""}>
+                        {formatDate(boleto.dataVencimento)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusBadgeVariant(boleto.status)}>
+                        {getStatusLabel(boleto.status)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        {boleto.uploadBoletoUrl && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(boleto.uploadBoletoUrl, "_blank")}
+                          >
+                            <Download className="h-3 w-3" />
+                          </Button>
+                        )}
+                        {boleto.uploadNfUrl && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(boleto.uploadNfUrl, "_blank")}
+                          >
+                            <FileText className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(boleto)}
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(boleto.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+
+      <Dialog open={isFormOpen} onOpenChange={handleFormClose}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingBoleto ? "Editar Boleto" : "Novo Boleto"}
+            </DialogTitle>
+          </DialogHeader>
+          <BoletoForm
+            boleto={editingBoleto}
+            onSuccess={handleFormClose}
+            onCancel={handleFormClose}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

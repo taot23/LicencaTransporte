@@ -1058,6 +1058,92 @@ export class MemStorage implements IStorage {
       };
     });
   }
+
+  // Métodos de boletos
+  async getAllBoletos(): Promise<Boleto[]> {
+    return Array.from(this.boletos.values()).sort((a, b) => 
+      b.criadoEm.getTime() - a.criadoEm.getTime()
+    );
+  }
+
+  async getBoletoById(id: number): Promise<Boleto | undefined> {
+    return this.boletos.get(id);
+  }
+
+  async getBoletosByTransportadorId(transportadorId: number): Promise<Boleto[]> {
+    return Array.from(this.boletos.values())
+      .filter(boleto => boleto.transportadorId === transportadorId)
+      .sort((a, b) => b.criadoEm.getTime() - a.criadoEm.getTime());
+  }
+
+  async createBoleto(boletoData: InsertBoleto): Promise<Boleto> {
+    const id = this.currentBoletoId++;
+    const now = new Date();
+    
+    const boleto: Boleto = {
+      ...boletoData,
+      id,
+      dataEmissao: new Date(boletoData.dataEmissao),
+      dataVencimento: new Date(boletoData.dataVencimento),
+      valor: boletoData.valor.toString(),
+      criadoEm: now,
+      atualizadoEm: now,
+    };
+    
+    this.boletos.set(id, boleto);
+    return boleto;
+  }
+
+  async updateBoleto(id: number, boletoData: Partial<Boleto>): Promise<Boleto> {
+    const existingBoleto = this.boletos.get(id);
+    if (!existingBoleto) {
+      throw new Error(`Boleto com ID ${id} não encontrado`);
+    }
+
+    const updatedBoleto: Boleto = {
+      ...existingBoleto,
+      ...boletoData,
+      id,
+      atualizadoEm: new Date(),
+    };
+
+    this.boletos.set(id, updatedBoleto);
+    return updatedBoleto;
+  }
+
+  async deleteBoleto(id: number): Promise<void> {
+    const exists = this.boletos.has(id);
+    if (!exists) {
+      throw new Error(`Boleto com ID ${id} não encontrado`);
+    }
+    this.boletos.delete(id);
+  }
+
+  // Métodos de veículo models (faltavam na implementação)
+  async getAllVehicleModels(): Promise<VehicleModel[]> {
+    // Implementação mock para compatibilidade
+    return [];
+  }
+
+  async getVehicleModelById(id: number): Promise<VehicleModel | undefined> {
+    // Implementação mock para compatibilidade
+    return undefined;
+  }
+
+  async createVehicleModel(model: InsertVehicleModel): Promise<VehicleModel> {
+    // Implementação mock para compatibilidade
+    throw new Error("Não implementado no MemStorage");
+  }
+
+  async updateVehicleModel(id: number, model: InsertVehicleModel): Promise<VehicleModel | undefined> {
+    // Implementação mock para compatibilidade
+    return undefined;
+  }
+
+  async deleteVehicleModel(id: number): Promise<void> {
+    // Implementação mock para compatibilidade
+    throw new Error("Não implementado no MemStorage");
+  }
 }
 
 // Implementação de armazenamento com PostgreSQL
@@ -2321,6 +2407,119 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(statusHistories.createdAt));
 
     return history;
+  }
+
+  // Métodos de boletos
+  async getAllBoletos(): Promise<Boleto[]> {
+    return await db
+      .select()
+      .from(boletos)
+      .orderBy(desc(boletos.criadoEm));
+  }
+
+  async getBoletoById(id: number): Promise<Boleto | undefined> {
+    const results = await db
+      .select()
+      .from(boletos)
+      .where(eq(boletos.id, id))
+      .limit(1);
+    return results[0];
+  }
+
+  async getBoletosByTransportadorId(transportadorId: number): Promise<Boleto[]> {
+    return await db
+      .select()
+      .from(boletos)
+      .where(eq(boletos.transportadorId, transportadorId))
+      .orderBy(desc(boletos.criadoEm));
+  }
+
+  async createBoleto(boletoData: InsertBoleto): Promise<Boleto> {
+    const results = await db
+      .insert(boletos)
+      .values({
+        ...boletoData,
+        dataEmissao: new Date(boletoData.dataEmissao),
+        dataVencimento: new Date(boletoData.dataVencimento),
+      })
+      .returning();
+    return results[0];
+  }
+
+  async updateBoleto(id: number, boletoData: Partial<Boleto>): Promise<Boleto> {
+    const updateData = {
+      ...boletoData,
+      atualizadoEm: new Date(),
+    };
+
+    if (boletoData.dataEmissao) {
+      updateData.dataEmissao = new Date(boletoData.dataEmissao);
+    }
+    if (boletoData.dataVencimento) {
+      updateData.dataVencimento = new Date(boletoData.dataVencimento);
+    }
+
+    const results = await db
+      .update(boletos)
+      .set(updateData)
+      .where(eq(boletos.id, id))
+      .returning();
+
+    if (results.length === 0) {
+      throw new Error(`Boleto com ID ${id} não encontrado`);
+    }
+
+    return results[0];
+  }
+
+  async deleteBoleto(id: number): Promise<void> {
+    const result = await db
+      .delete(boletos)
+      .where(eq(boletos.id, id));
+
+    if (result.rowCount === 0) {
+      throw new Error(`Boleto com ID ${id} não encontrado`);
+    }
+  }
+
+  // Métodos de veículo models
+  async getAllVehicleModels(): Promise<VehicleModel[]> {
+    return await db
+      .select()
+      .from(vehicleModels)
+      .orderBy(asc(vehicleModels.brand), asc(vehicleModels.model));
+  }
+
+  async getVehicleModelById(id: number): Promise<VehicleModel | undefined> {
+    const results = await db
+      .select()
+      .from(vehicleModels)
+      .where(eq(vehicleModels.id, id))
+      .limit(1);
+    return results[0];
+  }
+
+  async createVehicleModel(model: InsertVehicleModel): Promise<VehicleModel> {
+    const results = await db
+      .insert(vehicleModels)
+      .values(model)
+      .returning();
+    return results[0];
+  }
+
+  async updateVehicleModel(id: number, model: InsertVehicleModel): Promise<VehicleModel | undefined> {
+    const results = await db
+      .update(vehicleModels)
+      .set(model)
+      .where(eq(vehicleModels.id, id))
+      .returning();
+    return results[0];
+  }
+
+  async deleteVehicleModel(id: number): Promise<void> {
+    await db
+      .delete(vehicleModels)
+      .where(eq(vehicleModels.id, id));
   }
 }
 

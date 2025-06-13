@@ -14,12 +14,14 @@ import {
   updateLicenseStateSchema,
   insertStatusHistorySchema,
   insertVehicleModelSchema,
+  insertBoletoSchema,
   LicenseStatus,
   userRoleEnum,
   licenseRequests,
   transporters,
   statusHistories,
-  vehicles
+  vehicles,
+  boletos
 } from "@shared/schema";
 import { eq, sql, or, inArray, and, desc } from "drizzle-orm";
 import { fromZodError } from "zod-validation-error";
@@ -3676,6 +3678,179 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     } catch (error) {
       console.error("Erro ao deletar modelo de veículo:", error);
       res.status(500).json({ message: "Erro ao deletar modelo de veículo" });
+    }
+  });
+
+  // ===== MÓDULO FINANCEIRO - BOLETOS =====
+
+  // Função auxiliar para verificar permissões financeiras
+  const canAccessFinancial = (user: any) => {
+    return user.role === "admin" || user.role === "financial";
+  };
+
+  // Listar todos os boletos (apenas admin e financial)
+  app.get("/api/boletos", requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    if (!canAccessFinancial(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    try {
+      const boletos = await storage.getAllBoletos();
+      res.json(boletos);
+    } catch (error) {
+      console.error("Erro ao buscar boletos:", error);
+      res.status(500).json({ message: "Erro ao buscar boletos" });
+    }
+  });
+
+  // Buscar boleto por ID (apenas admin e financial)
+  app.get("/api/boletos/:id", requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    if (!canAccessFinancial(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    try {
+      const id = parseInt(req.params.id);
+      const boleto = await storage.getBoletoById(id);
+      
+      if (!boleto) {
+        return res.status(404).json({ message: "Boleto não encontrado" });
+      }
+      
+      res.json(boleto);
+    } catch (error) {
+      console.error("Erro ao buscar boleto:", error);
+      res.status(500).json({ message: "Erro ao buscar boleto" });
+    }
+  });
+
+  // Buscar boletos por transportador (apenas admin e financial)
+  app.get("/api/transportadores/:id/boletos", requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    if (!canAccessFinancial(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    try {
+      const transportadorId = parseInt(req.params.id);
+      const boletos = await storage.getBoletosByTransportadorId(transportadorId);
+      res.json(boletos);
+    } catch (error) {
+      console.error("Erro ao buscar boletos do transportador:", error);
+      res.status(500).json({ message: "Erro ao buscar boletos do transportador" });
+    }
+  });
+
+  // Criar novo boleto (apenas admin e financial)
+  app.post("/api/boletos", requireAuth, upload.fields([
+    { name: 'uploadBoleto', maxCount: 1 },
+    { name: 'uploadNf', maxCount: 1 }
+  ]), async (req, res) => {
+    const user = req.user!;
+    
+    if (!canAccessFinancial(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    try {
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      
+      // Processar uploads de arquivos
+      let uploadBoletoUrl = null;
+      let uploadNfUrl = null;
+      
+      if (files.uploadBoleto && files.uploadBoleto[0]) {
+        uploadBoletoUrl = `/uploads/boletos/${files.uploadBoleto[0].filename}`;
+      }
+      
+      if (files.uploadNf && files.uploadNf[0]) {
+        uploadNfUrl = `/uploads/boletos/${files.uploadNf[0].filename}`;
+      }
+
+      const boletoData = {
+        ...req.body,
+        uploadBoletoUrl,
+        uploadNfUrl,
+      };
+
+      const validatedData = insertBoletoSchema.parse(boletoData);
+      const boleto = await storage.createBoleto(validatedData);
+      
+      res.status(201).json(boleto);
+    } catch (error) {
+      console.error("Erro ao criar boleto:", error);
+      if (error instanceof ZodError) {
+        res.status(400).json({ 
+          message: "Dados inválidos", 
+          errors: fromZodError(error).message 
+        });
+      } else {
+        res.status(500).json({ message: "Erro ao criar boleto" });
+      }
+    }
+  });
+
+  // Atualizar boleto (apenas admin e financial)
+  app.put("/api/boletos/:id", requireAuth, upload.fields([
+    { name: 'uploadBoleto', maxCount: 1 },
+    { name: 'uploadNf', maxCount: 1 }
+  ]), async (req, res) => {
+    const user = req.user!;
+    
+    if (!canAccessFinancial(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    try {
+      const id = parseInt(req.params.id);
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      
+      // Processar uploads de arquivos (se fornecidos)
+      const updateData: any = { ...req.body };
+      
+      if (files.uploadBoleto && files.uploadBoleto[0]) {
+        updateData.uploadBoletoUrl = `/uploads/boletos/${files.uploadBoleto[0].filename}`;
+      }
+      
+      if (files.uploadNf && files.uploadNf[0]) {
+        updateData.uploadNfUrl = `/uploads/boletos/${files.uploadNf[0].filename}`;
+      }
+
+      const boleto = await storage.updateBoleto(id, updateData);
+      res.json(boleto);
+    } catch (error) {
+      console.error("Erro ao atualizar boleto:", error);
+      if (error instanceof ZodError) {
+        res.status(400).json({ 
+          message: "Dados inválidos", 
+          errors: fromZodError(error).message 
+        });
+      } else {
+        res.status(500).json({ message: "Erro ao atualizar boleto" });
+      }
+    }
+  });
+
+  // Deletar boleto (apenas admin e financial)
+  app.delete("/api/boletos/:id", requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    if (!canAccessFinancial(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteBoleto(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Erro ao deletar boleto:", error);
+      res.status(500).json({ message: "Erro ao deletar boleto" });
     }
   });
 
