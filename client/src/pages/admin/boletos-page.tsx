@@ -101,7 +101,7 @@ export default function BoletosPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: BoletoFormData) => apiRequest("/api/boletos", "POST", data),
+    mutationFn: (data: BoletoFormData) => apiRequest("POST", "/api/boletos", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/boletos"] });
       toast({
@@ -121,7 +121,7 @@ export default function BoletosPage() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: BoletoFormData }) =>
-      apiRequest(`/api/boletos/${id}`, "PATCH", data),
+      apiRequest("PATCH", `/api/boletos/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/boletos"] });
       toast({
@@ -140,7 +140,7 @@ export default function BoletosPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/boletos/${id}`, "DELETE"),
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/boletos/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/boletos"] });
       toast({
