@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/table";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { exportToCSV, formatDateForCSV, formatCurrencyForCSV } from "@/lib/csv-export";
+import { SmartUpload } from "@/components/smart-upload";
 
 // Schema de validação para o formulário de boleto
 const boletoFormSchema = z.object({
