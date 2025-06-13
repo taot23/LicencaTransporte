@@ -79,7 +79,7 @@ interface BoletoFormProps {
   onCancel: () => void;
 }
 
-export function BoletoForm({ boleto, onSuccess, onCancel }: BoletoFormProps) {
+function BoletoForm({ boleto, onSuccess, onCancel }: BoletoFormProps) {
   const [uploadBoleto, setUploadBoleto] = useState<File | null>(null);
   const [uploadNf, setUploadNf] = useState<File | null>(null);
   const { toast } = useToast();
@@ -375,3 +375,5 @@ export function BoletoForm({ boleto, onSuccess, onCancel }: BoletoFormProps) {
     </Form>
   );
 }
+
+export { BoletoForm };
