@@ -3819,18 +3819,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     try {
       // Os uploads já foram feitos separadamente via /api/upload/boleto
       // Aqui recebemos apenas os dados do formulário incluindo as URLs dos arquivos
-      console.log("Dados recebidos no backend:", req.body);
-      
-      // Converter strings de data para objetos Date antes da validação
-      const processedData = {
-        ...req.body,
-        dataEmissao: req.body.dataEmissao ? new Date(req.body.dataEmissao) : new Date(),
-        dataVencimento: req.body.dataVencimento ? new Date(req.body.dataVencimento) : new Date(),
-      };
-      
-      console.log("Dados processados:", processedData);
-      
-      const validatedData = insertBoletoSchema.parse(processedData);
+      const validatedData = insertBoletoSchema.parse(req.body);
       const boleto = await storage.createBoleto(validatedData);
       
       res.status(201).json(boleto);

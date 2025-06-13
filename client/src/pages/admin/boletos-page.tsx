@@ -268,17 +268,11 @@ export default function BoletosPage() {
   };
 
   const onSubmit = async (data: BoletoFormData) => {
-    // Converter strings de data para objetos Date
-    const processedData = {
-      ...data,
-      dataEmissao: new Date(data.dataEmissao),
-      dataVencimento: new Date(data.dataVencimento),
-    };
-
+    // Manter as datas como strings ISO para o schema Zod
     if (editingBoleto) {
-      updateMutation.mutate({ id: editingBoleto.id, data: processedData });
+      updateMutation.mutate({ id: editingBoleto.id, data });
     } else {
-      createMutation.mutate(processedData);
+      createMutation.mutate(data);
     }
   };
 
