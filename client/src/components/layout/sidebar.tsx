@@ -13,6 +13,7 @@ import {
   ListChecks, 
   LogOut, 
   ChevronRight, 
+  ChevronLeft,
   Building2, 
   ClipboardEdit,
   LayoutDashboard,
@@ -48,6 +49,7 @@ export function Sidebar({ className }: SidebarProps) {
   });
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const userInitials = user?.fullName
     .split(' ')
@@ -513,9 +515,21 @@ export function Sidebar({ className }: SidebarProps) {
       </div>
       
       {/* Sidebar desktop sem footer de usuário */}
-      <div className={cn("hidden md:flex md:flex-col md:w-56 lg:w-64 xl:w-72 fixed inset-y-0 bg-gray-800 text-white shadow-lg z-10", className)}>
-        <div className="flex items-center justify-center h-16 px-4 bg-gray-900">
-          <Logo width={120} className="py-2" />
+      <div className={cn(
+        "hidden md:flex md:flex-col fixed inset-y-0 bg-gray-800 text-white shadow-lg z-10 transition-all duration-300",
+        isCollapsed ? "md:w-16" : "md:w-56 lg:w-64 xl:w-72",
+        className
+      )}>
+        <div className="flex items-center justify-between h-16 px-4 bg-gray-900">
+          {!isCollapsed && <Logo width={120} className="py-2" />}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="text-white hover:bg-gray-700 ml-auto"
+          >
+            {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
         </div>
         
         <div className="px-2 py-4 space-y-1 flex-1">
@@ -523,13 +537,15 @@ export function Sidebar({ className }: SidebarProps) {
             <Button
               variant="ghost"
               className={cn(
-                "w-full justify-start text-white hover:bg-gray-700",
+                "w-full text-white hover:bg-gray-700",
+                isCollapsed ? "justify-center px-2" : "justify-start",
                 (location === "/" || location === "/dashboard") ? "bg-gray-700" : "bg-transparent"
               )}
               onClick={() => handleNavigate("/")}
+              title={isCollapsed ? "Dashboard" : undefined}
             >
-              <Home className="mr-3 h-5 w-5" />
-              Dashboard
+              <Home className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
+              {!isCollapsed && "Dashboard"}
             </Button>
           )}
           
@@ -538,49 +554,57 @@ export function Sidebar({ className }: SidebarProps) {
           <Button
             variant="ghost"
             className={cn(
-              "w-full justify-start text-white hover:bg-gray-700",
+              "w-full text-white hover:bg-gray-700",
+              isCollapsed ? "justify-center px-2" : "justify-start",
               location === "/vehicles" ? "bg-gray-700" : "bg-transparent"
             )}
             onClick={() => handleNavigate("/vehicles")}
+            title={isCollapsed ? "Veículos Cadastrados" : undefined}
           >
-            <Truck className="mr-3 h-5 w-5" />
-            Veículos Cadastrados
+            <Truck className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
+            {!isCollapsed && "Veículos Cadastrados"}
           </Button>
           
           <Button
             variant="ghost"
             className={cn(
-              "w-full justify-start text-white hover:bg-gray-700",
+              "w-full text-white hover:bg-gray-700",
+              isCollapsed ? "justify-center px-2" : "justify-start",
               location === "/request-license" ? "bg-gray-700" : "bg-transparent"
             )}
             onClick={() => handleNavigate("/request-license")}
+            title={isCollapsed ? "Solicitar Licença" : undefined}
           >
-            <FileText className="mr-3 h-5 w-5" />
-            Solicitar Licença
+            <FileText className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
+            {!isCollapsed && "Solicitar Licença"}
           </Button>
           
           <Button
             variant="ghost"
             className={cn(
-              "w-full justify-start text-white hover:bg-gray-700",
+              "w-full text-white hover:bg-gray-700",
+              isCollapsed ? "justify-center px-2" : "justify-start",
               location === "/track-license" ? "bg-gray-700" : "bg-transparent"
             )}
             onClick={() => handleNavigate("/track-license")}
+            title={isCollapsed ? "Acompanhar Licença" : undefined}
           >
-            <ClipboardList className="mr-3 h-5 w-5" />
-            Acompanhar Licença
+            <ClipboardList className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
+            {!isCollapsed && "Acompanhar Licença"}
           </Button>
           
           <Button
             variant="ghost"
             className={cn(
-              "w-full justify-start text-white hover:bg-gray-700",
+              "w-full text-white hover:bg-gray-700",
+              isCollapsed ? "justify-center px-2" : "justify-start",
               location === "/issued-licenses" ? "bg-gray-700" : "bg-transparent"
             )}
             onClick={() => handleNavigate("/issued-licenses")}
+            title={isCollapsed ? "Licenças Emitidas" : undefined}
           >
-            <ListChecks className="mr-3 h-5 w-5" />
-            Licenças Emitidas
+            <ListChecks className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
+            {!isCollapsed && "Licenças Emitidas"}
           </Button>
           
           {(isAdmin || isSupervisor || isOperational) && (
