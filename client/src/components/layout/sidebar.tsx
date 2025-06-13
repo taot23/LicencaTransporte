@@ -150,8 +150,8 @@ export function Sidebar({ className }: SidebarProps) {
           Licenças Emitidas
         </Button>
         
-        {/* Meus Boletos - Para transportadores */}
-        {user && !['admin', 'supervisor', 'operational', 'financial', 'manager'].includes(user.role) && (
+        {/* Meus Boletos - Para todos os usuários autenticados */}
+        {user && (
           <Button
             variant="ghost"
             className={cn(
@@ -385,7 +385,7 @@ export function Sidebar({ className }: SidebarProps) {
                 </Button>
                 
                 {/* Meus Boletos - Mobile Version */}
-                {user && !['admin', 'supervisor', 'operational', 'financial', 'manager'].includes(user.role) && (
+                {user && (
                   <Button
                     variant="ghost"
                     className={cn(
