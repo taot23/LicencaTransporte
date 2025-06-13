@@ -38,11 +38,14 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
 
   const handleLogout = async () => {
     try {
-      await apiRequest("POST", "/api/logout");
-      navigate("/login");
+      await fetch("/api/logout", { 
+        method: "POST",
+        credentials: "include"
+      });
+      navigate("/auth");
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
-      navigate("/login");
+      navigate("/auth");
     }
   };
 

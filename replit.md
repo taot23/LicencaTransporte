@@ -44,6 +44,14 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 13/06/2025 - Melhorias de Interface e UX
+- ✅ Header fixo implementado com informações do usuário no canto superior direito
+- ✅ Sistema de exclusão atualizado para usar AlertDialog nativo ao invés de confirm()
+- ✅ Ícones de download corrigidos: Receipt para boleto, FileText para nota fiscal
+- ✅ Logout corrigido para usar fetch padrão conforme preferência do usuário
+- ✅ Layout responsivo mantido para mobile e desktop
+- ✅ Tooltips adicionados aos botões para maior clareza
+
 ### 13/06/2025 - Módulo Financeiro Implementado
 - ✅ Criado sistema completo de gestão de boletos brasileiros
 - ✅ Interface administrativa em `/admin/boletos` com CRUD completo
@@ -74,6 +82,7 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - Idioma: Português brasileiro
 - Foco: Manter arquivos seguros durante reinstalações
 - Prioridade: Estabilidade em produção sobre conveniência de desenvolvimento
+- API calls: Usar fetch padrão ao invés de apiRequest para logout e operações simples
 
 ## Configuração de Deployment
 
