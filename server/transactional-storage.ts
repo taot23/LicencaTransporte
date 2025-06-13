@@ -5,7 +5,8 @@ import {
   licenseRequests, type LicenseRequest, type InsertLicenseRequest, type UpdateLicenseStatus, 
   type UpdateLicenseState, LicenseStatus, LicenseType,
   statusHistories, type StatusHistory, type InsertStatusHistory,
-  vehicleModels, type VehicleModel, type InsertVehicleModel
+  vehicleModels, type VehicleModel, type InsertVehicleModel,
+  boletos, type Boleto, type InsertBoleto
 } from "@shared/schema";
 import { eq, and, desc, asc, sql, gt, lt, like, not, isNull, or } from "drizzle-orm";
 import { db, pool, withTransaction } from "./db";
@@ -1369,6 +1370,100 @@ export class TransactionalStorage implements IStorage {
     } catch (error) {
       console.error('Erro ao deletar modelo de veículo:', error);
       throw new Error('Falha ao deletar modelo de veículo');
+    }
+  }
+
+  // Métodos relacionados a Boletos
+  async getAllBoletos(): Promise<Boleto[]> {
+    try {
+      return await db
+        .select()
+        .from(boletos)
+        .orderBy(desc(boletos.criadoEm));
+    } catch (error) {
+      console.error('Erro ao buscar todos os boletos:', error);
+      throw new Error('Falha ao buscar boletos');
+    }
+  }
+
+  async getBoletoById(id: number): Promise<Boleto | undefined> {
+    try {
+      const [boleto] = await db
+        .select()
+        .from(boletos)
+        .where(eq(boletos.id, id));
+      return boleto || undefined;
+    } catch (error) {
+      console.error('Erro ao buscar boleto por ID:', error);
+      throw new Error('Falha ao buscar boleto');
+    }
+  }
+
+  async getBoletosByTransportadorId(transportadorId: number): Promise<Boleto[]> {
+    try {
+      return await db
+        .select()
+        .from(boletos)
+        .where(eq(boletos.transportadorId, transportadorId))
+        .orderBy(desc(boletos.criadoEm));
+    } catch (error) {
+      console.error('Erro ao buscar boletos por transportador:', error);
+      throw new Error('Falha ao buscar boletos do transportador');
+    }
+  }
+
+  async createBoleto(boletoData: InsertBoleto): Promise<Boleto> {
+    try {
+      const [boleto] = await db
+        .insert(boletos)
+        .values({
+          ...boletoData,
+          criadoEm: new Date(),
+          atualizadoEm: new Date()
+        })
+        .returning();
+      return boleto;
+    } catch (error) {
+      console.error('Erro ao criar boleto:', error);
+      throw new Error('Falha ao criar boleto');
+    }
+  }
+
+  async updateBoleto(id: number, boletoData: Partial<Boleto>): Promise<Boleto> {
+    try {
+      const [updatedBoleto] = await db
+        .update(boletos)
+        .set({
+          ...boletoData,
+          atualizadoEm: new Date()
+        })
+        .where(eq(boletos.id, id))
+        .returning();
+      
+      if (!updatedBoleto) {
+        throw new Error("Boleto não encontrado");
+      }
+      
+      return updatedBoleto;
+    } catch (error) {
+      console.error('Erro ao atualizar boleto:', error);
+      throw new Error('Falha ao atualizar boleto');
+    }
+  }
+
+  async deleteBoleto(id: number): Promise<void> {
+    try {
+      const result = await db
+        .delete(boletos)
+        .where(eq(boletos.id, id))
+        .returning();
+      
+      if (!result.length) {
+        throw new Error("Boleto não encontrado");
+      }
+    } catch (error) {
+      console.error('Erro ao deletar boleto:', error);
+      throw new Error('Falha ao deletar boleto');
     }
   }
 }

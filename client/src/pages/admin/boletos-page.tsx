@@ -7,7 +7,6 @@ import { Trash2, Plus, Edit, Download, FileText, Receipt } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { BoletoForm } from "@/components/boleto-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Table,
@@ -17,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Sidebar } from "@/components/layout/sidebar";
 
 interface Boleto {
   id: number;
@@ -109,14 +109,21 @@ export default function BoletosPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Carregando boletos...</div>
+      <div className="flex min-h-screen bg-gray-50">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-lg">Carregando boletos...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar />
+      <div className="flex-1 overflow-hidden">
+        <div className="h-full overflow-y-auto">
+          <div className="container mx-auto py-8 px-4">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Módulo Financeiro</h1>
@@ -240,20 +247,23 @@ export default function BoletosPage() {
         </Card>
       )}
 
-      <Dialog open={isFormOpen} onOpenChange={handleFormClose}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingBoleto ? "Editar Boleto" : "Novo Boleto"}
-            </DialogTitle>
-          </DialogHeader>
-          <BoletoForm
-            boleto={editingBoleto}
-            onSuccess={handleFormClose}
-            onCancel={handleFormClose}
-          />
-        </DialogContent>
-      </Dialog>
+            <Dialog open={isFormOpen} onOpenChange={handleFormClose}>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingBoleto ? "Editar Boleto" : "Novo Boleto"}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="p-4">
+                  <p className="text-center text-gray-500">
+                    Formulário de boletos em desenvolvimento
+                  </p>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
