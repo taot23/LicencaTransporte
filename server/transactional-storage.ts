@@ -1418,6 +1418,8 @@ export class TransactionalStorage implements IStorage {
         .insert(boletos)
         .values({
           ...boletoData,
+          dataEmissao: new Date(boletoData.dataEmissao),
+          dataVencimento: new Date(boletoData.dataVencimento),
           criadoEm: new Date(),
           atualizadoEm: new Date()
         })
