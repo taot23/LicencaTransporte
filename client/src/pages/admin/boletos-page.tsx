@@ -107,6 +107,64 @@ export default function BoletosPage() {
     return new Date(dataVencimento) < new Date();
   };
 
+  const handleExportCSV = () => {
+    if (!boletos || boletos.length === 0) {
+      toast({
+        title: "Nenhum dado para exportar",
+        description: "Não há boletos para exportar",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { exportToCSV, formatDateForCSV, formatStatusForCSV } = require("@/lib/csv-export");
+      
+      const headers = [
+        "ID",
+        "Transportador", 
+        "CPF/CNPJ",
+        "Número do Boleto",
+        "Valor",
+        "Data Emissão",
+        "Data Vencimento", 
+        "Status",
+        "Observações",
+        "Criado em"
+      ];
+
+      const formattedData = boletos.map(boleto => ({
+        id: boleto.id,
+        transportador: boleto.nomeTransportador,
+        "cpf/cnpj": boleto.cpfCnpj,
+        "número do boleto": boleto.numeroBoleto,
+        valor: boleto.valor,
+        "data emissão": formatDateForCSV(boleto.dataEmissao),
+        "data vencimento": formatDateForCSV(boleto.dataVencimento),
+        status: formatStatusForCSV(boleto.status),
+        observações: boleto.observacoes || "",
+        "criado em": formatDateForCSV(boleto.criadoEm)
+      }));
+
+      exportToCSV({
+        filename: "boletos",
+        headers,
+        data: formattedData
+      });
+
+      toast({
+        title: "Exportação concluída",
+        description: `${boletos.length} boletos exportados com sucesso`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro na exportação",
+        description: "Ocorreu um erro ao exportar os dados",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen bg-gray-50">
@@ -123,22 +181,32 @@ export default function BoletosPage() {
       <Sidebar />
       <div className="flex-1 overflow-hidden">
         <div className="h-full overflow-y-auto">
-          <div className="container mx-auto py-8 px-4">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Módulo Financeiro</h1>
-          <p className="text-gray-600 mt-2">
-            Gerencie boletos e pagamentos dos transportadores
-          </p>
-        </div>
-        <Button
-          onClick={() => setIsFormOpen(true)}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Novo Boleto
-        </Button>
-      </div>
+          <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Módulo Financeiro</h1>
+                <p className="text-gray-600 mt-2">
+                  Gerencie boletos e pagamentos dos transportadores
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={exportToCSV}
+                  className="flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Exportar
+                </Button>
+                <Button
+                  onClick={() => setIsFormOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Novo Boleto
+                </Button>
+              </div>
+            </div>
 
       {boletos.length === 0 ? (
         <Card>
