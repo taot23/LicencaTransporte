@@ -256,39 +256,7 @@ export function Sidebar({ className }: SidebarProps) {
         )}
       </div>
       
-      {/* Footer do usuário */}
-      <div className="mt-auto p-4 border-t border-gray-700">
-        <div className="flex items-center space-x-3">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-gray-600 text-white text-sm">
-              {userInitials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-white truncate">
-              {user?.fullName}
-            </div>
-            <div className="text-xs text-gray-400 truncate">
-              {user?.email}
-            </div>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {isAdmin && <span className="bg-blue-600 text-white text-[10px] px-1 py-0.5 rounded">Admin</span>}
-              {user?.role === 'supervisor' && <span className="bg-green-600 text-white text-[10px] px-1 py-0.5 rounded">Supervisor</span>}
-              {user?.role === 'operational' && <span className="bg-orange-600 text-white text-[10px] px-1 py-0.5 rounded">Operacional</span>}
-              {user?.role === 'financial' && <span className="bg-purple-600 text-white text-[10px] px-1 py-0.5 rounded">Financeiro</span>}
-              {user?.role === 'user' && <span className="bg-gray-600 text-white text-[10px] px-1 py-0.5 rounded">Transportador</span>}
-            </div>
-          </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="ml-auto text-gray-300 hover:text-white"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-5 w-5" />
-          </Button>
-        </div>
-      </div>
+
     </>
   );
 
