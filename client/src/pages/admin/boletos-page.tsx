@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -81,6 +82,12 @@ export default function BoletosPage() {
   const [uploadedBoleto, setUploadedBoleto] = useReactState<File | null>(null);
   const [uploadedNf, setUploadedNf] = useReactState<File | null>(null);
   const [uploading, setUploading] = useReactState(false);
+  
+  // Estado para controlar dialog de confirmação de exclusão
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; boletoId: number | null }>({
+    open: false,
+    boletoId: null
+  });
 
   // Configuração do formulário
   const form = useForm<BoletoFormData>({
@@ -178,10 +185,19 @@ export default function BoletosPage() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm("Tem certeza que deseja excluir este boleto?")) {
-      deleteMutation.mutate(id);
+  const handleDelete = (id: number) => {
+    setDeleteDialog({ open: true, boletoId: id });
+  };
+
+  const confirmDelete = () => {
+    if (deleteDialog.boletoId) {
+      deleteMutation.mutate(deleteDialog.boletoId);
+      setDeleteDialog({ open: false, boletoId: null });
     }
+  };
+
+  const cancelDelete = () => {
+    setDeleteDialog({ open: false, boletoId: null });
   };
 
   const handleFormClose = () => {
@@ -862,6 +878,27 @@ export default function BoletosPage() {
           </Form>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog de confirmação de exclusão */}
+      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => !open && cancelDelete()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este boleto? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelDelete}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }
