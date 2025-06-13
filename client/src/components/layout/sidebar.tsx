@@ -36,9 +36,10 @@ export function Sidebar({ className }: SidebarProps) {
   const [location, setLocation] = useLocation();
   const { user, logoutMutation } = useAuth();
   const isAdmin = user?.role === 'admin' || user?.isAdmin;
-  const isSupervisor = isAdmin || user?.role === 'supervisor';
-  const isOperational = isSupervisor || user?.role === 'operational';
-  const isFinancial = isAdmin || user?.role === 'financial';
+  const isSupervisor = user?.role === 'supervisor';
+  const isOperational = user?.role === 'operational';
+  const isFinancial = user?.role === 'financial';
+  const isTransporter = user?.role === 'user';
   
 
   const isMobile = useIsMobile();
@@ -150,7 +151,7 @@ export function Sidebar({ className }: SidebarProps) {
         </Button>
         
         {/* Meus Boletos - Apenas para transportadores (usuários normais) */}
-        {(!isAdmin && !isSupervisor && !isOperational && !isFinancial) && (
+        {isTransporter && (
           <Button
             variant="ghost"
             className={cn(
@@ -384,7 +385,7 @@ export function Sidebar({ className }: SidebarProps) {
                 </Button>
                 
                 {/* Meus Boletos - Mobile Version */}
-                {(!isAdmin && !isSupervisor && !isOperational && !isFinancial) && (
+                {isTransporter && (
                   <Button
                     variant="ghost"
                     className={cn(
