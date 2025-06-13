@@ -26,8 +26,8 @@ async function throwIfResNotOk(res: Response) {
  * Função para realizar requisições à API com tratamento de erro padronizado
  */
 export async function apiRequest(
-  url: string,
   method: string,
+  url: string,
   data?: unknown | undefined,
   options?: { 
     headers?: Record<string, string>;
@@ -45,7 +45,7 @@ export async function apiRequest(
     }
     
     const res = await fetch(url, {
-      method: method.toUpperCase(),
+      method,
       headers,
       // Para FormData não usamos JSON.stringify
       body: isFormData ? (data as BodyInit) : data ? JSON.stringify(data) : undefined,
@@ -55,7 +55,7 @@ export async function apiRequest(
     await throwIfResNotOk(res);
     return res;
   } catch (error) {
-    console.error(`Erro na requisição ${url} ${method}:`, error);
+    console.error(`Erro na requisição ${method} ${url}:`, error);
     throw error;
   }
 }

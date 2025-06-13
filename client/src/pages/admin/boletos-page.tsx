@@ -26,15 +26,14 @@ import {
 } from "@/components/ui/table";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { exportToCSV, formatDateForCSV, formatCurrencyForCSV } from "@/lib/csv-export";
-import { SmartUpload } from "@/components/smart-upload";
 
 // Schema de validação para o formulário de boleto
 const boletoFormSchema = z.object({
-  transportadorId: z.coerce.number().min(1, "Selecione um transportador"),
+  transportadorId: z.number().min(1, "Selecione um transportador"),
   nomeTransportador: z.string().min(1, "Nome do transportador é obrigatório"),
   cpfCnpj: z.string().min(11, "CPF/CNPJ é obrigatório"),
   numeroBoleto: z.string().min(1, "Número do boleto é obrigatório"),
-  valor: z.coerce.number().positive("Valor deve ser positivo"),
+  valor: z.string().min(1, "Valor é obrigatório"),
   dataEmissao: z.string().min(1, "Data de emissão é obrigatória"),
   dataVencimento: z.string().min(1, "Data de vencimento é obrigatória"),
   status: z.string().min(1, "Status é obrigatório"),
@@ -63,8 +62,6 @@ interface Boleto {
 export default function BoletosPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingBoleto, setEditingBoleto] = useState<Boleto | null>(null);
-  const [uploadBoleto, setUploadBoleto] = useState<File | null>(null);
-  const [uploadNf, setUploadNf] = useState<File | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -84,10 +81,10 @@ export default function BoletosPage() {
       nomeTransportador: "",
       cpfCnpj: "",
       numeroBoleto: "",
-      valor: 0,
+      valor: "",
       dataEmissao: new Date().toISOString().split('T')[0],
       dataVencimento: "",
-      status: "aguardando_pagamento",
+      status: "pendente",
       observacoes: "",
     },
   });
@@ -158,7 +155,7 @@ export default function BoletosPage() {
       nomeTransportador: boleto.nomeTransportador,
       cpfCnpj: boleto.cpfCnpj,
       numeroBoleto: boleto.numeroBoleto,
-      valor: parseFloat(boleto.valor),
+      valor: boleto.valor,
       dataEmissao: new Date(boleto.dataEmissao).toISOString().split('T')[0],
       dataVencimento: new Date(boleto.dataVencimento).toISOString().split('T')[0],
       status: boleto.status,
@@ -190,27 +187,10 @@ export default function BoletosPage() {
   };
 
   const onSubmit = (data: BoletoFormData) => {
-    const formData = new FormData();
-    
-    // Adicionar dados do boleto
-    Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        formData.append(key, value.toString());
-      }
-    });
-
-    // Adicionar arquivos se fornecidos
-    if (uploadBoleto) {
-      formData.append("uploadBoleto", uploadBoleto);
-    }
-    if (uploadNf) {
-      formData.append("uploadNf", uploadNf);
-    }
-
     if (editingBoleto) {
-      updateMutation.mutate({ id: editingBoleto.id, data: formData });
+      updateMutation.mutate({ id: editingBoleto.id, data });
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(data);
     }
   };
 
@@ -618,34 +598,6 @@ export default function BoletosPage() {
                   </FormItem>
                 )}
               />
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Upload do Boleto (PDF)</Label>
-                  <SmartUpload
-                    onFileChange={setUploadBoleto}
-                    accept=".pdf"
-                    maxSize={10 * 1024 * 1024}
-                    label="Arraste o arquivo PDF do boleto aqui"
-                    description="Arquivo PDF até 10MB"
-                    currentFileUrl={editingBoleto?.uploadBoletoUrl}
-                    currentFileName="Boleto atual"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Upload da Nota Fiscal (PDF)</Label>
-                  <SmartUpload
-                    onFileChange={setUploadNf}
-                    accept=".pdf"
-                    maxSize={10 * 1024 * 1024}
-                    label="Arraste o arquivo PDF da NF aqui"
-                    description="Arquivo PDF até 10MB"
-                    currentFileUrl={editingBoleto?.uploadNfUrl}
-                    currentFileName="Nota Fiscal atual"
-                  />
-                </div>
-              </div>
 
               <div className="flex justify-end space-x-2 pt-4">
                 <Button type="button" variant="outline" onClick={handleFormClose}>
