@@ -52,8 +52,10 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ Papel de usuário "financial" adicionado com permissões específicas
 - ✅ Navegação na sidebar para usuários admin e financial
 - ✅ Integração com sistema de uploads externos
-- ✅ Layout corrigido para seguir padrão das outras páginas com sidebar lateral
+- ✅ Layout corrigido para seguir padrão AdminLayout das outras páginas
 - ✅ Métodos de boletos implementados na TransactionalStorage (PostgreSQL)
+- ✅ Botão "Exportar" com ícone Download implementado para exportação CSV
+- ✅ Layout enquadrado corretamente na interface seguindo grid padrão
 
 ### 13/06/2025 - Configuração de Uploads Externos
 - ✅ Implementado sistema de detecção automática de diretório de uploads

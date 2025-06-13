@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Sidebar } from "@/components/layout/sidebar";
+import { AdminLayout } from "@/components/layout/admin-layout";
 
 interface Boleto {
   id: number;
@@ -167,46 +167,43 @@ export default function BoletosPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen bg-gray-50">
-        <Sidebar />
-        <div className="flex-1 flex items-center justify-center">
+      <AdminLayout>
+        <div className="flex items-center justify-center h-64">
           <div className="text-lg">Carregando boletos...</div>
         </div>
-      </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full overflow-y-auto">
-          <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Módulo Financeiro</h1>
-                <p className="text-gray-600 mt-2">
-                  Gerencie boletos e pagamentos dos transportadores
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={handleExportCSV}
-                  className="flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Exportar
-                </Button>
-                <Button
-                  onClick={() => setIsFormOpen(true)}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Novo Boleto
-                </Button>
-              </div>
-            </div>
+    <AdminLayout>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Módulo Financeiro</h1>
+          <p className="text-gray-600 mt-1">
+            Gerencie boletos e pagamentos dos transportadores
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCSV}
+            disabled={isLoading}
+            title="Exportar dados dos boletos"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Exportar
+          </Button>
+          <Button
+            onClick={() => setIsFormOpen(true)}
+            size="sm"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Boleto
+          </Button>
+        </div>
+      </div>
 
       {boletos.length === 0 ? (
         <Card>
@@ -315,23 +312,20 @@ export default function BoletosPage() {
         </Card>
       )}
 
-            <Dialog open={isFormOpen} onOpenChange={handleFormClose}>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingBoleto ? "Editar Boleto" : "Novo Boleto"}
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="p-4">
-                  <p className="text-center text-gray-500">
-                    Formulário de boletos em desenvolvimento
-                  </p>
-                </div>
-              </DialogContent>
-            </Dialog>
+      <Dialog open={isFormOpen} onOpenChange={handleFormClose}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingBoleto ? "Editar Boleto" : "Novo Boleto"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="p-4">
+            <p className="text-center text-gray-500">
+              Formulário de boletos em desenvolvimento
+            </p>
           </div>
-        </div>
-      </div>
-    </div>
+        </DialogContent>
+      </Dialog>
+    </AdminLayout>
   );
 }
