@@ -125,6 +125,75 @@ export default function VehiclesPage() {
     }
   };
 
+  const handleExportCSV = () => {
+    if (!vehicles || vehicles.length === 0) {
+      toast({
+        title: "Nenhum dado para exportar",
+        description: "Não há veículos para exportar",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { exportToCSV, formatDateForCSV } = require("@/lib/csv-export");
+      
+      const headers = [
+        "ID",
+        "Placa",
+        "Tipo",
+        "Marca",
+        "Modelo",
+        "Ano",
+        "Tara (kg)",
+        "Eixos",
+        "Status"
+      ];
+
+      const getVehicleTypeLabel = (type: string) => {
+        const types: Record<string, string> = {
+          tractor_unit: "Unidade Tratora",
+          semi_trailer: "Semirreboque",
+          trailer: "Reboque",
+          dolly: "Dolly",
+          flatbed: "Prancha"
+        };
+        return types[type] || type;
+      };
+
+      const formattedData = vehicles.map((vehicle) => ({
+        id: vehicle.id,
+        placa: vehicle.plate,
+        tipo: getVehicleTypeLabel(vehicle.type),
+        marca: vehicle.brand || "-",
+        modelo: vehicle.model || "-",
+        ano: vehicle.year || "-",
+        "tara (kg)": vehicle.tare || "-",
+        eixos: vehicle.axleCount || "-",
+        status: vehicle.status === "active" ? "Ativo" : 
+                vehicle.status === "inactive" ? "Inativo" : 
+                vehicle.status === "maintenance" ? "Manutenção" : vehicle.status
+      }));
+
+      exportToCSV({
+        filename: "veiculos",
+        headers,
+        data: formattedData
+      });
+
+      toast({
+        title: "Exportação concluída",
+        description: `${vehicles.length} veículos exportados com sucesso`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro na exportação",
+        description: "Ocorreu um erro ao exportar os dados",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <MainLayout>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6">
@@ -147,6 +216,16 @@ export default function VehiclesPage() {
               )}
             </div>
             {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCSV}
+            disabled={isLoading}
+            title="Exportar dados dos veículos"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Exportar
           </Button>
           <Button onClick={handleAddVehicle} className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" /> Cadastrar Veículo
