@@ -3750,17 +3750,18 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     }
   });
 
-  // Endpoint para transportadores acessarem seus próprios boletos
+  // Endpoint para transportadores acessarem seus próprios boletos (admin pode ver todos)
   app.get("/api/meus-boletos", requireAuth, async (req, res) => {
     const user = req.user!;
-    
-    // Apenas usuários normais (transportadores) podem acessar esta rota
-    if (user.role !== 'user') {
-      return res.status(403).json({ message: "Acesso negado - apenas para transportadores" });
-    }
 
     try {
-      // Buscar transportador vinculado ao usuário
+      // Admin pode ver todos os boletos
+      if (user.role === 'admin' || user.role === 'financial') {
+        const boletos = await storage.getAllBoletos();
+        return res.json(boletos);
+      }
+      
+      // Para transportadores, buscar apenas seus boletos
       const transporters = await storage.getAllTransporters();
       const userTransporter = transporters.find(t => t.userId === user.id);
       
