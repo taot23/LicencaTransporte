@@ -346,19 +346,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Rota de login simples para desenvolvimento
-  app.post("/api/login", async (req, res) => {
+  // Desabilitar middleware de autenticação para rota de login
+  app.post("/api/login", async (req, res, next) => {
+    // Pular autenticação para esta rota
+    next();
+  }, async (req, res) => {
     const { email, password } = req.body;
+    console.log("Tentativa de login:", { email, password });
     
     try {
-      // Login simples para desenvolvimento - admin@aet.com com senha "admin"
+      // Login simples para desenvolvimento - admin@aet.com com senha "admin"  
       if (email === "admin@aet.com" && password === "admin") {
+        console.log("Credenciais corretas, buscando usuário...");
         const user = await storage.getUserByEmail(email);
+        console.log("Usuário encontrado:", user ? "sim" : "não", user);
+        
         if (!user) {
-          return res.status(401).json({ message: "Email ou senha incorretos" });
+          return res.status(401).json({ message: "Usuário não encontrado" });
         }
 
-        // Criar sessão manual
+        // Criar sessão manual sem passport
         (req.session as any).user = {
           id: user.id,
           email: user.email,
@@ -366,6 +373,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role: user.role,
           phone: user.phone
         };
+
+        console.log("Sessão criada:", (req.session as any).user);
 
         res.json({ 
           message: "Login realizado com sucesso", 
@@ -378,6 +387,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         });
       } else {
+        console.log("Credenciais incorretas:", { email, password });
         return res.status(401).json({ message: "Email ou senha incorretos" });
       }
     } catch (error) {
