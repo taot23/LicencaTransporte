@@ -65,6 +65,7 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import { VehicleTypeImage } from "@/components/ui/vehicle-type-image";
+import { VehicleAutocomplete } from "@/components/ui/vehicle-autocomplete";
 
 // Tipos de carga por categoria
 const NON_FLATBED_CARGO_TYPES = [
