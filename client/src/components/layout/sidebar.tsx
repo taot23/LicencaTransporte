@@ -19,7 +19,8 @@ import {
   Users,
   Settings,
   Car,
-  RefreshCw
+  RefreshCw,
+  Receipt
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -36,6 +37,7 @@ export function Sidebar({ className }: SidebarProps) {
   const isAdmin = user?.role === 'admin' || user?.isAdmin;
   const isSupervisor = isAdmin || user?.role === 'supervisor';
   const isOperational = isSupervisor || user?.role === 'operational';
+  const isFinancial = isAdmin || user?.role === 'financial';
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
 
@@ -221,6 +223,20 @@ export function Sidebar({ className }: SidebarProps) {
               </Button>
             )}
             
+            {isFinancial && (
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start text-white hover:bg-gray-700",
+                  location === "/admin/boletos" ? "bg-gray-700" : "bg-transparent"
+                )}
+                onClick={() => handleNavigate("/admin/boletos")}
+              >
+                <Receipt className="mr-3 h-5 w-5" />
+                Módulo Financeiro
+              </Button>
+            )}
+            
             {/* Botão de todos veículos para usuários operacionais removido */}
           </>
         )}
@@ -238,6 +254,7 @@ export function Sidebar({ className }: SidebarProps) {
               {isAdmin && <span className="bg-blue-600 text-white text-[10px] px-1 py-0.5 rounded">Admin</span>}
               {user?.role === 'supervisor' && <span className="bg-green-600 text-white text-[10px] px-1 py-0.5 rounded">Supervisor</span>}
               {user?.role === 'operational' && <span className="bg-orange-600 text-white text-[10px] px-1 py-0.5 rounded">Operacional</span>}
+              {user?.role === 'financial' && <span className="bg-purple-600 text-white text-[10px] px-1 py-0.5 rounded">Financeiro</span>}
               {user?.role === 'user' && <span className="bg-gray-600 text-white text-[10px] px-1 py-0.5 rounded">Transportador</span>}
             </div>
           </div>

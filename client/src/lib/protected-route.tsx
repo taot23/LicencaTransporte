@@ -139,7 +139,7 @@ export function StaffRoute({
 }: {
   path: string;
   component: () => React.JSX.Element;
-  requiredRole?: "operational" | "supervisor" | "any";
+  requiredRole?: "operational" | "supervisor" | "financial" | "any";
 }) {
   const { user, isLoading, checkRole } = useAuth();
   const { toast } = useToast();
@@ -164,10 +164,18 @@ export function StaffRoute({
           return;
         }
         
+        if (requiredRole === "financial" && checkRole('financial')) {
+          setIsAuthorized(true);
+          setIsChecking(false);
+          return;
+        }
+        
         // Se não for óbvio, faz a verificação no servidor
         const endpoint = 
           requiredRole === "supervisor" 
             ? "/api/staff/check-supervisor"
+            : requiredRole === "financial"
+            ? "/api/staff/check-financial"
             : "/api/staff/check-operational";
         
         const res = await fetch(endpoint, {
