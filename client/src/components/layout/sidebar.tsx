@@ -40,7 +40,6 @@ export function Sidebar({ className }: SidebarProps) {
   const isOperational = isSupervisor || user?.role === 'operational';
   const isFinancial = isAdmin || user?.role === 'financial';
   const isTransporter = user?.role === 'user';
-  
 
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
@@ -58,238 +57,194 @@ export function Sidebar({ className }: SidebarProps) {
   };
 
   const handleNavigate = (path: string) => {
-    // Verifica se já está na mesma página para evitar recargas desnecessárias
     if (location !== path) {
       setLocation(path);
     }
     setOpen(false);
   };
 
-  const NavItems = () => (
+  // Menu items que aparecem sempre
+  const menuItems = [
+    // Dashboard
+    {
+      icon: Home,
+      label: "Dashboard",
+      path: "/",
+      show: !isOperational
+    },
+    // Minhas Empresas
+    {
+      icon: Building2,
+      label: "Minhas Empresas",
+      path: "/my-companies",
+      show: isSupervisor || isOperational
+    },
+    // Veículos Cadastrados
+    {
+      icon: Truck,
+      label: "Veículos Cadastrados",
+      path: "/vehicles",
+      show: true
+    },
+    // Solicitar Licença
+    {
+      icon: FileText,
+      label: "Solicitar Licença",
+      path: "/request-license",
+      show: true
+    },
+    // Acompanhar Licença
+    {
+      icon: ClipboardList,
+      label: "Acompanhar Licença",
+      path: "/track-license",
+      show: true
+    },
+    // Licenças Emitidas
+    {
+      icon: ListChecks,
+      label: "Licenças Emitidas",
+      path: "/issued-licenses",
+      show: true
+    },
+    // MEUS BOLETOS - SEMPRE VISÍVEL
+    {
+      icon: Receipt,
+      label: "Meus Boletos",
+      path: "/meus-boletos",
+      show: true
+    }
+  ];
+
+  const adminMenuItems = [
+    {
+      icon: LayoutDashboard,
+      label: "Relatórios",
+      path: "/admin",
+      show: isAdmin
+    },
+    {
+      icon: ClipboardEdit,
+      label: "Gerenciar Licenças",
+      path: "/admin/licenses",
+      show: isOperational
+    },
+    {
+      icon: Building2,
+      label: "Transportadores",
+      path: "/admin/transporters",
+      show: isOperational
+    },
+    {
+      icon: Users,
+      label: "Usuários",
+      path: "/admin/users",
+      show: isAdmin
+    },
+    {
+      icon: Car,
+      label: "Modelos de Veículos",
+      path: "/admin/vehicle-models",
+      show: isAdmin
+    },
+    {
+      icon: Receipt,
+      label: "Módulo Financeiro",
+      path: "/admin/boletos",
+      show: isFinancial
+    }
+  ];
+
+  const renderMenuItems = (items: any[], showSeparator = false) => (
     <>
-      <div className="flex items-center justify-center h-16 px-4 bg-gray-900">
-        <Logo width={120} className="py-2" />
-      </div>
-      
-      <div className="px-2 py-4 space-y-1">
-        {/* Seção do Usuário Regular - Dashboard é visível apenas para usuários não-administrativos */}
-        {!isOperational && (
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start text-white hover:bg-gray-700",
-              (location === "/" || location === "/dashboard") ? "bg-gray-700" : "bg-transparent"
-            )}
-            onClick={() => handleNavigate("/")}
-          >
-            <Home className="mr-3 h-5 w-5" />
-            Dashboard
-          </Button>
-        )}
-        
-        {/* Minhas Empresas é visível apenas para usuários com cargos administrativos (supervisor, operational, admin) */}
-        {(isSupervisor || isOperational) && (
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start text-white hover:bg-gray-700",
-              location === "/my-companies" ? "bg-gray-700" : "bg-transparent"
-            )}
-            onClick={() => handleNavigate("/my-companies")}
-          >
-            <Building2 className="mr-3 h-5 w-5" />
-            Minhas Empresas
-          </Button>
-        )}
-        
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start text-white hover:bg-gray-700",
-            location === "/vehicles" ? "bg-gray-700" : "bg-transparent"
-          )}
-          onClick={() => handleNavigate("/vehicles")}
-        >
-          <Truck className="mr-3 h-5 w-5" />
-          Veículos Cadastrados
-        </Button>
-        
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start text-white hover:bg-gray-700",
-            location === "/request-license" ? "bg-gray-700" : "bg-transparent"
-          )}
-          onClick={() => handleNavigate("/request-license")}
-        >
-          <FileText className="mr-3 h-5 w-5" />
-          Solicitar Licença
-        </Button>
-        
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start text-white hover:bg-gray-700",
-            location === "/track-license" ? "bg-gray-700" : "bg-transparent"
-          )}
-          onClick={() => handleNavigate("/track-license")}
-        >
-          <ClipboardList className="mr-3 h-5 w-5" />
-          Acompanhar Licença
-        </Button>
-        
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start text-white hover:bg-gray-700",
-            location === "/issued-licenses" ? "bg-gray-700" : "bg-transparent"
-          )}
-          onClick={() => handleNavigate("/issued-licenses")}
-        >
-          <ListChecks className="mr-3 h-5 w-5" />
-          Licenças Emitidas
-        </Button>
-        
-        {/* Meus Boletos - SEMPRE VISÍVEL */}
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start text-white hover:bg-gray-700",
-            location === "/meus-boletos" ? "bg-gray-700" : "bg-transparent"
-          )}
-          onClick={() => handleNavigate("/meus-boletos")}
-        >
-          <Receipt className="mr-3 h-5 w-5" />
-          Meus Boletos
-        </Button>
-        
-        {/* Seção de Funcionalidades Administrativas */}
-        {(isAdmin || isSupervisor || isOperational) && (
-          <>
-            <div className="pt-2 pb-2">
-              <Separator className="bg-gray-700" />
-              <p className="text-xs text-gray-400 uppercase mt-2 ml-2 font-semibold">Administração</p>
-            </div>
-            
-            {isAdmin && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-white hover:bg-gray-700",
-                  location === "/admin" ? "bg-gray-700" : "bg-transparent"
-                )}
-                onClick={() => handleNavigate("/admin")}
-              >
-                <LayoutDashboard className="mr-3 h-5 w-5" />
-                Relatórios
-              </Button>
-            )}
-            
-            {isOperational && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-white hover:bg-gray-700",
-                  (location === "/admin/licenses" || location === "/gerenciar-licencas") ? "bg-gray-700" : "bg-transparent"
-                )}
-                onClick={() => handleNavigate("/admin/licenses")}
-              >
-                <ClipboardEdit className="mr-3 h-5 w-5" />
-                Gerenciar Licenças
-              </Button>
-            )}
-            
-            {isOperational && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-white hover:bg-gray-700",
-                  location === "/admin/transporters" ? "bg-gray-700" : "bg-transparent"
-                )}
-                onClick={() => handleNavigate("/admin/transporters")}
-              >
-                <Building2 className="mr-3 h-5 w-5" />
-                Transportadores
-              </Button>
-            )}
-            
-            {isAdmin && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-white hover:bg-gray-700",
-                  location === "/admin/users" ? "bg-gray-700" : "bg-transparent"
-                )}
-                onClick={() => handleNavigate("/admin/users")}
-              >
-                <Users className="mr-3 h-5 w-5" />
-                Usuários
-              </Button>
-            )}
-            
-            {isAdmin && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-white hover:bg-gray-700",
-                  location === "/admin/vehicle-models" ? "bg-gray-700" : "bg-transparent"
-                )}
-                onClick={() => handleNavigate("/admin/vehicle-models")}
-              >
-                <Car className="mr-3 h-5 w-5" />
-                Modelos de Veículos
-              </Button>
-            )}
-            
-            {isFinancial && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-white hover:bg-gray-700",
-                  location === "/admin/boletos" ? "bg-gray-700" : "bg-transparent"
-                )}
-                onClick={() => handleNavigate("/admin/boletos")}
-              >
-                <Receipt className="mr-3 h-5 w-5" />
-                Módulo Financeiro
-              </Button>
-            )}
-            
-            {/* Botão de todos veículos para usuários operacionais removido */}
-          </>
-        )}
-      </div>
-      
-      <div className="p-4 border-t border-gray-700">
-        <div className="flex items-center">
-          <Avatar className="h-10 w-10 bg-gray-500">
-            <AvatarFallback className="text-black font-medium">{userInitials}</AvatarFallback>
-          </Avatar>
-          <div className="ml-3">
-            <p className="text-sm font-medium text-white">{user?.fullName}</p>
-            <p className="text-xs text-gray-300">{user?.email}</p>
-            <div className="mt-1">
-              {isAdmin && <span className="bg-blue-600 text-white text-[10px] px-1 py-0.5 rounded">Admin</span>}
-              {user?.role === 'supervisor' && <span className="bg-green-600 text-white text-[10px] px-1 py-0.5 rounded">Supervisor</span>}
-              {user?.role === 'operational' && <span className="bg-orange-600 text-white text-[10px] px-1 py-0.5 rounded">Operacional</span>}
-              {user?.role === 'financial' && <span className="bg-purple-600 text-white text-[10px] px-1 py-0.5 rounded">Financeiro</span>}
-              {user?.role === 'user' && <span className="bg-gray-600 text-white text-[10px] px-1 py-0.5 rounded">Transportador</span>}
-            </div>
-          </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="ml-auto text-gray-300 hover:text-white"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-5 w-5" />
-          </Button>
+      {showSeparator && (
+        <div className="pt-2 pb-2">
+          <Separator className="bg-gray-700" />
+          <p className="text-xs text-gray-400 uppercase mt-2 ml-2 font-semibold">Administração</p>
         </div>
-      </div>
+      )}
+      {items.map((item, index) => 
+        item.show && (
+          <Button
+            key={index}
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-white hover:bg-gray-700",
+              location === item.path ? "bg-gray-700" : "bg-transparent"
+            )}
+            onClick={() => handleNavigate(item.path)}
+          >
+            <item.icon className="mr-3 h-5 w-5" />
+            {item.label}
+          </Button>
+        )
+      )}
     </>
   );
 
-  return isMobile ? (
+  const DesktopSidebar = () => (
+    <div className={cn(
+      "fixed left-0 top-0 z-40 h-screen bg-gray-800 text-white transition-all duration-300",
+      isCollapsed ? "w-16" : "w-64",
+      className
+    )}>
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-center justify-center h-16 px-4 bg-gray-900">
+          {!isCollapsed && <Logo width={120} className="py-2" />}
+          {isCollapsed && <Logo width={40} className="py-2" />}
+        </div>
+        
+        {/* Navigation */}
+        <div className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+          {renderMenuItems(menuItems)}
+          
+          {/* Admin Section */}
+          {(isAdmin || isSupervisor || isOperational) && 
+            renderMenuItems(adminMenuItems.filter(item => item.show), true)
+          }
+        </div>
+        
+        {/* User Footer */}
+        <div className="p-4 border-t border-gray-700">
+          <div className="flex items-center space-x-3">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-gray-600 text-white text-sm">
+                {userInitials}
+              </AvatarFallback>
+            </Avatar>
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-white truncate">
+                  {user?.fullName}
+                </div>
+                <div className="text-xs text-gray-400 truncate">
+                  {user?.email}
+                </div>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {isAdmin && <span className="bg-blue-600 text-white text-[10px] px-1 py-0.5 rounded">Admin</span>}
+                  {user?.role === 'supervisor' && <span className="bg-green-600 text-white text-[10px] px-1 py-0.5 rounded">Supervisor</span>}
+                  {user?.role === 'operational' && <span className="bg-orange-600 text-white text-[10px] px-1 py-0.5 rounded">Operacional</span>}
+                  {user?.role === 'financial' && <span className="bg-purple-600 text-white text-[10px] px-1 py-0.5 rounded">Financeiro</span>}
+                  {user?.role === 'user' && <span className="bg-gray-600 text-white text-[10px] px-1 py-0.5 rounded">Transportador</span>}
+                </div>
+              </div>
+            )}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="ml-auto text-gray-300 hover:text-white"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const MobileSidebar = () => (
     <>
       <div className="md:hidden fixed inset-x-0 top-0 z-20 bg-gray-900 text-white flex items-center justify-between h-16 px-4 shadow-md">
         <div className="flex items-center">
@@ -305,435 +260,36 @@ export function Sidebar({ className }: SidebarProps) {
               </div>
               
               <div className="px-2 py-4 space-y-1">
-                {/* Menu items sem o footer de usuário */}
-                {!isOperational && (
-                  <Button
-                    variant="ghost"
-                    className={cn(
-                      "w-full justify-start text-white hover:bg-gray-700",
-                      (location === "/" || location === "/dashboard") ? "bg-gray-700" : "bg-transparent"
-                    )}
-                    onClick={() => handleNavigate("/")}
-                  >
-                    <Home className="mr-3 h-5 w-5" />
-                    Dashboard
-                  </Button>
-                )}
+                {renderMenuItems(menuItems)}
                 
-                {(isSupervisor || isOperational) && (
-                  <Button
-                    variant="ghost"
-                    className={cn(
-                      "w-full justify-start text-white hover:bg-gray-700",
-                      location === "/my-companies" ? "bg-gray-700" : "bg-transparent"
-                    )}
-                    onClick={() => handleNavigate("/my-companies")}
-                  >
-                    <Building2 className="mr-3 h-5 w-5" />
-                    Minhas Empresas
-                  </Button>
-                )}
-                
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start text-white hover:bg-gray-700",
-                    location === "/vehicles" ? "bg-gray-700" : "bg-transparent"
-                  )}
-                  onClick={() => handleNavigate("/vehicles")}
-                >
-                  <Truck className="mr-3 h-5 w-5" />
-                  Veículos Cadastrados
-                </Button>
-                
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start text-white hover:bg-gray-700",
-                    location === "/request-license" ? "bg-gray-700" : "bg-transparent"
-                  )}
-                  onClick={() => handleNavigate("/request-license")}
-                >
-                  <FileText className="mr-3 h-5 w-5" />
-                  Solicitar Licença
-                </Button>
-                
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start text-white hover:bg-gray-700",
-                    location === "/track-license" ? "bg-gray-700" : "bg-transparent"
-                  )}
-                  onClick={() => handleNavigate("/track-license")}
-                >
-                  <ClipboardList className="mr-3 h-5 w-5" />
-                  Acompanhar Licença
-                </Button>
-                
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start text-white hover:bg-gray-700",
-                    location === "/issued-licenses" ? "bg-gray-700" : "bg-transparent"
-                  )}
-                  onClick={() => handleNavigate("/issued-licenses")}
-                >
-                  <ListChecks className="mr-3 h-5 w-5" />
-                  Licenças Emitidas
-                </Button>
-                
-                {/* Meus Boletos - Mobile Version - SEMPRE VISÍVEL */}
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full justify-start text-white hover:bg-gray-700",
-                    location === "/meus-boletos" ? "bg-gray-700" : "bg-transparent"
-                  )}
-                  onClick={() => handleNavigate("/meus-boletos")}
-                >
-                  <Receipt className="mr-3 h-5 w-5" />
-                  Meus Boletos
-                </Button>
-                
-                {(isAdmin || isSupervisor || isOperational) && (
-                  <>
-                    <div className="pt-2 pb-2">
-                      <Separator className="bg-gray-700" />
-                      <p className="text-xs text-gray-400 uppercase mt-2 ml-2 font-semibold">Administração</p>
-                    </div>
-                    
-                    {isAdmin && (
-                      <Button
-                        variant="ghost"
-                        className={cn(
-                          "w-full justify-start text-white hover:bg-gray-700",
-                          location === "/admin" ? "bg-gray-700" : "bg-transparent"
-                        )}
-                        onClick={() => handleNavigate("/admin")}
-                      >
-                        <LayoutDashboard className="mr-3 h-5 w-5" />
-                        Relatórios
-                      </Button>
-                    )}
-                    
-                    {isOperational && (
-                      <Button
-                        variant="ghost"
-                        className={cn(
-                          "w-full justify-start text-white hover:bg-gray-700",
-                          (location === "/admin/licenses" || location === "/gerenciar-licencas") ? "bg-gray-700" : "bg-transparent"
-                        )}
-                        onClick={() => handleNavigate("/admin/licenses")}
-                      >
-                        <ClipboardEdit className="mr-3 h-5 w-5" />
-                        Gerenciar Licenças
-                      </Button>
-                    )}
-                    
-                    {isOperational && (
-                      <Button
-                        variant="ghost"
-                        className={cn(
-                          "w-full justify-start text-white hover:bg-gray-700",
-                          location === "/admin/transporters" ? "bg-gray-700" : "bg-transparent"
-                        )}
-                        onClick={() => handleNavigate("/admin/transporters")}
-                      >
-                        <Building2 className="mr-3 h-5 w-5" />
-                        Transportadores
-                      </Button>
-                    )}
-                    
-                    {isAdmin && (
-                      <Button
-                        variant="ghost"
-                        className={cn(
-                          "w-full justify-start text-white hover:bg-gray-700",
-                          location === "/admin/users" ? "bg-gray-700" : "bg-transparent"
-                        )}
-                        onClick={() => handleNavigate("/admin/users")}
-                      >
-                        <Users className="mr-3 h-5 w-5" />
-                        Usuários
-                      </Button>
-                    )}
-                    
-                    {isAdmin && (
-                      <Button
-                        variant="ghost"
-                        className={cn(
-                          "w-full justify-start text-white hover:bg-gray-700",
-                          location === "/admin/vehicle-models" ? "bg-gray-700" : "bg-transparent"
-                        )}
-                        onClick={() => handleNavigate("/admin/vehicle-models")}
-                      >
-                        <Car className="mr-3 h-5 w-5" />
-                        Modelos de Veículos
-                      </Button>
-                    )}
-                    
-                    {isFinancial && (
-                      <Button
-                        variant="ghost"
-                        className={cn(
-                          "w-full justify-start text-white hover:bg-gray-700",
-                          location === "/admin/boletos" ? "bg-gray-700" : "bg-transparent"
-                        )}
-                        onClick={() => handleNavigate("/admin/boletos")}
-                      >
-                        <Receipt className="mr-3 h-5 w-5" />
-                        Módulo Financeiro
-                      </Button>
-                    )}
-                  </>
-                )}
+                {/* Admin Section Mobile */}
+                {(isAdmin || isSupervisor || isOperational) && 
+                  renderMenuItems(adminMenuItems.filter(item => item.show), true)
+                }
               </div>
             </SheetContent>
           </Sheet>
-          <Logo width={90} className="ml-1" />
+          <Logo width={100} className="py-2" />
         </div>
-        <div className="flex items-center gap-2">
+        
+        <div className="flex items-center space-x-2">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="bg-gray-600 text-white text-sm">
+              {userInitials}
+            </AvatarFallback>
+          </Avatar>
           <Button 
             variant="ghost" 
             size="icon" 
-            className="text-gray-300 hover:text-white h-8 w-8"
+            className="text-gray-300 hover:text-white"
             onClick={handleLogout}
-            title="Sair"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-5 w-5" />
           </Button>
-          <Avatar className="h-8 w-8 bg-gray-700">
-            <AvatarFallback className="text-black font-medium">{userInitials}</AvatarFallback>
-          </Avatar>
-        </div>
-      </div>
-      <div className="pt-16 md:pt-0"></div>
-    </>
-  ) : (
-    <>
-      {/* Header superior para desktop */}
-      <div className="hidden md:block fixed top-0 right-0 left-56 lg:left-64 xl:left-72 z-20 bg-[#111827] border-b border-gray-700 h-16">
-        <div className="flex items-center justify-end h-full px-6 bg-[#111827]">
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <p className="text-sm font-medium text-white">{user?.fullName}</p>
-              <p className="text-xs text-gray-300">{user?.email}</p>
-            </div>
-            <Avatar className="h-10 w-10 bg-gray-500">
-              <AvatarFallback className="text-black font-medium">{userInitials}</AvatarFallback>
-            </Avatar>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-gray-300 hover:text-white h-8 w-8"
-              onClick={handleLogout}
-              title="Sair"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-      
-      {/* Sidebar desktop sem footer de usuário */}
-      <div className={cn(
-        "hidden md:flex md:flex-col fixed inset-y-0 bg-gray-800 text-white shadow-lg z-10 transition-all duration-300",
-        isCollapsed ? "md:w-16" : "md:w-56 lg:w-64 xl:w-72",
-        className
-      )}>
-        <div className="flex items-center justify-between h-16 px-4 bg-gray-900">
-          {!isCollapsed && <Logo width={120} className="py-2" />}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="text-white hover:bg-gray-700 ml-auto"
-          >
-            {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          </Button>
-        </div>
-        
-        <div className="px-2 py-4 space-y-1 flex-1">
-          {!isOperational && (
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full text-white hover:bg-gray-700",
-                isCollapsed ? "justify-center px-2" : "justify-start",
-                (location === "/" || location === "/dashboard") ? "bg-gray-700" : "bg-transparent"
-              )}
-              onClick={() => handleNavigate("/")}
-              title={isCollapsed ? "Dashboard" : undefined}
-            >
-              <Home className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
-              {!isCollapsed && "Dashboard"}
-            </Button>
-          )}
-          
-
-          
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full text-white hover:bg-gray-700",
-              isCollapsed ? "justify-center px-2" : "justify-start",
-              location === "/vehicles" ? "bg-gray-700" : "bg-transparent"
-            )}
-            onClick={() => handleNavigate("/vehicles")}
-            title={isCollapsed ? "Veículos Cadastrados" : undefined}
-          >
-            <Truck className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
-            {!isCollapsed && "Veículos Cadastrados"}
-          </Button>
-          
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full text-white hover:bg-gray-700",
-              isCollapsed ? "justify-center px-2" : "justify-start",
-              location === "/request-license" ? "bg-gray-700" : "bg-transparent"
-            )}
-            onClick={() => handleNavigate("/request-license")}
-            title={isCollapsed ? "Solicitar Licença" : undefined}
-          >
-            <FileText className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
-            {!isCollapsed && "Solicitar Licença"}
-          </Button>
-          
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full text-white hover:bg-gray-700",
-              isCollapsed ? "justify-center px-2" : "justify-start",
-              location === "/track-license" ? "bg-gray-700" : "bg-transparent"
-            )}
-            onClick={() => handleNavigate("/track-license")}
-            title={isCollapsed ? "Acompanhar Licença" : undefined}
-          >
-            <ClipboardList className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
-            {!isCollapsed && "Acompanhar Licença"}
-          </Button>
-          
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full text-white hover:bg-gray-700",
-              isCollapsed ? "justify-center px-2" : "justify-start",
-              location === "/issued-licenses" ? "bg-gray-700" : "bg-transparent"
-            )}
-            onClick={() => handleNavigate("/issued-licenses")}
-            title={isCollapsed ? "Licenças Emitidas" : undefined}
-          >
-            <ListChecks className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
-            {!isCollapsed && "Licenças Emitidas"}
-          </Button>
-          
-          {(isAdmin || isSupervisor || isOperational) && (
-            <>
-              <div className="pt-2 pb-2">
-                <Separator className="bg-gray-700" />
-                {!isCollapsed && <p className="text-xs text-gray-400 uppercase mt-2 ml-2 font-semibold">Administração</p>}
-              </div>
-              
-              {isAdmin && (
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full text-white hover:bg-gray-700",
-                    isCollapsed ? "justify-center px-2" : "justify-start",
-                    location === "/admin" ? "bg-gray-700" : "bg-transparent"
-                  )}
-                  onClick={() => handleNavigate("/admin")}
-                  title={isCollapsed ? "Relatórios" : undefined}
-                >
-                  <LayoutDashboard className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
-                  {!isCollapsed && "Relatórios"}
-                </Button>
-              )}
-              
-              {isOperational && (
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full text-white hover:bg-gray-700",
-                    isCollapsed ? "justify-center px-2" : "justify-start",
-                    (location === "/admin/licenses" || location === "/gerenciar-licencas") ? "bg-gray-700" : "bg-transparent"
-                  )}
-                  onClick={() => handleNavigate("/admin/licenses")}
-                  title={isCollapsed ? "Gerenciar Licenças" : undefined}
-                >
-                  <ClipboardEdit className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
-                  {!isCollapsed && "Gerenciar Licenças"}
-                </Button>
-              )}
-              
-              {isOperational && (
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full text-white hover:bg-gray-700",
-                    isCollapsed ? "justify-center px-2" : "justify-start",
-                    location === "/admin/transporters" ? "bg-gray-700" : "bg-transparent"
-                  )}
-                  onClick={() => handleNavigate("/admin/transporters")}
-                  title={isCollapsed ? "Transportadores" : undefined}
-                >
-                  <Building2 className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
-                  {!isCollapsed && "Transportadores"}
-                </Button>
-              )}
-              
-              {isAdmin && (
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full text-white hover:bg-gray-700",
-                    isCollapsed ? "justify-center px-2" : "justify-start",
-                    location === "/admin/users" ? "bg-gray-700" : "bg-transparent"
-                  )}
-                  onClick={() => handleNavigate("/admin/users")}
-                  title={isCollapsed ? "Usuários" : undefined}
-                >
-                  <Users className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
-                  {!isCollapsed && "Usuários"}
-                </Button>
-              )}
-              
-              {isAdmin && (
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full text-white hover:bg-gray-700",
-                    isCollapsed ? "justify-center px-2" : "justify-start",
-                    location === "/admin/vehicle-models" ? "bg-gray-700" : "bg-transparent"
-                  )}
-                  onClick={() => handleNavigate("/admin/vehicle-models")}
-                  title={isCollapsed ? "Modelos de Veículos" : undefined}
-                >
-                  <Car className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
-                  {!isCollapsed && "Modelos de Veículos"}
-                </Button>
-              )}
-              
-              {isFinancial && (
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "w-full text-white hover:bg-gray-700",
-                    isCollapsed ? "justify-center px-2" : "justify-start",
-                    location === "/admin/boletos" ? "bg-gray-700" : "bg-transparent"
-                  )}
-                  onClick={() => handleNavigate("/admin/boletos")}
-                  title={isCollapsed ? "Módulo Financeiro" : undefined}
-                >
-                  <Receipt className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
-                  {!isCollapsed && "Módulo Financeiro"}
-                </Button>
-              )}
-            </>
-          )}
         </div>
       </div>
     </>
   );
+
+  return isMobile ? <MobileSidebar /> : <DesktopSidebar />;
 }
