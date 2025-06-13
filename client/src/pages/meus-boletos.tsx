@@ -36,7 +36,7 @@ export default function MeusBoletos() {
 
   // Filtrar boletos
   const boletosFiltrados = boletos.filter((boleto) => {
-    const matchStatus = !filtroStatus || boleto.status === filtroStatus;
+    const matchStatus = !filtroStatus || filtroStatus === "todos" || boleto.status === filtroStatus;
     const matchVencimento = !filtroVencimento || 
       new Date(boleto.dataVencimento).toISOString().split('T')[0] >= filtroVencimento;
     const matchBusca = !termoBusca || 
@@ -191,7 +191,7 @@ export default function MeusBoletos() {
                     <SelectValue placeholder="Todos os status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos os status</SelectItem>
+                    <SelectItem value="todos">Todos os status</SelectItem>
                     <SelectItem value="pendente">Aguardando Pagamento</SelectItem>
                     <SelectItem value="pago">Pago</SelectItem>
                     <SelectItem value="vencido">Vencido</SelectItem>
@@ -212,7 +212,7 @@ export default function MeusBoletos() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    setFiltroStatus("");
+                    setFiltroStatus("todos");
                     setFiltroVencimento("");
                     setTermoBusca("");
                   }}
