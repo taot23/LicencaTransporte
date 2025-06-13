@@ -744,8 +744,6 @@ export default function AdminLicensesPage() {
     }
 
     try {
-      const { exportToCSV, formatDateForCSV, formatStatusForCSV } = require("@/lib/csv-export");
-      
       const headers = [
         "ID",
         "Número do Pedido",
@@ -759,15 +757,21 @@ export default function AdminLicensesPage() {
       ];
 
       const formattedData = filteredLicenses.map(license => ({
-        id: license.id,
-        "número do pedido": license.requestNumber,
-        "tipo de licença": getLicenseTypeLabel(license.type),
-        "placa principal": license.mainVehiclePlate,
-        status: formatStatusForCSV(license.status),
-        estados: license.states.join(", "),
-        transportador: `ID: ${license.transporterId}`,
-        "data de criação": formatDateForCSV(license.createdAt),
-        "última atualização": formatDateForCSV(license.updatedAt)
+        ID: license.id,
+        "Número do Pedido": license.requestNumber,
+        "Tipo de Licença": getLicenseTypeLabel(license.type),
+        "Placa Principal": license.mainVehiclePlate,
+        Status: license.status === "pending_registration" ? "Pendente de Registro" :
+                license.status === "registration_in_progress" ? "Registro em Andamento" :
+                license.status === "under_review" ? "Em Análise" :
+                license.status === "pending_approval" ? "Pendente de Aprovação" :
+                license.status === "approved" ? "Aprovado" :
+                license.status === "rejected" ? "Rejeitado" :
+                license.status === "canceled" ? "Cancelado" : license.status,
+        Estados: license.states.join(", "),
+        Transportador: `ID: ${license.transporterId}`,
+        "Data de Criação": formatDateForCSV(license.createdAt),
+        "Última Atualização": formatDateForCSV(license.updatedAt)
       }));
 
       exportToCSV({

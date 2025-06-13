@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { exportToCSV, formatDateForCSV } from "@/lib/csv-export";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Plus, MoreVertical, Edit, Trash, User as UserIcon, Download } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -302,8 +303,6 @@ export default function AdminUsers() {
     }
 
     try {
-      const { exportToCSV, formatDateForCSV } = require("@/lib/csv-export");
-      
       const headers = [
         "ID",
         "Nome Completo",
@@ -315,12 +314,12 @@ export default function AdminUsers() {
 
       const filteredUsers = users.filter((user: User) => !user.isAdmin);
       const formattedData = filteredUsers.map((user: User) => ({
-        id: user.id,
-        "nome completo": user.fullName,
-        email: user.email,
-        telefone: user.phone,
-        "função": getRoleLabel(user.role),
-        "data de criação": formatDateForCSV(user.createdAt)
+        ID: user.id,
+        "Nome Completo": user.fullName,
+        Email: user.email,
+        Telefone: user.phone,
+        Função: getRoleLabel(user.role),
+        "Data de Criação": formatDateForCSV(user.createdAt)
       }));
 
       exportToCSV({

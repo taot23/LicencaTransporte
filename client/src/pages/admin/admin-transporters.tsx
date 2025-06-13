@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { exportToCSV, formatDateForCSV } from "@/lib/csv-export";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Plus, MoreVertical, Edit, Trash, Link as LinkIcon, UserCircle2, Download } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -105,8 +106,6 @@ export default function AdminTransporters() {
     }
 
     try {
-      const { exportToCSV, formatDateForCSV } = require("@/lib/csv-export");
-      
       const headers = [
         "ID",
         "Nome/Razão Social",
@@ -119,14 +118,14 @@ export default function AdminTransporters() {
       ];
 
       const formattedData = transporters.map((transporter: Transporter) => ({
-        id: transporter.id,
-        "nome/razão social": transporter.name,
-        "cpf/cnpj": transporter.documentNumber,
-        email: transporter.email,
-        telefone: transporter.phone,
-        "contato principal": transporter.contact1Name,
-        "tipo de pessoa": transporter.personType === "pf" ? "Pessoa Física" : "Pessoa Jurídica",
-        "data de criação": formatDateForCSV(transporter.createdAt)
+        ID: transporter.id,
+        "Nome/Razão Social": transporter.name,
+        "CPF/CNPJ": transporter.documentNumber,
+        Email: transporter.email,
+        Telefone: transporter.phone,
+        "Contato Principal": transporter.contact1Name,
+        "Tipo de Pessoa": transporter.personType === "pf" ? "Pessoa Física" : "Pessoa Jurídica",
+        "Data de Criação": formatDateForCSV(transporter.createdAt)
       }));
 
       exportToCSV({
