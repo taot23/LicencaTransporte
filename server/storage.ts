@@ -21,6 +21,9 @@ import {
   vehicleModels,
   type VehicleModel,
   type InsertVehicleModel,
+  boletos,
+  type Boleto,
+  type InsertBoleto,
 } from "@shared/schema";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
@@ -145,6 +148,14 @@ export interface IStorage {
     state: string,
   ): Promise<StatusHistory[]>;
 
+  // Boletos methods
+  getAllBoletos(): Promise<Boleto[]>;
+  getBoletoById(id: number): Promise<Boleto | undefined>;
+  getBoletosByTransportadorId(transportadorId: number): Promise<Boleto[]>;
+  createBoleto(boleto: InsertBoleto): Promise<Boleto>;
+  updateBoleto(id: number, boleto: Partial<Boleto>): Promise<Boleto>;
+  deleteBoleto(id: number): Promise<void>;
+
   // Session store
   sessionStore: any;
 }
@@ -156,11 +167,13 @@ export class MemStorage implements IStorage {
   private vehicles: Map<number, Vehicle>;
   private licenseRequests: Map<number, LicenseRequest>;
   private statusHistories: Map<number, StatusHistory>;
+  private boletos: Map<number, Boleto>;
   private currentUserId: number;
   private currentTransporterId: number;
   private currentVehicleId: number;
   private currentLicenseId: number;
   private currentHistoryId: number;
+  private currentBoletoId: number;
   public sessionStore: any;
 
   constructor() {
@@ -169,11 +182,13 @@ export class MemStorage implements IStorage {
     this.vehicles = new Map();
     this.licenseRequests = new Map();
     this.statusHistories = new Map();
+    this.boletos = new Map();
     this.currentUserId = 1;
     this.currentTransporterId = 1;
     this.currentVehicleId = 1;
     this.currentLicenseId = 1;
     this.currentHistoryId = 1;
+    this.currentBoletoId = 1;
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // remove entradas expiradas a cada 24h
     });

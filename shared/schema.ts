@@ -8,6 +8,7 @@ export const userRoleEnum = z.enum([
   "operational", // Operacional (gerenciamento de licenças e veículos)
   "supervisor", // Supervisor (papel intermediário)
   "manager", // Gerente (papel com permissões estendidas)
+  "financial", // Financeiro (acesso a transportadores, usuários e boletos)
   "user" // Usuário transportador padrão
 ]);
 
@@ -661,3 +662,74 @@ export const insertVehicleModelSchema = createInsertSchema(vehicleModels)
 
 export type VehicleModel = typeof vehicleModels.$inferSelect;
 export type InsertVehicleModel = z.infer<typeof insertVehicleModelSchema>;
+
+// Enum para status dos boletos
+export const boletoBankingStatusEnum = z.enum([
+  "aguardando_pagamento", // Aguardando Pagamento
+  "pago", // Pago
+  "vencido" // Vencido
+]);
+
+export type BoletoBankingStatus = z.infer<typeof boletoBankingStatusEnum>;
+
+// Tabela de Boletos Financeiros
+export const boletos = pgTable("boletos", {
+  id: serial("id").primaryKey(),
+  transportadorId: integer("transportador_id").notNull().references(() => transporters.id),
+  nomeTransportador: text("nome_transportador").notNull(), // Redundância para facilitar listagem
+  cpfCnpj: text("cpf_cnpj").notNull(), // CPF/CNPJ do transportador
+  numeroBoleto: text("numero_boleto").notNull(), // Número do boleto
+  valor: numeric("valor", { precision: 10, scale: 2 }).notNull(), // Valor com 2 decimais
+  dataEmissao: timestamp("data_emissao").notNull(), // Data de emissão
+  dataVencimento: timestamp("data_vencimento").notNull(), // Data de vencimento
+  status: text("status").notNull().default("aguardando_pagamento"), // Status do boleto
+  uploadBoletoUrl: text("upload_boleto_url"), // URL do arquivo do boleto
+  uploadNfUrl: text("upload_nf_url"), // URL do arquivo da nota fiscal
+  observacoes: text("observacoes"), // Campo de observações
+  criadoEm: timestamp("criado_em").defaultNow().notNull(),
+  atualizadoEm: timestamp("atualizado_em").defaultNow().notNull(),
+}, (table) => {
+  return {
+    transportadorIdIdx: index("idx_boleto_transportador_id").on(table.transportadorId),
+    statusIdx: index("idx_boleto_status").on(table.status),
+    vencimentoIdx: index("idx_boleto_vencimento").on(table.dataVencimento),
+    numeroBoletoIdx: index("idx_boleto_numero").on(table.numeroBoleto),
+  };
+});
+
+export const insertBoletoSchema = createInsertSchema(boletos)
+  .omit({ id: true, criadoEm: true, atualizadoEm: true })
+  .extend({
+    valor: z.coerce.number().positive("O valor deve ser positivo"),
+    dataEmissao: z.string().refine((date) => !isNaN(Date.parse(date)), {
+      message: "Data de emissão inválida",
+    }),
+    dataVencimento: z.string().refine((date) => !isNaN(Date.parse(date)), {
+      message: "Data de vencimento inválida",
+    }),
+    numeroBoleto: z.string().min(1, "Número do boleto é obrigatório"),
+    cpfCnpj: z.string().regex(/^(\d{11}|\d{14})$/, "CPF deve ter 11 dígitos ou CNPJ deve ter 14 dígitos"),
+  })
+  .superRefine((val, ctx) => {
+    // Validar se data de emissão é anterior à data de vencimento
+    const emissao = new Date(val.dataEmissao);
+    const vencimento = new Date(val.dataVencimento);
+    
+    if (emissao >= vencimento) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "A data de emissão deve ser anterior à data de vencimento",
+        path: ["dataVencimento"],
+      });
+    }
+  });
+
+export type Boleto = typeof boletos.$inferSelect;
+export type InsertBoleto = z.infer<typeof insertBoletoSchema>;
+
+// Status options para interface
+export const boletoStatusOptions = [
+  { value: "aguardando_pagamento", label: "Aguardando Pagamento" },
+  { value: "pago", label: "Pago" },
+  { value: "vencido", label: "Vencido" },
+];

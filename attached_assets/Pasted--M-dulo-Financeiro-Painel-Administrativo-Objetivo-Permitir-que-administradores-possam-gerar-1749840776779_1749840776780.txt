@@ -1,0 +1,75 @@
+💰 Módulo Financeiro – Painel Administrativo
+🎯 Objetivo
+Permitir que administradores possam gerar, visualizar, editar e armazenar boletos de cobrança vinculados a transportadores.
+
+Tabela boletos (estrutura no banco de dados)
+_id,
+  transportador_id,     // ref para tabela/coleção 'usuarios'
+  nome_transportador,   // redundância para facilitar a listagem
+  cpf_cnpj,
+  numero_boleto,        // string
+  valor: Float(2),      // ex: 1234.56
+  data_emissao: Date,
+  data_vencimento: Date,
+  status: ["Aguardando Pagamento", "Pago", "Vencido"],
+  upload_boleto_url: String,
+  upload_nf_url: String,
+  criado_em: Date,
+  atualizado_em: Date
+
+🧾 2. Formulário de Geração de Boleto (em Modal)
+Campos obrigatórios:
+Campo	Tipo	Comportamento
+Transportador	Auto preenchimento	Lista suspensa com busca por nome/CPF/CNPJ
+Nº do Boleto	Texto (string)	Campo manual
+Valor do Boleto	Float (2 decimais)	Tipo moeda (R$), sem arredondar
+Data de Emissão	Data	Calendário (datepicker)
+Vencimento do Boleto	Data	Calendário (datepicker)
+Status	Seleção (dropdown)	Aguardando Pagamento / Pago / Vencido
+Upload do Boleto (arquivo)	PDF/JPG/PNG até 10MB	Campo drag & drop inteligente
+Upload da Nota Fiscal	PDF/JPG/PNG até 10MB	Campo drag & drop inteligente
+Campo de Observação
+
+💡 Auto preenchimento (autocomplete)
+Campo de busca dinâmica (async select) com busca por:
+
+Nome / CPF / CNPJ
+
+
+📋 3. Listagem dos Boletos
+Tabela com as colunas:
+
+Transportador	Nº Boleto	Valor (R$)	Vencimento	Status	Ações
+João Transportes LTDA	001234567	R$ 1.234,56	20/06/2025	Aguardando Pagamento	Editar / Ver
+
+Ao clicar em “Editar”, abre o mesmo modal com os dados preenchidos para alteração.
+
+
+4. Upload inteligente (Boleto e Nota Fiscal)
+Componente com:
+
+Dropzone (arraste e solte)
+
+Suporte a formatos: PDF, JPG, PNG
+
+Tamanho máximo: 10MB
+
+Visualização do arquivo após carregado
+
+Armazenamento: Firebase Storage, S3 ou backend local
+
+Permissões
+Apenas administradores, Supervisor e usuários do Tipo Financeiro devem acessar o módulo.
+Criar novo tipo de Usuário Financeiro, ele acessar o Transportadores e Usuários, e so visualizar as outras opções não podendo editar
+
+🧠 Validações
+Valor do boleto não pode ser negativo
+
+CPF/CNPJ válidos (regex)
+
+Datas coerentes (emissão < vencimento)
+
+Upload obrigatório dos 2 arquivos para finalizar cadastro
+
+lembrando que não pode quebrar as funções já implentadas
+
