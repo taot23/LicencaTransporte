@@ -1,12 +1,13 @@
 module.exports = {
   apps: [{
     name: 'aet-license-system',
-    script: 'node_modules/.bin/tsx',
-    args: 'server/index.ts',
+    script: './start-production.sh',
     cwd: '/var/www/aetlicensesystem/LicencaTransporte',
     env: {
       NODE_ENV: 'production',
-      PORT: 5000
+      PORT: 5000,
+      VITE_CACHE_DIR: '/tmp/vite-cache',
+      TMPDIR: '/tmp'
     },
     instances: 1,
     exec_mode: 'fork',

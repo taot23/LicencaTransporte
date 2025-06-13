@@ -1,0 +1,111 @@
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ pm2 status
+pm2 logs aet-license-system --lines 50
+┌────┬───────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                  │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼───────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ aet-license-system    │ default     │ N/A     │ fork    │ 2106263  │ 12s    │ 0    │ online    │ 0%       │ 62.3mb   │ ser… │ disabled │
+└────┴───────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+[TAILING] Tailing last 50 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error.log last 50 lines:
+0|aet-lice |       at async PluginContainer.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:49065:22)
+0|aet-lice |       at async loadAndTransform (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:51871:22)
+0|aet-lice | 3:13:34 AM [vite] Internal server error: ENOENT: no such file or directory, open '/home/ec2-user/.bash_history'
+0|aet-lice |       at async open (node:internal/fs/promises:639:25)
+0|aet-lice |       at async Object.readFile (node:internal/fs/promises:1246:14)
+0|aet-lice |       at async LoadPluginContext.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:20321:11)
+0|aet-lice |       at async PluginContainer.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:49065:22)
+0|aet-lice |       at async loadAndTransform (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:51871:22)
+0|aet-lice | 5:28:23 AM [vite] Internal server error: ENOENT: no such file or directory, open '//@fs/x/x/x/vite-project/'
+0|aet-lice |       at async open (node:internal/fs/promises:639:25)
+0|aet-lice |       at async Object.readFile (node:internal/fs/promises:1246:14)
+0|aet-lice |       at async LoadPluginContext.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:20321:11)
+0|aet-lice |       at async PluginContainer.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:49065:22)
+0|aet-lice |       at async loadAndTransform (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:51871:22)
+0|aet-lice | 7:39:16 AM [vite] Internal server error: ENOENT: no such file or directory, open '//@fs/x/x/x/vite-project/'
+0|aet-lice |       at async open (node:internal/fs/promises:639:25)
+0|aet-lice |       at async Object.readFile (node:internal/fs/promises:1246:14)
+0|aet-lice |       at async LoadPluginContext.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:20321:11)
+0|aet-lice |       at async PluginContainer.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:49065:22)
+0|aet-lice |       at async loadAndTransform (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:51871:22)
+0|aet-lice | 7:40:28 AM [vite] Internal server error: ENOENT: no such file or directory, open '//@fs/x/x/x/vite-project/'
+0|aet-lice |       at async open (node:internal/fs/promises:639:25)
+0|aet-lice |       at async Object.readFile (node:internal/fs/promises:1246:14)
+0|aet-lice |       at async LoadPluginContext.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:20321:11)
+0|aet-lice |       at async PluginContainer.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:49065:22)
+0|aet-lice |       at async loadAndTransform (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:51871:22)
+0|aet-lice | 7:50:11 AM [vite] Internal server error: ENOENT: no such file or directory, open '//@fs/x/x/x/vite-project/'
+0|aet-lice |       at async open (node:internal/fs/promises:639:25)
+0|aet-lice |       at async Object.readFile (node:internal/fs/promises:1246:14)
+0|aet-lice |       at async LoadPluginContext.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:20321:11)
+0|aet-lice |       at async PluginContainer.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:49065:22)
+0|aet-lice |       at async loadAndTransform (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:51871:22)
+0|aet-lice | 7:52:24 AM [vite] Internal server error: ENOENT: no such file or directory, open '//@fs/x/x/x/vite-project/'
+0|aet-lice |       at async open (node:internal/fs/promises:639:25)
+0|aet-lice |       at async Object.readFile (node:internal/fs/promises:1246:14)
+0|aet-lice |       at async LoadPluginContext.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:20321:11)
+0|aet-lice |       at async PluginContainer.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:49065:22)
+0|aet-lice |       at async loadAndTransform (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:51871:22)
+0|aet-lice | 8:05:25 AM [vite] Internal server error: ENOENT: no such file or directory, open '//@fs/x/x/x/vite-project/'
+0|aet-lice |       at async open (node:internal/fs/promises:639:25)
+0|aet-lice |       at async Object.readFile (node:internal/fs/promises:1246:14)
+0|aet-lice |       at async LoadPluginContext.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:20321:11)
+0|aet-lice |       at async PluginContainer.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:49065:22)
+0|aet-lice |       at async loadAndTransform (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:51871:22)
+0|aet-lice | 8:07:29 AM [vite] Internal server error: ENOENT: no such file or directory, open '//@fs/x/x/x/vite-project/'
+0|aet-lice |       at async open (node:internal/fs/promises:639:25)
+0|aet-lice |       at async Object.readFile (node:internal/fs/promises:1246:14)
+0|aet-lice |       at async LoadPluginContext.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:20321:11)
+0|aet-lice |       at async PluginContainer.load (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:49065:22)
+0|aet-lice |       at async loadAndTransform (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:51871:22)
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out.log last 50 lines:
+0|aet-lice |   "flatbedId": null,
+0|aet-lice |   "length": 2600,
+0|aet-lice |   "width": 260,
+0|aet-lice |   "height": 440,
+0|aet-lice |   "cargoType": "liquid_cargo",
+0|aet-lice |   "additionalPlates": [],
+0|aet-lice |   "additionalPlatesDocuments": [],
+0|aet-lice |   "states": [
+0|aet-lice |     "DNIT",
+0|aet-lice |     "PR",
+0|aet-lice |     "SP",
+0|aet-lice |     "MS"
+0|aet-lice |   ],
+0|aet-lice |   "status": "pending_registration",
+0|aet-lice |   "stateStatuses": [
+0|aet-lice |     "SP:registration_in_progress"
+0|aet-lice |   ],
+0|aet-lice |   "stateFiles": [],
+0|aet-lice |   "stateAETNumbers": [],
+0|aet-lice |   "createdAt": "2025-06-04T12:52:20.115Z",
+0|aet-lice |   "updatedAt": "2025-06-09T13:24:09.127Z",
+0|aet-lice |   "isDraft": false,
+0|aet-lice |   "comments": "",
+0|aet-lice |   "licenseFileUrl": null,
+0|aet-lice |   "validUntil": null,
+0|aet-lice |   "issuedAt": null,
+0|aet-lice |   "aetNumber": null,
+0|aet-lice |   "selectedCnpj": null,
+0|aet-lice |   "stateCnpjs": [
+0|aet-lice |     "SP:08916636000190"
+0|aet-lice |   ]
+0|aet-lice | }
+0|aet-lice | Total de licenças admin: 14, filtradas: 14, incluindo renovação: false
+0|aet-lice | 2:26:09 PM [express] GET /api/admin/licenses 304 in 11ms :: [{"id":21,"userId":8,"transporterId":1,"…
+0|aet-lice | Usuário admin@sistema.com (admin) tem acesso administrativo. Buscando todos os rascunhos.
+0|aet-lice | Total de rascunhos: 0, filtrados: 0, incluindo renovação: true
+0|aet-lice | [DEBUG DETALHES] Retornando 0 licenças com os seguintes IDs:
+0|aet-lice | 2:26:10 PM [express] GET /api/licenses/drafts 304 in 7ms :: []
+0|aet-lice | [DEBUG VEHICLES] Usuário admin@sistema.com (ID: 1, role: admin) buscando veículos
+0|aet-lice | [DEBUG VEHICLES] Usuário admin - buscando todos os veículos
+0|aet-lice | [DEBUG VEHICLES] Admin encontrou 68 veículos no total
+0|aet-lice | 2:26:12 PM [express] GET /api/vehicles 304 in 31ms :: [{"id":78,"userId":8,"plate":"BCB0I72","type":…
+0|aet-lice | 2:26:14 PM [express] GET /api/vehicle-models 200 in 14ms :: [{"id":2,"brand":"DAF","model":"CF FT 41…
+0|aet-lice | [DEBUG TRANSPORTERS] Usuário admin@sistema.com (ID: 1, role: admin) buscando transportadores
+0|aet-lice | [DEBUG TRANSPORTERS] Total de transportadores no sistema: 1
+0|aet-lice | [DEBUG TRANSPORTERS] Usuário admin - retornando todos os 1 transportadores
+0|aet-lice | 2:26:17 PM [express] GET /api/user/transporters 304 in 6ms :: [{"id":1,"personType":"pj","name":"TRA…
+0|aet-lice | 2:27:04 PM [express] serving on port 5000
+0|aet-lice | Novo cliente WebSocket conectado
+0|aet-lice | 2:28:36 PM [express] serving on port 5000

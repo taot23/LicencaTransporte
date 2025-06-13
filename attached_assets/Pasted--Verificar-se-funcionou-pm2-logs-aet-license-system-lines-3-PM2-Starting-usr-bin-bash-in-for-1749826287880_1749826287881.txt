@@ -1,0 +1,34 @@
+# Verificar se funcionou
+pm2 logs aet-license-system --lines 3
+[PM2] Starting /usr/bin/bash in fork_mode (1 instance)
+[PM2] Done.
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ aet-license-system │ fork     │ 0    │ online    │ 0%       │ 7.8mb    │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[TAILING] Tailing last 3 lines for [aet-license-system] process (change the value with --lines option)
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out.log last 3 lines:
+0|aet-lice | Total de rascunhos: 0, filtrados: 0, incluindo renovação: true
+0|aet-lice | [DEBUG DETALHES] Retornando 0 licenças com os seguintes IDs:
+0|aet-lice | 2:46:07 PM [express] GET /api/licenses/drafts 304 in 11ms :: []
+
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-error.log last 3 lines:
+0|aet-lice | }
+0|aet-lice | 
+0|aet-lice | Node.js v20.19.2
+
+0|aet-license-system  | 2:50:06 PM [express] serving on port 5000
+0|aet-license-system  | Novo cliente WebSocket conectado
+0|aet-license-system  | Error: EACCES: permission denied, mkdir '/var/www/aetlicensesystem/LicencaTransporte/node_modules/.vite/deps_temp_b532bb78'
+0|aet-license-system  |     at Object.mkdirSync (node:fs:1372:26)
+0|aet-license-system  |     at runOptimizeDeps (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:50715:15)
+0|aet-license-system  |     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:50188:34)
+0|aet-license-system  |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|aet-license-system  | 2:50:12 PM [express] serving on port 5000
+0|aet-license-system  | Novo cliente WebSocket conectado
+0|aet-license-system  | Error: EACCES: permission denied, mkdir '/var/www/aetlicensesystem/LicencaTransporte/node_modules/.vite/deps_temp_9fd2a89a'
+0|aet-license-system  |     at Object.mkdirSync (node:fs:1372:26)
+0|aet-license-system  |     at runOptimizeDeps (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:50715:15)
+0|aet-license-system  |     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:50188:34)
+0|aet-license-system  |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
