@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Download, FileText, Receipt, Search, Filter, DollarSign, Calendar } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { Boleto } from "@shared/schema";
-import AdminLayout from "@/components/layout/admin-layout";
+import { AdminLayout } from "@/components/layout/admin-layout";
 
 const statusColors = {
   "pendente": "bg-yellow-100 text-yellow-800",
