@@ -17,6 +17,7 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
   const [location, navigate] = useLocation();
   const { user, checkRole } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [pageKey, setPageKey] = useState(`${location}-${contentKey || ''}`);
   
   // Efeito para controlar o estado de carregamento entre navegações
@@ -37,6 +38,9 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
   }, [location, contentKey, pageKey]);
 
   const handleLogout = async () => {
+    if (isLoggingOut) return; // Previne múltiplos cliques
+    
+    setIsLoggingOut(true);
     try {
       await fetch("/api/logout", { 
         method: "POST",
@@ -46,6 +50,8 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
       navigate("/auth");
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -89,9 +95,14 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
               size="icon" 
               className="text-gray-500 hover:text-gray-700"
               onClick={handleLogout}
+              disabled={isLoggingOut}
               title="Logout"
             >
-              <LogOut className="h-5 w-5" />
+              {isLoggingOut ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <LogOut className="h-5 w-5" />
+              )}
             </Button>
           </div>
         </div>
