@@ -2039,34 +2039,18 @@ export function LicenseForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium">Prancha</FormLabel>
-                    <Select
-                      onValueChange={(value) => field.onChange(parseInt(value))}
-                      defaultValue={field.value?.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="h-10 bg-red-50 border-red-200">
-                          <SelectValue placeholder="Selecione a prancha" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {isLoadingVehicles ? (
-                          <SelectItem value="loading">Carregando...</SelectItem>
-                        ) : flatbeds.length > 0 ? (
-                          flatbeds.map((vehicle) => (
-                            <SelectItem
-                              key={vehicle.id}
-                              value={vehicle.id.toString()}
-                            >
-                              {vehicle.plate} - {vehicle.brand} {vehicle.model}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="no_flatbed">
-                            Nenhuma prancha cadastrada
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <VehicleAutocomplete
+                        vehicles={flatbeds}
+                        value={field.value}
+                        onSelect={(vehicleId) => {
+                          field.onChange(vehicleId);
+                        }}
+                        placeholder="Digite a placa ou selecione a prancha"
+                        disabled={isLoadingVehicles}
+                        className="h-10 bg-red-50 border-red-200"
+                      />
+                    </FormControl>
                     <FormDescription className="text-xs text-muted-foreground mt-1">
                       Veículo para transporte de cargas excepcionais
                     </FormDescription>
@@ -2179,34 +2163,18 @@ export function LicenseForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium">Caminhão</FormLabel>
-                    <Select
-                      onValueChange={(value) => field.onChange(parseInt(value))}
-                      defaultValue={field.value?.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="h-10 bg-blue-50 border-blue-200">
-                          <SelectValue placeholder="Selecione o caminhão" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {isLoadingVehicles ? (
-                          <SelectItem value="loading">Carregando...</SelectItem>
-                        ) : trucks.length > 0 ? (
-                          trucks.map((vehicle) => (
-                            <SelectItem
-                              key={vehicle.id}
-                              value={vehicle.id.toString()}
-                            >
-                              {vehicle.plate} - {vehicle.brand} {vehicle.model}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="no_truck">
-                            Nenhum caminhão cadastrado
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <VehicleAutocomplete
+                        vehicles={trucks}
+                        value={field.value}
+                        onSelect={(vehicleId) => {
+                          field.onChange(vehicleId);
+                        }}
+                        placeholder="Digite a placa ou selecione o caminhão"
+                        disabled={isLoadingVehicles}
+                        className="h-10 bg-blue-50 border-blue-200"
+                      />
+                    </FormControl>
                     <FormDescription className="text-xs text-muted-foreground mt-1">
                       Unidade principal do Romeu e Julieta
                     </FormDescription>
@@ -2244,34 +2212,18 @@ export function LicenseForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-medium">Reboque</FormLabel>
-                    <Select
-                      onValueChange={(value) => field.onChange(parseInt(value))}
-                      defaultValue={field.value?.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="h-10 bg-amber-50 border-amber-200">
-                          <SelectValue placeholder="Selecione o reboque" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {isLoadingVehicles ? (
-                          <SelectItem value="loading">Carregando...</SelectItem>
-                        ) : trailers.length > 0 ? (
-                          trailers.map((vehicle) => (
-                            <SelectItem
-                              key={vehicle.id}
-                              value={vehicle.id.toString()}
-                            >
-                              {vehicle.plate} - {vehicle.brand} {vehicle.model}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="no_trailer">
-                            Nenhum reboque cadastrado
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <VehicleAutocomplete
+                        vehicles={trailers}
+                        value={field.value}
+                        onSelect={(vehicleId) => {
+                          field.onChange(vehicleId);
+                        }}
+                        placeholder="Digite a placa ou selecione o reboque"
+                        disabled={isLoadingVehicles}
+                        className="h-10 bg-amber-50 border-amber-200"
+                      />
+                    </FormControl>
                     <FormDescription className="text-xs text-muted-foreground mt-1">
                       Componente principal do Romeu e Julieta
                     </FormDescription>
