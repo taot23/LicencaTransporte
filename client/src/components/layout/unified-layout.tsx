@@ -46,10 +46,11 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
         method: "POST",
         credentials: "include"
       });
-      navigate("/auth");
+      // Limpar dados do usuário no cache
+      window.location.href = "/auth";
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
-      navigate("/auth");
+      window.location.href = "/auth";
     } finally {
       setIsLoggingOut(false);
     }
