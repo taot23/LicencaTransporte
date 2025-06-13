@@ -3688,6 +3688,68 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     return user.role === "admin" || user.role === "financial";
   };
 
+  // Configuração do multer para upload de arquivos de boletos
+  const boletoStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      // Usar o diretório de uploads externo com subpasta para boletos
+      const boletoUploadDir = path.join(uploadDir, 'boletos');
+      if (!fs.existsSync(boletoUploadDir)) {
+        fs.mkdirSync(boletoUploadDir, { recursive: true });
+      }
+      cb(null, boletoUploadDir);
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const ext = path.extname(file.originalname);
+      cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+    }
+  });
+
+  const boletoFileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+    // Aceitar apenas PDFs para boletos
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Apenas arquivos PDF são aceitos'), false);
+    }
+  };
+
+  const boletoUpload = multer({ 
+    storage: boletoStorage,
+    fileFilter: boletoFileFilter,
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB max file size
+    }
+  });
+
+  // Rota de upload específica para boletos (chamada pelo frontend)
+  app.post("/api/upload/boleto", requireAuth, boletoUpload.single('file'), async (req, res) => {
+    const user = req.user!;
+    
+    if (!canAccessFinancial(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Nenhum arquivo enviado" });
+      }
+
+      const fileUrl = `/uploads/boletos/${req.file.filename}`;
+      
+      res.json({ 
+        success: true, 
+        url: fileUrl,
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size
+      });
+    } catch (error) {
+      console.error("Erro no upload do boleto:", error);
+      res.status(500).json({ message: "Erro ao fazer upload do arquivo" });
+    }
+  });
+
   // Listar todos os boletos (apenas admin e financial)
   app.get("/api/boletos", requireAuth, async (req, res) => {
     const user = req.user!;
