@@ -36,9 +36,9 @@ export function Sidebar({ className }: SidebarProps) {
   const [location, setLocation] = useLocation();
   const { user, logoutMutation } = useAuth();
   const isAdmin = user?.role === 'admin' || user?.isAdmin;
-  const isSupervisor = user?.role === 'supervisor';
-  const isOperational = user?.role === 'operational';
-  const isFinancial = user?.role === 'financial';
+  const isSupervisor = isAdmin || user?.role === 'supervisor';
+  const isOperational = isSupervisor || user?.role === 'operational';
+  const isFinancial = isAdmin || user?.role === 'financial';
   const isTransporter = user?.role === 'user';
   
 
