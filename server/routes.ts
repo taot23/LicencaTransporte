@@ -3758,6 +3758,12 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       // Admin pode ver todos os boletos
       if (user.role === 'admin' || user.role === 'financial') {
         const boletos = await storage.getAllBoletos();
+        
+        // Força refresh removendo cache
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        
         return res.json(boletos);
       }
       
@@ -3771,6 +3777,12 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
 
       // Buscar boletos do transportador
       const boletos = await storage.getBoletosByTransportadorId(userTransporter.id);
+      
+      // Força refresh removendo cache
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
       res.json(boletos);
     } catch (error) {
       console.error("Erro ao buscar boletos do usuário:", error);
@@ -3778,7 +3790,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     }
   });
 
-  // Listar todos os boletos (apenas admin e financial)
+  // Listar todos os boletos (apenas admin e financial) com filtros
   app.get("/api/boletos", requireAuth, async (req, res) => {
     const user = req.user!;
     
@@ -3787,8 +3799,44 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     }
 
     try {
-      const boletos = await storage.getAllBoletos();
-      console.log('[DEBUG] Boletos retornados:', JSON.stringify(boletos[0], null, 2));
+      const { status, vencimento } = req.query;
+      let boletos = await storage.getAllBoletos();
+      
+      // Aplicar filtros
+      if (status && status !== 'todos') {
+        boletos = boletos.filter(boleto => boleto.status === status);
+      }
+      
+      if (vencimento) {
+        const hoje = new Date();
+        const seteDias = new Date(hoje.getTime() + 7 * 24 * 60 * 60 * 1000);
+        
+        switch (vencimento) {
+          case 'vencidos':
+            boletos = boletos.filter(boleto => 
+              boleto.dataVencimento && new Date(boleto.dataVencimento) < hoje
+            );
+            break;
+          case 'vencendo':
+            boletos = boletos.filter(boleto => 
+              boleto.dataVencimento && 
+              new Date(boleto.dataVencimento) >= hoje && 
+              new Date(boleto.dataVencimento) <= seteDias
+            );
+            break;
+          case 'futuros':
+            boletos = boletos.filter(boleto => 
+              boleto.dataVencimento && new Date(boleto.dataVencimento) > seteDias
+            );
+            break;
+        }
+      }
+      
+      // Força refresh removendo cache
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
       res.json(boletos);
     } catch (error) {
       console.error("Erro ao buscar boletos:", error);
