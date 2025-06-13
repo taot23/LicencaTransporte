@@ -465,10 +465,12 @@ export default function BoletosPage() {
                     <TableCell>{boleto.nomeTransportador}</TableCell>
                     <TableCell>{boleto.cpfCnpj}</TableCell>
                     <TableCell>{formatCurrency(parseFloat(boleto.valor))}</TableCell>
-                    <TableCell>{formatDate(boleto.dataEmissao)}</TableCell>
+                    <TableCell>
+                      {boleto.dataEmissao ? formatDate(boleto.dataEmissao) : "-"}
+                    </TableCell>
                     <TableCell>
                       <div className={isVencido(boleto.dataVencimento) ? "text-red-600" : ""}>
-                        {formatDate(boleto.dataVencimento)}
+                        {boleto.dataVencimento ? formatDate(boleto.dataVencimento) : "-"}
                       </div>
                     </TableCell>
                     <TableCell>

@@ -268,8 +268,12 @@ export default function MeusBoletos() {
                         <TableCell>{boleto.nomeTransportador}</TableCell>
                         <TableCell>{boleto.cpfCnpj}</TableCell>
                         <TableCell>{formatCurrency(parseFloat(boleto.valor.replace(/[^\d,]/g, '').replace(',', '.')))}</TableCell>
-                        <TableCell>{formatDate(new Date(boleto.dataEmissao))}</TableCell>
-                        <TableCell>{formatDate(new Date(boleto.dataVencimento))}</TableCell>
+                        <TableCell>
+                          {boleto.dataEmissao ? formatDate(boleto.dataEmissao) : "-"}
+                        </TableCell>
+                        <TableCell>
+                          {boleto.dataVencimento ? formatDate(boleto.dataVencimento) : "-"}
+                        </TableCell>
                         <TableCell>
                           <Badge className={statusColors[boleto.status as keyof typeof statusColors]}>
                             {statusLabels[boleto.status as keyof typeof statusLabels]}

@@ -3788,6 +3788,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
 
     try {
       const boletos = await storage.getAllBoletos();
+      console.log('[DEBUG] Boletos retornados:', JSON.stringify(boletos[0], null, 2));
       res.json(boletos);
     } catch (error) {
       console.error("Erro ao buscar boletos:", error);
