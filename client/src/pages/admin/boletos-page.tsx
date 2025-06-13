@@ -35,7 +35,7 @@ interface Boleto {
   atualizadoEm: string;
 }
 
-export function BoletosPage() {
+export default function BoletosPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingBoleto, setEditingBoleto] = useState<Boleto | null>(null);
   const { toast } = useToast();
@@ -46,9 +46,7 @@ export function BoletosPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/boletos/${id}`, {
-      method: "DELETE",
-    }),
+    mutationFn: (id: number) => apiRequest(`/api/boletos/${id}`, "DELETE"),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/boletos"] });
       toast({

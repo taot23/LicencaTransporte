@@ -16,6 +16,7 @@ import AdminTransportersPage from "@/pages/admin/admin-transporters";
 import AdminUsersPage from "@/pages/admin/admin-users";
 import AdminVehiclesPage from "@/pages/admin/admin-vehicles";
 import VehicleModelsPage from "@/pages/admin/vehicle-models-page";
+import BoletosPage from "@/pages/admin/boletos-page";
 import RedirectPage from "@/pages/redirect-page";
 import { ProtectedRoute, AdminRoute, StaffRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
@@ -46,6 +47,7 @@ function Router() {
       <AdminRoute path="/admin/users" component={AdminUsersPage} />
       <StaffRoute path="/admin/vehicles" component={AdminVehiclesPage} requiredRole="operational" />
       <AdminRoute path="/admin/vehicle-models" component={VehicleModelsPage} />
+      <StaffRoute path="/admin/boletos" component={BoletosPage} requiredRole="financial" />
       
       {/* Sistema de Controle de Licenças - Rotas do usuário (versão desktop ou mobile) */}
       <ProtectedRoute 

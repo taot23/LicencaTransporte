@@ -106,10 +106,7 @@ export function BoletoForm({ boleto, onSuccess, onCancel }: BoletoFormProps) {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: FormData) => apiRequest("/api/boletos", {
-      method: "POST",
-      body: data,
-    }),
+    mutationFn: (data: FormData) => apiRequest("/api/boletos", "POST", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/boletos"] });
       toast({
@@ -128,10 +125,7 @@ export function BoletoForm({ boleto, onSuccess, onCancel }: BoletoFormProps) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: FormData) => apiRequest(`/api/boletos/${boleto!.id}`, {
-      method: "PUT",
-      body: data,
-    }),
+    mutationFn: (data: FormData) => apiRequest(`/api/boletos/${boleto!.id}`, "PUT", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/boletos"] });
       toast({

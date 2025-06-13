@@ -110,3 +110,33 @@ export function isAdminUser(user: any): boolean {
 export function isOperationalUser(user: any): boolean {
   return user?.role === 'operational' || user?.role === 'supervisor';
 }
+
+// Formatar data para exibição
+export function formatDate(dateString: string | Date | undefined | null): string {
+  if (!dateString) return "-";
+  
+  const date = typeof dateString === "string" ? new Date(dateString) : dateString;
+  
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    return "-";
+  }
+  
+  return date.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+// Formatar moeda brasileira
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+}
+
+// Verificar se o usuário pode acessar funcionalidades financeiras
+export function canAccessFinancial(user: any): boolean {
+  return user?.role === "admin" || user?.role === "financial";
+}
