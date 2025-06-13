@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, Edit, Download, FileText, Receipt } from "lucide-react";
+import { Trash2, Plus, Edit, Download, FileText, Receipt, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -67,11 +67,30 @@ interface Boleto {
 export default function BoletosPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingBoleto, setEditingBoleto] = useState<Boleto | null>(null);
+  const [filtroStatus, setFiltroStatus] = useState<string>("todos");
+  const [filtroVencimento, setFiltroVencimento] = useState<string>("todos");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: boletos = [], isLoading } = useQuery({
-    queryKey: ["/api/boletos"],
+    queryKey: ["/api/boletos", filtroStatus, filtroVencimento],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (filtroStatus !== "todos") params.set("status", filtroStatus);
+      if (filtroVencimento !== "todos") params.set("vencimento", filtroVencimento);
+      params.set("_t", Date.now().toString()); // Quebra cache
+      
+      return fetch(`/api/boletos?${params.toString()}`, {
+        headers: { 
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      }).then(res => res.json());
+    },
+    refetchInterval: 30000, // Atualização automática a cada 30 segundos
+    refetchOnWindowFocus: true,
+    staleTime: 0, // Dados sempre considerados obsoletos
   });
 
   const { data: transporters = [] } = useQuery({
