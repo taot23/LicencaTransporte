@@ -268,10 +268,17 @@ export default function BoletosPage() {
   };
 
   const onSubmit = async (data: BoletoFormData) => {
+    // Converter strings de data para objetos Date
+    const processedData = {
+      ...data,
+      dataEmissao: new Date(data.dataEmissao),
+      dataVencimento: new Date(data.dataVencimento),
+    };
+
     if (editingBoleto) {
-      updateMutation.mutate({ id: editingBoleto.id, data });
+      updateMutation.mutate({ id: editingBoleto.id, data: processedData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(processedData);
     }
   };
 
