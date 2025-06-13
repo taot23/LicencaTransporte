@@ -150,23 +150,8 @@ export function Sidebar({ className }: SidebarProps) {
           Licenças Emitidas
         </Button>
         
-        {/* TESTE - Botão sempre visível para debug */}
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-white hover:bg-gray-700 bg-orange-600"
-          onClick={() => {
-            console.log('DEBUG: user object:', user);
-            console.log('DEBUG: user role:', user?.role);
-            console.log('DEBUG: condition result:', user?.role === 'user');
-            handleNavigate("/meus-boletos");
-          }}
-        >
-          <Receipt className="mr-3 h-5 w-5" />
-          DEBUG - Meus Boletos (sempre visível)
-        </Button>
-
-        {/* Meus Boletos - Para usuários transportadores (role = 'user') */}
-        {user?.role === 'user' && (
+        {/* Meus Boletos - Para transportadores */}
+        {user && !['admin', 'supervisor', 'operational', 'financial', 'manager'].includes(user.role) && (
           <Button
             variant="ghost"
             className={cn(
@@ -400,7 +385,7 @@ export function Sidebar({ className }: SidebarProps) {
                 </Button>
                 
                 {/* Meus Boletos - Mobile Version */}
-                {user?.role === 'user' && (
+                {user && !['admin', 'supervisor', 'operational', 'financial', 'manager'].includes(user.role) && (
                   <Button
                     variant="ghost"
                     className={cn(
