@@ -16,6 +16,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useCallback, useState as useReactState } from "react";
+import { Upload, X, File, Eye } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -38,6 +40,8 @@ const boletoFormSchema = z.object({
   dataVencimento: z.string().min(1, "Data de vencimento é obrigatória"),
   status: z.string().min(1, "Status é obrigatório"),
   observacoes: z.string().optional(),
+  uploadBoletoUrl: z.string().optional(),
+  uploadNfUrl: z.string().optional(),
 });
 
 type BoletoFormData = z.infer<typeof boletoFormSchema>;
@@ -73,6 +77,11 @@ export default function BoletosPage() {
     queryKey: ["/api/admin/transporters"],
   });
 
+  // Estados para controlar uploads
+  const [uploadedBoleto, setUploadedBoleto] = useReactState<File | null>(null);
+  const [uploadedNf, setUploadedNf] = useReactState<File | null>(null);
+  const [uploading, setUploading] = useReactState(false);
+
   // Configuração do formulário
   const form = useForm<BoletoFormData>({
     resolver: zodResolver(boletoFormSchema),
@@ -86,6 +95,8 @@ export default function BoletosPage() {
       dataVencimento: "",
       status: "pendente",
       observacoes: "",
+      uploadBoletoUrl: "",
+      uploadNfUrl: "",
     },
   });
 
@@ -160,6 +171,8 @@ export default function BoletosPage() {
       dataVencimento: new Date(boleto.dataVencimento).toISOString().split('T')[0],
       status: boleto.status,
       observacoes: boleto.observacoes || "",
+      uploadBoletoUrl: boleto.uploadBoletoUrl || "",
+      uploadNfUrl: boleto.uploadNfUrl || "",
     });
     
     setIsFormOpen(true);
@@ -174,6 +187,8 @@ export default function BoletosPage() {
   const handleFormClose = () => {
     setIsFormOpen(false);
     setEditingBoleto(null);
+    setUploadedBoleto(null);
+    setUploadedNf(null);
     form.reset();
   };
 
@@ -186,7 +201,73 @@ export default function BoletosPage() {
     }
   };
 
-  const onSubmit = (data: BoletoFormData) => {
+  // Função para upload de arquivos
+  const uploadFile = async (file: File, type: string): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+
+    const response = await fetch('/api/upload/boleto', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro no upload do arquivo');
+    }
+
+    const result = await response.json();
+    return result.url;
+  };
+
+  const handleFileUpload = async (file: File, type: 'boleto' | 'nf') => {
+    // Validar arquivo
+    if (file.type !== 'application/pdf') {
+      toast({
+        title: "Arquivo inválido",
+        description: "Apenas arquivos PDF são aceitos",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB
+      toast({
+        title: "Arquivo muito grande",
+        description: "O arquivo deve ter no máximo 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const url = await uploadFile(file, type);
+      
+      if (type === 'boleto') {
+        setUploadedBoleto(file);
+        form.setValue('uploadBoletoUrl', url);
+      } else {
+        setUploadedNf(file);
+        form.setValue('uploadNfUrl', url);
+      }
+
+      toast({
+        title: "Upload realizado",
+        description: `${type === 'boleto' ? 'Boleto' : 'Nota Fiscal'} enviado com sucesso`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro no upload",
+        description: "Erro ao enviar arquivo. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const onSubmit = async (data: BoletoFormData) => {
     if (editingBoleto) {
       updateMutation.mutate({ id: editingBoleto.id, data });
     } else {
@@ -598,6 +679,172 @@ export default function BoletosPage() {
                   </FormItem>
                 )}
               />
+
+              {/* Upload de Boleto */}
+              <div className="space-y-2">
+                <Label>Upload do Boleto (PDF)</Label>
+                <div 
+                  className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                    uploading ? 'border-gray-300 bg-gray-50' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+                  }`}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                      handleFileUpload(files[0], 'boleto');
+                    }
+                  }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDragEnter={(e) => e.preventDefault()}
+                >
+                  {uploadedBoleto ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <File className="h-5 w-5 text-red-600" />
+                        <span className="text-sm">{uploadedBoleto.name}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (form.getValues('uploadBoletoUrl')) {
+                              window.open(form.getValues('uploadBoletoUrl'), '_blank');
+                            }
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setUploadedBoleto(null);
+                            form.setValue('uploadBoletoUrl', '');
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm text-gray-600 mb-2">
+                        Arraste e solte o arquivo do boleto aqui, ou clique para selecionar
+                      </p>
+                      <p className="text-xs text-gray-500">PDF • Máx. 10MB</p>
+                      <Input
+                        type="file"
+                        accept=".pdf"
+                        onChange={(e) => {
+                          const files = e.target.files;
+                          if (files && files.length > 0) {
+                            handleFileUpload(files[0], 'boleto');
+                          }
+                        }}
+                        className="hidden"
+                        id="boleto-upload"
+                        disabled={uploading}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById('boleto-upload')?.click()}
+                        disabled={uploading}
+                        className="mt-2"
+                      >
+                        {uploading ? "Enviando..." : "Selecionar Arquivo"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Upload de Nota Fiscal */}
+              <div className="space-y-2">
+                <Label>Upload da Nota Fiscal (PDF)</Label>
+                <div 
+                  className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                    uploading ? 'border-gray-300 bg-gray-50' : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+                  }`}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                      handleFileUpload(files[0], 'nf');
+                    }
+                  }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDragEnter={(e) => e.preventDefault()}
+                >
+                  {uploadedNf ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <File className="h-5 w-5 text-red-600" />
+                        <span className="text-sm">{uploadedNf.name}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (form.getValues('uploadNfUrl')) {
+                              window.open(form.getValues('uploadNfUrl'), '_blank');
+                            }
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setUploadedNf(null);
+                            form.setValue('uploadNfUrl', '');
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm text-gray-600 mb-2">
+                        Arraste e solte o arquivo da nota fiscal aqui, ou clique para selecionar
+                      </p>
+                      <p className="text-xs text-gray-500">PDF • Máx. 10MB</p>
+                      <Input
+                        type="file"
+                        accept=".pdf"
+                        onChange={(e) => {
+                          const files = e.target.files;
+                          if (files && files.length > 0) {
+                            handleFileUpload(files[0], 'nf');
+                          }
+                        }}
+                        className="hidden"
+                        id="nf-upload"
+                        disabled={uploading}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById('nf-upload')?.click()}
+                        disabled={uploading}
+                        className="mt-2"
+                      >
+                        {uploading ? "Enviando..." : "Selecionar Arquivo"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
 
               <div className="flex justify-end space-x-2 pt-4">
                 <Button type="button" variant="outline" onClick={handleFormClose}>
