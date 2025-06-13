@@ -3750,6 +3750,33 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     }
   });
 
+  // Endpoint para transportadores acessarem seus próprios boletos
+  app.get("/api/meus-boletos", requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    // Apenas usuários normais (transportadores) podem acessar esta rota
+    if (user.role !== 'user') {
+      return res.status(403).json({ message: "Acesso negado - apenas para transportadores" });
+    }
+
+    try {
+      // Buscar transportador vinculado ao usuário
+      const transporters = await storage.getAllTransporters();
+      const userTransporter = transporters.find(t => t.userId === user.id);
+      
+      if (!userTransporter) {
+        return res.status(404).json({ message: "Transportador não encontrado para este usuário" });
+      }
+
+      // Buscar boletos do transportador
+      const boletos = await storage.getBoletosByTransportadorId(userTransporter.id);
+      res.json(boletos);
+    } catch (error) {
+      console.error("Erro ao buscar boletos do usuário:", error);
+      res.status(500).json({ message: "Erro ao buscar seus boletos" });
+    }
+  });
+
   // Listar todos os boletos (apenas admin e financial)
   app.get("/api/boletos", requireAuth, async (req, res) => {
     const user = req.user!;

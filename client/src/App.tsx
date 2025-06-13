@@ -17,6 +17,7 @@ import AdminUsersPage from "@/pages/admin/admin-users";
 import AdminVehiclesPage from "@/pages/admin/admin-vehicles";
 import VehicleModelsPage from "@/pages/admin/vehicle-models-page";
 import BoletosPage from "@/pages/admin/boletos-page";
+import MeusBoletos from "@/pages/meus-boletos";
 import RedirectPage from "@/pages/redirect-page";
 import { ProtectedRoute, AdminRoute, StaffRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
@@ -73,6 +74,12 @@ function Router() {
       <ProtectedRoute 
         path="/issued-licenses" 
         component={isMobile ? MobileIssuedLicensesPage : IssuedLicensesPage} 
+      />
+      
+      {/* Acesso do cliente ao módulo financeiro - apenas para transportadores */}
+      <ProtectedRoute 
+        path="/meus-boletos" 
+        component={MeusBoletos} 
       />
       
       <Route component={NotFound} />
