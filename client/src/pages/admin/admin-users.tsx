@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Plus, MoreVertical, Edit, Trash, User as UserIcon } from "lucide-react";
+import { Plus, MoreVertical, Edit, Trash, User as UserIcon, Download } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SkeletonTable } from "@/components/ui/skeleton-table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -291,6 +291,57 @@ export default function AdminUsers() {
     }
   };
 
+  const handleExportCSV = () => {
+    if (!users || users.length === 0) {
+      toast({
+        title: "Nenhum dado para exportar",
+        description: "Não há usuários para exportar",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { exportToCSV, formatDateForCSV } = require("@/lib/csv-export");
+      
+      const headers = [
+        "ID",
+        "Nome Completo",
+        "Email",
+        "Telefone",
+        "Função",
+        "Data de Criação"
+      ];
+
+      const filteredUsers = users.filter((user: User) => !user.isAdmin);
+      const formattedData = filteredUsers.map((user: User) => ({
+        id: user.id,
+        "nome completo": user.fullName,
+        email: user.email,
+        telefone: user.phone,
+        "função": getRoleLabel(user.role),
+        "data de criação": formatDateForCSV(user.createdAt)
+      }));
+
+      exportToCSV({
+        filename: "usuarios",
+        headers,
+        data: formattedData
+      });
+
+      toast({
+        title: "Exportação concluída",
+        description: `${filteredUsers.length} usuários exportados com sucesso`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro na exportação",
+        description: "Ocorreu um erro ao exportar os dados",
+        variant: "destructive",
+      });
+    }
+  };
+
   const renderUsersList = () => {
     if (isLoading) {
       return <SkeletonTable columns={5} rows={5} />;
@@ -413,24 +464,36 @@ export default function AdminUsers() {
       <div className="container mx-auto py-6 max-w-6xl">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Gerenciar Usuários</h1>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm">
-                <Plus size={16} className="mr-2" />
-                Novo
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl">
-              <DialogHeader>
-                <DialogTitle>Novo Usuário</DialogTitle>
-              </DialogHeader>
-              <UserForm 
-                onSuccess={() => {
-                  setIsCreateDialogOpen(false);
-                }} 
-              />
-            </DialogContent>
-          </Dialog>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCSV}
+              disabled={isLoading}
+              title="Exportar dados dos usuários"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Exportar
+            </Button>
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm">
+                  <Plus size={16} className="mr-2" />
+                  Novo
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle>Novo Usuário</DialogTitle>
+                </DialogHeader>
+                <UserForm 
+                  onSuccess={() => {
+                    setIsCreateDialogOpen(false);
+                  }} 
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {/* Lista de usuários */}

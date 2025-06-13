@@ -52,24 +52,30 @@ export default function AdminTransporters() {
     }
   }, [lastMessage, queryClient]);
 
+  // Fetch transporters
   const { data: transporters = [], isLoading } = useQuery({
-    queryKey: ['/api/admin/transporters'],
+    queryKey: ["/api/admin/transporters"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/admin/transporters");
+      return await response.json();
+    }
   });
 
-  // Mutation para exclusão de transportador
+
+
+  // Delete transporter mutation
   const deleteTransporterMutation = useMutation({
     mutationFn: async (transporterId: number) => {
-      const response = await apiRequest("DELETE", `/api/admin/transporters/${transporterId}`);
-      return response.json();
+      await apiRequest("DELETE", `/api/admin/transporters/${transporterId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/transporters'] });
       toast({
-        title: "Transportador excluído com sucesso",
-        description: "O transportador foi removido do sistema.",
+        title: "Transportador excluído",
+        description: "O transportador foi excluído com sucesso",
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/transporters"] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Erro ao excluir transportador",
         description: error.message,
@@ -77,6 +83,8 @@ export default function AdminTransporters() {
       });
     }
   });
+
+
 
   const handleEditTransporter = (transporter: Transporter) => {
     setSelectedTransporter(transporter);
@@ -118,7 +126,7 @@ export default function AdminTransporters() {
         "Data de Criação"
       ];
 
-      const formattedData = transporters.map((transporter: Transporter) => ({
+      const formattedData = transporters.map(transporter => ({
         id: transporter.id,
         "nome/razão social": transporter.name,
         "cpf/cnpj": transporter.documentNumber,
@@ -222,7 +230,7 @@ export default function AdminTransporters() {
             <TableHead>CPF/CNPJ</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Contato Principal</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
+            <TableHead className="w-[100px]">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -232,7 +240,7 @@ export default function AdminTransporters() {
               <TableCell>{transporter.documentNumber}</TableCell>
               <TableCell>{transporter.email}</TableCell>
               <TableCell>{transporter.contact1Name}</TableCell>
-              <TableCell className="text-right">
+              <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon">
@@ -286,18 +294,18 @@ export default function AdminTransporters() {
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Novo Transportador</DialogTitle>
-                </DialogHeader>
-                <div className="pb-4">
-                  <TransporterForm 
-                    onSuccess={() => {
-                      setIsCreateDialogOpen(false);
-                    }} 
-                  />
-                </div>
-              </DialogContent>
-            </Dialog>
+                  <DialogHeader>
+                    <DialogTitle>Novo Transportador</DialogTitle>
+                  </DialogHeader>
+                  <div className="pb-4">
+                    <TransporterForm 
+                      onSuccess={() => {
+                        setIsCreateDialogOpen(false);
+                      }} 
+                    />
+                  </div>
+                </DialogContent>
+          </Dialog>
           </div>
         </div>
 
