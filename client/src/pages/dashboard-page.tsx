@@ -18,15 +18,15 @@ export default function DashboardPage() {
     <MainLayout>
       <PageTransition>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
           <div className="flex items-center w-full sm:w-auto">
             <div className="relative w-full sm:w-64">
               <input 
                 type="text" 
                 placeholder="Pesquisar..." 
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
               />
-              <span className="absolute left-3 top-2.5 text-gray-400">
+              <span className="absolute left-3 top-2.5 text-muted-foreground">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -74,50 +74,50 @@ export default function DashboardPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow mb-8">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-800">Licenças Recentes</h2>
+        <Card className="mb-8">
+          <div className="p-6 border-b border-border">
+            <h2 className="text-lg font-medium text-foreground">Licenças Recentes</h2>
           </div>
           <LicenseTable licenses={stats?.recentLicenses || []} isLoading={isLoading} />
-          <div className="px-6 py-4 border-t border-gray-200">
-            <a href="/issued-licenses" className="text-sm text-blue-600 hover:text-blue-800 font-medium">Ver todas as licenças →</a>
+          <div className="px-6 py-4 border-t border-border">
+            <a href="/issued-licenses" className="text-sm text-primary hover:text-primary/80 font-medium">Ver todas as licenças →</a>
           </div>
-        </div>
+        </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Tabs defaultValue="vehicle-status" className="bg-white rounded-lg shadow p-6">
-            <TabsList className="mb-4">
-              <TabsTrigger value="vehicle-status">Status de Veículos</TabsTrigger>
-              <TabsTrigger value="license-states">Licenças por Estado</TabsTrigger>
-            </TabsList>
-            <TabsContent value="vehicle-status">
-              <div className="h-64">
-                <StatusChart
-                  type="vehicle"
-                  isLoading={isLoading}
-                />
-              </div>
-            </TabsContent>
-            <TabsContent value="license-states">
-              <div className="h-64">
-                <StatusChart
-                  type="state"
-                  isLoading={isLoading}
-                />
-              </div>
-            </TabsContent>
-          </Tabs>
+          <Card className="p-6">
+            <Tabs defaultValue="vehicle-status">
+              <TabsList className="mb-4">
+                <TabsTrigger value="vehicle-status">Status de Veículos</TabsTrigger>
+                <TabsTrigger value="license-states">Licenças por Estado</TabsTrigger>
+              </TabsList>
+              <TabsContent value="vehicle-status">
+                <div className="h-64">
+                  <StatusChart
+                    type="vehicle"
+                    isLoading={isLoading}
+                  />
+                </div>
+              </TabsContent>
+              <TabsContent value="license-states">
+                <div className="h-64">
+                  <StatusChart
+                    type="state"
+                    isLoading={isLoading}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </Card>
           
-          <Card>
-            <CardContent className="p-6">
-              <h2 className="text-lg font-medium text-gray-800 mb-4">Licenças por Estado</h2>
-              <div className="h-64">
-                <StatusChart
-                  type="state"
-                  isLoading={isLoading}
-                />
-              </div>
-            </CardContent>
+          <Card className="p-6">
+            <h2 className="text-lg font-medium text-foreground mb-4">Licenças por Estado</h2>
+            <div className="h-64">
+              <StatusChart
+                type="state"
+                isLoading={isLoading}
+              />
+            </div>
           </Card>
         </div>
       </PageTransition>
