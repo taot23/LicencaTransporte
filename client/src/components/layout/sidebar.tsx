@@ -150,7 +150,7 @@ export function Sidebar({ className }: SidebarProps) {
         </Button>
         
         {/* Meus Boletos - Apenas para transportadores (usuários normais) */}
-        {user?.role === 'user' && (
+        {(!isAdmin && !isSupervisor && !isOperational && !isFinancial) && (
           <Button
             variant="ghost"
             className={cn(
@@ -382,6 +382,21 @@ export function Sidebar({ className }: SidebarProps) {
                   <ListChecks className="mr-3 h-5 w-5" />
                   Licenças Emitidas
                 </Button>
+                
+                {/* Meus Boletos - Mobile Version */}
+                {(!isAdmin && !isSupervisor && !isOperational && !isFinancial) && (
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start text-white hover:bg-gray-700",
+                      location === "/meus-boletos" ? "bg-gray-700" : "bg-transparent"
+                    )}
+                    onClick={() => handleNavigate("/meus-boletos")}
+                  >
+                    <Receipt className="mr-3 h-5 w-5" />
+                    Meus Boletos
+                  </Button>
+                )}
                 
                 {(isAdmin || isSupervisor || isOperational) && (
                   <>
