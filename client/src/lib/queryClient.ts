@@ -55,7 +55,7 @@ export async function apiRequest(
     await throwIfResNotOk(res);
     return res;
   } catch (error) {
-    console.error(`Erro na requisição ${method} ${url}:`, error);
+    console.error(`Erro na requisição ${url} ${method}:`, error);
     throw error;
   }
 }

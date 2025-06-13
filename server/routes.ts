@@ -354,28 +354,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = await storage.getUserByEmail(email);
       if (!user) {
-        return res.status(401).json({ message: "Credenciais inválidas" });
+        return res.status(401).json({ message: "Email ou senha incorretos" });
       }
 
       // Para desenvolvimento, aceitar senha simples "admin" para admin
       const isValidPassword = password === "admin" && user.email === "admin@aet.com";
       
       if (!isValidPassword) {
-        return res.status(401).json({ message: "Credenciais inválidas" });
+        return res.status(401).json({ message: "Email ou senha incorretos" });
       }
 
-      // Simular login manual
-      req.login(user, (err) => {
-        if (err) {
-          return res.status(500).json({ message: "Erro ao fazer login" });
-        }
-        res.json({ message: "Login realizado com sucesso", user: {
+      // Simular sessão manual sem passport
+      (req.session as any).user = {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role,
+        phone: user.phone
+      };
+
+      res.json({ 
+        message: "Login realizado com sucesso", 
+        user: {
           id: user.id,
           email: user.email,
           fullName: user.fullName,
           role: user.role,
-          isAdmin: user.isAdmin
-        }});
+          phone: user.phone
+        }
       });
     } catch (error) {
       console.error("Erro no login:", error);

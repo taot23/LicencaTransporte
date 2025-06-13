@@ -619,6 +619,34 @@ export default function BoletosPage() {
                 )}
               />
 
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Upload do Boleto (PDF)</Label>
+                  <SmartUpload
+                    onFileChange={setUploadBoleto}
+                    accept=".pdf"
+                    maxSize={10 * 1024 * 1024}
+                    label="Arraste o arquivo PDF do boleto aqui"
+                    description="Arquivo PDF até 10MB"
+                    currentFileUrl={editingBoleto?.uploadBoletoUrl}
+                    currentFileName="Boleto atual"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Upload da Nota Fiscal (PDF)</Label>
+                  <SmartUpload
+                    onFileChange={setUploadNf}
+                    accept=".pdf"
+                    maxSize={10 * 1024 * 1024}
+                    label="Arraste o arquivo PDF da NF aqui"
+                    description="Arquivo PDF até 10MB"
+                    currentFileUrl={editingBoleto?.uploadNfUrl}
+                    currentFileName="Nota Fiscal atual"
+                  />
+                </div>
+              </div>
+
               <div className="flex justify-end space-x-2 pt-4">
                 <Button type="button" variant="outline" onClick={handleFormClose}>
                   Cancelar
