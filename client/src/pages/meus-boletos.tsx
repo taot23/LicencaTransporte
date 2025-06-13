@@ -282,8 +282,9 @@ export default function MeusBoletos() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleDownload(boleto.uploadBoletoUrl, `boleto-${boleto.numeroBoleto}.pdf`)}
+                                title="Download Boleto"
                               >
-                                <FileText className="h-4 w-4" />
+                                <Receipt className="h-4 w-4" />
                               </Button>
                             )}
                             {boleto.uploadNfUrl && (
@@ -291,8 +292,9 @@ export default function MeusBoletos() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleDownload(boleto.uploadNfUrl, `nf-${boleto.numeroBoleto}.pdf`)}
+                                title="Download Nota Fiscal"
                               >
-                                <Receipt className="h-4 w-4" />
+                                <FileText className="h-4 w-4" />
                               </Button>
                             )}
                           </div>
