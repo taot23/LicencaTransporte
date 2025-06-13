@@ -63,6 +63,8 @@ interface Boleto {
 export default function BoletosPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingBoleto, setEditingBoleto] = useState<Boleto | null>(null);
+  const [uploadBoleto, setUploadBoleto] = useState<File | null>(null);
+  const [uploadNf, setUploadNf] = useState<File | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -188,10 +190,27 @@ export default function BoletosPage() {
   };
 
   const onSubmit = (data: BoletoFormData) => {
+    const formData = new FormData();
+    
+    // Adicionar dados do boleto
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value.toString());
+      }
+    });
+
+    // Adicionar arquivos se fornecidos
+    if (uploadBoleto) {
+      formData.append("uploadBoleto", uploadBoleto);
+    }
+    if (uploadNf) {
+      formData.append("uploadNf", uploadNf);
+    }
+
     if (editingBoleto) {
-      updateMutation.mutate({ id: editingBoleto.id, data });
+      updateMutation.mutate({ id: editingBoleto.id, data: formData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(formData);
     }
   };
 

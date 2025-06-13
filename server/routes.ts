@@ -329,6 +329,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Servir arquivos estáticos da pasta uploads
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+  // Rota para obter informações do usuário autenticado
+  app.get("/api/user", (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Não autenticado" });
+    }
+    
+    const user = req.user!;
+    res.json({
+      id: user.id,
+      email: user.email,
+      fullName: user.fullName,
+      role: user.role,
+      phone: user.phone,
+      isAdmin: user.isAdmin,
+    });
+  });
+
+  // Rota de login simples para desenvolvimento
+  app.post("/api/login", async (req, res) => {
+    const { email, password } = req.body;
+    
+    try {
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ message: "Credenciais inválidas" });
+      }
+
+      // Para desenvolvimento, aceitar senha simples "admin" para admin
+      const isValidPassword = password === "admin" && user.email === "admin@aet.com";
+      
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Credenciais inválidas" });
+      }
+
+      // Simular login manual
+      req.login(user, (err) => {
+        if (err) {
+          return res.status(500).json({ message: "Erro ao fazer login" });
+        }
+        res.json({ message: "Login realizado com sucesso", user: {
+          id: user.id,
+          email: user.email,
+          fullName: user.fullName,
+          role: user.role,
+          isAdmin: user.isAdmin
+        }});
+      });
+    } catch (error) {
+      console.error("Erro no login:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
   
   // Criar o servidor HTTP (definido apenas uma vez)
   const httpServer = createServer(app);

@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
+import LoginPage from "@/pages/login";
 import RegularDashboardPage from "@/pages/regular-dashboard-page";
 import VehiclesPage from "@/pages/vehicles-page";
 import RequestLicensePage from "@/pages/request-license-page";
@@ -36,6 +37,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/auth" component={AuthPage} />
+      <Route path="/login" component={LoginPage} />
       
       {/* Página inicial com redirecionamento inteligente baseado no papel */}
       <ProtectedRoute path="/" component={RedirectPage} />
