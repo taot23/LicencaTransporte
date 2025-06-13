@@ -1414,12 +1414,20 @@ export class TransactionalStorage implements IStorage {
 
   async createBoleto(boletoData: InsertBoleto): Promise<Boleto> {
     try {
+      // Garantir conversão correta de datas
+      const dataEmissao = typeof boletoData.dataEmissao === 'string' 
+        ? new Date(boletoData.dataEmissao) 
+        : boletoData.dataEmissao;
+      const dataVencimento = typeof boletoData.dataVencimento === 'string' 
+        ? new Date(boletoData.dataVencimento) 
+        : boletoData.dataVencimento;
+
       const [boleto] = await db
         .insert(boletos)
         .values({
           ...boletoData,
-          dataEmissao: new Date(boletoData.dataEmissao),
-          dataVencimento: new Date(boletoData.dataVencimento),
+          dataEmissao,
+          dataVencimento,
           criadoEm: new Date(),
           atualizadoEm: new Date()
         })
@@ -1433,10 +1441,20 @@ export class TransactionalStorage implements IStorage {
 
   async updateBoleto(id: number, boletoData: Partial<Boleto>): Promise<Boleto> {
     try {
+      const updateData: any = { ...boletoData };
+      
+      // Converter strings de data para objetos Date
+      if (updateData.dataEmissao && typeof updateData.dataEmissao === 'string') {
+        updateData.dataEmissao = new Date(updateData.dataEmissao);
+      }
+      if (updateData.dataVencimento && typeof updateData.dataVencimento === 'string') {
+        updateData.dataVencimento = new Date(updateData.dataVencimento);
+      }
+      
       const [updatedBoleto] = await db
         .update(boletos)
         .set({
-          ...boletoData,
+          ...updateData,
           atualizadoEm: new Date()
         })
         .where(eq(boletos.id, id))

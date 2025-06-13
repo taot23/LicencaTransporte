@@ -41,18 +41,17 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
     if (isLoggingOut) return; // Previne múltiplos cliques
     
     setIsLoggingOut(true);
+    // Redirecionar imediatamente para melhor UX
+    window.location.href = "/auth";
+    
+    // Fazer logout em background
     try {
-      await fetch("/api/logout", { 
+      fetch("/api/logout", { 
         method: "POST",
         credentials: "include"
       });
-      // Limpar dados do usuário no cache
-      window.location.href = "/auth";
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
-      window.location.href = "/auth";
-    } finally {
-      setIsLoggingOut(false);
     }
   };
 

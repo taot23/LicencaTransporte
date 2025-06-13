@@ -48,7 +48,9 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ Header fixo implementado com informações do usuário no canto superior direito
 - ✅ Sistema de exclusão atualizado para usar AlertDialog nativo ao invés de confirm()
 - ✅ Ícones de download corrigidos: Receipt para boleto, FileText para nota fiscal
-- ✅ Logout corrigido para usar fetch padrão conforme preferência do usuário
+- ✅ Logout otimizado com redirecionamento imediato para melhor performance
+- ✅ Proteção contra múltiplos cliques simultâneos no logout
+- ✅ Correção das datas divergentes no sistema de boletos
 - ✅ Layout responsivo mantido para mobile e desktop
 - ✅ Tooltips adicionados aos botões para maior clareza
 
