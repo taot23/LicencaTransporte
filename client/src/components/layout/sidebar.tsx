@@ -40,13 +40,7 @@ export function Sidebar({ className }: SidebarProps) {
   const isOperational = isSupervisor || user?.role === 'operational';
   const isFinancial = isAdmin || user?.role === 'financial';
   
-  // Debug temporário
-  console.log('Sidebar Debug:', {
-    userRole: user?.role,
-    isAdmin,
-    isFinancial,
-    userIsAdmin: user?.isAdmin
-  });
+
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -611,20 +605,22 @@ export function Sidebar({ className }: SidebarProps) {
             <>
               <div className="pt-2 pb-2">
                 <Separator className="bg-gray-700" />
-                <p className="text-xs text-gray-400 uppercase mt-2 ml-2 font-semibold">Administração</p>
+                {!isCollapsed && <p className="text-xs text-gray-400 uppercase mt-2 ml-2 font-semibold">Administração</p>}
               </div>
               
               {isAdmin && (
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start text-white hover:bg-gray-700",
+                    "w-full text-white hover:bg-gray-700",
+                    isCollapsed ? "justify-center px-2" : "justify-start",
                     location === "/admin" ? "bg-gray-700" : "bg-transparent"
                   )}
                   onClick={() => handleNavigate("/admin")}
+                  title={isCollapsed ? "Relatórios" : undefined}
                 >
-                  <LayoutDashboard className="mr-3 h-5 w-5" />
-                  Relatórios
+                  <LayoutDashboard className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
+                  {!isCollapsed && "Relatórios"}
                 </Button>
               )}
               
@@ -632,13 +628,15 @@ export function Sidebar({ className }: SidebarProps) {
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start text-white hover:bg-gray-700",
+                    "w-full text-white hover:bg-gray-700",
+                    isCollapsed ? "justify-center px-2" : "justify-start",
                     (location === "/admin/licenses" || location === "/gerenciar-licencas") ? "bg-gray-700" : "bg-transparent"
                   )}
                   onClick={() => handleNavigate("/admin/licenses")}
+                  title={isCollapsed ? "Gerenciar Licenças" : undefined}
                 >
-                  <ClipboardEdit className="mr-3 h-5 w-5" />
-                  Gerenciar Licenças
+                  <ClipboardEdit className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
+                  {!isCollapsed && "Gerenciar Licenças"}
                 </Button>
               )}
               
@@ -646,13 +644,15 @@ export function Sidebar({ className }: SidebarProps) {
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start text-white hover:bg-gray-700",
+                    "w-full text-white hover:bg-gray-700",
+                    isCollapsed ? "justify-center px-2" : "justify-start",
                     location === "/admin/transporters" ? "bg-gray-700" : "bg-transparent"
                   )}
                   onClick={() => handleNavigate("/admin/transporters")}
+                  title={isCollapsed ? "Transportadores" : undefined}
                 >
-                  <Building2 className="mr-3 h-5 w-5" />
-                  Transportadores
+                  <Building2 className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
+                  {!isCollapsed && "Transportadores"}
                 </Button>
               )}
               
@@ -660,13 +660,15 @@ export function Sidebar({ className }: SidebarProps) {
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start text-white hover:bg-gray-700",
+                    "w-full text-white hover:bg-gray-700",
+                    isCollapsed ? "justify-center px-2" : "justify-start",
                     location === "/admin/users" ? "bg-gray-700" : "bg-transparent"
                   )}
                   onClick={() => handleNavigate("/admin/users")}
+                  title={isCollapsed ? "Usuários" : undefined}
                 >
-                  <Users className="mr-3 h-5 w-5" />
-                  Usuários
+                  <Users className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
+                  {!isCollapsed && "Usuários"}
                 </Button>
               )}
               
@@ -674,13 +676,15 @@ export function Sidebar({ className }: SidebarProps) {
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start text-white hover:bg-gray-700",
+                    "w-full text-white hover:bg-gray-700",
+                    isCollapsed ? "justify-center px-2" : "justify-start",
                     location === "/admin/vehicle-models" ? "bg-gray-700" : "bg-transparent"
                   )}
                   onClick={() => handleNavigate("/admin/vehicle-models")}
+                  title={isCollapsed ? "Modelos de Veículos" : undefined}
                 >
-                  <Car className="mr-3 h-5 w-5" />
-                  Modelos de Veículos
+                  <Car className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
+                  {!isCollapsed && "Modelos de Veículos"}
                 </Button>
               )}
               
@@ -688,13 +692,15 @@ export function Sidebar({ className }: SidebarProps) {
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start text-white hover:bg-gray-700",
+                    "w-full text-white hover:bg-gray-700",
+                    isCollapsed ? "justify-center px-2" : "justify-start",
                     location === "/admin/boletos" ? "bg-gray-700" : "bg-transparent"
                   )}
                   onClick={() => handleNavigate("/admin/boletos")}
+                  title={isCollapsed ? "Módulo Financeiro" : undefined}
                 >
-                  <Receipt className="mr-3 h-5 w-5" />
-                  Módulo Financeiro
+                  <Receipt className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
+                  {!isCollapsed && "Módulo Financeiro"}
                 </Button>
               )}
             </>
