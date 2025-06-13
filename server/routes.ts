@@ -30,19 +30,41 @@ import * as fs from "fs";
 import { promisify } from "util";
 import { WebSocketServer, WebSocket } from "ws";
 
-// Set up file storage for uploads
-const uploadDir = path.join(process.cwd(), "uploads");
-const ensureUploadDir = () => {
-  try {
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+// Set up file storage for uploads - externa ao projeto
+const getUploadDir = () => {
+  // Tentar diferentes localizações baseadas no ambiente
+  const possiblePaths = [
+    process.env.UPLOAD_DIR, // Variável de ambiente personalizada
+    '/var/uploads', // Padrão para produção
+    '/tmp/uploads', // Fallback para sistemas com permissões limitadas
+    path.join(process.cwd(), '..', 'uploads'), // Um nível acima do projeto
+    path.join(process.cwd(), 'uploads') // Último recurso dentro do projeto
+  ].filter(Boolean);
+
+  for (const uploadPath of possiblePaths) {
+    try {
+      // Tentar criar o diretório
+      if (!fs.existsSync(uploadPath!)) {
+        fs.mkdirSync(uploadPath!, { recursive: true });
+      }
+      
+      // Testar se consegue escrever no diretório
+      const testFile = path.join(uploadPath!, '.write-test');
+      fs.writeFileSync(testFile, 'test');
+      fs.unlinkSync(testFile);
+      
+      console.log(`[UPLOAD] Usando diretório: ${uploadPath}`);
+      return uploadPath!;
+    } catch (error) {
+      console.warn(`[UPLOAD] Não foi possível usar ${uploadPath}:`, error.message);
+      continue;
     }
-  } catch (error) {
-    console.error("Error creating upload directory:", error);
   }
+  
+  throw new Error('Nenhum diretório de upload válido encontrado');
 };
 
-ensureUploadDir();
+const uploadDir = getUploadDir();
 
 const storage_config = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -2500,12 +2522,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Configuração do multer para upload de arquivos de veículos
   const vehicleStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-      // Cria o diretório de uploads caso não exista
-      const uploadDir = './uploads/vehicles';
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
+      // Usar o diretório de uploads externo com subpasta para veículos
+      const vehicleUploadDir = path.join(uploadDir, 'vehicles');
+      if (!fs.existsSync(vehicleUploadDir)) {
+        fs.mkdirSync(vehicleUploadDir, { recursive: true });
       }
-      cb(null, uploadDir);
+      cb(null, vehicleUploadDir);
     },
     filename: (req, file, cb) => {
       // Preservar o ID do veículo no nome do arquivo para facilitar substituição
@@ -2811,12 +2833,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Configuração do multer para upload de arquivos do transportador
   const transporterStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-      // Cria o diretório de uploads caso não exista
-      const uploadDir = './uploads/transporter';
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
+      // Usar o diretório de uploads externo com subpasta para transportadores
+      const transporterUploadDir = path.join(uploadDir, 'transporter');
+      if (!fs.existsSync(transporterUploadDir)) {
+        fs.mkdirSync(transporterUploadDir, { recursive: true });
       }
-      cb(null, uploadDir);
+      cb(null, transporterUploadDir);
     },
     filename: (req, file, cb) => {
       // Cria um nome de arquivo único
