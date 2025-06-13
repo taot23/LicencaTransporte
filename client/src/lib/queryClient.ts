@@ -45,7 +45,7 @@ export async function apiRequest(
     }
     
     const res = await fetch(url, {
-      method,
+      method: method.toUpperCase(),
       headers,
       // Para FormData não usamos JSON.stringify
       body: isFormData ? (data as BodyInit) : data ? JSON.stringify(data) : undefined,
