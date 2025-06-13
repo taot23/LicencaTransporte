@@ -29,11 +29,11 @@ import { exportToCSV, formatDateForCSV, formatCurrencyForCSV } from "@/lib/csv-e
 
 // Schema de validação para o formulário de boleto
 const boletoFormSchema = z.object({
-  transportadorId: z.number().min(1, "Selecione um transportador"),
+  transportadorId: z.coerce.number().min(1, "Selecione um transportador"),
   nomeTransportador: z.string().min(1, "Nome do transportador é obrigatório"),
   cpfCnpj: z.string().min(11, "CPF/CNPJ é obrigatório"),
   numeroBoleto: z.string().min(1, "Número do boleto é obrigatório"),
-  valor: z.string().min(1, "Valor é obrigatório"),
+  valor: z.coerce.number().positive("Valor deve ser positivo"),
   dataEmissao: z.string().min(1, "Data de emissão é obrigatória"),
   dataVencimento: z.string().min(1, "Data de vencimento é obrigatória"),
   status: z.string().min(1, "Status é obrigatório"),
@@ -81,10 +81,10 @@ export default function BoletosPage() {
       nomeTransportador: "",
       cpfCnpj: "",
       numeroBoleto: "",
-      valor: "",
+      valor: 0,
       dataEmissao: new Date().toISOString().split('T')[0],
       dataVencimento: "",
-      status: "pendente",
+      status: "aguardando_pagamento",
       observacoes: "",
     },
   });
@@ -155,7 +155,7 @@ export default function BoletosPage() {
       nomeTransportador: boleto.nomeTransportador,
       cpfCnpj: boleto.cpfCnpj,
       numeroBoleto: boleto.numeroBoleto,
-      valor: boleto.valor,
+      valor: parseFloat(boleto.valor),
       dataEmissao: new Date(boleto.dataEmissao).toISOString().split('T')[0],
       dataVencimento: new Date(boleto.dataVencimento).toISOString().split('T')[0],
       status: boleto.status,

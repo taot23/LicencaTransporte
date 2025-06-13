@@ -26,8 +26,8 @@ async function throwIfResNotOk(res: Response) {
  * Função para realizar requisições à API com tratamento de erro padronizado
  */
 export async function apiRequest(
-  method: string,
   url: string,
+  method: string,
   data?: unknown | undefined,
   options?: { 
     headers?: Record<string, string>;
