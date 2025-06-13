@@ -3809,10 +3809,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // Criar novo boleto (apenas admin e financial)
-  app.post("/api/boletos", requireAuth, upload.fields([
-    { name: 'uploadBoleto', maxCount: 1 },
-    { name: 'uploadNf', maxCount: 1 }
-  ]), async (req, res) => {
+  app.post("/api/boletos", requireAuth, async (req, res) => {
     const user = req.user!;
     
     if (!canAccessFinancial(user)) {
@@ -3820,27 +3817,9 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     }
 
     try {
-      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-      
-      // Processar uploads de arquivos
-      let uploadBoletoUrl = null;
-      let uploadNfUrl = null;
-      
-      if (files.uploadBoleto && files.uploadBoleto[0]) {
-        uploadBoletoUrl = `/uploads/boletos/${files.uploadBoleto[0].filename}`;
-      }
-      
-      if (files.uploadNf && files.uploadNf[0]) {
-        uploadNfUrl = `/uploads/boletos/${files.uploadNf[0].filename}`;
-      }
-
-      const boletoData = {
-        ...req.body,
-        uploadBoletoUrl,
-        uploadNfUrl,
-      };
-
-      const validatedData = insertBoletoSchema.parse(boletoData);
+      // Os uploads já foram feitos separadamente via /api/upload/boleto
+      // Aqui recebemos apenas os dados do formulário incluindo as URLs dos arquivos
+      const validatedData = insertBoletoSchema.parse(req.body);
       const boleto = await storage.createBoleto(validatedData);
       
       res.status(201).json(boleto);
@@ -3858,10 +3837,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // Atualizar boleto (apenas admin e financial)
-  app.put("/api/boletos/:id", requireAuth, upload.fields([
-    { name: 'uploadBoleto', maxCount: 1 },
-    { name: 'uploadNf', maxCount: 1 }
-  ]), async (req, res) => {
+  app.put("/api/boletos/:id", requireAuth, async (req, res) => {
     const user = req.user!;
     
     if (!canAccessFinancial(user)) {
@@ -3870,20 +3846,9 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
 
     try {
       const id = parseInt(req.params.id);
-      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-      
-      // Processar uploads de arquivos (se fornecidos)
-      const updateData: any = { ...req.body };
-      
-      if (files.uploadBoleto && files.uploadBoleto[0]) {
-        updateData.uploadBoletoUrl = `/uploads/boletos/${files.uploadBoleto[0].filename}`;
-      }
-      
-      if (files.uploadNf && files.uploadNf[0]) {
-        updateData.uploadNfUrl = `/uploads/boletos/${files.uploadNf[0].filename}`;
-      }
-
-      const boleto = await storage.updateBoleto(id, updateData);
+      // Os uploads já foram feitos separadamente via /api/upload/boleto
+      // Aqui recebemos apenas os dados do formulário incluindo as URLs dos arquivos
+      const boleto = await storage.updateBoleto(id, req.body);
       res.json(boleto);
     } catch (error) {
       console.error("Erro ao atualizar boleto:", error);
