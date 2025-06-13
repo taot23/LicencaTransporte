@@ -38,6 +38,14 @@ export function Sidebar({ className }: SidebarProps) {
   const isSupervisor = isAdmin || user?.role === 'supervisor';
   const isOperational = isSupervisor || user?.role === 'operational';
   const isFinancial = isAdmin || user?.role === 'financial';
+  
+  // Debug temporário
+  console.log('Sidebar Debug:', {
+    userRole: user?.role,
+    isAdmin,
+    isFinancial,
+    userIsAdmin: user?.isAdmin
+  });
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
 
@@ -440,6 +448,20 @@ export function Sidebar({ className }: SidebarProps) {
                         Modelos de Veículos
                       </Button>
                     )}
+                    
+                    {isFinancial && (
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start text-white hover:bg-gray-700",
+                          location === "/admin/boletos" ? "bg-gray-700" : "bg-transparent"
+                        )}
+                        onClick={() => handleNavigate("/admin/boletos")}
+                      >
+                        <Receipt className="mr-3 h-5 w-5" />
+                        Módulo Financeiro
+                      </Button>
+                    )}
                   </>
                 )}
               </div>
@@ -635,6 +657,20 @@ export function Sidebar({ className }: SidebarProps) {
                 >
                   <Car className="mr-3 h-5 w-5" />
                   Modelos de Veículos
+                </Button>
+              )}
+              
+              {isFinancial && (
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start text-white hover:bg-gray-700",
+                    location === "/admin/boletos" ? "bg-gray-700" : "bg-transparent"
+                  )}
+                  onClick={() => handleNavigate("/admin/boletos")}
+                >
+                  <Receipt className="mr-3 h-5 w-5" />
+                  Módulo Financeiro
                 </Button>
               )}
             </>

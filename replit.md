@@ -44,6 +44,15 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 13/06/2025 - Módulo Financeiro Implementado
+- ✅ Criado sistema completo de gestão de boletos brasileiros
+- ✅ Interface administrativa em `/admin/boletos` com CRUD completo
+- ✅ Formulário de criação/edição com upload de arquivos (boleto e NF)
+- ✅ Validação e formatação de dados financeiros brasileiros
+- ✅ Papel de usuário "financial" adicionado com permissões específicas
+- ✅ Navegação na sidebar para usuários admin e financial
+- ✅ Integração com sistema de uploads externos
+
 ### 13/06/2025 - Configuração de Uploads Externos
 - ✅ Implementado sistema de detecção automática de diretório de uploads
 - ✅ Configuração de subpastas organizadas para veículos e transportadores
