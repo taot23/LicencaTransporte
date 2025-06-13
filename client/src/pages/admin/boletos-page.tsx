@@ -192,7 +192,7 @@ export default function BoletosPage() {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={exportToCSV}
+                  onClick={handleExportCSV}
                   className="flex items-center gap-2"
                 >
                   <Download className="w-4 h-4" />

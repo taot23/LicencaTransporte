@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { 
   Loader2, Search, FileText, CheckCircle, XCircle, File, Clock, 
   MapPin, X, UploadCloud, Pencil, AlertCircle, Eye, EyeOff, Trash2,
-  RefreshCw
+  RefreshCw, Download
 } from "lucide-react";
 import {
   AlertDialog,
@@ -732,6 +732,62 @@ export default function AdminLicensesPage() {
     }
   };
 
+  const handleExportCSV = () => {
+    if (!filteredLicenses || filteredLicenses.length === 0) {
+      toast({
+        title: "Nenhum dado para exportar",
+        description: "Não há licenças para exportar",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { exportToCSV, formatDateForCSV, formatStatusForCSV } = require("@/lib/csv-export");
+      
+      const headers = [
+        "ID",
+        "Número do Pedido",
+        "Tipo de Licença",
+        "Placa Principal",
+        "Status",
+        "Estados",
+        "Transportador",
+        "Data de Criação",
+        "Última Atualização"
+      ];
+
+      const formattedData = filteredLicenses.map(license => ({
+        id: license.id,
+        "número do pedido": license.requestNumber,
+        "tipo de licença": getLicenseTypeLabel(license.type),
+        "placa principal": license.mainVehiclePlate,
+        status: formatStatusForCSV(license.status),
+        estados: license.states.join(", "),
+        transportador: `ID: ${license.transporterId}`,
+        "data de criação": formatDateForCSV(license.createdAt),
+        "última atualização": formatDateForCSV(license.updatedAt)
+      }));
+
+      exportToCSV({
+        filename: "licencas",
+        headers,
+        data: formattedData
+      });
+
+      toast({
+        title: "Exportação concluída",
+        description: `${filteredLicenses.length} licenças exportadas com sucesso`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro na exportação",
+        description: "Ocorreu um erro ao exportar os dados",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Opções de status para o select com descrições detalhadas
   const statusOptions = [
     { value: "pending_registration", label: "Pedido em Cadastramento", description: "Status inicial do pedido" },
@@ -750,26 +806,39 @@ export default function AdminLicensesPage() {
           <div className="flex flex-col">
             <div className="flex items-center gap-3">
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight leading-tight">Licenças</h1>
-              <Button
-                variant="outline"
-                size="sm"
-                className={`h-9 bg-white ${isConnected ? 'border-green-200' : 'border-gray-200'}`}
-                onClick={handleRefresh}
-                disabled={isRefreshing || isLoading}
-                title={`Atualizar lista de licenças ${isConnected ? '(Tempo real ativo)' : '(Offline)'}`}
-              >
-                <div className="flex items-center">
-                  {isRefreshing ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                  )}
-                  {isConnected && (
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-1" title="Conectado em tempo real" />
-                  )}
-                </div>
-                {isRefreshing ? 'Atualizando...' : 'Atualizar'}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 bg-white"
+                  onClick={handleExportCSV}
+                  disabled={isLoading}
+                  title="Exportar dados das licenças"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Exportar
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`h-9 bg-white ${isConnected ? 'border-green-200' : 'border-gray-200'}`}
+                  onClick={handleRefresh}
+                  disabled={isRefreshing || isLoading}
+                  title={`Atualizar lista de licenças ${isConnected ? '(Tempo real ativo)' : '(Offline)'}`}
+                >
+                  <div className="flex items-center">
+                    {isRefreshing ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                    )}
+                    {isConnected && (
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-1" title="Conectado em tempo real" />
+                    )}
+                  </div>
+                  {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+                </Button>
+              </div>
             </div>
             <p className="text-sm md:text-base text-muted-foreground mt-1">
               Gerencie todas as licenças no sistema.

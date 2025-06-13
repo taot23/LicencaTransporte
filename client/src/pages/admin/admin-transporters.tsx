@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Plus, MoreVertical, Edit, Trash, Link as LinkIcon, UserCircle2 } from "lucide-react";
+import { Plus, MoreVertical, Edit, Trash, Link as LinkIcon, UserCircle2, Download } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SkeletonTable } from "@/components/ui/skeleton-table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -223,14 +223,25 @@ export default function AdminTransporters() {
       <div className="container mx-auto py-6 max-w-6xl">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Cadastro Transportador</h1>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm">
-                <Plus size={16} className="mr-2" />
-                Novo
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCSV}
+              disabled={isLoading}
+              title="Exportar dados dos transportadores"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Exportar
+            </Button>
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm">
+                  <Plus size={16} className="mr-2" />
+                  Novo
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Novo Transportador</DialogTitle>
               </DialogHeader>
