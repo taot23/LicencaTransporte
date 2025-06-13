@@ -339,6 +339,25 @@ export default function BoletosPage() {
     return new Date(dataVencimento) < new Date();
   };
 
+  const handleDownloadFile = (url: string, fileName: string) => {
+    if (!url) {
+      toast({
+        title: "Erro",
+        description: "Arquivo não encontrado",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleExportCSV = () => {
     if (!boletos || boletos.length === 0) {
       toast({
@@ -437,6 +456,49 @@ export default function BoletosPage() {
         </div>
       </div>
 
+      {/* Filtros */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="h-5 w-5" />
+            Filtros
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="filtro-status">Status</Label>
+              <Select value={filtroStatus} onValueChange={setFiltroStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="aguardando_pagamento">Aguardando Pagamento</SelectItem>
+                  <SelectItem value="pago">Pago</SelectItem>
+                  <SelectItem value="vencido">Vencido</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="filtro-vencimento">Vencimento</Label>
+              <Select value={filtroVencimento} onValueChange={setFiltroVencimento}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione período" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="vencidos">Vencidos</SelectItem>
+                  <SelectItem value="vencendo">Vencendo (7 dias)</SelectItem>
+                  <SelectItem value="futuros">Futuros</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {boletos.length === 0 ? (
         <Card>
           <CardContent className="py-8">
@@ -503,19 +565,24 @@ export default function BoletosPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => window.open(boleto.uploadBoletoUrl, "_blank")}
+                            onClick={() => handleDownloadFile(boleto.uploadBoletoUrl!, `boleto-${boleto.numeroBoleto}.pdf`)}
+                            title="Baixar boleto"
                           >
-                            <Download className="h-3 w-3" />
+                            <Receipt className="h-3 w-3" />
                           </Button>
                         )}
                         {boleto.uploadNfUrl && (
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => window.open(boleto.uploadNfUrl, "_blank")}
+                            onClick={() => handleDownloadFile(boleto.uploadNfUrl!, `nf-${boleto.numeroBoleto}.pdf`)}
+                            title="Baixar nota fiscal"
                           >
                             <FileText className="h-3 w-3" />
                           </Button>
+                        )}
+                        {!boleto.uploadBoletoUrl && !boleto.uploadNfUrl && (
+                          <span className="text-sm text-gray-500">Sem arquivos</span>
                         )}
                       </div>
                     </TableCell>
