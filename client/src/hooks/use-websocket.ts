@@ -92,21 +92,21 @@ export function useWebSocket() {
     }
   }, []);
 
-  // Limpeza periódica de cache para garantir dados atualizados
+  // Limpeza otimizada de cache para melhor performance
   useEffect(() => {
     const cacheCleanupInterval = setInterval(() => {
       console.log('🧹 Limpeza automática de cache executada');
       
-      // Limpar queries antigas (mais de 5 minutos)
+      // Limpar apenas queries muito antigas (mais de 15 minutos) para manter performance
       queryClient.getQueryCache().getAll().forEach(query => {
         const dataUpdatedAt = query.state.dataUpdatedAt;
-        const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+        const fifteenMinutesAgo = Date.now() - 15 * 60 * 1000;
         
-        if (dataUpdatedAt && dataUpdatedAt < fiveMinutesAgo) {
+        if (dataUpdatedAt && dataUpdatedAt < fifteenMinutesAgo) {
           queryClient.removeQueries({ queryKey: query.queryKey });
         }
       });
-    }, 10 * 60 * 1000); // A cada 10 minutos
+    }, 15 * 60 * 1000); // A cada 15 minutos para reduzir overhead
 
     return () => clearInterval(cacheCleanupInterval);
   }, []);

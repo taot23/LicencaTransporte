@@ -111,13 +111,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
+      // Limpa o cache imediatamente para logout instantâneo
+      queryClient.setQueryData(["/api/user"], null);
+      queryClient.clear(); // Remove todos os dados em cache
+      
+      // Faz a requisição de logout em background
+      try {
+        await fetch("/api/logout", {
+          method: "POST",
+          credentials: "include"
+        });
+      } catch (error) {
+        // Silencia erros de logout - usuário já foi deslogado localmente
+        console.warn("Erro no logout do servidor:", error);
+      }
     },
     onSuccess: () => {
-      queryClient.setQueryData(["/api/user"], null);
       toast({
-        title: "Logout realizado com sucesso",
-        description: "Você foi desconectado com segurança.",
+        title: "Logout realizado",
+        description: "Você foi desconectado.",
       });
     },
     onError: (error: Error) => {

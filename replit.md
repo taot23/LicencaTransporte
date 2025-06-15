@@ -44,6 +44,12 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 15/06/2025 - Refinamentos do Sidebar e Navegação
+- ✅ Removido menu "Minhas Empresas" do sidebar conforme solicitação
+- ✅ Ajustado menu "Modelos de Veículos" para seguir padrão das páginas administrativas
+- ✅ Permissões de "Modelos de Veículos" expandidas para admin e operational
+- ✅ Melhorias na organização e consistência da navegação
+
 ### 13/06/2025 - Melhorias de Interface e UX
 - ✅ Header fixo implementado com informações do usuário no canto superior direito
 - ✅ Sistema de exclusão atualizado para usar AlertDialog nativo ao invés de confirm()

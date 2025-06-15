@@ -107,17 +107,30 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
-      // Melhoria de performance: mantemos os dados em cache por 5 minutos
-      staleTime: 5 * 60 * 1000, // 5 minutos
-      // Melhoria de UX: recarregamos dados quando o usuário volta à janela
-      refetchOnWindowFocus: true,
-      // Tentamos mais uma vez para tolerância a falhas temporárias
-      retry: 1,
-      // Mostrar dados imediatamente, mesmo que desatualizados (sensação de UI mais rápida)
-      refetchOnMount: true,
+      // Performance otimizada: cache por 2 minutos para dados dinâmicos
+      staleTime: 2 * 60 * 1000, // 2 minutos
+      // Cache mais longo para reduzir requisições desnecessárias
+      gcTime: 10 * 60 * 1000, // 10 minutos (antigo cacheTime)
+      // Desabilita refetch automático para melhor performance
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      // Retry mais agressivo mas rápido
+      retry: (failureCount, error: any) => {
+        // Não retry em erros de autenticação
+        if (error?.message?.includes('401') || error?.message?.includes('Não autenticado')) {
+          return false;
+        }
+        return failureCount < 2;
+      },
+      retryDelay: 500, // Delay menor entre tentativas
+      // Prefere dados em cache para navegação mais rápida
+      refetchOnMount: false,
+      // Network timeout menor para evitar delays
+      networkMode: 'online',
     },
     mutations: {
-      retry: 1, // Uma tentativa adicional para mutações também
+      retry: 1,
+      networkMode: 'online',
     },
   },
 });
