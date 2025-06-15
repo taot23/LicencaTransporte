@@ -50,6 +50,16 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ Permissões de "Modelos de Veículos" expandidas para admin e operational
 - ✅ Melhorias na organização e consistência da navegação
 
+### 15/06/2025 - Otimizações de Performance e Logout
+- ✅ Eliminado delay no logout - agora instantâneo com limpeza imediata de cache
+- ✅ Otimizado QueryClient para melhor performance de navegação
+- ✅ Reduzido staleTime para 2 minutos e desabilitado refetch automático
+- ✅ Implementado retry inteligente que evita loops em erros de autenticação
+- ✅ Otimizado WebSocket para reduzir reconexões desnecessárias
+- ✅ Removido delay artificial de carregamento entre páginas
+- ✅ Melhorado gerenciamento de cache com limpeza a cada 15 minutos
+- ✅ Logout instantâneo com fetch em background para melhor UX
+
 ### 13/06/2025 - Melhorias de Interface e UX
 - ✅ Header fixo implementado com informações do usuário no canto superior direito
 - ✅ Sistema de exclusão atualizado para usar AlertDialog nativo ao invés de confirm()

@@ -53,14 +53,20 @@ export function Sidebar({ className }: SidebarProps) {
     .toUpperCase();
 
   const handleLogout = () => {
+    // Previne múltiplos cliques durante logout
+    if (logoutMutation.isPending) return;
+    
     logoutMutation.mutate();
   };
 
   const handleNavigate = (path: string) => {
+    // Navegação otimizada - fecha modal primeiro para feedback visual instantâneo
+    setOpen(false);
+    
+    // Navegação apenas se for caminho diferente
     if (location !== path) {
       setLocation(path);
     }
-    setOpen(false);
   };
 
   const NavItems = () => (

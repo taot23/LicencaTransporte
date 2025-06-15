@@ -20,20 +20,13 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [pageKey, setPageKey] = useState(`${location}-${contentKey || ''}`);
   
-  // Efeito para controlar o estado de carregamento entre navegações
+  // Otimização de navegação - remove delay artificial
   useEffect(() => {
     const newPageKey = `${location}-${contentKey || ''}`;
     
     if (newPageKey !== pageKey) {
-      setIsLoading(true);
-      
-      // Simula um carregamento rápido para dar feedback visual
-      const timer = setTimeout(() => {
-        setPageKey(newPageKey);
-        setIsLoading(false);
-      }, 200); // Tempo curto para não atrapalhar a experiência
-      
-      return () => clearTimeout(timer);
+      setPageKey(newPageKey);
+      setIsLoading(false); // Remove delays de carregamento
     }
   }, [location, contentKey, pageKey]);
 
@@ -41,10 +34,16 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
     if (isLoggingOut) return; // Previne múltiplos cliques
     
     setIsLoggingOut(true);
-    // Redirecionar imediatamente para melhor UX
-    window.location.href = "/auth";
     
-    // Fazer logout em background
+    // Limpar cache imediatamente para logout instantâneo
+    const { queryClient } = await import("@/lib/queryClient");
+    queryClient.setQueryData(["/api/user"], null);
+    queryClient.clear();
+    
+    // Redirecionar imediatamente 
+    navigate("/auth");
+    
+    // Fazer logout no servidor em background
     try {
       fetch("/api/logout", { 
         method: "POST",

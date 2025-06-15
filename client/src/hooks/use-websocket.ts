@@ -128,11 +128,7 @@ export function useWebSocket() {
         setIsConnected(true);
         reconnectAttempts.current = 0;
         
-        // Ao reconectar, invalidar cache para garantir dados atualizados
-        if (reconnectAttempts.current > 0) {
-          console.log('Reconectado - invalidando cache para atualizar dados');
-          queryClient.invalidateQueries();
-        }
+        // Não invalidar automaticamente no reconect para melhor performance
       };
       
       socket.onclose = () => {
