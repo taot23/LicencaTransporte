@@ -68,7 +68,10 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **CORREÇÃO CRÍTICA**: Rota duplicada `/api/staff/check-operational` removida
 - ✅ **ACESSO MANAGER RESOLVIDO**: Todas verificações de permissão incluem role 'manager'
 - ✅ **AUTENTICAÇÃO HÍBRIDA**: Sistema suporta bcrypt e scrypt para compatibilidade
-- ✅ **CREDENCIAIS FUNCIONAIS**: gerente@sistema.com / 123456 operacional
+- ✅ **CREDENCIAIS FUNCIONAIS**: gerente@sistema.com / 123456 (role: manager)
+- ✅ **USUÁRIO OPERACIONAL CORRIGIDO**: operacional01@sistema.com / 123456 (role: operational)
+- ✅ **MENUS ADMINISTRATIVOS**: Role 'operational' incluído em todas as verificações do sidebar
+- ✅ **ACESSO COMPLETO**: Usuários operacionais veem "Gerenciar Licenças" e "Transportadores"
 
 ### 16/06/2025 - Filtros Inteligentes e Exportações CSV Padronizadas
 - ✅ Filtro inteligente implementado na página de licenças administrativas (/admin/licenses)
