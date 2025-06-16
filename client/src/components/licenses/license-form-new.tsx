@@ -55,6 +55,8 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import { VehicleTypeImage } from "@/components/ui/vehicle-type-image";
+import { useLicenseValidation, type LicenseConflict } from "@/hooks/use-license-validation";
+import { LicenseConflictModal } from "./license-conflict-modal";
 
 // Tipos de carga por categoria
 const NON_FLATBED_CARGO_TYPES = [
@@ -113,6 +115,11 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
   const [licenseType, setLicenseType] = useState<string>(draft?.type || "");
   const [cargoType, setCargoType] = useState<string>("");
   const [showVehicleDialog, setShowVehicleDialog] = useState(false);
+  const [showConflictModal, setShowConflictModal] = useState(false);
+  const [licenseConflicts, setLicenseConflicts] = useState<LicenseConflict[]>([]);
+  
+  // Hook para validação de licenças
+  const { checkExistingLicenses, isChecking } = useLicenseValidation();
 
   // Fetch vehicles for the dropdown selectors
   const { data: vehicles, isLoading: isLoadingVehicles } = useQuery<Vehicle[]>({

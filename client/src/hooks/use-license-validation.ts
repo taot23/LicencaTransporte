@@ -25,10 +25,19 @@ interface CheckExistingLicensesRequest {
 export function useLicenseValidation() {
   const checkExistingLicensesMutation = useMutation({
     mutationFn: async (data: CheckExistingLicensesRequest): Promise<CheckExistingLicensesResponse> => {
-      return await apiRequest("/api/licenses/check-existing", {
+      const response = await fetch("/api/licenses/check-existing", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
       });
+      
+      if (!response.ok) {
+        throw new Error("Erro ao verificar licenças existentes");
+      }
+      
+      return response.json();
     },
   });
 
