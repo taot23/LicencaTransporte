@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json, index, uniqueIndex, numeric } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, json, index, uniqueIndex, numeric, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -680,8 +680,8 @@ export const boletos = pgTable("boletos", {
   cpfCnpj: text("cpf_cnpj").notNull(), // CPF/CNPJ do transportador
   numeroBoleto: text("numero_boleto").notNull(), // Número do boleto
   valor: numeric("valor", { precision: 10, scale: 2 }).notNull(), // Valor com 2 decimais
-  dataEmissao: timestamp("data_emissao").notNull(), // Data de emissão
-  dataVencimento: timestamp("data_vencimento").notNull(), // Data de vencimento
+  dataEmissao: date("data_emissao").notNull(), // Data de emissão
+  dataVencimento: date("data_vencimento").notNull(), // Data de vencimento
   status: text("status").notNull().default("aguardando_pagamento"), // Status do boleto
   uploadBoletoUrl: text("upload_boleto_url"), // URL do arquivo do boleto
   uploadNfUrl: text("upload_nf_url"), // URL do arquivo da nota fiscal
