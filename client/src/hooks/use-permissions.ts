@@ -26,8 +26,14 @@ export function usePermissions() {
   };
 
   const canAccess = (module: keyof ModulePermissions): boolean => {
-    if (!user) return false;
-    return canAccessModule(getUserRole(), module);
+    if (!user) {
+      console.log(`[PERMISSIONS] Usuário não autenticado - negando acesso ao módulo ${module}`);
+      return false;
+    }
+    const userRole = getUserRole();
+    const hasAccess = canAccessModule(userRole, module);
+    console.log(`[PERMISSIONS] Usuário ${user.email} (${userRole}) tentando acessar ${module}: ${hasAccess}`);
+    return hasAccess;
   };
 
   const canCreate = (module: keyof ModulePermissions): boolean => {
