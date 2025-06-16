@@ -174,17 +174,19 @@ export function setupAuth(app: Express) {
     res.json(userWithoutPassword);
   });
   
-  // Admin check endpoint
+  // Admin check endpoint - usando sistema de permissões granular
   app.get("/api/admin/check", (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Não autenticado" });
     }
     
     const user = req.user as SelectUser;
-    if (!user.isAdmin) {
+    // Permite acesso para qualquer perfil administrativo conforme matriz de permissões
+    const adminRoles = ['admin', 'manager', 'supervisor', 'operational', 'financial'];
+    if (!adminRoles.includes(user.role)) {
       return res.status(403).json({ message: "Acesso negado" });
     }
     
-    res.status(200).json({ message: "Acesso de administrador confirmado", isAdmin: true });
+    res.status(200).json({ message: "Acesso administrativo confirmado", isAdmin: true });
   });
 }

@@ -113,14 +113,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logoutMutation = useMutation({
     mutationFn: async () => {
       // Previne múltiplas execuções simultâneas
-      if (logoutMutation.isPending) return;
+      if (logoutInProgress.current) return;
+      logoutInProgress.current = true;
       
-      // Limpa o cache imediatamente para logout instantâneo
-      queryClient.setQueryData(["/api/user"], null);
-      queryClient.clear(); // Remove todos os dados em cache
-      
-      // Faz a requisição de logout em background
       try {
+        // Limpa o cache imediatamente para logout instantâneo
+        queryClient.setQueryData(["/api/user"], null);
+        queryClient.clear(); // Remove todos os dados em cache
+        
+        // Faz a requisição de logout em background
         await fetch("/api/logout", {
           method: "POST",
           credentials: "include"
@@ -128,6 +129,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         // Silencia erros de logout - usuário já foi deslogado localmente
         console.warn("Erro no logout do servidor:", error);
+      } finally {
+        // Reset da flag após um pequeno delay para evitar cliques duplos
+        setTimeout(() => {
+          logoutInProgress.current = false;
+        }, 1000);
       }
     },
     onSuccess: () => {
