@@ -52,6 +52,16 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ Filtros por vencimento funcionando adequadamente com datas válidas
 - ✅ Atualização em tempo real via WebSocket implementada na página "Meus Boletos"
 
+### 16/06/2025 - Padronização de Exportação CSV com Separador Ponto e Vírgula
+- ✅ Botão "Exportar CSV" implementado na página de licenças emitidas (/licencas-emitidas)
+- ✅ Biblioteca csv-export.ts padronizada para usar separador ";" em todo o sistema
+- ✅ Tradução completa para português brasileiro nos dados exportados
+- ✅ Tipos de veículo traduzidos: "bitrain_9_axles" → "Bitrem 9 Eixos"
+- ✅ Status traduzidos: "approved" → "Aprovado"
+- ✅ Formatação de datas em padrão brasileiro (DD/MM/AAAA)
+- ✅ Todas as páginas com exportação CSV agora usam separador ";" por padrão:
+  - Licenças emitidas, Boletos, Transportadores, Veículos, Licenças administrativas
+
 ### 16/06/2025 - Dashboard AET Administrativo Implementado
 - ✅ Dashboard AET centralizado criado conforme especificações técnicas
 - ✅ Cards de resumo diário: AETs solicitadas, emitidas, pendentes, vencidas hoje
