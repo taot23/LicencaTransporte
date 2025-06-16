@@ -33,7 +33,8 @@ import {
   DialogFooter,
   DialogClose
 } from "@/components/ui/dialog";
-import { FileDown, ExternalLink, AlertCircle, CheckCircle2, Clock, RefreshCcw } from "lucide-react";
+import { FileDown, ExternalLink, AlertCircle, CheckCircle2, Clock, RefreshCcw, Download } from "lucide-react";
+import { formatDateForCSV } from "@/lib/csv-export";
 import { Status, StatusBadge } from "@/components/licenses/status-badge";
 import { TransporterInfo } from "@/components/transporters/transporter-info";
 import { Badge } from "@/components/ui/badge";
@@ -410,6 +411,54 @@ export default function IssuedLicensesPage() {
     }
   };
 
+  // Função para exportar CSV das licenças emitidas
+  const handleExportCSV = () => {
+    const dataForExport = filteredLicenses.map(license => ({
+      "Nº Solicitação": license.requestNumber,
+      "Tipo de Veículo": license.type,
+      "Placa Principal": license.mainVehiclePlate,
+      "Estado": license.state,
+      "Status": license.status,
+      "Data de Emissão": license.emissionDate ? formatDateForCSV(license.emissionDate) : "",
+      "Data de Validade": license.validUntil ? formatDateForCSV(license.validUntil) : "",
+      "Número AET": license.aetNumber || ""
+    }));
+
+    // Criação do CSV com separador de ponto e vírgula
+    const headers = ["Nº Solicitação", "Tipo de Veículo", "Placa Principal", "Estado", "Status", "Data de Emissão", "Data de Validade", "Número AET"];
+    const csvData = dataForExport.map(item => {
+      return headers.map(header => {
+        const value = item[header as keyof typeof item] || '';
+        // Escapa aspas duplas e adiciona aspas ao redor do valor
+        const stringValue = String(value).replace(/"/g, '""');
+        return `"${stringValue}"`;
+      }).join(';');
+    });
+
+    const csvContent = [
+      headers.map(h => `"${h}"`).join(';'),
+      ...csvData
+    ].join('\n');
+
+    // Cria e baixa o arquivo
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `licencas-emitidas-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Exportação concluída",
+      description: `${dataForExport.length} licenças exportadas para CSV`,
+    });
+  };
+
   return (
     <MainLayout>
       <div className="mb-6 flex justify-between items-center">
@@ -417,25 +466,37 @@ export default function IssuedLicensesPage() {
           <h1 className="text-2xl font-bold text-gray-800">Licenças Emitidas</h1>
           <p className="text-gray-600 mt-1">Histórico de todas as licenças liberadas</p>
         </div>
-        <Button 
-          onClick={handleRefresh} 
-          variant="outline" 
-          className={`flex items-center gap-1 bg-white ${isConnected ? 'border-green-200' : 'border-gray-200'}`}
-          title={`Atualizar lista de licenças ${isConnected ? '(Tempo real ativo)' : '(Offline)'}`}
-          disabled={isRefreshing || isLoading}
-        >
-          <div className="flex items-center">
-            {isRefreshing ? (
-              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-1" />
-            )}
-            {isConnected && (
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-1" title="Conectado em tempo real" />
-            )}
-          </div>
-          {isRefreshing ? 'Atualizando...' : 'Atualizar'}
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleExportCSV}
+            variant="outline" 
+            className="flex items-center gap-1 bg-white border-gray-200"
+            title="Exportar licenças para CSV"
+            disabled={isLoading || filteredLicenses.length === 0}
+          >
+            <Download className="h-4 w-4" />
+            Exportar CSV
+          </Button>
+          <Button 
+            onClick={handleRefresh} 
+            variant="outline" 
+            className={`flex items-center gap-1 bg-white ${isConnected ? 'border-green-200' : 'border-gray-200'}`}
+            title={`Atualizar lista de licenças ${isConnected ? '(Tempo real ativo)' : '(Offline)'}`}
+            disabled={isRefreshing || isLoading}
+          >
+            <div className="flex items-center">
+              {isRefreshing ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-1" />
+              )}
+              {isConnected && (
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-1" title="Conectado em tempo real" />
+              )}
+            </div>
+            {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+          </Button>
+        </div>
       </div>
 
       <div className="bg-white p-4 rounded-lg shadow mb-6">
