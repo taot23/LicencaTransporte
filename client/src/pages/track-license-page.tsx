@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { TransporterInfo } from "@/components/transporters/transporter-info";
 import { SortableHeader } from "@/components/ui/sortable-header";
 import { LicenseDetailsCard } from "@/components/licenses/license-details-card";
+import { exportToCSV, formatDateForCSV } from "@/lib/csv-export";
 
 export default function TrackLicensePage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -275,6 +276,78 @@ export default function TrackLicensePage() {
     setSelectedLicense(license);
   };
 
+  // Função para traduzir tipos de veículos
+  const translateVehicleType = (type: string): string => {
+    const typeMap: { [key: string]: string } = {
+      'truck': 'Caminhão',
+      'bitruck': 'Bitruck',
+      'tractor': 'Cavalo Mecânico',
+      'bitrain_9_axles': 'Bitrem 9 Eixos',
+      'road_train': 'Rodotrem',
+      'simple_trailer': 'Reboque Simples',
+      'semi_trailer': 'Semirreboque',
+      'dolly': 'Dolly',
+      'platform': 'Prancha'
+    };
+    return typeMap[type] || type;
+  };
+
+  // Função para traduzir status
+  const translateStatus = (status: string): string => {
+    const statusMap: { [key: string]: string } = {
+      'pending_registration': 'Pedido em Cadastramento',
+      'registration_in_progress': 'Cadastro em Andamento',
+      'rejected': 'Reprovado',
+      'under_review': 'Análise do Órgão',
+      'pending_approval': 'Pendente Liberação',
+      'approved': 'Liberada',
+      'canceled': 'Cancelado'
+    };
+    return statusMap[status] || status;
+  };
+
+  // Função para exportar CSV
+  const handleExportCSV = () => {
+    try {
+      const headers = [
+        "Nº Solicitação",
+        "Tipo de Veículo",
+        "Placa Principal",
+        "Estado",
+        "Status",
+        "Data de Solicitação",
+        "Última Atualização"
+      ];
+
+      const dataForExport = sortedLicenses.map(license => ({
+        "Nº Solicitação": license.requestNumber || '',
+        "Tipo de Veículo": translateVehicleType(license.type) || '',
+        "Placa Principal": license.mainVehiclePlate || '',
+        "Estado": license.specificState || (license.states?.join(', ')) || '',
+        "Status": translateStatus(license.specificStateStatus || license.status) || '',
+        "Data de Solicitação": formatDateForCSV(license.createdAt),
+        "Última Atualização": formatDateForCSV(license.updatedAt)
+      }));
+
+      exportToCSV({
+        filename: "acompanhar-licencas",
+        headers,
+        data: dataForExport
+      });
+
+      toast({
+        title: "Exportação concluída",
+        description: `${dataForExport.length} licenças exportadas para CSV`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro na exportação",
+        description: "Ocorreu um erro ao exportar os dados",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <MainLayout>
       <div className="mb-6 flex justify-between items-center">
@@ -282,15 +355,27 @@ export default function TrackLicensePage() {
           <h1 className="text-2xl font-bold text-gray-800">Acompanhar Licença</h1>
           <p className="text-gray-600 mt-1">Acompanhe o status de todas as suas licenças solicitadas</p>
         </div>
-        <Button 
-          onClick={handleRefresh} 
-          variant="outline" 
-          className="flex items-center gap-1 bg-white"
-          title="Atualizar lista de licenças"
-        >
-          <RefreshCw className="h-4 w-4 mr-1" />
-          Atualizar
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleExportCSV}
+            variant="outline" 
+            className="flex items-center gap-1 bg-white border-gray-200"
+            title="Exportar licenças para CSV"
+            disabled={isLoading || sortedLicenses.length === 0}
+          >
+            <Download className="h-4 w-4" />
+            Exportar CSV
+          </Button>
+          <Button 
+            onClick={handleRefresh} 
+            variant="outline" 
+            className="flex items-center gap-1 bg-white"
+            title="Atualizar lista de licenças"
+          >
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Atualizar
+          </Button>
+        </div>
       </div>
 
       <div className="bg-white p-4 rounded-lg shadow mb-6">
