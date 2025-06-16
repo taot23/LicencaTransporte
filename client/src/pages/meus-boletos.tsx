@@ -146,8 +146,8 @@ export default function MeusBoletos() {
         `"${boleto.nomeTransportador}"`,
         boleto.cpfCnpj,
         boleto.valor,
-        boleto.dataEmissao ? formatDate(boleto.dataEmissao) : "-",
-        boleto.dataVencimento ? formatDate(boleto.dataVencimento) : "-",
+        boleto.dataEmissao ? formatDate(new Date(boleto.dataEmissao)) : "-",
+        boleto.dataVencimento ? formatDate(new Date(boleto.dataVencimento)) : "-",
         getStatusLabel(boleto.status)
       ].join(','))
     ].join('\n');
@@ -383,11 +383,11 @@ export default function MeusBoletos() {
                       <TableCell>{boleto.cpfCnpj}</TableCell>
                       <TableCell>{formatCurrency(parseFloat(boleto.valor.toString()))}</TableCell>
                       <TableCell>
-                        {boleto.dataEmissao ? formatDate(boleto.dataEmissao) : "-"}
+                        {boleto.dataEmissao ? formatDate(new Date(boleto.dataEmissao)) : "-"}
                       </TableCell>
                       <TableCell>
                         <div className={isVencido(boleto.dataVencimento) ? "text-red-600" : ""}>
-                          {boleto.dataVencimento ? formatDate(boleto.dataVencimento) : "-"}
+                          {boleto.dataVencimento ? formatDate(new Date(boleto.dataVencimento)) : "-"}
                         </div>
                       </TableCell>
                       <TableCell>

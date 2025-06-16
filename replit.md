@@ -44,6 +44,14 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 15/06/2025 - Correção Crítica: Exibição de Datas no Módulo Financeiro
+- ✅ Corrigido problema das datas de emissão e vencimento não aparecendo nas tabelas
+- ✅ Implementada conversão adequada de datas usando `new Date()` no frontend
+- ✅ Corrigidas ambas páginas: "Meus Boletos" (/meus-boletos) e Admin (/admin/boletos)
+- ✅ Exportação CSV agora exibe datas corretamente formatadas
+- ✅ Filtros por vencimento funcionando adequadamente com datas válidas
+- ✅ Atualização em tempo real via WebSocket implementada na página "Meus Boletos"
+
 ### 15/06/2025 - Refinamentos do Sidebar e Navegação
 - ✅ Removido menu "Minhas Empresas" do sidebar conforme solicitação
 - ✅ Ajustado menu "Modelos de Veículos" para seguir padrão das páginas administrativas
