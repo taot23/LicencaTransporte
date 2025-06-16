@@ -3946,12 +3946,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // Criar novo boleto (apenas admin e financial)
-  app.post("/api/boletos", requireAuth, async (req, res) => {
-    const user = req.user!;
-    
-    if (!canAccessFinancial(user)) {
-      return res.status(403).json({ message: "Acesso negado" });
-    }
+  app.post("/api/boletos", requireAuth, requirePermission('financial', 'create'), async (req, res) => {
 
     try {
       // Os uploads já foram feitos separadamente via /api/upload/boleto
@@ -3974,12 +3969,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // Atualizar boleto (apenas admin e financial)
-  app.put("/api/boletos/:id", requireAuth, async (req, res) => {
-    const user = req.user!;
-    
-    if (!canAccessFinancial(user)) {
-      return res.status(403).json({ message: "Acesso negado" });
-    }
+  app.put("/api/boletos/:id", requireAuth, requirePermission('financial', 'edit'), async (req, res) => {
 
     try {
       const id = parseInt(req.params.id);
@@ -4000,13 +3990,8 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     }
   });
 
-  // Deletar boleto (apenas admin e financial)
-  app.delete("/api/boletos/:id", requireAuth, async (req, res) => {
-    const user = req.user!;
-    
-    if (!canAccessFinancial(user)) {
-      return res.status(403).json({ message: "Acesso negado" });
-    }
+  // Deletar boleto (apenas admin e financial com DELETE específico)
+  app.delete("/api/boletos/:id", requireAuth, requirePermission('financial', 'delete'), async (req, res) => {
 
     try {
       const id = parseInt(req.params.id);
