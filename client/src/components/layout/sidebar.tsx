@@ -166,15 +166,8 @@ export function Sidebar({ className }: SidebarProps) {
           </Button>
         )}
         
-        {/* DEBUG: Role atual */}
-        {user && (
-          <div className="text-xs text-gray-400 p-2">
-            DEBUG: Role = {user.role}
-          </div>
-        )}
-        
         {/* Seção de Funcionalidades Administrativas */}
-        {(user?.role === 'admin' || user?.role === 'manager' || user?.role === 'supervisor' || user?.role === 'financial') && (
+        {user && ['admin', 'manager', 'supervisor', 'financial'].includes(user.role) && (
           <>
             <div className="pt-2 pb-2">
               <Separator className="bg-gray-700" />
@@ -197,7 +190,7 @@ export function Sidebar({ className }: SidebarProps) {
             )}
             
             {/* Gerenciar Licenças - conforme permissões de gerenciamento */}
-            {(user?.role === 'admin' || user?.role === 'manager' || user?.role === 'supervisor' || user?.role === 'financial') && (
+            {user && ['admin', 'manager', 'supervisor', 'financial'].includes(user.role) && (
               <Button
                 variant="ghost"
                 className={cn(
@@ -212,7 +205,7 @@ export function Sidebar({ className }: SidebarProps) {
             )}
             
             {/* Gerenciar Transportadores - conforme permissões */}
-            {(user?.role === 'admin' || user?.role === 'manager' || user?.role === 'supervisor' || user?.role === 'financial') && (
+            {user && ['admin', 'manager', 'supervisor', 'financial'].includes(user.role) && (
               <Button
                 variant="ghost"
                 className={cn(
