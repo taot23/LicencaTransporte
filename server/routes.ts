@@ -2758,7 +2758,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Rota para criação de usuários (transportadores)
   app.post('/api/admin/users', requireAuth, requirePermission('users', 'create'), async (req, res) => {
     try {
-      const { fullName, email, password, isAdmin, role = "user", phone = "" } = req.body;
+      const { fullName, email, password, role = "user", phone = "" } = req.body;
       
       // Verificar se já existe um usuário com este e-mail
       const existingUser = await storage.getUserByEmail(email);
@@ -2774,7 +2774,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
         phone,
         role: userRoleEnum.parse(role), // Garantir que o role seja válido
-        isAdmin: !!isAdmin
       });
       
       // Remover a senha do objeto retornado

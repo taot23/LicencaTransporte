@@ -147,7 +147,7 @@ export function getModulePermissions(userRole: UserRole, module: keyof ModulePer
 
 // Função para verificar se usuário é administrativo
 export function isAdministrativeRole(userRole: UserRole): boolean {
-  return ['supervisor', 'financial', 'manager', 'admin'].includes(userRole);
+  return ['operational', 'supervisor', 'financial', 'manager', 'admin'].includes(userRole);
 }
 
 // Função para verificar acesso ao dashboard administrativo
