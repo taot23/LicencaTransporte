@@ -3861,8 +3861,10 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       const hoje = new Date();
       const limiteRenovacao = new Date(hoje.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 dias no futuro
       
-      console.log("[VALIDAÇÃO] Data atual:", hoje);
-      console.log("[VALIDAÇÃO] Limite renovação (30 dias):", limiteRenovacao);
+      console.log("[VALIDAÇÃO] Data atual:", hoje.toISOString());
+      console.log("[VALIDAÇÃO] Limite renovação (30 dias):", limiteRenovacao.toISOString());
+      console.log("[VALIDAÇÃO] Placas para verificar:", placas);
+      console.log("[VALIDAÇÃO] Estados para verificar:", estados);
       
       // Buscar todas as licenças aprovadas vigentes
       const todasLicencas = await db
@@ -3883,28 +3885,30 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         
         // Buscar licenças que incluem este estado específico
         for (const licenca of todasLicencas) {
-          console.log(`[VALIDAÇÃO] Analisando licença ${licenca.id} - Estados: ${JSON.stringify(licenca.states)}`);
+          console.log(`[VALIDAÇÃO] Analisando licença ${licenca.id} - Estados: ${JSON.stringify(licenca.states)} - Placa principal: ${licenca.mainVehiclePlate}`);
           
           // Verificar se a licença inclui este estado específico
           if (!licenca.states || !licenca.states.includes(estado)) {
-            console.log(`[VALIDAÇÃO] Licença ${licenca.id} não inclui estado ${estado}`);
+            console.log(`[VALIDAÇÃO] Licença ${licenca.id} não inclui estado ${estado} - PULAR`);
             continue;
           }
           
-          console.log(`[VALIDAÇÃO] Licença ${licenca.id} inclui estado ${estado}`);
+          console.log(`[VALIDAÇÃO] ✓ Licença ${licenca.id} inclui estado ${estado}`);
           
           // Verificar se alguma placa da nova solicitação conflita
-          const placaConflitante = placas.find(placa => 
-            placa === licenca.mainVehiclePlate || 
-            (licenca.additionalPlates && licenca.additionalPlates.includes(placa))
-          );
+          const placaConflitante = placas.find(placa => {
+            const conflito = placa === licenca.mainVehiclePlate || 
+              (licenca.additionalPlates && licenca.additionalPlates.includes(placa));
+            console.log(`[VALIDAÇÃO] Comparando placa ${placa} com licença ${licenca.id}: placa principal=${licenca.mainVehiclePlate}, conflito=${conflito}`);
+            return conflito;
+          });
           
           if (!placaConflitante) {
-            console.log(`[VALIDAÇÃO] Licença ${licenca.id} não tem conflito de placas`);
+            console.log(`[VALIDAÇÃO] Licença ${licenca.id} não tem conflito de placas - PULAR`);
             continue;
           }
           
-          console.log(`[VALIDAÇÃO] CONFLITO DE PLACA DETECTADO! Licença ${licenca.id}, estado ${estado}, placa ${placaConflitante}`);
+          console.log(`[VALIDAÇÃO] ⚠️  CONFLITO DE PLACA DETECTADO! Licença ${licenca.id}, estado ${estado}, placa ${placaConflitante}`);
           
           // Verificar se há status aprovado para este estado específico
           let dataValidadeEstado = null;

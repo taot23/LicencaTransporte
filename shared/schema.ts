@@ -733,3 +733,34 @@ export const boletoStatusOptions = [
   { value: "pago", label: "Pago" },
   { value: "vencido", label: "Vencido" },
 ];
+
+// Nova tabela para licenças individuais por estado
+export const stateLicenses = pgTable("state_licenses", {
+  id: serial("id").primaryKey(),
+  licenseRequestId: integer("license_request_id").notNull().references(() => licenseRequests.id),
+  state: text("state").notNull(), // Estado específico (AL, MG, SP, etc.)
+  status: text("status").notNull().default("pending_registration"), // Status específico do estado
+  aetNumber: text("aet_number"), // Número AET específico do estado
+  issuedAt: timestamp("issued_at"), // Data de emissão específica do estado
+  validUntil: timestamp("valid_until"), // Data de validade específica do estado
+  comments: text("comments"), // Observações específicas do estado
+  selectedCnpj: text("selected_cnpj"), // CNPJ selecionado para este estado
+  licenseFileUrl: text("license_file_url"), // URL do arquivo de licença específico
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    licenseRequestIdIdx: index("idx_state_licenses_request_id").on(table.licenseRequestId),
+    stateIdx: index("idx_state_licenses_state").on(table.state),
+    statusIdx: index("idx_state_licenses_status").on(table.status),
+    validUntilIdx: index("idx_state_licenses_valid_until").on(table.validUntil),
+    // Índice único para evitar duplicatas de estado por licença
+    uniqueStatePerLicense: uniqueIndex("unique_state_per_license").on(table.licenseRequestId, table.state)
+  };
+});
+
+export const insertStateLicenseSchema = createInsertSchema(stateLicenses)
+  .omit({ id: true, createdAt: true, updatedAt: true });
+
+export type StateLicense = typeof stateLicenses.$inferSelect;
+export type InsertStateLicense = z.infer<typeof insertStateLicenseSchema>;
