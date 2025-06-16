@@ -146,6 +146,7 @@ export default function AdminLicensesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [transporterFilter, setTransporterFilter] = useState("all");
+  const [transporterSearchTerm, setTransporterSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [selectedLicense, setSelectedLicense] = useState<LicenseRequest | null>(null);
   const [licenseDetailsOpen, setLicenseDetailsOpen] = useState(false);
@@ -468,7 +469,7 @@ export default function AdminLicensesPage() {
   // Filtrar licenças com critérios múltiplos
   const filteredLicenses = licenses
     .filter(license => {
-      // Filtro de busca (número do pedido, placa ou transportador)
+      // Filtro de busca (número do pedido, placa)
       const matchesSearch = !searchTerm || 
         license.requestNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         license.mainVehiclePlate?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -476,10 +477,22 @@ export default function AdminLicensesPage() {
       // Filtro de status
       const matchesStatus = !statusFilter || statusFilter === "all" || license.status === statusFilter;
       
-      // Filtro de transportador - corrigido para usar "all" como valor padrão
-      const matchesTransporter = !transporterFilter || transporterFilter === "all" || (
-        license.transporterId != null && license.transporterId.toString() === transporterFilter
-      );
+      // Filtro de transportador por busca de texto (nome, CNPJ, CPF)
+      let matchesTransporter = true;
+      if (transporterSearchTerm.trim()) {
+        const searchLower = transporterSearchTerm.toLowerCase().trim();
+        const transporter = transporters.find(t => t.id === license.transporterId);
+        
+        if (transporter) {
+          const nameMatch = Boolean(transporter.name?.toLowerCase().includes(searchLower));
+          const documentMatch = Boolean(transporter.documentNumber?.toLowerCase().includes(searchLower));
+          const tradeNameMatch = Boolean(transporter.tradeName?.toLowerCase().includes(searchLower));
+          
+          matchesTransporter = nameMatch || documentMatch || tradeNameMatch;
+        } else {
+          matchesTransporter = false;
+        }
+      }
       
       // Filtro de data
       let matchesDate = true;
@@ -922,20 +935,28 @@ export default function AdminLicensesPage() {
                 
                 <div className="md:col-span-3">
                   <div className="flex flex-col space-y-1">
-                    <Label htmlFor="transporter-filter" className="text-sm">Transportador</Label>
-                    <Select value={transporterFilter} onValueChange={setTransporterFilter}>
-                      <SelectTrigger id="transporter-filter" className="h-9 text-sm">
-                        <SelectValue placeholder="Todos os transportadores" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todos os transportadores</SelectItem>
-                        {transporters.map((transporter) => (
-                          <SelectItem key={transporter.id} value={transporter.id.toString()}>
-                            {transporter.name} - {transporter.documentNumber}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="transporter-search" className="text-sm">Transportador</Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="transporter-search"
+                        type="text"
+                        placeholder="Digite o nome, CNPJ ou CPF do transportador"
+                        value={transporterSearchTerm}
+                        onChange={(e) => setTransporterSearchTerm(e.target.value)}
+                        className="pl-10 h-9 text-sm"
+                      />
+                      {transporterSearchTerm && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setTransporterSearchTerm("")}
+                          className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0 hover:bg-gray-100"
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
