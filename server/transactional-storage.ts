@@ -1517,8 +1517,8 @@ export class TransactionalStorage implements IStorage {
       // Dados dos últimos 7 dias (contagem por estado)
       const licencasPorStatus7Dias = [];
       for (let i = 6; i >= 0; i--) {
-        const data = new Date();
-        data.setDate(data.getDate() - i);
+        const data = new Date(agora);
+        data.setDate(agora.getDate() - i);
         const dataStr = data.toISOString().split('T')[0];
         
         let estadosSolicitados = 0;
