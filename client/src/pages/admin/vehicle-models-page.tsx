@@ -4,6 +4,7 @@ import { Plus, Edit, Trash2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,8 @@ import { AdminLayout } from "@/components/layout/admin-layout";
 export default function VehicleModelsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingModel, setEditingModel] = useState<VehicleModel | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [modelToDelete, setModelToDelete] = useState<number | null>(null);
   const [brandFilter, setBrandFilter] = useState("");
   const [modelFilter, setModelFilter] = useState("");
   const { toast } = useToast();
@@ -103,8 +106,15 @@ export default function VehicleModelsPage() {
   };
 
   const handleDelete = (id: number) => {
-    if (confirm("Tem certeza que deseja excluir este modelo de veículo?")) {
-      deleteMutation.mutate(id);
+    setModelToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (modelToDelete) {
+      deleteMutation.mutate(modelToDelete);
+      setIsDeleteDialogOpen(false);
+      setModelToDelete(null);
     }
   };
 
@@ -314,6 +324,28 @@ export default function VehicleModelsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal de confirmação de exclusão */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este modelo de veículo? Esta ação não pode ser desfeita e todos os dados relacionados serão removidos permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       </div>
     </AdminLayout>
   );

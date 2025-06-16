@@ -44,6 +44,17 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 16/06/2025 - Sistema de Modais Customizados para Confirmações
+- ✅ Substituído todas as notificações `confirm()` nativas por modais customizados AlertDialog
+- ✅ Implementado na página de transportadores (/admin/transporters) com confirmação de exclusão
+- ✅ Implementado na página de usuários (/admin/users) com confirmação de exclusão
+- ✅ Implementado na página de modelos de veículos (/admin/vehicle-models) com confirmação de exclusão
+- ✅ Estados de controle adicionados: isDeleteDialogOpen, itemToDelete para cada página
+- ✅ Funções handleDeleteItem e handleConfirmDelete implementadas consistentemente
+- ✅ Interface melhorada: botões com estados de loading e cores de destaque para ações críticas
+- ✅ Modais responsivos com descrições claras sobre consequências das ações
+- ✅ Proteção contra múltiplas execuções durante processamento de exclusão
+
 ### 16/06/2025 - Sistema de Controle de Acesso Detalhado por Perfil de Usuário
 - ✅ Sistema de permissões granular implementado conforme matriz especificada
 - ✅ 5 perfis de usuário: Operacional, Supervisor, Financeiro, Gerente, Administrador

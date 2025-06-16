@@ -305,8 +305,15 @@ export default function AdminUsers() {
   };
 
   const handleDeleteUser = (userId: number) => {
-    if (confirm("Tem certeza que deseja excluir este usuário?")) {
-      deleteUserMutation.mutate(userId);
+    setUserToDelete(userId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (userToDelete) {
+      deleteUserMutation.mutate(userToDelete);
+      setIsDeleteDialogOpen(false);
+      setUserToDelete(null);
     }
   };
 
@@ -557,6 +564,28 @@ export default function AdminUsers() {
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Modal de confirmação de exclusão */}
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita e todos os dados relacionados serão removidos permanentemente.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmDelete}
+                className="bg-red-600 hover:bg-red-700"
+                disabled={deleteUserMutation.isPending}
+              >
+                {deleteUserMutation.isPending ? "Excluindo..." : "Excluir"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AdminLayout>
   );
