@@ -119,7 +119,7 @@ export default function RequestLicensePage() {
               draft={currentDraft}
               onComplete={handleFormComplete}
               onCancel={() => setShowForm(false)}
-              preSelectedTransporterId={preSelectedTransporterId}
+              preSelectedTransporterId={preSelectedTransporterId || undefined}
             />
           </div>
           

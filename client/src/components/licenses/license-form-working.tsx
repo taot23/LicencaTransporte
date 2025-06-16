@@ -320,7 +320,7 @@ export function LicenseFormWorking({ draft, preSelectedTransporterId, onComplete
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {transporters?.map((transporter: any) => (
+                  {transporters && Array.isArray(transporters) && transporters.map((transporter: any) => (
                     <SelectItem key={transporter.id} value={transporter.id.toString()}>
                       {transporter.name}
                     </SelectItem>
