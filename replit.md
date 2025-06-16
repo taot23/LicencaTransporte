@@ -55,6 +55,17 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ Modais responsivos com descrições claras sobre consequências das ações
 - ✅ Proteção contra múltiplas execuções durante processamento de exclusão
 
+### 16/06/2025 - Sistema de Validação Inteligente de Licenças Vigentes por Estado
+- ✅ Endpoint `/api/licenses/check-existing` implementado para verificação de licenças ativas
+- ✅ Validação automática considera licenças com mais de 30 dias até vencimento como bloqueadoras
+- ✅ Hook `useLicenseValidation` criado para comunicação frontend-backend
+- ✅ Modal `LicenseConflictModal` implementado com informações detalhadas de conflitos
+- ✅ Integração completa no formulário de licenças com validação em tempo real
+- ✅ Remoção automática de estados conflitantes da seleção do usuário
+- ✅ Notificações claras sobre regra dos 30 dias para renovação
+- ✅ Coleta automática de todas as placas do formulário (principal, adicionais, veículos)
+- ✅ Interface intuitiva com contagem de dias restantes e orientações
+
 ### 16/06/2025 - Sistema de Controle de Acesso Detalhado por Perfil de Usuário
 - ✅ Sistema de permissões granular implementado conforme matriz especificada
 - ✅ 5 perfis de usuário: Operacional, Supervisor, Financeiro, Gerente, Administrador

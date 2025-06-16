@@ -121,6 +121,50 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
   // Hook para validação de licenças
   const { checkExistingLicenses, isChecking } = useLicenseValidation();
 
+  // Função para validar licenças vigentes
+  const validateExistingLicenses = async (selectedStates: string[], selectedPlates: string[]) => {
+    if (selectedStates.length === 0 || selectedPlates.length === 0) {
+      return { hasConflicts: false, validStates: selectedStates };
+    }
+
+    try {
+      const result = await checkExistingLicenses({
+        placas: selectedPlates,
+        estados: selectedStates,
+      });
+
+      if (result.conflitos.length > 0) {
+        setLicenseConflicts(result.conflitos);
+        setShowConflictModal(true);
+        
+        // Remover estados com conflitos da seleção
+        const conflictStates = result.conflitos.map(c => c.estado);
+        const validStates = selectedStates.filter(state => !conflictStates.includes(state));
+        
+        // Atualizar o formulário removendo estados conflitantes
+        form.setValue("states", validStates);
+        
+        toast({
+          title: "Licenças vigentes detectadas",
+          description: `${conflictStates.length} estado(s) removido(s) por ter licenças ativas`,
+          variant: "destructive",
+        });
+        
+        return { hasConflicts: true, validStates };
+      }
+      
+      return { hasConflicts: false, validStates: selectedStates };
+    } catch (error) {
+      console.error("Erro ao validar licenças:", error);
+      toast({
+        title: "Erro na validação",
+        description: "Não foi possível verificar licenças existentes. Prosseguindo com a solicitação.",
+        variant: "destructive",
+      });
+      return { hasConflicts: false, validStates: selectedStates };
+    }
+  };
+
   // Fetch vehicles for the dropdown selectors
   const { data: vehicles, isLoading: isLoadingVehicles } = useQuery<Vehicle[]>({
     queryKey: ["/api/vehicles"],
@@ -925,7 +969,6 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                   name="firstTrailerId"
                   render={({ field }) => (
                     <FormItem>
-                      <VehicleSelectCard
                         title="1ª Carreta"
                         description="Primeiro semirreboque da composição"
                         value={field.value}
@@ -986,7 +1029,6 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                   name="secondTrailerId"
                   render={({ field }) => (
                     <FormItem>
-                      <VehicleSelectCard
                         title="2ª Carreta"
                         description="Segundo semirreboque da composição"
                         value={field.value}
@@ -1068,7 +1110,6 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                 name="tractorUnitId"
                 render={({ field }) => (
                   <FormItem>
-                    <VehicleSelectCard
                     <FormLabel className="font-medium">Unidade Tratora (Cavalo Mecânico)</FormLabel>
                     <Select 
                       onValueChange={(value) => field.onChange(parseInt(value))} 
@@ -1238,7 +1279,6 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                 name="tractorUnitId"
                 render={({ field }) => (
                   <FormItem>
-                    <VehicleSelectCard
                     <FormLabel className="font-medium">Unidade Tratora (Cavalo Mecânico)</FormLabel>
                     <Select 
                       onValueChange={(value) => field.onChange(parseInt(value))} 
@@ -1369,7 +1409,6 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                 name="tractorUnitId"
                 render={({ field }) => (
                   <FormItem>
-                    <VehicleSelectCard
                       title="Caminhão"
                       description="Unidade principal do Romeu e Julieta"
                       value={field.value}
@@ -1778,5 +1817,12 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
         </div>
       </form>
     </Form>
+    
+    {/* Modal de conflitos de licenças */}
+    <LicenseConflictModal
+      isOpen={showConflictModal}
+      onClose={() => setShowConflictModal(false)}
+      conflicts={licenseConflicts}
+    />
   );
 }
