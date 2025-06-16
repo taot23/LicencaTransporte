@@ -2490,7 +2490,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/staff/check-operational', requireAuth, (req, res) => {
     const user = req.user!;
     
-    if (user.role === 'operational' || user.role === 'supervisor' || user.isAdmin) {
+    if (user.role === 'operational' || user.role === 'supervisor' || user.role === 'manager' || user.role === 'financial' || user.role === 'admin') {
       res.json({ message: "Acesso operacional confirmado" });
     } else {
       res.status(403).json({ message: "Acesso negado. Perfil operacional necessário" });
@@ -2704,19 +2704,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Rota para verificar acesso operacional
-  app.get('/api/staff/check-operational', requireAuth, (req, res) => {
-    const user = req.user!;
-    
-    if (user.role === 'operational' || user.role === 'supervisor' || user.isAdmin) {
-      res.json({ 
-        message: "Acesso de staff confirmado",
-        role: user.role
-      });
-    } else {
-      res.status(403).json({ message: "Acesso negado" });
-    }
-  });
+
   
   // Rota para verificar acesso supervisor
   app.get('/api/staff/check-supervisor', requireAuth, (req, res) => {
