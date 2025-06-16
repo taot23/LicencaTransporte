@@ -969,7 +969,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                   name="firstTrailerId"
                   render={({ field }) => (
                     <FormItem>
-                      <VehicleSelector
+                      <VehicleSelectCard
                         title="1ª Carreta"
                         description="Primeiro semirreboque da composição"
                         value={field.value}

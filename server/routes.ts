@@ -3883,10 +3883,15 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         
         // Buscar licenças que incluem este estado específico
         for (const licenca of todasLicencas) {
+          console.log(`[VALIDAÇÃO] Analisando licença ${licenca.id} - Estados: ${JSON.stringify(licenca.states)}`);
+          
           // Verificar se a licença inclui este estado específico
           if (!licenca.states || !licenca.states.includes(estado)) {
+            console.log(`[VALIDAÇÃO] Licença ${licenca.id} não inclui estado ${estado}`);
             continue;
           }
+          
+          console.log(`[VALIDAÇÃO] Licença ${licenca.id} inclui estado ${estado}`);
           
           // Verificar se alguma placa da nova solicitação conflita
           const placaConflitante = placas.find(placa => 
@@ -3895,63 +3900,76 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
           );
           
           if (!placaConflitante) {
+            console.log(`[VALIDAÇÃO] Licença ${licenca.id} não tem conflito de placas`);
             continue;
           }
           
-          console.log(`[VALIDAÇÃO] Verificando licença ${licenca.id} para estado ${estado}, placa ${placaConflitante}`);
+          console.log(`[VALIDAÇÃO] CONFLITO DE PLACA DETECTADO! Licença ${licenca.id}, estado ${estado}, placa ${placaConflitante}`);
           
-          // Verificar se há status aprovado INDIVIDUAL para este estado específico
-          const statusEstadoIndividual = licenca.stateStatuses?.find(status => 
-            status.startsWith(`${estado}:approved`)
-          );
+          // Verificar se há status aprovado para este estado específico
+          let dataValidadeEstado = null;
+          let statusIndividual = null;
           
-          if (statusEstadoIndividual) {
-            console.log(`[VALIDAÇÃO] Status individual encontrado para ${estado}:`, statusEstadoIndividual);
+          // Procurar por status individual do estado
+          if (licenca.stateStatuses && licenca.stateStatuses.length > 0) {
+            statusIndividual = licenca.stateStatuses.find(status => 
+              status.startsWith(`${estado}:approved`)
+            );
             
-            // Extrair data de validade específica do estado
-            const statusParts = statusEstadoIndividual.split(':');
-            let dataValidadeEstado = null;
-            
-            // Usar a data específica do estado se disponível
-            if (statusParts.length > 2 && statusParts[2]) {
-              try {
-                dataValidadeEstado = new Date(statusParts[2]);
-              } catch (e) {
-                dataValidadeEstado = licenca.validUntil ? new Date(licenca.validUntil) : null;
-              }
-            } else {
-              // Fallback para data geral da licença
-              dataValidadeEstado = licenca.validUntil ? new Date(licenca.validUntil) : null;
-            }
-            
-            if (!dataValidadeEstado || dataValidadeEstado <= hoje) {
-              console.log(`[VALIDAÇÃO] Licença ${licenca.id} expirada ou sem data válida para ${estado}`);
-              continue;
-            }
-            
-            // Verificar se a licença no estado específico tem mais de 30 dias até vencer
-            if (dataValidadeEstado > limiteRenovacao) {
-              const diasRestantes = Math.ceil((dataValidadeEstado.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+            if (statusIndividual) {
+              console.log(`[VALIDAÇÃO] Status individual encontrado para ${estado}:`, statusIndividual);
               
-              console.log(`[VALIDAÇÃO] CONFLITO DETECTADO! Estado ${estado}, licença ${licenca.id}, dias restantes: ${diasRestantes}`);
-              
-              conflitos.push({
-                estado,
-                licenca: {
-                  id: licenca.id,
-                  requestNumber: licenca.requestNumber,
-                  mainVehiclePlate: licenca.mainVehiclePlate,
-                  validUntil: dataValidadeEstado,
-                  diasRestantes,
-                  placasConflitantes: [placaConflitante],
-                  statusIndividual: statusEstadoIndividual
+              // Extrair data de validade específica do estado
+              const statusParts = statusIndividual.split(':');
+              if (statusParts.length > 2 && statusParts[2]) {
+                try {
+                  dataValidadeEstado = new Date(statusParts[2]);
+                  console.log(`[VALIDAÇÃO] Data extraída do status individual:`, dataValidadeEstado);
+                } catch (e) {
+                  console.log(`[VALIDAÇÃO] Erro ao parsear data do status:`, statusParts[2]);
                 }
-              });
-            } else {
-              console.log(`[VALIDAÇÃO] Estado ${estado} da licença ${licenca.id} pode ser renovado (${Math.ceil((dataValidadeEstado.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24))} dias restantes)`);
+              }
             }
+          }
+          
+          // Se não tem status individual mas tem aprovação geral
+          if (!dataValidadeEstado && licenca.status === 'approved' && licenca.validUntil) {
+            dataValidadeEstado = new Date(licenca.validUntil);
+            console.log(`[VALIDAÇÃO] Usando data geral da licença:`, dataValidadeEstado);
+          }
+          
+          if (!dataValidadeEstado) {
+            console.log(`[VALIDAÇÃO] Licença ${licenca.id} sem data de validade válida`);
+            continue;
+          }
+          
+          // Verificar se ainda está válida
+          if (dataValidadeEstado <= hoje) {
+            console.log(`[VALIDAÇÃO] Licença ${licenca.id} expirada para ${estado}`);
+            continue;
+          }
+          
+          // Verificar se a licença no estado específico tem mais de 30 dias até vencer
+          const diasRestantes = Math.ceil((dataValidadeEstado.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+          console.log(`[VALIDAÇÃO] Dias restantes para ${estado}:`, diasRestantes);
+          
+          if (diasRestantes > 30) {
+            console.log(`[VALIDAÇÃO] CONFLITO CONFIRMADO! Estado ${estado}, licença ${licenca.id}, dias restantes: ${diasRestantes}`);
+            
+            conflitos.push({
+              estado,
+              licenca: {
+                id: licenca.id,
+                requestNumber: licenca.requestNumber,
+                mainVehiclePlate: licenca.mainVehiclePlate,
+                validUntil: dataValidadeEstado,
+                diasRestantes,
+                placasConflitantes: [placaConflitante],
+                statusIndividual: statusIndividual || `${estado}:approved`
+              }
+            });
           } else {
-            console.log(`[VALIDAÇÃO] Licença ${licenca.id} não tem aprovação individual para estado ${estado}`);
+            console.log(`[VALIDAÇÃO] Estado ${estado} da licença ${licenca.id} pode ser renovado (${diasRestantes} dias restantes)`);
           }
         }
       }
