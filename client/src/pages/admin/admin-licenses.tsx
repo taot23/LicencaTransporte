@@ -145,7 +145,7 @@ export default function AdminLicensesPage() {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [transporterFilter, setTransporterFilter] = useState("");
+  const [transporterFilter, setTransporterFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("");
   const [selectedLicense, setSelectedLicense] = useState<LicenseRequest | null>(null);
   const [licenseDetailsOpen, setLicenseDetailsOpen] = useState(false);
