@@ -6,6 +6,7 @@ import { Transporter } from "@shared/schema";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { TransporterForm } from "@/components/admin/transporter-form";
 import { TransporterLinkUser } from "@/components/admin/transporter-link-user";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +28,9 @@ export default function AdminTransporters() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isLinkUserDialogOpen, setIsLinkUserDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedTransporter, setSelectedTransporter] = useState<Transporter | null>(null);
+  const [transporterToDelete, setTransporterToDelete] = useState<number | null>(null);
   const [searchFilter, setSearchFilter] = useState("");
   const { lastMessage } = useWebSocketContext();
 
@@ -115,8 +118,15 @@ export default function AdminTransporters() {
   };
 
   const handleDeleteTransporter = (transporterId: number) => {
-    if (confirm("Tem certeza que deseja excluir este transportador?")) {
-      deleteTransporterMutation.mutate(transporterId);
+    setTransporterToDelete(transporterId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (transporterToDelete) {
+      deleteTransporterMutation.mutate(transporterToDelete);
+      setIsDeleteDialogOpen(false);
+      setTransporterToDelete(null);
     }
   };
   
@@ -424,6 +434,28 @@ export default function AdminTransporters() {
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Modal de confirmação de exclusão */}
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir este transportador? Esta ação não pode ser desfeita e todos os dados relacionados serão removidos permanentemente.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmDelete}
+                className="bg-red-600 hover:bg-red-700"
+                disabled={deleteTransporterMutation.isPending}
+              >
+                {deleteTransporterMutation.isPending ? "Excluindo..." : "Excluir"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AdminLayout>
   );
