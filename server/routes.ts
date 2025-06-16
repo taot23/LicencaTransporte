@@ -2739,7 +2739,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Rota para listagem de usuários (transportadores)
-  app.get('/api/admin/users', requireAdmin, async (req, res) => {
+  app.get('/api/admin/users', requireAuth, requirePermission('users', 'view'), async (req, res) => {
     try {
       const users = await storage.getAllUsers();
       console.log(`[DEBUG] Total de usuários recuperados: ${users.length}`);
