@@ -568,7 +568,7 @@ export default function AdminLicensesPage() {
     // Determinar o status atual deste estado
     let currentStateStatus = "pending";
     
-    // Parse dos stateStatuses (que são armazenados como "ESTADO:STATUS:VALIDUNTIL")
+    // Parse dos stateStatuses (que são armazenados como "ESTADO:STATUS:VALIDUNTIL:ISSUEDDAT")
     let currentValidUntil = "";
     let currentIssuedAt = "";
     
@@ -583,15 +583,21 @@ export default function AdminLicensesPage() {
         if (parts[2]) {
           currentValidUntil = parts[2];
         }
+        // Extrair data de emissão específica do estado (4ª parte)
+        if (parts[3]) {
+          // Converter a data ISO para formato do input (YYYY-MM-DD)
+          try {
+            const issuedDate = new Date(parts[3]);
+            currentIssuedAt = issuedDate.toISOString().split('T')[0];
+          } catch (e) {
+            console.warn('Erro ao converter data de emissão do estado:', parts[3]);
+            currentIssuedAt = "";
+          }
+        }
       }
     }
     
-    // Usar a data de emissão do campo dedicado da licença
-    if (license.issuedAt) {
-      // Converter para formato de data do input (YYYY-MM-DD)
-      const issuedDate = new Date(license.issuedAt);
-      currentIssuedAt = issuedDate.toISOString().split('T')[0];
-    }
+    // NÃO usar a data global - cada estado deve ter sua própria data de emissão
     
     // Determinar o CNPJ específico para este estado
     let currentStateCnpj = "";

@@ -35,22 +35,29 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
     
     setIsLoggingOut(true);
     
-    // Limpar cache imediatamente para logout instantâneo
-    const { queryClient } = await import("@/lib/queryClient");
-    queryClient.setQueryData(["/api/user"], null);
-    queryClient.clear();
-    
-    // Redirecionar imediatamente 
-    navigate("/auth");
-    
-    // Fazer logout no servidor em background
     try {
-      fetch("/api/logout", { 
+      // Fazer logout no servidor primeiro
+      await fetch("/api/logout", { 
         method: "POST",
         credentials: "include"
       });
+      
+      // Limpar cache após confirmação
+      const { queryClient } = await import("@/lib/queryClient");
+      queryClient.setQueryData(["/api/user"], null);
+      queryClient.clear();
+      
+      // Redirecionar após limpeza
+      navigate("/auth");
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
+      // Mesmo com erro, limpar cache e redirecionar
+      const { queryClient } = await import("@/lib/queryClient");
+      queryClient.setQueryData(["/api/user"], null);
+      queryClient.clear();
+      navigate("/auth");
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
