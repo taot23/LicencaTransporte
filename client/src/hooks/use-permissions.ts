@@ -26,14 +26,8 @@ export function usePermissions() {
   };
 
   const canAccess = (module: keyof ModulePermissions): boolean => {
-    if (!user) {
-      console.log(`[PERMISSIONS] Usuário não autenticado - negando acesso ao módulo ${module}`);
-      return false;
-    }
-    const userRole = getUserRole();
-    const hasAccess = canAccessModule(userRole, module);
-    console.log(`[PERMISSIONS] Usuário ${user.email} (${userRole}) tentando acessar ${module}: ${hasAccess}`);
-    return hasAccess;
+    if (!user) return false;
+    return canAccessModule(getUserRole(), module);
   };
 
   const canCreate = (module: keyof ModulePermissions): boolean => {
@@ -57,14 +51,8 @@ export function usePermissions() {
   };
 
   const isAdministrative = (): boolean => {
-    if (!user) {
-      console.log(`[PERMISSIONS] Usuário não autenticado - negando acesso administrativo`);
-      return false;
-    }
-    const userRole = getUserRole();
-    const isAdmin = isAdministrativeRole(userRole);
-    console.log(`[PERMISSIONS] Usuário ${user.email} (${userRole}) verificação isAdministrative: ${isAdmin}`);
-    return isAdmin;
+    if (!user) return false;
+    return isAdministrativeRole(getUserRole());
   };
 
   const isFinancial = (): boolean => {

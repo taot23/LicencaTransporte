@@ -167,7 +167,7 @@ export function Sidebar({ className }: SidebarProps) {
         )}
         
         {/* Seção de Funcionalidades Administrativas */}
-        {permissions.isAdministrative() && (
+        {(user?.role === 'admin' || user?.role === 'manager' || user?.role === 'supervisor' || user?.role === 'financial') && (
           <>
             <div className="pt-2 pb-2">
               <Separator className="bg-gray-700" />
@@ -190,7 +190,7 @@ export function Sidebar({ className }: SidebarProps) {
             )}
             
             {/* Gerenciar Licenças - conforme permissões de gerenciamento */}
-            {permissions.canManageLicenses() && (
+            {(user?.role === 'admin' || user?.role === 'manager' || user?.role === 'supervisor' || user?.role === 'financial') && (
               <Button
                 variant="ghost"
                 className={cn(
@@ -205,7 +205,7 @@ export function Sidebar({ className }: SidebarProps) {
             )}
             
             {/* Gerenciar Transportadores - conforme permissões */}
-            {permissions.canViewTransporters() && (
+            {(user?.role === 'admin' || user?.role === 'manager' || user?.role === 'supervisor' || user?.role === 'financial') && (
               <Button
                 variant="ghost"
                 className={cn(
