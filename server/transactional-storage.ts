@@ -1444,11 +1444,14 @@ export class TransactionalStorage implements IStorage {
             if (statusParts && statusParts.length >= 4) {
               const dataEmissao = statusParts[3]; // Data de emissão
               console.log(`    Estado ${state} - Data emissão: ${dataEmissao}, Hoje: ${hoje}`);
-              if (dataEmissao === hoje) {
+              // Para estados emitidos hoje, também verificar se foi aprovado hoje (updatedAt)
+              const licenseUpdatedToday = l.updatedAt && new Date(l.updatedAt).toISOString().split('T')[0] === hoje;
+              
+              if (dataEmissao === hoje || licenseUpdatedToday) {
                 estadosEmitidosHoje++;
-                console.log(`    Estado ${state} emitido hoje: +1`);
+                console.log(`    Estado ${state} emitido hoje: +1 (data emissão: ${dataEmissao}, atualizado hoje: ${licenseUpdatedToday})`);
               } else {
-                console.log(`    Estado ${state} NÃO emitido hoje (${dataEmissao} != ${hoje})`);
+                console.log(`    Estado ${state} NÃO emitido hoje (${dataEmissao} != ${hoje}, atualizado hoje: ${licenseUpdatedToday})`);
               }
             } else {
               console.log(`    Estado ${state} - Status mal formatado: ${stateStatus}`);
