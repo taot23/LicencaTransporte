@@ -374,7 +374,7 @@ export default function AdminUsers() {
     if (isMobile) {
       return (
         <div className="space-y-4">
-          {users.filter((user: User) => !user.isAdmin).map((user: User) => (
+          {filteredUsers.filter((user: User) => !user.isAdmin).map((user: User) => (
             <Card key={user.id} className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="p-4 bg-gray-50 flex justify-between items-center">
@@ -436,7 +436,7 @@ export default function AdminUsers() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.filter((user: User) => !user.isAdmin).map((user: User) => (
+          {filteredUsers.filter((user: User) => !user.isAdmin).map((user: User) => (
             <TableRow key={user.id}>
               <TableCell>{user.id}</TableCell>
               <TableCell className="font-medium">{user.fullName}</TableCell>
@@ -507,6 +507,30 @@ export default function AdminUsers() {
                 />
               </DialogContent>
             </Dialog>
+          </div>
+        </div>
+
+        {/* Campo de busca inteligente */}
+        <div className="mb-6">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Digite nome, email, telefone ou função"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+            {searchTerm && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSearchTerm("")}
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0 hover:bg-gray-100"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
           </div>
         </div>
 

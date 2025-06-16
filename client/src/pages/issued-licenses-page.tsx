@@ -34,7 +34,7 @@ import {
   DialogClose
 } from "@/components/ui/dialog";
 import { FileDown, ExternalLink, AlertCircle, CheckCircle2, Clock, RefreshCcw, Download } from "lucide-react";
-import { formatDateForCSV } from "@/lib/csv-export";
+import { formatDateForCSV, exportToCSV } from "@/lib/csv-export";
 import { Status, StatusBadge } from "@/components/licenses/status-badge";
 import { TransporterInfo } from "@/components/transporters/transporter-info";
 import { Badge } from "@/components/ui/badge";
@@ -456,50 +456,46 @@ export default function IssuedLicensesPage() {
 
   // Função para exportar CSV das licenças emitidas
   const handleExportCSV = () => {
-    const dataForExport = filteredLicenses.map(license => ({
-      "Nº Solicitação": license.requestNumber || '',
-      "Tipo de Veículo": translateVehicleType(license.type) || '',
-      "Placa Principal": license.mainVehiclePlate || '',
-      "Estado": license.state || '',
-      "Status": translateStatus(license.status) || '',
-      "Data de Emissão": formatDateToCSV(license.emissionDate),
-      "Data de Validade": formatDateToCSV(license.validUntil),
-      "Número AET": license.aetNumber || ''
-    }));
+    try {
+      const headers = [
+        "Nº Solicitação",
+        "Tipo de Veículo", 
+        "Placa Principal",
+        "Estado",
+        "Status",
+        "Data de Emissão",
+        "Data de Validade",
+        "Número AET"
+      ];
 
-    // Criação do CSV com separador de ponto e vírgula
-    const headers = ["Nº Solicitação", "Tipo de Veículo", "Placa Principal", "Estado", "Status", "Data de Emissão", "Data de Validade", "Número AET"];
-    const csvData = dataForExport.map(item => {
-      return headers.map(header => {
-        const value = item[header as keyof typeof item] || '';
-        // Escapa aspas duplas e adiciona aspas ao redor do valor
-        const stringValue = String(value).replace(/"/g, '""');
-        return `"${stringValue}"`;
-      }).join(';');
-    });
+      const dataForExport = filteredLicenses.map(license => ({
+        "Nº Solicitação": license.requestNumber || '',
+        "Tipo de Veículo": translateVehicleType(license.type) || '',
+        "Placa Principal": license.mainVehiclePlate || '',
+        "Estado": license.state || '',
+        "Status": translateStatus(license.status) || '',
+        "Data de Emissão": formatDateForCSV(license.emissionDate),
+        "Data de Validade": formatDateForCSV(license.validUntil),
+        "Número AET": license.aetNumber || ''
+      }));
 
-    const csvContent = [
-      headers.map(h => `"${h}"`).join(';'),
-      ...csvData
-    ].join('\n');
+      exportToCSV({
+        filename: "licencas-emitidas",
+        headers,
+        data: dataForExport
+      });
 
-    // Cria e baixa o arquivo
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', `licencas-emitidas-${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast({
-      title: "Exportação concluída",
-      description: `${dataForExport.length} licenças exportadas para CSV`,
-    });
+      toast({
+        title: "Exportação concluída",
+        description: `${dataForExport.length} licenças exportadas para CSV`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro na exportação",
+        description: "Ocorreu um erro ao exportar os dados",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
