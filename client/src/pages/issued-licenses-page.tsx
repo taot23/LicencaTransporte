@@ -423,14 +423,45 @@ export default function IssuedLicensesPage() {
     }
   };
 
+  // Função para traduzir tipos de veículo para português
+  const translateVehicleType = (type: string): string => {
+    const vehicleTypeMap: Record<string, string> = {
+      'truck': 'Caminhão',
+      'bitrain_9_axles': 'Bitrem 9 Eixos',
+      'bitrain_7_axles': 'Bitrem 7 Eixos',
+      'rodotrain': 'Rodotrem',
+      'truck_trailer': 'Caminhão + Reboque',
+      'articulated_truck': 'Caminhão Articulado',
+      'special_transport': 'Transporte Especial',
+      'oversized_cargo': 'Carga Superdimensionada'
+    };
+    
+    return vehicleTypeMap[type] || type;
+  };
+
+  // Função para traduzir status para português
+  const translateStatus = (status: string): string => {
+    const statusMap: Record<string, string> = {
+      'pending_registration': 'Pendente de Registro',
+      'registration_in_progress': 'Registro em Andamento',
+      'under_review': 'Em Análise',
+      'pending_approval': 'Pendente de Aprovação',
+      'approved': 'Aprovado',
+      'rejected': 'Rejeitado',
+      'canceled': 'Cancelado'
+    };
+    
+    return statusMap[status] || status;
+  };
+
   // Função para exportar CSV das licenças emitidas
   const handleExportCSV = () => {
     const dataForExport = filteredLicenses.map(license => ({
       "Nº Solicitação": license.requestNumber || '',
-      "Tipo de Veículo": license.type || '',
+      "Tipo de Veículo": translateVehicleType(license.type) || '',
       "Placa Principal": license.mainVehiclePlate || '',
       "Estado": license.state || '',
-      "Status": license.status || '',
+      "Status": translateStatus(license.status) || '',
       "Data de Emissão": formatDateToCSV(license.emissionDate),
       "Data de Validade": formatDateToCSV(license.validUntil),
       "Número AET": license.aetNumber || ''
