@@ -72,6 +72,8 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **USUÁRIO OPERACIONAL CORRIGIDO**: operacional01@sistema.com / 123456 (role: operational)
 - ✅ **MENUS ADMINISTRATIVOS**: Role 'operational' incluído em todas as verificações do sidebar
 - ✅ **ACESSO COMPLETO**: Usuários operacionais veem "Gerenciar Licenças" e "Transportadores"
+- ✅ **SERVIDOR GOOGLE CORRIGIDO**: Função isAdminUser inclui role 'operational' para acesso total
+- ✅ **DADOS OPERACIONAIS**: Usuários operacionais veem todos os veículos e licenças do sistema
 
 ### 16/06/2025 - Filtros Inteligentes e Exportações CSV Padronizadas
 - ✅ Filtro inteligente implementado na página de licenças administrativas (/admin/licenses)

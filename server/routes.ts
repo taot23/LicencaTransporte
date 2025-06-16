@@ -867,7 +867,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Função auxiliar para verificar se um usuário tem papel administrativo
   function isAdminUser(user: Express.User): boolean {
-    const adminRoles = ['admin', 'manager', 'supervisor', 'financial'];
+    const adminRoles = ['admin', 'manager', 'supervisor', 'financial', 'operational'];
     return adminRoles.includes(user.role);
   }
 
