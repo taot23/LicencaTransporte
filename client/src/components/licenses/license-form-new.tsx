@@ -872,7 +872,6 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                 name="tractorUnitId"
                 render={({ field }) => (
                   <FormItem>
-                    <VehicleSelectCard
                     <FormLabel className="font-medium">Unidade Tratora (Cavalo Mecânico)</FormLabel>
                     <Select 
                       onValueChange={(value) => field.onChange(parseInt(value))} 
