@@ -77,6 +77,10 @@ function Router() {
         path="/issued-licenses" 
         component={isMobile ? MobileIssuedLicensesPage : IssuedLicensesPage} 
       />
+      <ProtectedRoute 
+        path="/licencas-emitidas" 
+        component={isMobile ? MobileIssuedLicensesPage : IssuedLicensesPage} 
+      />
       
       {/* Acesso do cliente ao módulo financeiro - apenas para transportadores */}
       <ProtectedRoute 

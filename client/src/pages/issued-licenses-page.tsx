@@ -411,17 +411,29 @@ export default function IssuedLicensesPage() {
     }
   };
 
+  // Função para formatar data para CSV
+  const formatDateToCSV = (dateString: string | null): string => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
+      return date.toLocaleDateString('pt-BR');
+    } catch {
+      return '';
+    }
+  };
+
   // Função para exportar CSV das licenças emitidas
   const handleExportCSV = () => {
     const dataForExport = filteredLicenses.map(license => ({
-      "Nº Solicitação": license.requestNumber,
-      "Tipo de Veículo": license.type,
-      "Placa Principal": license.mainVehiclePlate,
-      "Estado": license.state,
-      "Status": license.status,
-      "Data de Emissão": license.emissionDate ? formatDateForCSV(license.emissionDate) : "",
-      "Data de Validade": license.validUntil ? formatDateForCSV(license.validUntil) : "",
-      "Número AET": license.aetNumber || ""
+      "Nº Solicitação": license.requestNumber || '',
+      "Tipo de Veículo": license.type || '',
+      "Placa Principal": license.mainVehiclePlate || '',
+      "Estado": license.state || '',
+      "Status": license.status || '',
+      "Data de Emissão": formatDateToCSV(license.emissionDate),
+      "Data de Validade": formatDateToCSV(license.validUntil),
+      "Número AET": license.aetNumber || ''
     }));
 
     // Criação do CSV com separador de ponto e vírgula
