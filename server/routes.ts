@@ -3847,6 +3847,8 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     try {
       const { placas, estados } = req.body;
       
+      console.log("[VALIDAÇÃO] Recebendo verificação de licenças:", { placas, estados });
+      
       if (!placas || !Array.isArray(placas) || placas.length === 0) {
         return res.status(400).json({ message: "Placas são obrigatórias" });
       }
@@ -3858,6 +3860,9 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       const conflitos: any[] = [];
       const hoje = new Date();
       const limiteRenovacao = new Date(hoje.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 dias no futuro
+      
+      console.log("[VALIDAÇÃO] Data atual:", hoje);
+      console.log("[VALIDAÇÃO] Limite renovação (30 dias):", limiteRenovacao);
       
       // Para cada estado selecionado
       for (const estado of estados) {
@@ -3889,12 +3894,24 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         
         const licencasExistentes = await query;
         
+        console.log(`[VALIDAÇÃO] Estado ${estado}: encontradas ${licencasExistentes.length} licenças`);
+        
         // Verificar cada licença encontrada
         for (const licenca of licencasExistentes) {
+          console.log(`[VALIDAÇÃO] Verificando licença ${licenca.id}:`, {
+            mainVehiclePlate: licenca.mainVehiclePlate,
+            states: licenca.states,
+            status: licenca.status,
+            stateStatuses: licenca.stateStatuses,
+            validUntil: licenca.validUntil
+          });
+          
           // Verificar se há status aprovado específico para este estado
           const stateStatus = licenca.stateStatuses?.find(status => 
             status.startsWith(`${estado}:approved`)
           );
+          
+          console.log(`[VALIDAÇÃO] Estado ${estado} na licença ${licenca.id}:`, stateStatus);
           
           if (stateStatus) {
             // Extrair data de validade específica do estado
@@ -3905,9 +3922,15 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
               validUntilState = new Date(stateStatusParts[2]);
             }
             
+            console.log(`[VALIDAÇÃO] Data validUntil para ${estado}:`, validUntilState);
+            console.log(`[VALIDAÇÃO] Limite renovação:`, limiteRenovacao);
+            console.log(`[VALIDAÇÃO] ValidUntil > Limite?:`, validUntilState > limiteRenovacao);
+            
             // Verificar se a licença tem mais de 30 dias até vencer
             if (validUntilState && validUntilState > limiteRenovacao) {
               const diasRestantes = Math.ceil((validUntilState.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+              
+              console.log(`[VALIDAÇÃO] CONFLITO DETECTADO! Estado ${estado}, dias restantes:`, diasRestantes);
               
               conflitos.push({
                 estado,
@@ -3923,10 +3946,16 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
                   )
                 }
               });
+            } else {
+              console.log(`[VALIDAÇÃO] Licença ${licenca.id} no estado ${estado} pode ser renovada (menos de 30 dias)`);
             }
+          } else {
+            console.log(`[VALIDAÇÃO] Licença ${licenca.id} não tem status aprovado para estado ${estado}`);
           }
         }
       }
+      
+      console.log(`[VALIDAÇÃO] Total de conflitos encontrados:`, conflitos.length);
       
       res.json({ conflitos });
     } catch (error) {

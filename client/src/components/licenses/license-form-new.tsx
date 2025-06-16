@@ -1762,11 +1762,62 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                                     ? 'bg-blue-50 border-blue-300 text-blue-700 font-medium' 
                                     : 'border-gray-200 hover:bg-gray-50'
                                 }`}
-                                onClick={() => {
+                                onClick={async () => {
                                   if (isSelected) {
                                     field.onChange((field.value || []).filter((value) => value !== state.code));
                                   } else {
-                                    field.onChange([...(field.value || []), state.code]);
+                                    const newStates = [...(field.value || []), state.code];
+                                    
+                                    // Coletar todas as placas do formulário para validação
+                                    const allPlates = [];
+                                    const mainPlate = form.watch("mainVehiclePlate");
+                                    if (mainPlate) allPlates.push(mainPlate);
+                                    
+                                    const additionalPlates = form.watch("additionalPlates") || [];
+                                    allPlates.push(...additionalPlates);
+                                    
+                                    // Obter placas dos veículos selecionados
+                                    const tractorId = form.watch("tractorUnitId");
+                                    const firstTrailerId = form.watch("firstTrailerId");
+                                    const secondTrailerId = form.watch("secondTrailerId");
+                                    const dollyId = form.watch("dollyId");
+                                    const flatbedId = form.watch("flatbedId");
+                                    
+                                    if (vehicles) {
+                                      if (tractorId) {
+                                        const vehicle = vehicles.find(v => v.id === tractorId);
+                                        if (vehicle?.plate) allPlates.push(vehicle.plate);
+                                      }
+                                      if (firstTrailerId) {
+                                        const vehicle = vehicles.find(v => v.id === firstTrailerId);
+                                        if (vehicle?.plate) allPlates.push(vehicle.plate);
+                                      }
+                                      if (secondTrailerId) {
+                                        const vehicle = vehicles.find(v => v.id === secondTrailerId);
+                                        if (vehicle?.plate) allPlates.push(vehicle.plate);
+                                      }
+                                      if (dollyId) {
+                                        const vehicle = vehicles.find(v => v.id === dollyId);
+                                        if (vehicle?.plate) allPlates.push(vehicle.plate);
+                                      }
+                                      if (flatbedId) {
+                                        const vehicle = vehicles.find(v => v.id === flatbedId);
+                                        if (vehicle?.plate) allPlates.push(vehicle.plate);
+                                      }
+                                    }
+                                    
+                                    console.log("Validando licenças para:", { estados: [state.code], placas: allPlates });
+                                    
+                                    // Validar apenas se temos placas para verificar
+                                    if (allPlates.length > 0) {
+                                      const validation = await validateExistingLicenses([state.code], allPlates);
+                                      if (validation.hasConflicts) {
+                                        // Estado já foi removido pela função de validação
+                                        return;
+                                      }
+                                    }
+                                    
+                                    field.onChange(newStates);
                                   }
                                 }}
                               >
