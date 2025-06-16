@@ -37,7 +37,6 @@ export function exportToCSV(options: CSVExportOptions): void {
   });
 
   // Monta o conteúdo CSV com separador de ponto e vírgula (;)
-  console.log('[CSV Export] Usando separador ponto e vírgula (;)');
   const csvContent = [
     headers.map(h => `"${h}"`).join(";"),
     ...csvData.map(row => row.join(";"))
