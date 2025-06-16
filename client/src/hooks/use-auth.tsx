@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useRef } from "react";
 import {
   useQuery,
   useMutation,
@@ -38,6 +38,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const logoutInProgress = useRef(false);
   const {
     data: user,
     error,
@@ -111,6 +112,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
+      // Previne múltiplas execuções simultâneas
+      if (logoutMutation.isPending) return;
+      
       // Limpa o cache imediatamente para logout instantâneo
       queryClient.setQueryData(["/api/user"], null);
       queryClient.clear(); // Remove todos os dados em cache
