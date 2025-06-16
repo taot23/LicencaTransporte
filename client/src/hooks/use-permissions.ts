@@ -58,7 +58,7 @@ export function usePermissions() {
   const isFinancial = (): boolean => {
     if (!user) return false;
     const role = getUserRole();
-    return role === 'financial' || role === 'admin';
+    return role === 'financial' || role === 'manager' || role === 'admin';
   };
 
   // Verificações específicas por módulo

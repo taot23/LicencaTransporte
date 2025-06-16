@@ -2506,6 +2506,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.get('/api/staff/check-financial', requireAuth, (req, res) => {
+    const user = req.user!;
+    
+    if (user.role === 'financial' || user.role === 'manager' || user.isAdmin) {
+      res.json({ message: "Acesso financeiro confirmado" });
+    } else {
+      res.status(403).json({ message: "Acesso negado. Perfil financeiro necessário" });
+    }
+  });
+  
   /* Rota removida para evitar duplicação - já existe implementação abaixo
   // Rota para obter usuários não-admin para seleção
   app.get('/api/admin/non-admin-users', requireAdmin, async (req, res) => {
@@ -3744,7 +3754,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
 
   // Função auxiliar para verificar permissões financeiras
   const canAccessFinancial = (user: any) => {
-    return user.role === "admin" || user.role === "financial";
+    return user.role === "admin" || user.role === "financial" || user.role === "manager";
   };
 
   // Configuração do multer para upload de arquivos de boletos

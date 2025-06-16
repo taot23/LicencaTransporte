@@ -160,5 +160,5 @@ export function formatCurrency(value: number): string {
 
 // Verificar se o usuário pode acessar funcionalidades financeiras
 export function canAccessFinancial(user: any): boolean {
-  return user?.role === "admin" || user?.role === "financial";
+  return user?.role === "admin" || user?.role === "financial" || user?.role === "manager";
 }
