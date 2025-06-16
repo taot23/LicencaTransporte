@@ -2386,7 +2386,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin endpoints
   // Endpoint para buscar todas as licenças - acessível para Admin, Operacional e Supervisor
   // Rota para admin/operational obter todas as licenças
-  app.get('/api/admin/licenses', requireOperational, async (req, res) => {
+  app.get('/api/admin/licenses', requireAuth, requirePermission('manageLicenses', 'view'), async (req, res) => {
     try {
       // Obter todas as licenças
       const allLicenses = await storage.getAllLicenseRequests();
@@ -2885,13 +2885,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Rotas para transportadores
-  app.get('/api/admin/transporters', requireAuth, async (req, res) => {
-    const user = req.user!;
-    
-    // Verificar se o usuário pode gerenciar transportadores
-    if (!canManageTransporters(user)) {
-      return res.status(403).json({ message: "Acesso negado" });
-    }
+  app.get('/api/admin/transporters', requireAuth, requirePermission('transporters', 'view'), async (req, res) => {
     try {
       const transporters = await storage.getAllTransporters();
       res.json(transporters);
