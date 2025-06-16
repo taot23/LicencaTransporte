@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import { apiRequest } from "@/lib/queryClient";
@@ -8,13 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { TransporterForm } from "@/components/admin/transporter-form";
 import { TransporterLinkUser } from "@/components/admin/transporter-link-user";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { exportToCSV, formatDateForCSV } from "@/lib/csv-export";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Plus, MoreVertical, Edit, Trash, Link as LinkIcon, UserCircle2, Download } from "lucide-react";
+import { Plus, MoreVertical, Edit, Trash, Link as LinkIcon, UserCircle2, Download, Search, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SkeletonTable } from "@/components/ui/skeleton-table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -27,6 +28,7 @@ export default function AdminTransporters() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isLinkUserDialogOpen, setIsLinkUserDialogOpen] = useState(false);
   const [selectedTransporter, setSelectedTransporter] = useState<Transporter | null>(null);
+  const [searchFilter, setSearchFilter] = useState("");
   const { lastMessage } = useWebSocketContext();
 
   // Effect para invalidar cache quando houver atualizações via WebSocket
@@ -53,9 +55,37 @@ export default function AdminTransporters() {
     }
   }, [lastMessage, queryClient]);
 
-  const { data: transporters = [], isLoading } = useQuery({
+  const { data: transporters = [], isLoading } = useQuery<Transporter[]>({
     queryKey: ['/api/admin/transporters'],
   });
+
+  // Filtragem inteligente por CNPJ/CPF/Nome
+  const filteredTransporters = useMemo(() => {
+    if (!searchFilter.trim()) {
+      return transporters;
+    }
+
+    const searchTerm = searchFilter.toLowerCase().trim();
+    
+    return transporters.filter((transporter: Transporter) => {
+      // Buscar por nome/razão social
+      const nameMatch = transporter.name?.toLowerCase().includes(searchTerm);
+      
+      // Buscar por nome fantasia
+      const tradeNameMatch = transporter.tradeName?.toLowerCase().includes(searchTerm);
+      
+      // Buscar por CPF/CNPJ (removendo pontuação para busca mais flexível)
+      const documentMatch = transporter.documentNumber?.replace(/[^\d]/g, '').includes(searchTerm.replace(/[^\d]/g, ''));
+      
+      // Buscar por email
+      const emailMatch = transporter.email?.toLowerCase().includes(searchTerm);
+      
+      // Buscar por cidade
+      const cityMatch = transporter.city?.toLowerCase().includes(searchTerm);
+      
+      return nameMatch || tradeNameMatch || documentMatch || emailMatch || cityMatch;
+    });
+  }, [transporters, searchFilter]);
 
   // Mutation para exclusão de transportador
   const deleteTransporterMutation = useMutation({
@@ -96,7 +126,7 @@ export default function AdminTransporters() {
   };
 
   const handleExportCSV = () => {
-    if (!transporters || transporters.length === 0) {
+    if (!filteredTransporters || filteredTransporters.length === 0) {
       toast({
         title: "Nenhum dado para exportar",
         description: "Não há transportadores para exportar",
@@ -117,7 +147,7 @@ export default function AdminTransporters() {
         "Data de Criação"
       ];
 
-      const formattedData = transporters.map((transporter: Transporter) => ({
+      const formattedData = filteredTransporters.map((transporter: Transporter) => ({
         ID: transporter.id,
         "Nome/Razão Social": transporter.name,
         "CPF/CNPJ": transporter.documentNumber,
@@ -136,7 +166,7 @@ export default function AdminTransporters() {
 
       toast({
         title: "Exportação concluída",
-        description: `${transporters.length} transportadores exportados com sucesso`,
+        description: `${filteredTransporters.length} transportadores exportados com sucesso`,
       });
     } catch (error) {
       toast({
