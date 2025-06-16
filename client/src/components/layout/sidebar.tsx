@@ -249,7 +249,7 @@ export function Sidebar({ className }: SidebarProps) {
               </Button>
             )}
             
-            {/* Módulo Financeiro - apenas para perfis financeiro e admin */}
+            {/* Módulo Financeiro - apenas para perfis financeiro, manager e admin */}
             {permissions.canViewFinancial() && (
               <Button
                 variant="ghost"
@@ -261,6 +261,21 @@ export function Sidebar({ className }: SidebarProps) {
               >
                 <Receipt className="mr-3 h-5 w-5" />
                 Módulo Financeiro
+              </Button>
+            )}
+            
+            {/* Meus Boletos - para usuários com acesso financeiro */}
+            {permissions.canViewFinancial() && (
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start text-white hover:bg-gray-700",
+                  location === "/meus-boletos" ? "bg-gray-700" : "bg-transparent"
+                )}
+                onClick={() => handleNavigate("/meus-boletos")}
+              >
+                <Receipt className="mr-3 h-5 w-5" />
+                Meus Boletos
               </Button>
             )}
           </>

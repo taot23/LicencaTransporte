@@ -3824,8 +3824,8 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     const user = req.user!;
 
     try {
-      // Admin pode ver todos os boletos
-      if (user.role === 'admin' || user.role === 'financial') {
+      // Admin, financial e manager podem ver todos os boletos
+      if (user.role === 'admin' || user.role === 'financial' || user.role === 'manager') {
         const boletos = await storage.getAllBoletos();
         
         // Força refresh removendo cache
