@@ -22,7 +22,7 @@ export interface ModulePermissions {
 // Matriz de permissões por role
 const ROLE_PERMISSIONS: Record<UserRole, ModulePermissions> = {
   user: {
-    dashboard: { view: false, create: false, edit: false, delete: false },
+    dashboard: { view: true, create: false, edit: false, delete: false },
     users: { view: false, create: false, edit: false, delete: false },
     financial: { view: false, create: false, edit: false, delete: false },
     myBoletos: { view: false, create: false, edit: false, delete: false },

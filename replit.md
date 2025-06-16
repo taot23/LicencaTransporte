@@ -74,7 +74,7 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **ACESSO COMPLETO**: Usuários operacionais veem "Gerenciar Licenças" e "Transportadores"
 - ✅ **SERVIDOR GOOGLE CORRIGIDO**: Função isAdminUser inclui role 'operational' para acesso total
 - ✅ **DADOS OPERACIONAIS**: Usuários operacionais veem todos os veículos e licenças do sistema
-- ✅ **DASHBOARD OCULTO PARA ADMIN**: Botão "Dashboard" removido do sidebar para role 'admin'
+- ✅ **DASHBOARD EXCLUSIVO TRANSPORTADORES**: Botão "Dashboard" apenas para role 'user', oculto para admin e demais roles
 
 ### 16/06/2025 - Filtros Inteligentes e Exportações CSV Padronizadas
 - ✅ Filtro inteligente implementado na página de licenças administrativas (/admin/licenses)
