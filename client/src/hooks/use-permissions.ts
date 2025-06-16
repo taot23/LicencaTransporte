@@ -57,8 +57,14 @@ export function usePermissions() {
   };
 
   const isAdministrative = (): boolean => {
-    if (!user) return false;
-    return isAdministrativeRole(getUserRole());
+    if (!user) {
+      console.log(`[PERMISSIONS] Usuário não autenticado - negando acesso administrativo`);
+      return false;
+    }
+    const userRole = getUserRole();
+    const isAdmin = isAdministrativeRole(userRole);
+    console.log(`[PERMISSIONS] Usuário ${user.email} (${userRole}) verificação isAdministrative: ${isAdmin}`);
+    return isAdmin;
   };
 
   const isFinancial = (): boolean => {
