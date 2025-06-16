@@ -21,7 +21,8 @@ import {
   transporters,
   statusHistories,
   vehicles,
-  boletos
+  boletos,
+  stateLicenses
 } from "@shared/schema";
 import { 
   canAccessRoute, 
@@ -2131,6 +2132,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('License request saved to database:', JSON.stringify(licenseRequest, null, 2));
       
+      // Criar registros individuais para cada estado na nova tabela state_licenses
+      console.log(`[NOVA ABORDAGEM] Criando registros individuais para estados: ${sanitizedData.states.join(', ')}`);
+      
+      try {
+        for (const state of sanitizedData.states) {
+          await db.insert(stateLicenses).values({
+            licenseRequestId: licenseRequest.id,
+            state: state,
+            status: 'pending_registration',
+            comments: licenseRequest.comments || null,
+            selectedCnpj: null, // Será preenchido quando aprovado
+            licenseFileUrl: null, // Será preenchido quando aprovado
+            aetNumber: null, // Será preenchido quando aprovado
+            issuedAt: null, // Será preenchido quando aprovado
+            validUntil: null, // Será preenchido quando aprovado
+          });
+          console.log(`[NOVA ABORDAGEM] Registro criado para estado: ${state}`);
+        }
+        console.log(`[NOVA ABORDAGEM] Todos os ${sanitizedData.states.length} registros de estado criados com sucesso`);
+      } catch (error) {
+        console.error('[NOVA ABORDAGEM] Erro ao criar registros de estado:', error);
+        // Não falhar a criação da licença principal se houver erro nos registros de estado
+      }
+      
       // Enviar notificação WebSocket para nova licença criada
       broadcastLicenseUpdate(licenseRequest.id, 'created', licenseRequest);
       broadcastDashboardUpdate();
@@ -2230,6 +2255,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : 'Erro ao renovar licença';
       
       res.status(500).json({ message: errorMessage });
+    }
+  });
+
+  // Novo endpoint para validação inteligente de licenças por estado
+  app.post('/api/licenses/check-existing', requireAuth, async (req, res) => {
+    try {
+      const { states, plates } = req.body;
+      
+      if (!states || !Array.isArray(states) || states.length === 0) {
+        return res.status(400).json({ message: 'Estados são obrigatórios' });
+      }
+      
+      if (!plates || !Array.isArray(plates) || plates.length === 0) {
+        return res.status(400).json({ message: 'Placas são obrigatórias' });
+      }
+      
+      console.log(`[VALIDAÇÃO INTELIGENTE] Verificando conflitos para estados: ${states.join(', ')} e placas: ${plates.join(', ')}`);
+      
+      const conflicts = [];
+      const now = new Date();
+      const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
+      
+      // Para cada estado, verificar se há licenças vigentes com as placas fornecidas
+      for (const state of states) {
+        console.log(`[VALIDAÇÃO INTELIGENTE] Verificando estado: ${state}`);
+        
+        // Buscar licenças vigentes no estado com mais de 30 dias até vencimento
+        const query = `
+          SELECT 
+            sl.state,
+            sl.aet_number,
+            sl.valid_until,
+            sl.status,
+            lr.main_vehicle_plate,
+            lr.additional_plates,
+            lr.vehicles,
+            lr.request_number,
+            lr.id as license_id
+          FROM state_licenses sl
+          JOIN license_requests lr ON sl.license_request_id = lr.id
+          WHERE sl.state = $1 
+            AND sl.status = 'approved'
+            AND sl.valid_until > $2
+            AND (
+              lr.main_vehicle_plate = ANY($3) OR
+              lr.additional_plates && $3 OR
+              EXISTS (
+                SELECT 1 FROM jsonb_array_elements(lr.vehicles) AS vehicle
+                WHERE vehicle->>'plate' = ANY($3)
+              )
+            )
+        `;
+        
+        const result = await pool.query(query, [state, thirtyDaysFromNow, plates]);
+        
+        console.log(`[VALIDAÇÃO INTELIGENTE] Encontradas ${result.rows.length} licenças vigentes no estado ${state}`);
+        
+        for (const row of result.rows) {
+          const daysUntilExpiry = Math.ceil((new Date(row.valid_until) - now) / (1000 * 60 * 60 * 24));
+          
+          // Identificar quais placas específicas estão em conflito
+          const conflictingPlates = [];
+          
+          if (plates.includes(row.main_vehicle_plate)) {
+            conflictingPlates.push(row.main_vehicle_plate);
+          }
+          
+          if (row.additional_plates) {
+            const additionalPlates = Array.isArray(row.additional_plates) ? row.additional_plates : [];
+            conflictingPlates.push(...additionalPlates.filter(plate => plates.includes(plate)));
+          }
+          
+          if (row.vehicles) {
+            const vehicles = Array.isArray(row.vehicles) ? row.vehicles : [];
+            const vehiclePlates = vehicles.map(v => v.plate).filter(plate => plates.includes(plate));
+            conflictingPlates.push(...vehiclePlates);
+          }
+          
+          conflicts.push({
+            state: row.state,
+            licenseId: row.license_id,
+            requestNumber: row.request_number,
+            aetNumber: row.aet_number,
+            validUntil: row.valid_until,
+            daysUntilExpiry,
+            conflictingPlates: [...new Set(conflictingPlates)], // Remove duplicatas
+            canRenew: daysUntilExpiry <= 30
+          });
+          
+          console.log(`[VALIDAÇÃO INTELIGENTE] Conflito encontrado: Estado ${state}, AET ${row.aet_number}, ${daysUntilExpiry} dias até vencer, placas: ${conflictingPlates.join(', ')}`);
+        }
+      }
+      
+      console.log(`[VALIDAÇÃO INTELIGENTE] Total de conflitos encontrados: ${conflicts.length}`);
+      
+      res.json({
+        hasConflicts: conflicts.length > 0,
+        conflicts,
+        message: conflicts.length > 0 
+          ? `Encontrados ${conflicts.length} conflito(s) em licenças vigentes`
+          : 'Nenhum conflito encontrado'
+      });
+      
+    } catch (error) {
+      console.error('[VALIDAÇÃO INTELIGENTE] Erro ao verificar licenças existentes:', error);
+      res.status(500).json({ 
+        message: 'Erro ao verificar licenças existentes',
+        error: String(error)
+      });
     }
   });
 

@@ -194,9 +194,6 @@ export const vehicles = pgTable("vehicles", {
   };
 });
 
-export type Vehicle = typeof vehicles.$inferSelect;
-export type InsertVehicle = typeof vehicles.$inferInsert;
-
 export const insertVehicleSchema = createInsertSchema(vehicles)
   .omit({ id: true, userId: true })
   .extend({

@@ -1,60 +1,77 @@
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useState } from 'react';
 
 interface LicenseConflict {
-  estado: string;
-  licenca: {
-    id: number;
-    requestNumber: string;
-    mainVehiclePlate: string;
-    validUntil: string;
-    diasRestantes: number;
-    placasConflitantes: string[];
-  };
+  state: string;
+  licenseId: number;
+  requestNumber: string;
+  aetNumber: string;
+  validUntil: string;
+  daysUntilExpiry: number;
+  conflictingPlates: string[];
+  canRenew: boolean;
 }
 
-interface CheckExistingLicensesResponse {
-  conflitos: LicenseConflict[];
-}
-
-interface CheckExistingLicensesRequest {
-  placas: string[];
-  estados: string[];
+interface ValidationResponse {
+  hasConflicts: boolean;
+  conflicts: LicenseConflict[];
+  message: string;
 }
 
 export function useLicenseValidation() {
-  const checkExistingLicensesMutation = useMutation({
-    mutationFn: async (data: CheckExistingLicensesRequest): Promise<CheckExistingLicensesResponse> => {
-      console.log("[VALIDAÇÃO CLIENT] Enviando requisição:", data);
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState<ValidationResponse | null>(null);
+
+  const validateLicenses = async (states: string[], plates: string[]): Promise<ValidationResponse> => {
+    setIsValidating(true);
+    
+    try {
+      console.log(`[VALIDAÇÃO FRONTEND] Verificando estados: ${states.join(', ')} e placas: ${plates.join(', ')}`);
       
-      const response = await fetch("/api/licenses/check-existing", {
-        method: "POST",
+      const response = await fetch('/api/licenses/check-existing', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        credentials: "include", // Incluir cookies de sessão
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          states,
+          plates
+        }),
       });
-      
-      console.log("[VALIDAÇÃO CLIENT] Status da resposta:", response.status);
-      
+
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("[VALIDAÇÃO CLIENT] Erro:", errorText);
-        throw new Error("Erro ao verificar licenças existentes");
+        throw new Error(`Erro na validação: ${response.status}`);
       }
+
+      const result: ValidationResponse = await response.json();
       
-      const result = await response.json();
-      console.log("[VALIDAÇÃO CLIENT] Resultado:", result);
+      console.log(`[VALIDAÇÃO FRONTEND] Resultado: ${result.hasConflicts ? 'CONFLITOS ENCONTRADOS' : 'SEM CONFLITOS'}`);
+      console.log(`[VALIDAÇÃO FRONTEND] Total de conflitos: ${result.conflicts.length}`);
+      
+      setValidationResult(result);
       return result;
-    },
-  });
+      
+    } catch (error) {
+      console.error('[VALIDAÇÃO FRONTEND] Erro ao validar licenças:', error);
+      const errorResult: ValidationResponse = {
+        hasConflicts: false,
+        conflicts: [],
+        message: `Erro ao verificar licenças existentes: ${error}`
+      };
+      setValidationResult(errorResult);
+      return errorResult;
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const clearValidation = () => {
+    setValidationResult(null);
+  };
 
   return {
-    checkExistingLicenses: checkExistingLicensesMutation.mutateAsync,
-    isChecking: checkExistingLicensesMutation.isPending,
-    error: checkExistingLicensesMutation.error
+    isValidating,
+    validationResult,
+    validateLicenses,
+    clearValidation,
   };
 }
-
-export type { LicenseConflict };
