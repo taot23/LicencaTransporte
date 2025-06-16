@@ -119,7 +119,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
   const [licenseConflicts, setLicenseConflicts] = useState<LicenseConflict[]>([]);
   
   // Hook para validação de licenças
-  const { checkExistingLicenses, isChecking } = useLicenseValidation();
+  const { validateLicenses, isValidating } = useLicenseValidation();
 
   // Função para validar licenças vigentes
   const validateExistingLicenses = async (selectedStates: string[], selectedPlates: string[]) => {
@@ -128,17 +128,14 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
     }
 
     try {
-      const result = await checkExistingLicenses({
-        placas: selectedPlates,
-        estados: selectedStates,
-      });
+      const result = await validateLicenses(selectedStates, selectedPlates);
 
-      if (result.conflitos.length > 0) {
-        setLicenseConflicts(result.conflitos);
+      if (result.hasConflicts) {
+        setLicenseConflicts(result.conflicts);
         setShowConflictModal(true);
         
         // Remover estados com conflitos da seleção
-        const conflictStates = result.conflitos.map(c => c.estado);
+        const conflictStates = result.conflicts.map((c: LicenseConflict) => c.state);
         const validStates = selectedStates.filter(state => !conflictStates.includes(state));
         
         // Atualizar o formulário removendo estados conflitantes
@@ -1874,7 +1871,12 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
     <LicenseConflictModal
       isOpen={showConflictModal}
       onClose={() => setShowConflictModal(false)}
+      onProceed={(statesWithoutConflicts) => {
+        form.setValue("states", statesWithoutConflicts);
+        setShowConflictModal(false);
+      }}
       conflicts={licenseConflicts}
+      selectedStates={form.watch("states") || []}
     />
   );
 }

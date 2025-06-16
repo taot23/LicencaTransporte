@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-interface LicenseConflict {
+export interface LicenseConflict {
   state: string;
   licenseId: number;
   requestNumber: string;
