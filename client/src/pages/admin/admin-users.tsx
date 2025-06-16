@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from "@/hooks/use-toast";
 import { exportToCSV, formatDateForCSV } from "@/lib/csv-export";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Plus, MoreVertical, Edit, Trash, User as UserIcon, Download } from "lucide-react";
+import { Plus, MoreVertical, Edit, Trash, User as UserIcon, Download, Search, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SkeletonTable } from "@/components/ui/skeleton-table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -64,6 +64,7 @@ export default function AdminUsers() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch users
   const { data: users = [], isLoading } = useQuery({
@@ -72,6 +73,19 @@ export default function AdminUsers() {
       const response = await apiRequest("GET", "/api/admin/users");
       return await response.json();
     }
+  });
+
+  // Filtrar usuários com base no termo de busca
+  const filteredUsers = users.filter((user: User) => {
+    if (!searchTerm.trim()) return true;
+    
+    const searchLower = searchTerm.toLowerCase().trim();
+    const nameMatch = user.fullName?.toLowerCase().includes(searchLower);
+    const emailMatch = user.email?.toLowerCase().includes(searchLower);
+    const phoneMatch = user.phone?.toLowerCase().includes(searchLower);
+    const roleMatch = getRoleLabel(user.role)?.toLowerCase().includes(searchLower);
+    
+    return nameMatch || emailMatch || phoneMatch || roleMatch;
   });
 
   // Delete user mutation
