@@ -1376,7 +1376,12 @@ export class TransactionalStorage implements IStorage {
   // Método para Dashboard AET
   async getDashboardAETData(): Promise<any> {
     try {
-      const hoje = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      // Usar horário de Brasília (UTC-3)
+      const agora = new Date();
+      const horarioBrasilia = new Date(agora.getTime() - (3 * 60 * 60 * 1000));
+      const hoje = horarioBrasilia.toISOString().split('T')[0]; // YYYY-MM-DD
+      
+      console.log(`[DASHBOARD AET] Data de hoje (Brasília): ${hoje}`);
       
       // Buscar dados básicos do sistema
       const todasLicencas = await db.select().from(licenseRequests).where(eq(licenseRequests.isDraft, false));
@@ -1416,7 +1421,9 @@ export class TransactionalStorage implements IStorage {
       todasLicencas.forEach(l => {
         if (!l.states) return;
         
-        const isHoje = l.createdAt && new Date(l.createdAt).toISOString().split('T')[0] === hoje;
+        // Converter data de criação para horário de Brasília
+        const dataCriacaoBrasilia = new Date(new Date(l.createdAt).getTime() - (3 * 60 * 60 * 1000));
+        const isHoje = dataCriacaoBrasilia.toISOString().split('T')[0] === hoje;
         
         console.log(`[DASHBOARD AET] Licença #${l.id}:`);
         console.log(`  - Data criação: ${l.createdAt}`);
@@ -1444,14 +1451,13 @@ export class TransactionalStorage implements IStorage {
             if (statusParts && statusParts.length >= 4) {
               const dataEmissao = statusParts[3]; // Data de emissão
               console.log(`    Estado ${state} - Data emissão: ${dataEmissao}, Hoje: ${hoje}`);
-              // Para estados emitidos hoje, também verificar se foi aprovado hoje (updatedAt)
-              const licenseUpdatedToday = l.updatedAt && new Date(l.updatedAt).toISOString().split('T')[0] === hoje;
               
-              if (dataEmissao === hoje || licenseUpdatedToday) {
+              // Contar como emitido hoje APENAS se a data de emissão for hoje
+              if (dataEmissao === hoje) {
                 estadosEmitidosHoje++;
-                console.log(`    Estado ${state} emitido hoje: +1 (data emissão: ${dataEmissao}, atualizado hoje: ${licenseUpdatedToday})`);
+                console.log(`    Estado ${state} emitido hoje: +1`);
               } else {
-                console.log(`    Estado ${state} NÃO emitido hoje (${dataEmissao} != ${hoje}, atualizado hoje: ${licenseUpdatedToday})`);
+                console.log(`    Estado ${state} NÃO emitido hoje (${dataEmissao} != ${hoje})`);
               }
             } else {
               console.log(`    Estado ${state} - Status mal formatado: ${stateStatus}`);
@@ -1469,9 +1475,11 @@ export class TransactionalStorage implements IStorage {
       console.log(`- Estados pendentes: ${estadosPendentes}`);
       console.log(`- Estados emitidos total: ${estadosEmitidosTotal}`);
       
-      const boletosHoje = todosBoletos.filter(b => 
-        b.criadoEm && new Date(b.criadoEm).toISOString().split('T')[0] === hoje
-      );
+      const boletosHoje = todosBoletos.filter(b => {
+        if (!b.criadoEm) return false;
+        const dataBoletosBrasilia = new Date(new Date(b.criadoEm).getTime() - (3 * 60 * 60 * 1000));
+        return dataBoletosBrasilia.toISOString().split('T')[0] === hoje;
+      });
       
       const valorBoletosHoje = boletosHoje.reduce((sum, b) => sum + parseFloat(b.valor), 0);
 
