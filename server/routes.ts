@@ -2128,6 +2128,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('Creating license request with data:', JSON.stringify(sanitizedData, null, 2));
       
+      // Validar licenças vigentes ANTES de criar a nova licença
+      console.log(`[VALIDAÇÃO INTELIGENTE] Verificando conflitos antes de criar licença`);
+      
+      // Coletar todas as placas do formulário
+      const allPlates = [];
+      if (sanitizedData.mainVehiclePlate) allPlates.push(sanitizedData.mainVehiclePlate);
+      if (sanitizedData.additionalPlates) allPlates.push(...sanitizedData.additionalPlates);
+      
+      console.log(`[VALIDAÇÃO INTELIGENTE] Estados: ${sanitizedData.states.join(', ')}, Placas: ${allPlates.join(', ')}`);
+      
+      const conflicts = [];
+      const now = new Date();
+      const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
+      
+      // Verificar conflitos para cada estado
+      for (const state of sanitizedData.states) {
+        const query = `
+          SELECT 
+            sl.state,
+            sl.aet_number,
+            sl.valid_until,
+            sl.status,
+            lr.main_vehicle_plate,
+            lr.additional_plates,
+            lr.vehicles,
+            lr.request_number,
+            lr.id as license_id
+          FROM state_licenses sl
+          JOIN license_requests lr ON sl.license_request_id = lr.id
+          WHERE sl.state = $1 
+            AND sl.status = 'approved'
+            AND sl.valid_until > $2
+            AND (
+              lr.main_vehicle_plate = ANY($3) OR
+              lr.additional_plates && $3
+            )
+        `;
+        
+        const result = await pool.query(query, [state, thirtyDaysFromNow, allPlates]);
+        
+        if (result.rows.length > 0) {
+          for (const row of result.rows) {
+            const daysUntilExpiry = Math.ceil((new Date(row.valid_until) - now) / (1000 * 60 * 60 * 24));
+            
+            conflicts.push({
+              state: row.state,
+              licenseId: row.license_id,
+              requestNumber: row.request_number,
+              aetNumber: row.aet_number,
+              validUntil: row.valid_until,
+              daysUntilExpiry,
+              canRenew: daysUntilExpiry <= 30
+            });
+            
+            console.log(`[VALIDAÇÃO INTELIGENTE] CONFLITO: Estado ${state}, AET ${row.aet_number}, ${daysUntilExpiry} dias até vencer`);
+          }
+        }
+      }
+      
+      if (conflicts.length > 0) {
+        console.log(`[VALIDAÇÃO INTELIGENTE] BLOQUEANDO CRIAÇÃO: ${conflicts.length} conflito(s) encontrado(s)`);
+        return res.status(400).json({
+          message: `Não é possível criar a licença. Foram encontradas ${conflicts.length} licença(s) vigente(s) para os estados e placas selecionados.`,
+          conflicts: conflicts,
+          validationError: true
+        });
+      }
+      
+      console.log(`[VALIDAÇÃO INTELIGENTE] Nenhum conflito encontrado. Prosseguindo com a criação da licença.`);
+
       const licenseRequest = await storage.createLicenseRequest(userId, sanitizedData);
       
       console.log('License request saved to database:', JSON.stringify(licenseRequest, null, 2));
