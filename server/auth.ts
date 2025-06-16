@@ -23,7 +23,17 @@ declare global {
 const scryptAsync = promisify(scrypt);
 
 async function comparePasswords(supplied: string, stored: string) {
-  // Verificar se stored é uma string válida e contém um ponto
+  // Verificar se é hash bcrypt (usado para compatibilidade)
+  if (stored && stored.startsWith('$2b$')) {
+    try {
+      return await bcrypt.compare(supplied, stored);
+    } catch (error) {
+      console.error('Erro na comparação bcrypt:', error);
+      return false;
+    }
+  }
+  
+  // Verificar se stored é uma string válida e contém um ponto (formato scrypt)
   if (!stored || !stored.includes('.')) {
     console.error('Formato de senha inválido:', stored);
     return false;
