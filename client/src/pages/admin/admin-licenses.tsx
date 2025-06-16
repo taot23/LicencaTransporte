@@ -50,7 +50,7 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { LicenseRequest, brazilianStates as brazilianStatesObjects } from "@shared/schema";
+import { LicenseRequest, brazilianStates as brazilianStatesObjects, Transporter } from "@shared/schema";
 import { TransporterInfo } from "@/components/transporters/transporter-info";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
@@ -328,6 +328,11 @@ export default function AdminLicensesPage() {
     },
   });
 
+  // Buscar todos os transportadores para o filtro
+  const { data: transporters = [] } = useQuery<Transporter[]>({
+    queryKey: ['/api/admin/transporters'],
+  });
+
   // Função de atualização melhorada com feedback visual e integração WebSocket
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -471,7 +476,7 @@ export default function AdminLicensesPage() {
       // Filtro de status
       const matchesStatus = !statusFilter || statusFilter === "all" || license.status === statusFilter;
       
-      // Filtro de transportador
+      // Filtro de transportador - corrigido para usar "all" como valor padrão
       const matchesTransporter = !transporterFilter || transporterFilter === "all" || (
         license.transporterId != null && license.transporterId.toString() === transporterFilter
       );
@@ -924,11 +929,11 @@ export default function AdminLicensesPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Todos os transportadores</SelectItem>
-                        {/* Aqui seria ideal ter uma lista de transportadores para selecionar */}
-                        {/* Como é um exemplo, adicionamos alguns valores genéricos */}
-                        <SelectItem value="1">Transportadora ABC Ltda</SelectItem>
-                        <SelectItem value="2">Transportes XYZ S.A.</SelectItem>
-                        <SelectItem value="3">Logística Express Ltda</SelectItem>
+                        {transporters.map((transporter) => (
+                          <SelectItem key={transporter.id} value={transporter.id.toString()}>
+                            {transporter.name} - {transporter.documentNumber}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
