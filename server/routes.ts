@@ -2477,6 +2477,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   */
   
+  // Dashboard AET endpoint
+  app.get("/api/dashboard/aet", requireAuth, async (req, res) => {
+    try {
+      const user = req.user as Express.User;
+      
+      // Verificar se o usuário tem permissão para acessar o dashboard AET
+      if (!isAdminUser(user) && user.role !== 'manager') {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+
+      const dashboardData = await storage.getDashboardAETData();
+      res.json(dashboardData);
+    } catch (error) {
+      console.error("Error fetching AET dashboard data:", error);
+      res.status(500).json({ message: "Erro ao buscar dados do dashboard AET" });
+    }
+  });
+
   // Dashboard Admin
   app.get('/api/admin/dashboard/stats', requireAdmin, async (req, res) => {
     try {

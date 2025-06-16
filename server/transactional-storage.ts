@@ -8,7 +8,7 @@ import {
   vehicleModels, type VehicleModel, type InsertVehicleModel,
   boletos, type Boleto, type InsertBoleto
 } from "@shared/schema";
-import { eq, and, desc, asc, sql, gt, lt, like, not, isNull, or } from "drizzle-orm";
+import { eq, and, desc, asc, sql, gt, lt, like, not, isNull, or, count, sum } from "drizzle-orm";
 import { db, pool, withTransaction } from "./db";
 import { IStorage, DashboardStats, ChartData } from "./storage";
 import {
@@ -1370,6 +1370,138 @@ export class TransactionalStorage implements IStorage {
     } catch (error) {
       console.error('Erro ao deletar modelo de veículo:', error);
       throw new Error('Falha ao deletar modelo de veículo');
+    }
+  }
+
+  // Método para Dashboard AET
+  async getDashboardAETData(): Promise<any> {
+    try {
+      const hoje = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      
+      // Buscar dados básicos do sistema
+      const todasLicencas = await db.select().from(licenseRequests).where(eq(licenseRequests.isDraft, false));
+      const todosVeiculos = await db.select().from(vehicles);
+      const todosBoletos = await db.select().from(boletos);
+      
+      // Últimas 5 licenças com nome do transportador
+      const ultimasLicencas = await db.select({
+        id: licenseRequests.id,
+        requestNumber: licenseRequests.requestNumber,
+        mainVehiclePlate: licenseRequests.mainVehiclePlate,
+        type: licenseRequests.type,
+        status: licenseRequests.status,
+        createdAt: licenseRequests.createdAt,
+        transporterName: transporters.name
+      })
+      .from(licenseRequests)
+      .leftJoin(transporters, eq(licenseRequests.transporterId, transporters.id))
+      .where(eq(licenseRequests.isDraft, false))
+      .orderBy(desc(licenseRequests.createdAt))
+      .limit(5);
+      
+      // Últimos 5 boletos
+      const ultimosBoletos = await db.select()
+        .from(boletos)
+        .orderBy(desc(boletos.criadoEm))
+        .limit(5);
+
+      // Calcular estatísticas baseadas nos dados reais
+      const licencasHoje = todasLicencas.filter(l => 
+        l.createdAt && new Date(l.createdAt).toISOString().split('T')[0] === hoje
+      );
+      
+      const licencasEmitidas = todasLicencas.filter(l => {
+        if (!l.stateStatuses || l.stateStatuses.length === 0) return false;
+        return l.stateStatuses.some(status => status.includes(':approved:'));
+      });
+      
+      const licencasEmitidasHoje = licencasEmitidas.filter(l => 
+        l.createdAt && new Date(l.createdAt).toISOString().split('T')[0] === hoje
+      );
+      
+      const licencasPendentes = todasLicencas.filter(l => {
+        if (!l.stateStatuses || l.stateStatuses.length === 0) return true;
+        return !l.stateStatuses.some(status => status.includes(':approved:'));
+      });
+      
+      const boletosHoje = todosBoletos.filter(b => 
+        b.criadoEm && new Date(b.criadoEm).toISOString().split('T')[0] === hoje
+      );
+      
+      const valorBoletosHoje = boletosHoje.reduce((sum, b) => sum + parseFloat(b.valor), 0);
+
+      // Estatísticas por estado
+      const estadosMap: Record<string, number> = {};
+      todasLicencas.forEach(l => {
+        if (l.states) {
+          l.states.forEach(state => {
+            estadosMap[state] = (estadosMap[state] || 0) + 1;
+          });
+        }
+      });
+      
+      const porEstado = Object.entries(estadosMap).map(([name, value]) => ({ name, value }));
+
+      // Estatísticas por tipo de veículo
+      const tiposVeiculoMap: Record<string, string> = {
+        'roadtrain_9_axles': 'Rodotrem 9 eixos',
+        'bitrain_9_axles': 'Bitrem 9 eixos',
+        'bitrain_7_axles': 'Bitrem 7 eixos',
+        'bitrain_6_axles': 'Bitrem 6 eixos',
+        'flatbed': 'Prancha',
+        'romeo_juliet': 'Romeu e Julieta'
+      };
+      
+      const tiposMap: Record<string, number> = {};
+      todasLicencas.forEach(l => {
+        if (l.type) {
+          tiposMap[l.type] = (tiposMap[l.type] || 0) + 1;
+        }
+      });
+      
+      const porTipoVeiculo = Object.entries(tiposMap).map(([type, value]) => ({
+        name: tiposVeiculoMap[type] || type,
+        value,
+        color: `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`
+      }));
+
+      // Dados dos últimos 7 dias (baseado em dados reais)
+      const licencasPorStatus7Dias = [];
+      for (let i = 6; i >= 0; i--) {
+        const data = new Date();
+        data.setDate(data.getDate() - i);
+        const dataStr = data.toISOString().split('T')[0];
+        
+        const licencasDoDia = todasLicencas.filter(l => 
+          l.createdAt && new Date(l.createdAt).toISOString().split('T')[0] === dataStr
+        );
+        
+        licencasPorStatus7Dias.push({
+          data: data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+          solicitada: licencasDoDia.length,
+          emitida: licencasDoDia.filter(l => l.stateStatuses?.some(s => s.includes(':approved:'))).length,
+          recusada: licencasDoDia.filter(l => l.status === 'rejected').length,
+          expirada: licencasDoDia.filter(l => l.status === 'expired').length
+        });
+      }
+
+      return {
+        aetsSolicitadasHoje: licencasHoje.length,
+        aetsEmitidasHoje: licencasEmitidasHoje.length,
+        aetsPendentes: licencasPendentes.length,
+        aetsVencidasHoje: 0, // Precisaria implementar lógica de vencimento
+        totalVeiculos: todosVeiculos.length,
+        boletosHoje: boletosHoje.length,
+        valorBoletosHoje,
+        porEstado,
+        porTipoVeiculo,
+        ultimosBoletos,
+        ultimasLicencas,
+        licencasPorStatus7Dias
+      };
+    } catch (error) {
+      console.error('Erro ao buscar dados do dashboard AET:', error);
+      throw new Error('Falha ao buscar dados do dashboard AET');
     }
   }
 
