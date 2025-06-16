@@ -2500,7 +2500,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/staff/check-supervisor', requireAuth, (req, res) => {
     const user = req.user!;
     
-    if (user.role === 'supervisor' || user.isAdmin) {
+    if (user.role === 'supervisor' || user.role === 'manager' || user.role === 'financial' || user.role === 'admin') {
       res.json({ message: "Acesso de supervisor confirmado" });
     } else {
       res.status(403).json({ message: "Acesso negado. Perfil de supervisor necessário" });
@@ -2510,7 +2510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/staff/check-financial', requireAuth, (req, res) => {
     const user = req.user!;
     
-    if (user.role === 'financial' || user.role === 'manager' || user.isAdmin) {
+    if (user.role === 'financial' || user.role === 'manager' || user.role === 'admin') {
       res.json({ message: "Acesso financeiro confirmado" });
     } else {
       res.status(403).json({ message: "Acesso negado. Perfil financeiro necessário" });
