@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { LicenseRequest, InsertLicenseRequest } from "@shared/schema";
-import { LicenseFormWorking } from "@/components/licenses/license-form-working";
+import { LicenseForm } from "@/components/licenses/license-form";
 import { LicenseList } from "@/components/licenses/license-list";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -115,11 +115,11 @@ export default function RequestLicensePage() {
           </div>
           
           <div className="p-4 sm:p-6">
-            <LicenseFormWorking
+            <LicenseForm
               draft={currentDraft}
               onComplete={handleFormComplete}
               onCancel={() => setShowForm(false)}
-              preSelectedTransporterId={preSelectedTransporterId || undefined}
+              preSelectedTransporterId={preSelectedTransporterId}
             />
           </div>
           

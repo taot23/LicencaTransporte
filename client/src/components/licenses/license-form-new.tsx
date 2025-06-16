@@ -442,72 +442,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
     form.handleSubmit(onSubmit)();
   };
 
-  const handleSubmitRequest = async () => {
+  const handleSubmitRequest = () => {
     form.setValue("isDraft", false);
-    
-    // Primeiro, validar se há conflitos com licenças existentes
-    const formData = form.getValues();
-    const estados = formData.states;
-    
-    // Coletar todas as placas para validação
-    let placas = [];
-    if (formData.mainVehiclePlate) {
-      placas.push(formData.mainVehiclePlate);
-    }
-    if (formData.additionalPlates && formData.additionalPlates.length > 0) {
-      placas.push(...formData.additionalPlates);
-    }
-    
-    // Adicionar placas dos veículos selecionados
-    if (formData.tractorUnitId && vehicles) {
-      const tractor = vehicles.find(v => v.id === formData.tractorUnitId);
-      if (tractor?.plate) placas.push(tractor.plate);
-    }
-    if (formData.firstTrailerId && vehicles) {
-      const trailer = vehicles.find(v => v.id === formData.firstTrailerId);
-      if (trailer?.plate) placas.push(trailer.plate);
-    }
-    if (formData.secondTrailerId && vehicles) {
-      const trailer = vehicles.find(v => v.id === formData.secondTrailerId);
-      if (trailer?.plate) placas.push(trailer.plate);
-    }
-    if (formData.dollyId && vehicles) {
-      const dolly = vehicles.find(v => v.id === formData.dollyId);
-      if (dolly?.plate) placas.push(dolly.plate);
-    }
-    if (formData.flatbedId && vehicles) {
-      const flatbed = vehicles.find(v => v.id === formData.flatbedId);
-      if (flatbed?.plate) placas.push(flatbed.plate);
-    }
-    
-    console.log("[VALIDAÇÃO] Verificando conflitos antes da submissão:", { estados, placas });
-    
-    // Validar apenas se temos estados e placas
-    if (estados && estados.length > 0 && placas.length > 0) {
-      try {
-        const validationResult = await checkExistingLicenses({ 
-          placas: Array.from(new Set(placas)), // Remove duplicatas
-          estados: estados || []
-        });
-        
-        if (validationResult.conflitos && validationResult.conflitos.length > 0) {
-          console.log("[VALIDAÇÃO] Conflitos encontrados:", validationResult.conflitos);
-          setLicenseConflicts(validationResult.conflitos);
-          setShowConflictModal(true);
-          return; // Não submeter se há conflitos
-        }
-      } catch (error) {
-        console.error("[VALIDAÇÃO] Erro na validação:", error);
-        toast({
-          title: "Erro na validação",
-          description: "Não foi possível verificar licenças existentes. Tente novamente.",
-          variant: "destructive",
-        });
-        return;
-      }
-    }
-    
-    // Se não há conflitos, proceder com a submissão
     form.handleSubmit(onSubmit)();
   };
 
