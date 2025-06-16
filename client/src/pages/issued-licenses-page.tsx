@@ -1170,10 +1170,10 @@ export default function IssuedLicensesPage() {
       {/* Diálogo de detalhes da licença */}
       {selectedLicense && (
         <Dialog open={!!selectedLicense} onOpenChange={(open) => !open && setSelectedLicense(null)}>
-          <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto" aria-describedby="license-details-description">
             <DialogHeader>
               <DialogTitle>Detalhes da Licença</DialogTitle>
-              <p className="text-sm text-gray-500">Informações detalhadas da licença selecionada</p>
+              <p id="license-details-description" className="text-sm text-gray-500">Informações detalhadas da licença selecionada</p>
             </DialogHeader>
             <div className="space-y-4">
               {selectedLicense && (
@@ -1223,6 +1223,16 @@ export default function IssuedLicensesPage() {
                   {selectedLicense.validUntil ? new Intl.DateTimeFormat('pt-BR').format(new Date(selectedLicense.validUntil)) : '-'}
                 </p>
               </div>
+              
+              {/* Campo de Observações */}
+              {selectedLicense.comments && selectedLicense.comments.trim() && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Observações</h3>
+                  <div className="mt-1 p-3 bg-gray-50 border border-gray-200 rounded-md">
+                    <p className="text-gray-900 text-sm whitespace-pre-wrap">{selectedLicense.comments}</p>
+                  </div>
+                </div>
+              )}
               {/* Arquivos por estado - mostrar sempre, mesmo que não haja arquivos ainda */}
               {selectedLicense.states && selectedLicense.states.length > 0 && (
                 <div>
