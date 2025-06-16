@@ -254,6 +254,7 @@ export default function AdminUsers() {
                     <option value="user">Transportador</option>
                     <option value="operational">Operacional</option>
                     <option value="supervisor">Supervisor</option>
+                    <option value="financial">Financeiro</option>
                     <option value="manager">Gerente</option>
                   </select>
                 </FormControl>

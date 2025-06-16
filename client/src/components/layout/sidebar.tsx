@@ -163,20 +163,6 @@ export function Sidebar({ className }: SidebarProps) {
               <p className="text-xs text-gray-400 uppercase mt-2 ml-2 font-semibold">Administração</p>
             </div>
             
-            {isAdmin && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-white hover:bg-gray-700",
-                  location === "/admin" ? "bg-gray-700" : "bg-transparent"
-                )}
-                onClick={() => handleNavigate("/admin")}
-              >
-                <LayoutDashboard className="mr-3 h-5 w-5" />
-                Relatórios
-              </Button>
-            )}
-            
             {(isAdmin || user?.role === 'manager') && (
               <Button
                 variant="ghost"

@@ -52,6 +52,16 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ Filtros por vencimento funcionando adequadamente com datas válidas
 - ✅ Atualização em tempo real via WebSocket implementada na página "Meus Boletos"
 
+### 16/06/2025 - Dashboard AET Administrativo Implementado
+- ✅ Dashboard AET centralizado criado conforme especificações técnicas
+- ✅ Cards de resumo diário: AETs solicitadas, emitidas, pendentes, vencidas hoje
+- ✅ Gráficos operacionais: licenças por status (7 dias), por tipo de veículo, por estado
+- ✅ Tabelas de apoio: AETs recentes e últimos boletos gerados
+- ✅ Endpoint `/api/dashboard/aet` implementado com dados reais do sistema
+- ✅ Rota `/admin/dashboard-aet` adicionada com permissões para admin e manager
+- ✅ Link "Dashboard AET" incluído no sidebar administrativo
+- ✅ Removido menu "Relatórios" do sidebar para melhor organização
+
 ### 15/06/2025 - Refinamentos do Sidebar e Navegação
 - ✅ Removido menu "Minhas Empresas" do sidebar conforme solicitação
 - ✅ Ajustado menu "Modelos de Veículos" para seguir padrão das páginas administrativas
