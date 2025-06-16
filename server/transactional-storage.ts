@@ -1376,10 +1376,9 @@ export class TransactionalStorage implements IStorage {
   // Método para Dashboard AET
   async getDashboardAETData(): Promise<any> {
     try {
-      // Usar horário de Brasília (UTC-3)
+      // Usar data atual real do servidor
       const agora = new Date();
-      const horarioBrasilia = new Date(agora.getTime() - (3 * 60 * 60 * 1000));
-      const hoje = horarioBrasilia.toISOString().split('T')[0]; // YYYY-MM-DD
+      const hoje = agora.toISOString().split('T')[0]; // YYYY-MM-DD
       
       console.log(`[DASHBOARD AET] Data de hoje (Brasília): ${hoje}`);
       
@@ -1421,9 +1420,8 @@ export class TransactionalStorage implements IStorage {
       todasLicencas.forEach(l => {
         if (!l.states) return;
         
-        // Converter data de criação para horário de Brasília
-        const dataCriacaoBrasilia = new Date(new Date(l.createdAt).getTime() - (3 * 60 * 60 * 1000));
-        const isHoje = dataCriacaoBrasilia.toISOString().split('T')[0] === hoje;
+        // Verificar se foi criado hoje
+        const isHoje = l.createdAt && new Date(l.createdAt).toISOString().split('T')[0] === hoje;
         
         console.log(`[DASHBOARD AET] Licença #${l.id}:`);
         console.log(`  - Data criação: ${l.createdAt}`);
@@ -1475,11 +1473,9 @@ export class TransactionalStorage implements IStorage {
       console.log(`- Estados pendentes: ${estadosPendentes}`);
       console.log(`- Estados emitidos total: ${estadosEmitidosTotal}`);
       
-      const boletosHoje = todosBoletos.filter(b => {
-        if (!b.criadoEm) return false;
-        const dataBoletosBrasilia = new Date(new Date(b.criadoEm).getTime() - (3 * 60 * 60 * 1000));
-        return dataBoletosBrasilia.toISOString().split('T')[0] === hoje;
-      });
+      const boletosHoje = todosBoletos.filter(b => 
+        b.criadoEm && new Date(b.criadoEm).toISOString().split('T')[0] === hoje
+      );
       
       const valorBoletosHoje = boletosHoje.reduce((sum, b) => sum + parseFloat(b.valor), 0);
 

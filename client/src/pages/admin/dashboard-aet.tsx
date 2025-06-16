@@ -6,6 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { formatCurrency, formatDate, getLicenseTypeLabel } from "@/lib/utils";
+
+// Função para traduzir status para português brasileiro
+const translateStatus = (status: string): string => {
+  const translations: Record<string, string> = {
+    'pending_registration': 'Pendente',
+    'registration_in_progress': 'Em Análise',
+    'under_review': 'Em Análise',
+    'pending_approval': 'Aguardando Aprovação',
+    'approved': 'Aprovada',
+    'rejected': 'Rejeitada',
+    'canceled': 'Cancelada',
+    'expired': 'Expirada'
+  };
+  
+  return translations[status] || status;
+};
 import { 
   FileText, 
   CheckCircle, 
@@ -329,7 +345,7 @@ export default function DashboardAET() {
                       <TableCell>{getLicenseTypeLabel(licenca.type)}</TableCell>
                       <TableCell>
                         <Badge variant={licenca.status === 'approved' ? 'default' : 'secondary'}>
-                          {licenca.status}
+                          {translateStatus(licenca.status)}
                         </Badge>
                       </TableCell>
                       <TableCell>{formatDate(licenca.createdAt)}</TableCell>
