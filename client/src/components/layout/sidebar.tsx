@@ -204,7 +204,8 @@ export function Sidebar({ className }: SidebarProps) {
               </Button>
             )}
             
-            {isOperational && (
+            {/* Gerenciar Transportadores - conforme permissões */}
+            {permissions.canViewTransporters() && (
               <Button
                 variant="ghost"
                 className={cn(
@@ -218,7 +219,8 @@ export function Sidebar({ className }: SidebarProps) {
               </Button>
             )}
             
-            {isAdmin && (
+            {/* Gerenciar Usuários - conforme permissões */}
+            {permissions.canViewUsers() && (
               <Button
                 variant="ghost"
                 className={cn(
@@ -232,7 +234,8 @@ export function Sidebar({ className }: SidebarProps) {
               </Button>
             )}
             
-            {(isAdmin || isOperational) && (
+            {/* Modelos de Veículos - conforme permissões */}
+            {permissions.canViewVehicleModels() && (
               <Button
                 variant="ghost"
                 className={cn(
@@ -246,7 +249,8 @@ export function Sidebar({ className }: SidebarProps) {
               </Button>
             )}
             
-            {isFinancial && (
+            {/* Módulo Financeiro - apenas para perfis financeiro e admin */}
+            {permissions.canViewFinancial() && (
               <Button
                 variant="ghost"
                 className={cn(
