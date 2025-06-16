@@ -37,11 +37,7 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
   const [location, setLocation] = useLocation();
   const { user, logoutMutation } = useAuth();
-  const isAdmin = user?.role === 'admin' || user?.isAdmin;
-  const isSupervisor = isAdmin || user?.role === 'supervisor';
-  const isOperational = isSupervisor || user?.role === 'operational';
-  const isFinancial = isAdmin || user?.role === 'financial';
-  const isTransporter = user?.role === 'user';
+  const permissions = usePermissions();
 
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
@@ -78,8 +74,8 @@ export function Sidebar({ className }: SidebarProps) {
       </div>
       
       <div className="px-2 py-4 space-y-1">
-        {/* Dashboard */}
-        {!isOperational && (
+        {/* Dashboard - Apenas para perfis administrativos */}
+        {permissions.canViewDashboard() && (
           <Button
             variant="ghost"
             className={cn(
@@ -95,76 +91,91 @@ export function Sidebar({ className }: SidebarProps) {
         
 
         
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start text-white hover:bg-gray-700",
-            location === "/vehicles" ? "bg-gray-700" : "bg-transparent"
-          )}
-          onClick={() => handleNavigate("/vehicles")}
-        >
-          <Truck className="mr-3 h-5 w-5" />
-          Veículos Cadastrados
-        </Button>
+        {/* Veículos Cadastrados - Todos podem ver */}
+        {permissions.canViewVehicles() && (
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-white hover:bg-gray-700",
+              location === "/vehicles" ? "bg-gray-700" : "bg-transparent"
+            )}
+            onClick={() => handleNavigate("/vehicles")}
+          >
+            <Truck className="mr-3 h-5 w-5" />
+            Veículos Cadastrados
+          </Button>
+        )}
         
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start text-white hover:bg-gray-700",
-            location === "/request-license" ? "bg-gray-700" : "bg-transparent"
-          )}
-          onClick={() => handleNavigate("/request-license")}
-        >
-          <FileText className="mr-3 h-5 w-5" />
-          Solicitar Licença
-        </Button>
+        {/* Solicitar Licença - Todos podem solicitar */}
+        {permissions.canCreateLicenses() && (
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-white hover:bg-gray-700",
+              location === "/request-license" ? "bg-gray-700" : "bg-transparent"
+            )}
+            onClick={() => handleNavigate("/request-license")}
+          >
+            <FileText className="mr-3 h-5 w-5" />
+            Solicitar Licença
+          </Button>
+        )}
         
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start text-white hover:bg-gray-700",
-            location === "/track-license" ? "bg-gray-700" : "bg-transparent"
-          )}
-          onClick={() => handleNavigate("/track-license")}
-        >
-          <ClipboardList className="mr-3 h-5 w-5" />
-          Acompanhar Licença
-        </Button>
+        {/* Acompanhar Licença - Todos podem acompanhar */}
+        {permissions.canTrackLicenses() && (
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-white hover:bg-gray-700",
+              location === "/track-license" ? "bg-gray-700" : "bg-transparent"
+            )}
+            onClick={() => handleNavigate("/track-license")}
+          >
+            <ClipboardList className="mr-3 h-5 w-5" />
+            Acompanhar Licença
+          </Button>
+        )}
         
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start text-white hover:bg-gray-700",
-            location === "/issued-licenses" ? "bg-gray-700" : "bg-transparent"
-          )}
-          onClick={() => handleNavigate("/issued-licenses")}
-        >
-          <ListChecks className="mr-3 h-5 w-5" />
-          Licenças Emitidas
-        </Button>
+        {/* Licenças Emitidas - Todos podem ver suas licenças emitidas */}
+        {permissions.canTrackLicenses() && (
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-white hover:bg-gray-700",
+              location === "/issued-licenses" ? "bg-gray-700" : "bg-transparent"
+            )}
+            onClick={() => handleNavigate("/issued-licenses")}
+          >
+            <ListChecks className="mr-3 h-5 w-5" />
+            Licenças Emitidas
+          </Button>
+        )}
         
-        {/* MEUS BOLETOS - SEMPRE VISÍVEL */}
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start text-white hover:bg-gray-700",
-            location === "/meus-boletos" ? "bg-gray-700" : "bg-transparent"
-          )}
-          onClick={() => handleNavigate("/meus-boletos")}
-        >
-          <Receipt className="mr-3 h-5 w-5" />
-          Meus Boletos
-        </Button>
+        {/* MEUS BOLETOS - Conforme permissões */}
+        {permissions.canViewMyBoletos() && (
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-white hover:bg-gray-700",
+              location === "/meus-boletos" ? "bg-gray-700" : "bg-transparent"
+            )}
+            onClick={() => handleNavigate("/meus-boletos")}
+          >
+            <Receipt className="mr-3 h-5 w-5" />
+            Meus Boletos
+          </Button>
+        )}
         
         {/* Seção de Funcionalidades Administrativas */}
-        {(isAdmin || isSupervisor || isOperational) && (
+        {permissions.isAdministrative() && (
           <>
             <div className="pt-2 pb-2">
               <Separator className="bg-gray-700" />
               <p className="text-xs text-gray-400 uppercase mt-2 ml-2 font-semibold">Administração</p>
             </div>
             
-            {(isAdmin || user?.role === 'manager') && (
+            {/* Dashboard AET - para perfis com acesso ao dashboard */}
+            {permissions.canViewDashboard() && (
               <Button
                 variant="ghost"
                 className={cn(
@@ -178,7 +189,8 @@ export function Sidebar({ className }: SidebarProps) {
               </Button>
             )}
             
-            {isOperational && (
+            {/* Gerenciar Licenças - conforme permissões de gerenciamento */}
+            {permissions.canManageLicenses() && (
               <Button
                 variant="ghost"
                 className={cn(

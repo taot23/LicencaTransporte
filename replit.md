@@ -44,6 +44,17 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 16/06/2025 - Sistema de Controle de Acesso Detalhado por Perfil de Usuário
+- ✅ Sistema de permissões granular implementado conforme matriz especificada
+- ✅ 5 perfis de usuário: Operacional, Supervisor, Financeiro, Gerente, Administrador
+- ✅ Controle de acesso no backend: middleware de verificação de permissões implementado
+- ✅ Restrições específicas aplicadas: DELETE apenas para admin, POST /usuarios (admin, supervisor)
+- ✅ POST /boletos limitado a financeiro e admin, POST /transportador (todos exceto operacional)
+- ✅ Hook usePermissions() criado no frontend para verificação de permissões
+- ✅ Sidebar atualizado com controle de visibilidade de menus por perfil
+- ✅ Arquivo shared/permissions.ts com matriz completa de permissões por módulo
+- ✅ Funções de verificação: hasPermission, canAccessModule, canCreateIn, canEditIn, canDeleteIn
+
 ### 16/06/2025 - Filtros Inteligentes e Exportações CSV Padronizadas
 - ✅ Filtro inteligente implementado na página de licenças administrativas (/admin/licenses)
 - ✅ Substituído dropdown de transportadores por campo de busca por nome/CNPJ/CPF
