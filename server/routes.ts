@@ -23,6 +23,13 @@ import {
   vehicles,
   boletos
 } from "@shared/schema";
+import { 
+  canAccessRoute, 
+  hasPermission, 
+  canAccessModule, 
+  isAdministrativeRole,
+  type UserRole 
+} from "@shared/permissions";
 import { eq, sql, or, inArray, and, desc } from "drizzle-orm";
 import { fromZodError } from "zod-validation-error";
 import { ZodError } from "zod";
@@ -860,15 +867,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Função auxiliar para verificar se um usuário tem papel administrativo
   function isAdminUser(user: Express.User): boolean {
-    return ['admin', 'supervisor', 'operational', 'manager'].includes(user.role);
+    return isAdministrativeRole(user.role as UserRole);
   }
 
   function canManageTransporters(user: Express.User): boolean {
-    return ['admin', 'operational'].includes(user.role);
+    return hasPermission(user.role as UserRole, 'transporters', 'edit');
   }
 
   function canManageVehicleModels(user: Express.User): boolean {
-    return ['admin', 'operational'].includes(user.role);
+    return hasPermission(user.role as UserRole, 'vehicleModels', 'edit');
+  }
+
+  // Middleware para verificar permissões específicas
+  function requirePermission(module: keyof import("@shared/permissions").ModulePermissions, action: keyof import("@shared/permissions").Permission) {
+    return (req: any, res: any, next: any) => {
+      if (!req.user) {
+        return res.status(401).json({ message: "Não autenticado" });
+      }
+
+      const userRole = req.user.role as UserRole;
+      if (!hasPermission(userRole, module, action)) {
+        return res.status(403).json({ message: "Acesso negado - permissão insuficiente" });
+      }
+
+      next();
+    };
+  }
+
+  // Middleware para verificar acesso a rotas específicas
+  function requireRouteAccess() {
+    return (req: any, res: any, next: any) => {
+      if (!req.user) {
+        return res.status(401).json({ message: "Não autenticado" });
+      }
+
+      const userRole = req.user.role as UserRole;
+      const method = req.method;
+      const path = req.path;
+
+      if (!canAccessRoute(userRole, method, path)) {
+        return res.status(403).json({ message: "Acesso negado - operação não permitida" });
+      }
+
+      next();
+    };
   }
   
   // Vehicles CRUD endpoints
@@ -2714,7 +2756,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Rota para criação de usuários (transportadores)
-  app.post('/api/admin/users', requireAdmin, async (req, res) => {
+  app.post('/api/admin/users', requireAuth, requirePermission('users', 'create'), async (req, res) => {
     try {
       const { fullName, email, password, isAdmin, role = "user", phone = "" } = req.body;
       
@@ -2746,7 +2788,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Rota para atualização de usuários (transportadores)
-  app.patch('/api/admin/users/:id', requireAdmin, async (req, res) => {
+  app.patch('/api/admin/users/:id', requireAuth, requirePermission('users', 'edit'), async (req, res) => {
     const userId = parseInt(req.params.id);
     if (isNaN(userId)) {
       return res.status(400).json({ message: "ID de usuário inválido" });
@@ -2804,8 +2846,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Rota para exclusão de usuários (transportadores)
-  app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
+  // Rota para exclusão de usuários (transportadores) - APENAS ADMIN
+  app.delete('/api/admin/users/:id', requireAuth, requirePermission('users', 'delete'), async (req, res) => {
     const userId = parseInt(req.params.id);
     if (isNaN(userId)) {
       return res.status(400).json({ message: "ID de usuário inválido" });
