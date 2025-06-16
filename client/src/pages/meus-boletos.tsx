@@ -64,7 +64,8 @@ export default function MeusBoletos() {
   }, [lastMessage, refetch]);
 
   // Função para verificar se boleto está vencido
-  const isVencido = (dataVencimento: string) => {
+  const isVencido = (dataVencimento: string | Date) => {
+    if (!dataVencimento) return false;
     return new Date(dataVencimento) < new Date();
   };
 

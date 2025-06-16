@@ -1401,11 +1401,23 @@ export class TransactionalStorage implements IStorage {
 
   async getBoletosByTransportadorId(transportadorId: number): Promise<Boleto[]> {
     try {
-      return await db
+      const results = await db
         .select()
         .from(boletos)
         .where(eq(boletos.transportadorId, transportadorId))
         .orderBy(desc(boletos.criadoEm));
+      
+      // DEBUG: Log das datas encontradas
+      console.log(`[DEBUG STORAGE] Boletos encontrados para transportador ${transportadorId}:`, results.length);
+      results.forEach((boleto, index) => {
+        console.log(`[DEBUG STORAGE BOLETO ${index + 1}] ID: ${boleto.id}`);
+        console.log(`[DEBUG STORAGE BOLETO ${index + 1}] Data Emissão:`, boleto.dataEmissao);
+        console.log(`[DEBUG STORAGE BOLETO ${index + 1}] Data Vencimento:`, boleto.dataVencimento);
+        console.log(`[DEBUG STORAGE BOLETO ${index + 1}] Tipo Data Emissão:`, typeof boleto.dataEmissao);
+        console.log(`[DEBUG STORAGE BOLETO ${index + 1}] Tipo Data Vencimento:`, typeof boleto.dataVencimento);
+      });
+      
+      return results;
     } catch (error) {
       console.error('Erro ao buscar boletos por transportador:', error);
       throw new Error('Falha ao buscar boletos do transportador');
