@@ -61,6 +61,8 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ Rota `/admin/dashboard-aet` adicionada com permissões para admin e manager
 - ✅ Link "Dashboard AET" incluído no sidebar administrativo
 - ✅ Removido menu "Relatórios" do sidebar para melhor organização
+- ✅ Atualização em tempo real implementada via WebSocket
+- ✅ Opção "Financeiro" adicionada no formulário de criação de usuários
 
 ### 15/06/2025 - Refinamentos do Sidebar e Navegação
 - ✅ Removido menu "Minhas Empresas" do sidebar conforme solicitação

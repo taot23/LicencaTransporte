@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -61,10 +61,52 @@ const CORES_GRAFICO = [
 ];
 
 export default function DashboardAET() {
+  const queryClient = useQueryClient();
+  const [lastUpdate, setLastUpdate] = useState(new Date());
+
   const { data: dashboardData, isLoading, error } = useQuery<DashboardAETData>({
     queryKey: ["/api/dashboard/aet"],
     refetchInterval: 30000, // Atualiza a cada 30 segundos
   });
+
+  // WebSocket para atualizações em tempo real
+  useEffect(() => {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    const socket = new WebSocket(wsUrl);
+
+    socket.onopen = () => {
+      console.log("[DASHBOARD] WebSocket conectado");
+    };
+
+    socket.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        console.log("[DASHBOARD] Mensagem WebSocket recebida:", message.type);
+        
+        // Atualiza o dashboard em mudanças relevantes
+        if (['LICENSE_UPDATE', 'DASHBOARD_UPDATE', 'STATUS_UPDATE'].includes(message.type)) {
+          console.log("[DASHBOARD] Atualizando dados do dashboard");
+          queryClient.invalidateQueries({ queryKey: ["/api/dashboard/aet"] });
+          setLastUpdate(new Date());
+        }
+      } catch (error) {
+        console.error("[DASHBOARD] Erro ao processar mensagem WebSocket:", error);
+      }
+    };
+
+    socket.onclose = () => {
+      console.log("[DASHBOARD] WebSocket desconectado");
+    };
+
+    socket.onerror = (error) => {
+      console.error("[DASHBOARD] Erro WebSocket:", error);
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, [queryClient]);
 
   if (isLoading) {
     return (
@@ -104,7 +146,7 @@ export default function DashboardAET() {
           </div>
           <Button variant="outline" size="sm">
             <Calendar className="h-4 w-4 mr-2" />
-            Atualizado em {new Date().toLocaleTimeString('pt-BR')}
+            Atualizado em {lastUpdate.toLocaleTimeString('pt-BR')}
           </Button>
         </div>
 
