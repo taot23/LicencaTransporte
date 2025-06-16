@@ -74,7 +74,20 @@ export function Sidebar({ className }: SidebarProps) {
       </div>
       
       <div className="px-2 py-4 space-y-1">
-        
+        {/* Dashboard - Apenas para perfis administrativos */}
+        {permissions.canViewDashboard() && (
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-white hover:bg-gray-700",
+              (location === "/" || location === "/dashboard") ? "bg-gray-700" : "bg-transparent"
+            )}
+            onClick={() => handleNavigate("/")}
+          >
+            <Home className="mr-3 h-5 w-5" />
+            Dashboard
+          </Button>
+        )}
         
 
         
