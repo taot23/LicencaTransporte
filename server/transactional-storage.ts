@@ -1418,23 +1418,39 @@ export class TransactionalStorage implements IStorage {
         
         const isHoje = l.createdAt && new Date(l.createdAt).toISOString().split('T')[0] === hoje;
         
+        console.log(`[DASHBOARD AET] Licença #${l.id}:`);
+        console.log(`  - Data criação: ${l.createdAt}`);
+        console.log(`  - É hoje: ${isHoje}`);
+        console.log(`  - Estados: ${JSON.stringify(l.states)}`);
+        console.log(`  - Status estados: ${JSON.stringify(l.stateStatuses)}`);
+        
         l.states.forEach(state => {
           // Contar estados solicitados hoje
           if (isHoje) {
             estadosSolicitadosHoje++;
+            console.log(`    Estado ${state} solicitado hoje: +1`);
           }
           
-          // Verificar se o estado foi aprovado
+          // Verificar se o estado foi aprovado e QUANDO foi aprovado
           const stateStatus = l.stateStatuses?.find(s => s.startsWith(`${state}:`));
           const isApproved = stateStatus?.includes(':approved:');
           
           if (isApproved) {
             estadosEmitidosTotal++;
-            if (isHoje) {
-              estadosEmitidosHoje++;
+            
+            // Para contar como emitido hoje, vamos verificar a data de emissão do estado
+            // O formato é: "STATE:approved:YYYY-MM-DD:YYYY-MM-DD"
+            const statusParts = stateStatus?.split(':');
+            if (statusParts && statusParts.length >= 4) {
+              const dataEmissao = statusParts[3]; // Data de emissão
+              if (dataEmissao === hoje) {
+                estadosEmitidosHoje++;
+                console.log(`    Estado ${state} emitido hoje: +1`);
+              }
             }
           } else {
             estadosPendentes++;
+            console.log(`    Estado ${state} pendente: +1`);
           }
         });
       });
