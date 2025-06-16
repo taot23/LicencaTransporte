@@ -524,7 +524,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Evitar cache
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       
-      const isAdmin = userRole === 'admin' || userRole === 'supervisor' || userRole === 'manager';
+      const isAdmin = userRole === 'admin' || userRole === 'supervisor' || userRole === 'manager' || userRole === 'financial';
       
       if (isAdmin) {
         console.log(`[DASHBOARD NEW] ADMIN - Coletando dados globais`);
