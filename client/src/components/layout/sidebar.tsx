@@ -74,8 +74,8 @@ export function Sidebar({ className }: SidebarProps) {
       </div>
       
       <div className="px-2 py-4 space-y-1">
-        {/* Dashboard - Apenas para perfis administrativos */}
-        {permissions.canViewDashboard() && (
+        {/* Dashboard - Apenas para perfis administrativos, exceto admin */}
+        {permissions.canViewDashboard() && user?.role !== 'admin' && (
           <Button
             variant="ghost"
             className={cn(
