@@ -166,6 +166,13 @@ export function Sidebar({ className }: SidebarProps) {
           </Button>
         )}
         
+        {/* DEBUG: Role atual */}
+        {user && (
+          <div className="text-xs text-gray-400 p-2">
+            DEBUG: Role = {user.role}
+          </div>
+        )}
+        
         {/* Seção de Funcionalidades Administrativas */}
         {(user?.role === 'admin' || user?.role === 'manager' || user?.role === 'supervisor' || user?.role === 'financial') && (
           <>
