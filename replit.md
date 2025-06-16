@@ -65,6 +65,10 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ Sidebar atualizado com controle de visibilidade de menus por perfil
 - ✅ Arquivo shared/permissions.ts com matriz completa de permissões por módulo
 - ✅ Funções de verificação: hasPermission, canAccessModule, canCreateIn, canEditIn, canDeleteIn
+- ✅ **CORREÇÃO CRÍTICA**: Rota duplicada `/api/staff/check-operational` removida
+- ✅ **ACESSO MANAGER RESOLVIDO**: Todas verificações de permissão incluem role 'manager'
+- ✅ **AUTENTICAÇÃO HÍBRIDA**: Sistema suporta bcrypt e scrypt para compatibilidade
+- ✅ **CREDENCIAIS FUNCIONAIS**: gerente@sistema.com / 123456 operacional
 
 ### 16/06/2025 - Filtros Inteligentes e Exportações CSV Padronizadas
 - ✅ Filtro inteligente implementado na página de licenças administrativas (/admin/licenses)
