@@ -192,10 +192,20 @@ export default function AdminTransporters() {
       );
     }
 
+    if (filteredTransporters.length === 0 && searchFilter.trim()) {
+      return (
+        <Alert className="my-4">
+          <AlertDescription>
+            Nenhum transportador encontrado para "{searchFilter}". Tente um termo diferente.
+          </AlertDescription>
+        </Alert>
+      );
+    }
+
     if (isMobile) {
       return (
         <div className="space-y-4">
-          {transporters.map((transporter: Transporter) => (
+          {filteredTransporters.map((transporter: Transporter) => (
             <Card key={transporter.id} className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="p-4 bg-gray-50 flex justify-between items-center">
@@ -255,7 +265,7 @@ export default function AdminTransporters() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {transporters.map((transporter: Transporter) => (
+          {filteredTransporters.map((transporter: Transporter) => (
             <TableRow key={transporter.id}>
               <TableCell className="font-medium">{transporter.name}</TableCell>
               <TableCell>{transporter.documentNumber}</TableCell>
@@ -329,6 +339,48 @@ export default function AdminTransporters() {
             </Dialog>
           </div>
         </div>
+
+        {/* Campo de busca inteligente */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              Buscar Transportadores
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Digite CNPJ/CPF, nome, razão social, email ou cidade..."
+                value={searchFilter}
+                onChange={(e) => setSearchFilter(e.target.value)}
+                className="pl-10 pr-10"
+              />
+              {searchFilter && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSearchFilter("")}
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            {searchFilter && (
+              <div className="mt-2 text-sm text-gray-600">
+                {filteredTransporters.length === 0 ? (
+                  <span>Nenhum resultado encontrado para "{searchFilter}"</span>
+                ) : (
+                  <span>
+                    {filteredTransporters.length} transportador(es) encontrado(s) de {transporters.length} total
+                  </span>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Lista de transportadores */}
         {renderTransportersList()}
