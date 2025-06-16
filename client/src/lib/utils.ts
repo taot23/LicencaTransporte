@@ -111,21 +111,43 @@ export function isOperationalUser(user: any): boolean {
   return user?.role === 'operational' || user?.role === 'supervisor';
 }
 
-// Formatar data para exibição
+// Formatar data para exibição no formato brasileiro
 export function formatDate(dateString: string | Date | undefined | null): string {
   if (!dateString) return "-";
   
-  const date = typeof dateString === "string" ? new Date(dateString) : dateString;
-  
-  if (!(date instanceof Date) || isNaN(date.getTime())) {
+  try {
+    let date: Date;
+    
+    if (typeof dateString === "string") {
+      // Se a string contém 'T', é ISO format
+      if (dateString.includes('T')) {
+        date = new Date(dateString);
+      } else {
+        // Se é formato YYYY-MM-DD, processar diretamente
+        const parts = dateString.split('-');
+        if (parts.length === 3) {
+          date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        } else {
+          date = new Date(dateString);
+        }
+      }
+    } else {
+      date = dateString;
+    }
+    
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      return "-";
+    }
+    
+    return date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  } catch (error) {
+    console.error("Erro ao formatar data:", error, dateString);
     return "-";
   }
-  
-  return date.toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
 }
 
 // Formatar moeda brasileira

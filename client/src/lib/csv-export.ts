@@ -57,12 +57,44 @@ export function exportToCSV(options: CSVExportOptions): void {
 }
 
 /**
- * Formata data para exibição em CSV
+ * Formata data para exibição em CSV no formato brasileiro
  */
 export function formatDateForCSV(date: string | Date): string {
   if (!date) return '';
-  const d = new Date(date);
-  return d.toLocaleDateString('pt-BR');
+  
+  try {
+    let d: Date;
+    
+    if (typeof date === "string") {
+      // Se a string contém 'T', é ISO format
+      if (date.includes('T')) {
+        d = new Date(date);
+      } else {
+        // Se é formato YYYY-MM-DD, processar diretamente
+        const parts = date.split('-');
+        if (parts.length === 3) {
+          d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        } else {
+          d = new Date(date);
+        }
+      }
+    } else {
+      d = date;
+    }
+    
+    if (!(d instanceof Date) || isNaN(d.getTime())) {
+      return '';
+    }
+    
+    return d.toLocaleDateString('pt-BR', {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  } catch (error) {
+    console.error("Erro ao formatar data para CSV:", error, date);
+    return '';
+  }
 }
 
 /**
