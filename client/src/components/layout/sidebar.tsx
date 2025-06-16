@@ -21,7 +21,8 @@ import {
   Settings,
   Car,
   RefreshCw,
-  Receipt
+  Receipt,
+  BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -173,6 +174,20 @@ export function Sidebar({ className }: SidebarProps) {
               >
                 <LayoutDashboard className="mr-3 h-5 w-5" />
                 Relatórios
+              </Button>
+            )}
+            
+            {(isAdmin || user?.role === 'manager') && (
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start text-white hover:bg-gray-700",
+                  location === "/admin/dashboard-aet" ? "bg-gray-700" : "bg-transparent"
+                )}
+                onClick={() => handleNavigate("/admin/dashboard-aet")}
+              >
+                <BarChart3 className="mr-3 h-5 w-5" />
+                Dashboard AET
               </Button>
             )}
             

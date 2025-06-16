@@ -17,6 +17,7 @@ import AdminUsersPage from "@/pages/admin/admin-users";
 import AdminVehiclesPage from "@/pages/admin/admin-vehicles";
 import VehicleModelsPage from "@/pages/admin/vehicle-models-page";
 import BoletosPage from "@/pages/admin/boletos-page";
+import DashboardAET from "@/pages/admin/dashboard-aet";
 import MeusBoletos from "@/pages/meus-boletos";
 import RedirectPage from "@/pages/redirect-page";
 import { ProtectedRoute, AdminRoute, StaffRoute } from "./lib/protected-route";
@@ -49,6 +50,7 @@ function Router() {
       <StaffRoute path="/admin/vehicles" component={AdminVehiclesPage} requiredRole="operational" />
       <AdminRoute path="/admin/vehicle-models" component={VehicleModelsPage} />
       <StaffRoute path="/admin/boletos" component={BoletosPage} requiredRole="financial" />
+      <AdminRoute path="/admin/dashboard-aet" component={DashboardAET} />
       
       {/* Sistema de Controle de Licenças - Rotas do usuário (versão desktop ou mobile) */}
       <ProtectedRoute 
