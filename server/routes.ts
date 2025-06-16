@@ -30,7 +30,7 @@ import {
   isAdministrativeRole,
   type UserRole 
 } from "@shared/permissions";
-import { eq, sql, or, inArray, and, desc } from "drizzle-orm";
+import { eq, sql, or, inArray, and, desc, gt } from "drizzle-orm";
 import { fromZodError } from "zod-validation-error";
 import { ZodError } from "zod";
 import multer from "multer";
@@ -3839,6 +3839,99 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     } catch (error) {
       console.error("Erro ao buscar boletos do usuário:", error);
       res.status(500).json({ message: "Erro ao buscar seus boletos" });
+    }
+  });
+
+  // Verificar licenças vigentes por estado e placas
+  app.post("/api/licenses/check-existing", requireAuth, async (req, res) => {
+    try {
+      const { placas, estados } = req.body;
+      
+      if (!placas || !Array.isArray(placas) || placas.length === 0) {
+        return res.status(400).json({ message: "Placas são obrigatórias" });
+      }
+      
+      if (!estados || !Array.isArray(estados) || estados.length === 0) {
+        return res.status(400).json({ message: "Estados são obrigatórios" });
+      }
+      
+      const conflitos: any[] = [];
+      const hoje = new Date();
+      const limiteRenovacao = new Date(hoje.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 dias no futuro
+      
+      // Para cada estado selecionado
+      for (const estado of estados) {
+        // Buscar licenças aprovadas para as placas fornecidas neste estado
+        const query = db
+          .select()
+          .from(licenseRequests)
+          .where(
+            and(
+              // Verificar se alguma das placas fornecidas está na placa principal
+              or(
+                inArray(licenseRequests.mainVehiclePlate, placas),
+                // Também verificar se alguma placa está nas placas adicionais
+                sql`EXISTS (
+                  SELECT 1 FROM unnest(${licenseRequests.additionalPlates}) AS additional_plate 
+                  WHERE additional_plate = ANY(${placas})
+                )`
+              ),
+              // Estado deve estar presente no array de estados
+              sql`${estado} = ANY(${licenseRequests.states})`,
+              // Status deve ser aprovado
+              eq(licenseRequests.status, 'approved'),
+              // Data de validade deve ser futura
+              sql`${licenseRequests.validUntil} > ${hoje}`,
+              // Não deve ser rascunho
+              eq(licenseRequests.isDraft, false)
+            )
+          );
+        
+        const licencasExistentes = await query;
+        
+        // Verificar cada licença encontrada
+        for (const licenca of licencasExistentes) {
+          // Verificar se há status aprovado específico para este estado
+          const stateStatus = licenca.stateStatuses?.find(status => 
+            status.startsWith(`${estado}:approved`)
+          );
+          
+          if (stateStatus) {
+            // Extrair data de validade específica do estado
+            const stateStatusParts = stateStatus.split(':');
+            let validUntilState = licenca.validUntil;
+            
+            if (stateStatusParts.length > 2 && stateStatusParts[2]) {
+              validUntilState = new Date(stateStatusParts[2]);
+            }
+            
+            // Verificar se a licença tem mais de 30 dias até vencer
+            if (validUntilState && validUntilState > limiteRenovacao) {
+              const diasRestantes = Math.ceil((validUntilState.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+              
+              conflitos.push({
+                estado,
+                licenca: {
+                  id: licenca.id,
+                  requestNumber: licenca.requestNumber,
+                  mainVehiclePlate: licenca.mainVehiclePlate,
+                  validUntil: validUntilState,
+                  diasRestantes,
+                  placasConflitantes: placas.filter(placa => 
+                    placa === licenca.mainVehiclePlate || 
+                    (licenca.additionalPlates && licenca.additionalPlates.includes(placa))
+                  )
+                }
+              });
+            }
+          }
+        }
+      }
+      
+      res.json({ conflitos });
+    } catch (error) {
+      console.error("Erro ao verificar licenças existentes:", error);
+      res.status(500).json({ message: "Erro ao verificar licenças existentes" });
     }
   });
 
