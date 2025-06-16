@@ -1405,24 +1405,45 @@ export class TransactionalStorage implements IStorage {
         .orderBy(desc(boletos.criadoEm))
         .limit(5);
 
-      // Calcular estatísticas baseadas nos dados reais
-      const licencasHoje = todasLicencas.filter(l => 
-        l.createdAt && new Date(l.createdAt).toISOString().split('T')[0] === hoje
-      );
+      // Calcular estatísticas POR ESTADO e não por pedido
+      let estadosSolicitadosHoje = 0;
+      let estadosEmitidosHoje = 0;
+      let estadosPendentes = 0;
+      let estadosEmitidosTotal = 0;
       
-      const licencasEmitidas = todasLicencas.filter(l => {
-        if (!l.stateStatuses || l.stateStatuses.length === 0) return false;
-        return l.stateStatuses.some(status => status.includes(':approved:'));
+      console.log(`[DASHBOARD AET] Analisando ${todasLicencas.length} licenças para contagem por estado`);
+      
+      todasLicencas.forEach(l => {
+        if (!l.states) return;
+        
+        const isHoje = l.createdAt && new Date(l.createdAt).toISOString().split('T')[0] === hoje;
+        
+        l.states.forEach(state => {
+          // Contar estados solicitados hoje
+          if (isHoje) {
+            estadosSolicitadosHoje++;
+          }
+          
+          // Verificar se o estado foi aprovado
+          const stateStatus = l.stateStatuses?.find(s => s.startsWith(`${state}:`));
+          const isApproved = stateStatus?.includes(':approved:');
+          
+          if (isApproved) {
+            estadosEmitidosTotal++;
+            if (isHoje) {
+              estadosEmitidosHoje++;
+            }
+          } else {
+            estadosPendentes++;
+          }
+        });
       });
       
-      const licencasEmitidasHoje = licencasEmitidas.filter(l => 
-        l.createdAt && new Date(l.createdAt).toISOString().split('T')[0] === hoje
-      );
-      
-      const licencasPendentes = todasLicencas.filter(l => {
-        if (!l.stateStatuses || l.stateStatuses.length === 0) return true;
-        return !l.stateStatuses.some(status => status.includes(':approved:'));
-      });
+      console.log(`[DASHBOARD AET] Resultado da contagem por estado:`);
+      console.log(`- Estados solicitados hoje: ${estadosSolicitadosHoje}`);
+      console.log(`- Estados emitidos hoje: ${estadosEmitidosHoje}`);
+      console.log(`- Estados pendentes: ${estadosPendentes}`);
+      console.log(`- Estados emitidos total: ${estadosEmitidosTotal}`);
       
       const boletosHoje = todosBoletos.filter(b => 
         b.criadoEm && new Date(b.criadoEm).toISOString().split('T')[0] === hoje
@@ -1465,30 +1486,51 @@ export class TransactionalStorage implements IStorage {
         color: `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`
       }));
 
-      // Dados dos últimos 7 dias (baseado em dados reais)
+      // Dados dos últimos 7 dias (contagem por estado)
       const licencasPorStatus7Dias = [];
       for (let i = 6; i >= 0; i--) {
         const data = new Date();
         data.setDate(data.getDate() - i);
         const dataStr = data.toISOString().split('T')[0];
         
-        const licencasDoDia = todasLicencas.filter(l => 
-          l.createdAt && new Date(l.createdAt).toISOString().split('T')[0] === dataStr
-        );
+        let estadosSolicitados = 0;
+        let estadosEmitidos = 0;
+        let estadosRecusados = 0;
+        let estadosExpirados = 0;
+        
+        todasLicencas.forEach(l => {
+          if (!l.states || !l.createdAt) return;
+          
+          const licenseDate = new Date(l.createdAt).toISOString().split('T')[0];
+          if (licenseDate !== dataStr) return;
+          
+          l.states.forEach(state => {
+            estadosSolicitados++;
+            
+            const stateStatus = l.stateStatuses?.find(s => s.startsWith(`${state}:`));
+            if (stateStatus?.includes(':approved:')) {
+              estadosEmitidos++;
+            } else if (l.status === 'rejected') {
+              estadosRecusados++;
+            } else if (l.status === 'expired') {
+              estadosExpirados++;
+            }
+          });
+        });
         
         licencasPorStatus7Dias.push({
           data: data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
-          solicitada: licencasDoDia.length,
-          emitida: licencasDoDia.filter(l => l.stateStatuses?.some(s => s.includes(':approved:'))).length,
-          recusada: licencasDoDia.filter(l => l.status === 'rejected').length,
-          expirada: licencasDoDia.filter(l => l.status === 'expired').length
+          solicitada: estadosSolicitados,
+          emitida: estadosEmitidos,
+          recusada: estadosRecusados,
+          expirada: estadosExpirados
         });
       }
 
       return {
-        aetsSolicitadasHoje: licencasHoje.length,
-        aetsEmitidasHoje: licencasEmitidasHoje.length,
-        aetsPendentes: licencasPendentes.length,
+        aetsSolicitadasHoje: estadosSolicitadosHoje,
+        aetsEmitidasHoje: estadosEmitidosHoje,
+        aetsPendentes: estadosPendentes,
         aetsVencidasHoje: 0, // Precisaria implementar lógica de vencimento
         totalVeiculos: todosVeiculos.length,
         boletosHoje: boletosHoje.length,
