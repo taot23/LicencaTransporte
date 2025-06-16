@@ -44,6 +44,17 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 16/06/2025 - Filtros Inteligentes e Exportações CSV Padronizadas
+- ✅ Filtro inteligente implementado na página de licenças administrativas (/admin/licenses)
+- ✅ Substituído dropdown de transportadores por campo de busca por nome/CNPJ/CPF
+- ✅ Filtro inteligente implementado na página de usuários (/admin/users)
+- ✅ Campo de busca por nome, email, telefone ou função de usuários
+- ✅ Exportação CSV implementada na página "Minhas Licenças Emitidas" (/licencas-emitidas)
+- ✅ Exportação CSV implementada na página "Acompanhar Licença" (/acompanhar-licenca)
+- ✅ Todas as exportações CSV padronizadas com separador ";" (ponto e vírgula)
+- ✅ Tradução completa dos dados exportados para português brasileiro
+- ✅ Filtros em tempo real com busca instantânea enquanto o usuário digita
+
 ### 15/06/2025 - Correção Crítica: Exibição de Datas no Módulo Financeiro
 - ✅ Corrigido problema das datas de emissão e vencimento não aparecendo nas tabelas
 - ✅ Implementada conversão adequada de datas usando `new Date()` no frontend
