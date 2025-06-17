@@ -353,6 +353,59 @@ async function sincronizarLicencaEmitida(licenca: any, estado: string, numeroAet
   }
 }
 
+// Função para sincronizar todas as licenças aprovadas existentes
+async function sincronizarTodasLicencasAprovadas() {
+  try {
+    console.log('[SINCRONIZAÇÃO EM LOTE] Iniciando sincronização de todas as licenças aprovadas...');
+    
+    // Buscar todas as licenças não-rascunho
+    const licencasQuery = `
+      SELECT * FROM license_requests 
+      WHERE is_draft = false 
+      AND state_statuses IS NOT NULL 
+      AND array_length(state_statuses, 1) > 0
+    `;
+    
+    const licencasResult = await pool.query(licencasQuery);
+    let totalSincronizadas = 0;
+    
+    for (const licenca of licencasResult.rows) {
+      if (licenca.state_statuses && Array.isArray(licenca.state_statuses)) {
+        for (const stateStatus of licenca.state_statuses) {
+          // Parse do formato: "ESTADO:status:data_validade:data_emissao"
+          const parts = stateStatus.split(':');
+          if (parts.length >= 4 && parts[1] === 'approved') {
+            const estado = parts[0];
+            const dataValidade = parts[2];
+            const dataEmissao = parts[3];
+            
+            // Buscar número AET do stateAETNumbers
+            let numeroAet = `AET-${estado}-${licenca.id}`;
+            if (licenca.state_aet_numbers && Array.isArray(licenca.state_aet_numbers)) {
+              const aetEntry = licenca.state_aet_numbers.find((entry: string) => entry.startsWith(`${estado}:`));
+              if (aetEntry) {
+                numeroAet = aetEntry.split(':')[1];
+              }
+            }
+            
+            try {
+              await sincronizarLicencaEmitida(licenca, estado, numeroAet, dataValidade);
+              totalSincronizadas++;
+              console.log(`[SINCRONIZAÇÃO EM LOTE] Sincronizada: Licença ${licenca.id}, Estado ${estado}`);
+            } catch (error) {
+              console.error(`[SINCRONIZAÇÃO EM LOTE] Erro na licença ${licenca.id}, estado ${estado}:`, error);
+            }
+          }
+        }
+      }
+    }
+    
+    console.log(`[SINCRONIZAÇÃO EM LOTE] Concluída: ${totalSincronizadas} licenças sincronizadas`);
+  } catch (error) {
+    console.error('[SINCRONIZAÇÃO EM LOTE] Erro geral:', error);
+  }
+}
+
 // Função para transmitir mensagens a todos os clientes conectados
 const broadcastMessage = (message: WSMessage) => {
   console.log(`📡 Enviando atualização WebSocket: ${message.type}`);
@@ -3768,9 +3821,12 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       // Se o status foi alterado para 'approved', sincronizar com licencas_emitidas
       if (statusData.status === 'approved' && statusData.validUntil && statusData.aetNumber) {
         try {
+          console.log(`[SINCRONIZAÇÃO AUTOMÁTICA] Licença ${licenseId} aprovada para estado ${statusData.state} - iniciando sincronização`);
           await sincronizarLicencaEmitida(updatedLicense, statusData.state, statusData.aetNumber, statusData.validUntil);
+          console.log(`[SINCRONIZAÇÃO AUTOMÁTICA] Licença ${licenseId} sincronizada com sucesso para tabela licencas_emitidas`);
         } catch (error) {
-          console.error('Erro ao sincronizar licença emitida:', error);
+          console.error(`[SINCRONIZAÇÃO AUTOMÁTICA] ERRO ao sincronizar licença ${licenseId}:`, error);
+          // Ainda assim continuar o processo, mas logar o erro crítico
         }
       }
 
