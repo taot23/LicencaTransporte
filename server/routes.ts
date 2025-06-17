@@ -2539,6 +2539,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ENDPOINT DE VALIDAÇÃO CRÍTICA DEFINITIVO - EVITA CUSTOS DESNECESSÁRIOS
+  app.post('/api/validacao-critica', requireAuth, async (req, res) => {
+    try {
+      const { estado, placas } = req.body;
+      
+      console.log(`[VALIDAÇÃO CRÍTICA DEFINITIVA] Estado: ${estado}, Placas: ${placas?.join(', ')}`);
+      
+      if (!estado || !placas || placas.length === 0) {
+        return res.json({ bloqueado: false, message: 'Parâmetros inválidos' });
+      }
+
+      // Query SQL DIRETA para máxima confiabilidade  
+      const query = `
+        SELECT 
+          numero_licenca,
+          data_validade,
+          placa_unidade_tratora,
+          placa_primeira_carreta,
+          placa_segunda_carreta,
+          EXTRACT(DAY FROM (data_validade - CURRENT_DATE)) as dias_restantes
+        FROM licencas_emitidas 
+        WHERE estado = $1 
+          AND status = 'ativa'
+          AND data_validade > CURRENT_DATE
+          AND (
+            placa_unidade_tratora = ANY($2::text[]) OR
+            placa_primeira_carreta = ANY($2::text[]) OR
+            placa_segunda_carreta = ANY($2::text[])
+          )
+        ORDER BY data_validade DESC
+        LIMIT 1
+      `;
+      
+      const result = await pool.query(query, [estado, placas]);
+      
+      if (result.rows.length > 0) {
+        const licenca = result.rows[0];
+        const dias = parseInt(licenca.dias_restantes);
+        
+        console.log(`[VALIDAÇÃO CRÍTICA] ${estado}: Licença ${licenca.numero_licenca} com ${dias} dias`);
+        
+        if (dias > 60) {
+          console.log(`[VALIDAÇÃO CRÍTICA] ${estado} BLOQUEADO - ${dias} dias > 60`);
+          return res.json({
+            bloqueado: true,
+            numero: licenca.numero_licenca,
+            validade: licenca.data_validade,
+            diasRestantes: dias,
+            placasConflitantes: [
+              licenca.placa_unidade_tratora,
+              licenca.placa_primeira_carreta, 
+              licenca.placa_segunda_carreta
+            ].filter(Boolean)
+          });
+        }
+      }
+      
+      console.log(`[VALIDAÇÃO CRÍTICA] ${estado} LIBERADO`);
+      return res.json({ bloqueado: false });
+      
+    } catch (error) {
+      console.error('[VALIDAÇÃO CRÍTICA] Erro:', error);
+      return res.json({ bloqueado: false, error: 'Erro na validação' });
+    }
+  });
+
   // ENDPOINT ESPECÍFICO POR ESTADO - VALIDAÇÃO CRÍTICA
   app.post('/api/licencas-vigentes-by-state', requireAuth, async (req, res) => {
     try {

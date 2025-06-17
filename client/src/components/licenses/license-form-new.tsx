@@ -39,7 +39,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { CampoPlacaAdicional } from "./placas-adicionais";
 import { VehicleSelectCard } from "./vehicle-select-card";
-import { StateSelectionWithValidation } from "./state-selection-with-validation";
+import { StateSelectionFinal } from "./state-selection-final";
 import { 
   LoaderCircle,
   X, 
@@ -1780,7 +1780,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
             console.log('[FORM-PRINCIPAL] Placas enviadas para validação:', placasColetadas);
             
             return (
-              <StateSelectionWithValidation
+              <StateSelectionFinal
                 selectedStates={field.value || []}
                 onStatesChange={field.onChange}
                 placas={placasColetadas}
