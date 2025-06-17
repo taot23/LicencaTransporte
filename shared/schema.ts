@@ -731,7 +731,59 @@ export const boletoStatusOptions = [
   { value: "vencido", label: "Vencido" },
 ];
 
-// Nova tabela para licenças individuais por estado
+// Nova tabela de licenças emitidas por estado com validação precisa por composição veicular
+export const licencasEmitidas = pgTable("licencas_emitidas", {
+  id: serial("id").primaryKey(),
+  pedidoId: integer("pedido_id").references(() => licenseRequests.id, { onDelete: 'cascade' }).notNull(),
+  estado: text("estado").notNull(), // UF do estado
+  numeroLicenca: text("numero_licenca").notNull(), // Número AET gerado
+  
+  // Placas por tipo de veículo na composição
+  placaUnidadeTratora: text("placa_unidade_tratora"), // Cavalo mecânico
+  placaPrimeiraCarreta: text("placa_primeira_carreta"), // Primeira carreta/reboque
+  placaSegundaCarreta: text("placa_segunda_carreta"), // Segunda carreta (bitrem/rodotrem)
+  placaDolly: text("placa_dolly"), // Dolly (para rodotrem)
+  placaPrancha: text("placa_prancha"), // Prancha (para tipo prancha)
+  placaReboque: text("placa_reboque"), // Reboque (Romeu e Julieta)
+  
+  // Dados da licença
+  dataEmissao: timestamp("data_emissao").notNull(),
+  dataValidade: timestamp("data_validade").notNull(),
+  status: text("status").notNull().default("emitida"), // emitida, vencida, cancelada
+  
+  // Campos adicionais
+  cnpjSelecionado: text("cnpj_selecionado"), // CNPJ usado para emissão
+  arquivoLicenca: text("arquivo_licenca"), // URL do arquivo da licença
+  observacoes: text("observacoes"), // Comentários específicos
+  
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+}, (table) => {
+  return {
+    // Índices para validação eficiente
+    estadoValidadeIdx: index("idx_licenca_estado_validade").on(table.estado, table.dataValidade),
+    statusValidadeIdx: index("idx_licenca_status_validade").on(table.status, table.dataValidade),
+    numeroLicencaIdx: uniqueIndex("idx_licenca_numero").on(table.numeroLicenca),
+    
+    // Índices por placa para validação rápida
+    placaTratoraIdx: index("idx_licenca_placa_tratora").on(table.placaUnidadeTratora),
+    placaPrimeiraIdx: index("idx_licenca_placa_primeira").on(table.placaPrimeiraCarreta),
+    placaSegundaIdx: index("idx_licenca_placa_segunda").on(table.placaSegundaCarreta),
+    placaDollyIdx: index("idx_licenca_placa_dolly").on(table.placaDolly),
+    placaPranchaIdx: index("idx_licenca_placa_prancha").on(table.placaPrancha),
+    placaReboqueIdx: index("idx_licenca_placa_reboque").on(table.placaReboque),
+    
+    // Índice composto para busca por estado + placas
+    estadoPlacasIdx: index("idx_licenca_estado_placas").on(
+      table.estado, 
+      table.placaUnidadeTratora,
+      table.placaPrimeiraCarreta,
+      table.placaSegundaCarreta
+    )
+  };
+});
+
+// Tabela legacy mantida para compatibilidade
 export const stateLicenses = pgTable("state_licenses", {
   id: serial("id").primaryKey(),
   licenseRequestId: integer("license_request_id").notNull().references(() => licenseRequests.id),
@@ -756,8 +808,16 @@ export const stateLicenses = pgTable("state_licenses", {
   };
 });
 
+// Schemas para a nova tabela de licenças emitidas
+export const insertLicencaEmitidaSchema = createInsertSchema(licencasEmitidas)
+  .omit({ id: true, createdAt: true, updatedAt: true });
+
 export const insertStateLicenseSchema = createInsertSchema(stateLicenses)
   .omit({ id: true, createdAt: true, updatedAt: true });
+
+// Tipos TypeScript para licenças emitidas
+export type LicencaEmitida = typeof licencasEmitidas.$inferSelect;
+export type InsertLicencaEmitida = z.infer<typeof insertLicencaEmitidaSchema>;
 
 export type StateLicense = typeof stateLicenses.$inferSelect;
 export type InsertStateLicense = z.infer<typeof insertStateLicenseSchema>;

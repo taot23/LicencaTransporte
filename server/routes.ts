@@ -2128,75 +2128,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('Creating license request with data:', JSON.stringify(sanitizedData, null, 2));
       
-      // Validar licenças vigentes ANTES de criar a nova licença
-      console.log(`[VALIDAÇÃO INTELIGENTE] Verificando conflitos antes de criar licença`);
+      // NOVA VALIDAÇÃO INTELIGENTE: Verificar licenças vigentes por composição veicular
+      console.log(`[VALIDAÇÃO NOVA] Verificando conflitos por composição veicular antes de criar licença`);
       
-      // Coletar todas as placas do formulário
-      const allPlates = [];
-      if (sanitizedData.mainVehiclePlate) allPlates.push(sanitizedData.mainVehiclePlate);
-      if (sanitizedData.additionalPlates) allPlates.push(...sanitizedData.additionalPlates);
+      // Mapear placas por tipo de veículo conforme a composição
+      const placaMapping = {
+        placaUnidadeTratora: null,
+        placaPrimeiraCarreta: null,
+        placaSegundaCarreta: null,
+        placaDolly: null,
+        placaPrancha: null,
+        placaReboque: null
+      };
       
-      console.log(`[VALIDAÇÃO INTELIGENTE] Estados: ${sanitizedData.states.join(', ')}, Placas: ${allPlates.join(', ')}`);
+      // Definir placas baseado no tipo de licença e veículos selecionados
+      if (sanitizedData.mainVehiclePlate) {
+        placaMapping.placaUnidadeTratora = sanitizedData.mainVehiclePlate;
+      }
+      
+      // Mapear veículos específicos baseado no tipo de licença
+      if (sanitizedData.type === 'bitrain_9_axles' || sanitizedData.type === 'bitrain_7_axles') {
+        if (sanitizedData.firstTrailerId) {
+          // Buscar placa do primeiro trailer
+          const firstTrailer = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.firstTrailerId));
+          if (firstTrailer[0]) placaMapping.placaPrimeiraCarreta = firstTrailer[0].plate;
+        }
+        if (sanitizedData.secondTrailerId) {
+          // Buscar placa do segundo trailer
+          const secondTrailer = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.secondTrailerId));
+          if (secondTrailer[0]) placaMapping.placaSegundaCarreta = secondTrailer[0].plate;
+        }
+      } else if (sanitizedData.type === 'rodotrem') {
+        if (sanitizedData.dollyId) {
+          const dolly = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.dollyId));
+          if (dolly[0]) placaMapping.placaDolly = dolly[0].plate;
+        }
+        if (sanitizedData.secondTrailerId) {
+          const secondTrailer = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.secondTrailerId));
+          if (secondTrailer[0]) placaMapping.placaSegundaCarreta = secondTrailer[0].plate;
+        }
+      } else if (sanitizedData.type === 'prancha') {
+        if (sanitizedData.flatbedId) {
+          const flatbed = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.flatbedId));
+          if (flatbed[0]) placaMapping.placaPrancha = flatbed[0].plate;
+        }
+      } else if (sanitizedData.type === 'romeu_julieta') {
+        if (sanitizedData.firstTrailerId) {
+          const reboque = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.firstTrailerId));
+          if (reboque[0]) placaMapping.placaReboque = reboque[0].plate;
+        }
+      }
+      
+      console.log(`[VALIDAÇÃO NOVA] Placas mapeadas:`, placaMapping);
+      console.log(`[VALIDAÇÃO NOVA] Estados: ${sanitizedData.states.join(', ')}`);
       
       const conflicts = [];
       const now = new Date();
       const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
       
-      // Verificar conflitos para cada estado
+      // Verificar conflitos para cada estado usando a nova tabela
       for (const state of sanitizedData.states) {
         const query = `
           SELECT 
-            sl.state,
-            sl.aet_number,
-            sl.valid_until,
-            sl.status,
-            lr.main_vehicle_plate,
-            lr.additional_plates,
-            lr.vehicles,
+            le.estado,
+            le.numero_licenca,
+            le.data_validade,
+            le.status,
+            le.placa_unidade_tratora,
+            le.placa_primeira_carreta,
+            le.placa_segunda_carreta,
+            le.placa_dolly,
+            le.placa_prancha,
+            le.placa_reboque,
             lr.request_number,
-            lr.id as license_id
-          FROM state_licenses sl
-          JOIN license_requests lr ON sl.license_request_id = lr.id
-          WHERE sl.state = $1 
-            AND sl.status = 'approved'
-            AND sl.valid_until > $2
+            le.pedido_id
+          FROM licencas_emitidas le
+          JOIN license_requests lr ON le.pedido_id = lr.id
+          WHERE le.estado = $1 
+            AND le.status = 'emitida'
+            AND le.data_validade > $2
             AND (
-              lr.main_vehicle_plate = ANY($3) OR
-              lr.additional_plates && $3
+              ($3 IS NOT NULL AND le.placa_unidade_tratora = $3) OR
+              ($4 IS NOT NULL AND le.placa_primeira_carreta = $4) OR
+              ($5 IS NOT NULL AND le.placa_segunda_carreta = $5) OR
+              ($6 IS NOT NULL AND le.placa_dolly = $6) OR
+              ($7 IS NOT NULL AND le.placa_prancha = $7) OR
+              ($8 IS NOT NULL AND le.placa_reboque = $8)
             )
         `;
         
-        const result = await pool.query(query, [state, thirtyDaysFromNow, allPlates]);
+        const result = await pool.query(query, [
+          state, 
+          thirtyDaysFromNow,
+          placaMapping.placaUnidadeTratora,
+          placaMapping.placaPrimeiraCarreta,
+          placaMapping.placaSegundaCarreta,
+          placaMapping.placaDolly,
+          placaMapping.placaPrancha,
+          placaMapping.placaReboque
+        ]);
         
         if (result.rows.length > 0) {
           for (const row of result.rows) {
-            const daysUntilExpiry = Math.ceil((new Date(row.valid_until) - now) / (1000 * 60 * 60 * 24));
+            const daysUntilExpiry = Math.ceil((new Date(row.data_validade) - now) / (1000 * 60 * 60 * 24));
             
             conflicts.push({
-              state: row.state,
-              licenseId: row.license_id,
+              state: row.estado,
+              licenseId: row.pedido_id,
               requestNumber: row.request_number,
-              aetNumber: row.aet_number,
-              validUntil: row.valid_until,
+              aetNumber: row.numero_licenca,
+              validUntil: row.data_validade,
               daysUntilExpiry,
-              canRenew: daysUntilExpiry <= 30
+              canRenew: daysUntilExpiry <= 30,
+              conflictingPlates: {
+                tratora: row.placa_unidade_tratora,
+                primeira: row.placa_primeira_carreta,
+                segunda: row.placa_segunda_carreta,
+                dolly: row.placa_dolly,
+                prancha: row.placa_prancha,
+                reboque: row.placa_reboque
+              }
             });
             
-            console.log(`[VALIDAÇÃO INTELIGENTE] CONFLITO: Estado ${state}, AET ${row.aet_number}, ${daysUntilExpiry} dias até vencer`);
+            console.log(`[VALIDAÇÃO NOVA] CONFLITO: Estado ${state}, AET ${row.numero_licenca}, ${daysUntilExpiry} dias até vencer`);
           }
         }
       }
       
       if (conflicts.length > 0) {
-        console.log(`[VALIDAÇÃO INTELIGENTE] BLOQUEANDO CRIAÇÃO: ${conflicts.length} conflito(s) encontrado(s)`);
+        console.log(`[VALIDAÇÃO NOVA] BLOQUEANDO CRIAÇÃO: ${conflicts.length} conflito(s) encontrado(s) por composição veicular`);
         return res.status(400).json({
-          message: `Não é possível criar a licença. Foram encontradas ${conflicts.length} licença(s) vigente(s) para os estados e placas selecionados.`,
+          message: `Não é possível criar a licença. Foram encontradas ${conflicts.length} licença(s) vigente(s) para os estados e composição veicular selecionados.`,
           conflicts: conflicts,
-          validationError: true
+          validationError: true,
+          validationType: 'composicao_veicular'
         });
       }
       
-      console.log(`[VALIDAÇÃO INTELIGENTE] Nenhum conflito encontrado. Prosseguindo com a criação da licença.`);
+      console.log(`[VALIDAÇÃO NOVA] Nenhum conflito de composição veicular encontrado. Prosseguindo com a criação da licença.`);
 
       const licenseRequest = await storage.createLicenseRequest(userId, sanitizedData);
       
