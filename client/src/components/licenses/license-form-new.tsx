@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useStateValidation } from "@/hooks/use-state-validation";
+import { StateSelectorWithValidation } from './state-selector-with-validation';
 import { DimensionField } from "./dimension-field";
 import { 
   insertLicenseRequestSchema, 
@@ -1780,9 +1780,20 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
             const placasColetadas = getPlacasParaValidacao();
             console.log('[FORM-PRINCIPAL] Placas enviadas para validação:', placasColetadas);
             
-            // Função para validar estado em tempo real
-            const { validateState, validating: stateValidationLoading } = useStateValidation();
+            // Preparar placas para validação
+            const placasArray = Object.values(placasColetadas).filter(Boolean) as string[];
 
+            return (
+              <StateSelectorWithValidation
+                selectedStates={field.value || []}
+                onStatesChange={(newStates) => field.onChange(newStates)}
+                placas={placasArray}
+              />
+            );
+          }}
+        />
+
+        {/* Seção antiga removida - código comentado para referência
             const ESTADOS_BRASIL = [
               { code: "AL", name: "Alagoas" }, { code: "BA", name: "Bahia" }, { code: "CE", name: "Ceará" },
               { code: "DF", name: "Distrito Federal" }, { code: "DNIT", name: "FEDERAL" }, { code: "ES", name: "Espírito Santo" },
