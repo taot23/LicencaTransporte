@@ -43,7 +43,10 @@ export function useLicenseValidationV2() {
       // Converter placas object para array de strings
       const placasArray = Object.values(placas).filter(Boolean);
       
+      console.log(`[VALIDAÇÃO INTELIGENTE] Verificando estado: ${estado} com placas:`, placas);
+      
       if (placasArray.length === 0) {
+        console.log(`[VALIDAÇÃO INTELIGENTE] Nenhuma placa fornecida`);
         return false;
       }
 
@@ -64,8 +67,11 @@ export function useLicenseValidationV2() {
 
       const data = await response.json();
       
+      console.log(`[VALIDAÇÃO INTELIGENTE] Resposta da API para ${estado}:`, data);
+      
       // A API agora retorna um objeto com os dados da licença ou null
       if (data && data.bloqueado && data.diasRestantes > 60) {
+        console.log(`[VALIDAÇÃO INTELIGENTE] Estado ${estado} BLOQUEADO: ${data.diasRestantes} dias restantes > 60`);
         setEstadosBloqueados((prev) => ({
           ...prev,
           [estado]: {
@@ -76,6 +82,7 @@ export function useLicenseValidationV2() {
         }));
         return true; // Estado bloqueado
       } else {
+        console.log(`[VALIDAÇÃO INTELIGENTE] Estado ${estado} LIBERADO: ${data ? `${data.diasRestantes} dias restantes ≤ 60` : 'sem licença vigente'}`);
         // Remover o estado dos bloqueados se estava bloqueado antes
         setEstadosBloqueados((prev) => {
           const updated = { ...prev };

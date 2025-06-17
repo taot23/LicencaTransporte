@@ -220,7 +220,7 @@ export function VehicleSelectCard({
                     {selectedVehicle.brand} {selectedVehicle.model}
                   </div>
                   <div className="text-xs text-green-500 mt-1">
-                    {selectedVehicle.year} • {selectedVehicle.chassisNumber.slice(-6)}
+                    {selectedVehicle.year} • {selectedVehicle.renavam?.slice(-6) || 'N/A'}
                   </div>
                 </div>
               </div>
