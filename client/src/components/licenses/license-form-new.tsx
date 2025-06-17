@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useStateValidation } from "@/hooks/use-state-validation";
 import { DimensionField } from "./dimension-field";
 import { 
   insertLicenseRequestSchema, 
@@ -1780,41 +1781,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
             console.log('[FORM-PRINCIPAL] Placas enviadas para validação:', placasColetadas);
             
             // Função para validar estado em tempo real
-            const validarEstado = async (estado: string, placas: any) => {
-              try {
-                const placasArray = Object.values(placas).filter(Boolean) as string[];
-                if (placasArray.length === 0) return false;
-
-                console.log(`[VALIDAÇÃO TEMPO REAL] Validando ${estado} com placas:`, placasArray);
-                
-                const response = await fetch('/api/validacao-critica', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  credentials: 'include',
-                  body: JSON.stringify({ estado, placas: placasArray })
-                });
-
-                if (response.ok) {
-                  const data = await response.json();
-                  console.log(`[VALIDAÇÃO TEMPO REAL] Resposta ${estado}:`, data);
-                  
-                  if (data.bloqueado && data.diasRestantes > 60) {
-                    alert(
-                      `⚠️ ESTADO ${estado} BLOQUEADO\n\n` +
-                      `Licença vigente: ${data.numero}\n` +
-                      `Vencimento: ${new Date(data.validade).toLocaleDateString('pt-BR')}\n` +
-                      `Dias restantes: ${data.diasRestantes}\n\n` +
-                      `💰 ECONOMIA: Renovação só permitida com ≤60 dias restantes.\n` +
-                      `Isso evita custos desnecessários de pedidos duplicados.`
-                    );
-                    return true; // Bloqueado
-                  }
-                }
-              } catch (error) {
-                console.error(`Erro ao validar ${estado}:`, error);
-              }
-              return false; // Liberado
-            };
+            const { validateState, validating: stateValidationLoading } = useStateValidation();
 
             const ESTADOS_BRASIL = [
               { code: "AL", name: "Alagoas" }, { code: "BA", name: "Bahia" }, { code: "CE", name: "Ceará" },
@@ -1826,13 +1793,11 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               { code: "SP", name: "São Paulo" }, { code: "TO", name: "Tocantins" }
             ];
 
-            const [validating, setValidating] = useState<string | null>(null);
-
             const handleStateToggle = async (stateCode: string) => {
-              console.log(`[HANDLE STATE TOGGLE] Clique em ${stateCode}, validating: ${validating}`);
+              console.log(`[HANDLE STATE TOGGLE] Clique em ${stateCode}, validating: ${stateValidationLoading}`);
               
-              if (submitRequestMutation.isPending || saveAsDraftMutation.isPending || validating) {
-                console.log(`[HANDLE STATE TOGGLE] Bloqueado - pending: ${submitRequestMutation.isPending || saveAsDraftMutation.isPending}, validating: ${validating}`);
+              if (submitRequestMutation.isPending || saveAsDraftMutation.isPending || stateValidationLoading) {
+                console.log(`[HANDLE STATE TOGGLE] Bloqueado - pending: ${submitRequestMutation.isPending || saveAsDraftMutation.isPending}, validating: ${stateValidationLoading}`);
                 return;
               }
 
@@ -1850,11 +1815,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                 console.log(`[HANDLE STATE TOGGLE] Adicionando estado ${stateCode} - iniciando validação`);
                 console.log(`[HANDLE STATE TOGGLE] Placas para validação:`, placasColetadas);
                 
-                setValidating(stateCode);
-                
-                const bloqueado = await validarEstado(stateCode, placasColetadas);
-                
-                setValidating(null);
+                const placasArray = Object.values(placasColetadas).filter(Boolean) as string[];
+                const bloqueado = await validateState(stateCode, placasArray);
                 
                 if (!bloqueado) {
                   // Estado liberado, pode adicionar
@@ -1870,10 +1832,10 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-medium">Estados de Circulação</h3>
-                  {validating && (
+                  {stateValidationLoading && (
                     <div className="text-sm text-blue-600 flex items-center gap-2">
                       <div className="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
-                      Validando {validating}...
+                      Validando estado...
                     </div>
                   )}
                 </div>
@@ -1881,7 +1843,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                   {ESTADOS_BRASIL.map((estado) => {
                     const isSelected = (field.value || []).includes(estado.code);
-                    const isValidatingThis = validating === estado.code;
+                    const isValidatingThis = stateValidationLoading;
                     
                     return (
                       <div 
