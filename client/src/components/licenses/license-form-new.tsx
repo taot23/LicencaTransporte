@@ -1829,16 +1829,27 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
             const [validating, setValidating] = useState<string | null>(null);
 
             const handleStateToggle = async (stateCode: string) => {
-              if (submitRequestMutation.isPending || saveAsDraftMutation.isPending || validating) return;
+              console.log(`[HANDLE STATE TOGGLE] Clique em ${stateCode}, validating: ${validating}`);
+              
+              if (submitRequestMutation.isPending || saveAsDraftMutation.isPending || validating) {
+                console.log(`[HANDLE STATE TOGGLE] Bloqueado - pending: ${submitRequestMutation.isPending || saveAsDraftMutation.isPending}, validating: ${validating}`);
+                return;
+              }
 
               const currentStates = field.value || [];
               const isCurrentlySelected = currentStates.includes(stateCode);
+              
+              console.log(`[HANDLE STATE TOGGLE] Estado ${stateCode} - isSelected: ${isCurrentlySelected}, currentStates:`, currentStates);
 
               if (isCurrentlySelected) {
                 // Remover estado
+                console.log(`[HANDLE STATE TOGGLE] Removendo estado ${stateCode}`);
                 field.onChange(currentStates.filter((s: string) => s !== stateCode));
               } else {
                 // Adicionar estado - validar primeiro
+                console.log(`[HANDLE STATE TOGGLE] Adicionando estado ${stateCode} - iniciando validação`);
+                console.log(`[HANDLE STATE TOGGLE] Placas para validação:`, placasColetadas);
+                
                 setValidating(stateCode);
                 
                 const bloqueado = await validarEstado(stateCode, placasColetadas);
@@ -1847,9 +1858,11 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                 
                 if (!bloqueado) {
                   // Estado liberado, pode adicionar
+                  console.log(`[HANDLE STATE TOGGLE] Estado ${stateCode} liberado - adicionando`);
                   field.onChange([...currentStates, stateCode]);
+                } else {
+                  console.log(`[HANDLE STATE TOGGLE] Estado ${stateCode} bloqueado - não adicionando`);
                 }
-                // Se bloqueado, não adiciona (alert já foi mostrado)
               }
             };
 

@@ -2542,13 +2542,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ENDPOINT DE VALIDAÇÃO CRÍTICA DEFINITIVO - EVITA CUSTOS DESNECESSÁRIOS
   app.post('/api/validacao-critica', requireAuth, async (req, res) => {
     try {
+      console.log('[VALIDAÇÃO CRÍTICA] Requisição recebida:', req.body);
+      
       const { estado, placas } = req.body;
       
-      console.log(`[VALIDAÇÃO CRÍTICA DEFINITIVA] Estado: ${estado}, Placas: ${placas?.join(', ')}`);
-      
-      if (!estado || !placas || placas.length === 0) {
-        return res.json({ bloqueado: false, message: 'Parâmetros inválidos' });
+      if (!estado || !placas || !Array.isArray(placas) || placas.length === 0) {
+        console.log('[VALIDAÇÃO CRÍTICA] Parâmetros inválidos:', { estado, placas });
+        return res.status(400).json({ 
+          bloqueado: false, 
+          error: 'Parâmetros inválidos',
+          recebido: { estado, placas }
+        });
       }
+
+      console.log(`[VALIDAÇÃO CRÍTICA] Validando estado ${estado} com placas:`, placas);
 
       // Query SQL DIRETA para máxima confiabilidade  
       const query = `
@@ -2572,7 +2579,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         LIMIT 1
       `;
       
+      console.log(`[VALIDAÇÃO CRÍTICA] Executando query para estado ${estado}`);
       const result = await pool.query(query, [estado, placas]);
+      console.log(`[VALIDAÇÃO CRÍTICA] Resultado da query:`, result.rows);
       
       if (result.rows.length > 0) {
         const licenca = result.rows[0];
@@ -2600,8 +2609,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json({ bloqueado: false });
       
     } catch (error) {
-      console.error('[VALIDAÇÃO CRÍTICA] Erro:', error);
-      return res.json({ bloqueado: false, error: 'Erro na validação' });
+      console.error('[VALIDAÇÃO CRÍTICA] Erro detalhado:', error);
+      return res.status(500).json({ 
+        bloqueado: false, 
+        error: 'Erro interno na validação',
+        details: error.message 
+      });
     }
   });
 
