@@ -1813,6 +1813,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint para verificar licenças vigentes por estado e placas (nova abordagem)
+  app.post('/api/licencas-vigentes', requireAuth, async (req: any, res: any) => {
+    try {
+      const { estado, placas } = req.body;
+      
+      if (!estado) {
+        return res.status(400).json({ message: 'Estado é obrigatório' });
+      }
+      
+      if (!placas || typeof placas !== 'object') {
+        return res.status(400).json({ message: 'Placas são obrigatórias' });
+      }
+      
+      console.log(`[VALIDAÇÃO ESTADO] Verificando licenças vigentes para estado: ${estado}`);
+      console.log(`[VALIDAÇÃO ESTADO] Placas:`, placas);
+      
+      // Construir condições dinâmicas baseadas nas placas disponíveis
+      const conditions = [];
+      const params = [estado];
+      let paramIndex = 2;
+      
+      if (placas.cavalo) {
+        conditions.push(`le.placa_unidade_tratora = $${paramIndex++}`);
+        params.push(placas.cavalo);
+      }
+      if (placas.primeiraCarreta) {
+        conditions.push(`le.placa_primeira_carreta = $${paramIndex++}`);
+        params.push(placas.primeiraCarreta);
+      }
+      if (placas.segundaCarreta) {
+        conditions.push(`le.placa_segunda_carreta = $${paramIndex++}`);
+        params.push(placas.segundaCarreta);
+      }
+      if (placas.dolly) {
+        conditions.push(`le.placa_dolly = $${paramIndex++}`);
+        params.push(placas.dolly);
+      }
+      if (placas.prancha) {
+        conditions.push(`le.placa_prancha = $${paramIndex++}`);
+        params.push(placas.prancha);
+      }
+      if (placas.reboque) {
+        conditions.push(`le.placa_reboque = $${paramIndex++}`);
+        params.push(placas.reboque);
+      }
+      
+      if (conditions.length === 0) {
+        console.log(`[VALIDAÇÃO ESTADO] Nenhuma placa fornecida para validação`);
+        return res.json(null);
+      }
+      
+      const query = `
+        SELECT 
+          le.estado,
+          le.numero_licenca,
+          le.data_validade,
+          le.status,
+          le.placa_unidade_tratora,
+          le.placa_primeira_carreta,
+          le.placa_segunda_carreta,
+          le.placa_dolly,
+          le.placa_prancha,
+          le.placa_reboque
+        FROM licencas_emitidas le
+        WHERE le.estado = $1 
+          AND le.status = 'emitida'
+          AND le.data_validade > CURRENT_DATE
+          AND (${conditions.join(' OR ')})
+        ORDER BY le.data_validade DESC
+        LIMIT 1
+      `;
+      
+      console.log(`[VALIDAÇÃO ESTADO] Query:`, query);
+      console.log(`[VALIDAÇÃO ESTADO] Params:`, params);
+      
+      const result = await pool.query(query, params);
+      
+      if (result.rows.length > 0) {
+        const licenca = result.rows[0];
+        const now = new Date();
+        const validUntil = new Date(licenca.data_validade);
+        const diasRestantes = Math.ceil((validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        
+        console.log(`[VALIDAÇÃO ESTADO] Licença encontrada: ${licenca.numero_licenca}, ${diasRestantes} dias restantes`);
+        
+        return res.json({
+          numero_licenca: licenca.numero_licenca,
+          data_validade: licenca.data_validade,
+          diasRestantes,
+          bloqueado: diasRestantes > 30,
+          placas: {
+            tratora: licenca.placa_unidade_tratora,
+            primeira: licenca.placa_primeira_carreta,
+            segunda: licenca.placa_segunda_carreta,
+            dolly: licenca.placa_dolly,
+            prancha: licenca.placa_prancha,
+            reboque: licenca.placa_reboque
+          }
+        });
+      } else {
+        console.log(`[VALIDAÇÃO ESTADO] Nenhuma licença vigente encontrada para ${estado}`);
+        return res.json(null);
+      }
+      
+    } catch (error) {
+      console.error('Erro ao verificar licenças vigentes:', error);
+      return res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+
   // License request endpoints
   app.get('/api/licenses', requireAuth, async (req, res) => {
     try {
@@ -2128,174 +2238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('Creating license request with data:', JSON.stringify(sanitizedData, null, 2));
       
-      // NOVA VALIDAÇÃO INTELIGENTE: Verificar licenças vigentes por composição veicular
-      console.log(`[VALIDAÇÃO COMPOSIÇÃO] Iniciando validação por composição veicular`);
-      
-      // Mapear placas por tipo de veículo conforme a composição
-      const placaMapping = {
-        placaUnidadeTratora: null,
-        placaPrimeiraCarreta: null,
-        placaSegundaCarreta: null,
-        placaDolly: null,
-        placaPrancha: null,
-        placaReboque: null
-      };
-      
-      // Buscar placa da unidade tratora
-      if (sanitizedData.tractorUnitId) {
-        const tractor = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.tractorUnitId));
-        if (tractor[0]) placaMapping.placaUnidadeTratora = tractor[0].plate;
-      } else if (sanitizedData.mainVehiclePlate) {
-        placaMapping.placaUnidadeTratora = sanitizedData.mainVehiclePlate;
-      }
-      
-      // Mapear veículos específicos baseado no tipo de licença
-      try {
-        if (sanitizedData.type === 'bitrain_9_axles' || sanitizedData.type === 'bitrain_7_axles') {
-          if (sanitizedData.firstTrailerId) {
-            const firstTrailer = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.firstTrailerId));
-            if (firstTrailer[0]) placaMapping.placaPrimeiraCarreta = firstTrailer[0].plate;
-          }
-          if (sanitizedData.secondTrailerId) {
-            const secondTrailer = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.secondTrailerId));
-            if (secondTrailer[0]) placaMapping.placaSegundaCarreta = secondTrailer[0].plate;
-          }
-        } else if (sanitizedData.type === 'rodotrem') {
-          if (sanitizedData.dollyId) {
-            const dolly = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.dollyId));
-            if (dolly[0]) placaMapping.placaDolly = dolly[0].plate;
-          }
-          if (sanitizedData.secondTrailerId) {
-            const secondTrailer = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.secondTrailerId));
-            if (secondTrailer[0]) placaMapping.placaSegundaCarreta = secondTrailer[0].plate;
-          }
-        } else if (sanitizedData.type === 'prancha') {
-          if (sanitizedData.flatbedId) {
-            const flatbed = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.flatbedId));
-            if (flatbed[0]) placaMapping.placaPrancha = flatbed[0].plate;
-          }
-        } else if (sanitizedData.type === 'romeu_julieta') {
-          if (sanitizedData.firstTrailerId) {
-            const reboque = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.firstTrailerId));
-            if (reboque[0]) placaMapping.placaReboque = reboque[0].plate;
-          }
-        }
-      } catch (error) {
-        console.error(`[VALIDAÇÃO COMPOSIÇÃO] Erro ao buscar placas dos veículos:`, error);
-        // Continuar com validação apenas da placa principal
-      }
-      
-      console.log(`[VALIDAÇÃO COMPOSIÇÃO] Placas mapeadas:`, placaMapping);
-      console.log(`[VALIDAÇÃO COMPOSIÇÃO] Estados: ${sanitizedData.states.join(', ')}`);
-      
-      const conflicts = [];
-      const now = new Date();
-      const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
-      
-      // Verificar conflitos para cada estado
-      for (const state of sanitizedData.states) {
-        // Construir condições dinâmicas baseadas nas placas disponíveis
-        const conditions = [];
-        const params = [state, thirtyDaysFromNow];
-        let paramIndex = 3;
-        
-        if (placaMapping.placaUnidadeTratora) {
-          conditions.push(`le.placa_unidade_tratora = $${paramIndex++}`);
-          params.push(placaMapping.placaUnidadeTratora);
-        }
-        if (placaMapping.placaPrimeiraCarreta) {
-          conditions.push(`le.placa_primeira_carreta = $${paramIndex++}`);
-          params.push(placaMapping.placaPrimeiraCarreta);
-        }
-        if (placaMapping.placaSegundaCarreta) {
-          conditions.push(`le.placa_segunda_carreta = $${paramIndex++}`);
-          params.push(placaMapping.placaSegundaCarreta);
-        }
-        if (placaMapping.placaDolly) {
-          conditions.push(`le.placa_dolly = $${paramIndex++}`);
-          params.push(placaMapping.placaDolly);
-        }
-        if (placaMapping.placaPrancha) {
-          conditions.push(`le.placa_prancha = $${paramIndex++}`);
-          params.push(placaMapping.placaPrancha);
-        }
-        if (placaMapping.placaReboque) {
-          conditions.push(`le.placa_reboque = $${paramIndex++}`);
-          params.push(placaMapping.placaReboque);
-        }
-        
-        if (conditions.length === 0) {
-          console.log(`[VALIDAÇÃO COMPOSIÇÃO] Nenhuma placa para validar no estado ${state}`);
-          continue;
-        }
-        
-        const query = `
-          SELECT 
-            le.estado,
-            le.numero_licenca,
-            le.data_validade,
-            le.status,
-            le.placa_unidade_tratora,
-            le.placa_primeira_carreta,
-            le.placa_segunda_carreta,
-            le.placa_dolly,
-            le.placa_prancha,
-            le.placa_reboque,
-            lr.request_number,
-            le.pedido_id
-          FROM licencas_emitidas le
-          JOIN license_requests lr ON le.pedido_id = lr.id
-          WHERE le.estado = $1 
-            AND le.status = 'emitida'
-            AND le.data_validade > $2
-            AND (${conditions.join(' OR ')})
-        `;
-        
-        console.log(`[VALIDAÇÃO COMPOSIÇÃO] Query para ${state}:`, query);
-        console.log(`[VALIDAÇÃO COMPOSIÇÃO] Params:`, params);
-        
-        const result = await pool.query(query, params);
-        
-        if (result.rows.length > 0) {
-          for (const row of result.rows) {
-            const daysUntilExpiry = Math.ceil((new Date(row.data_validade) - now) / (1000 * 60 * 60 * 24));
-            
-            conflicts.push({
-              state: row.estado,
-              licenseId: row.pedido_id,
-              requestNumber: row.request_number,
-              aetNumber: row.numero_licenca,
-              validUntil: row.data_validade,
-              daysUntilExpiry,
-              canRenew: daysUntilExpiry <= 30,
-              conflictingPlates: {
-                tratora: row.placa_unidade_tratora,
-                primeira: row.placa_primeira_carreta,
-                segunda: row.placa_segunda_carreta,
-                dolly: row.placa_dolly,
-                prancha: row.placa_prancha,
-                reboque: row.placa_reboque
-              }
-            });
-            
-            console.log(`[VALIDAÇÃO COMPOSIÇÃO] CONFLITO: Estado ${state}, AET ${row.numero_licenca}, ${daysUntilExpiry} dias até vencer`);
-          }
-        } else {
-          console.log(`[VALIDAÇÃO COMPOSIÇÃO] Nenhum conflito encontrado para estado ${state}`);
-        }
-      }
-      
-      if (conflicts.length > 0) {
-        console.log(`[VALIDAÇÃO COMPOSIÇÃO] BLOQUEANDO CRIAÇÃO: ${conflicts.length} conflito(s) encontrado(s)`);
-        return res.status(400).json({
-          message: `Não é possível criar a licença. Foram encontradas ${conflicts.length} licença(s) vigente(s) para os estados e composição veicular selecionados.`,
-          conflicts: conflicts,
-          validationError: true,
-          validationType: 'composicao_veicular'
-        });
-      }
-      
-      console.log(`[VALIDAÇÃO COMPOSIÇÃO] Validação concluída - nenhum conflito encontrado`);
+      // Validação removida - será feita no frontend ao selecionar estados
 
       const licenseRequest = await storage.createLicenseRequest(userId, sanitizedData);
       
