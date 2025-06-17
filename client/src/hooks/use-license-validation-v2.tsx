@@ -42,33 +42,58 @@ export function useLicenseValidationV2() {
     try {
       console.log(`[VALIDAÇÃO V2] Verificando estado ${estado} com placas:`, placas);
       
-      const response = await fetch('/api/licencas-vigentes', {
+      // Converter placas object para array de strings
+      const placasArray = Object.values(placas).filter(Boolean);
+      
+      if (placasArray.length === 0) {
+        console.log('[VALIDAÇÃO V2] Nenhuma placa fornecida para validação');
+        return;
+      }
+
+      const response = await fetch('/api/licenses/check-existing', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ estado, placas }),
+        body: JSON.stringify({ 
+          states: [estado],
+          plates: placasArray 
+        }),
       });
 
       if (!response.ok) {
         throw new Error(`Erro na requisição: ${response.status}`);
       }
 
-      const licenca: LicencaVigente | null = await response.json();
-
-      if (licenca && licenca.diasRestantes > 30) {
-        console.log(`[VALIDAÇÃO V2] Estado ${estado} bloqueado - licença vigente por ${licenca.diasRestantes} dias`);
+      const data = await response.json();
+      
+      if (data.hasConflicts && data.conflicts) {
+        // Encontrar o conflito específico para este estado
+        const conflictoEstado = data.conflicts.find((c: any) => c.state === estado);
         
-        setEstadosBloqueados((prev) => ({
-          ...prev,
-          [estado]: {
-            numero: licenca.numero_licenca,
-            validade: licenca.data_validade,
-            diasRestantes: licenca.diasRestantes
-          }
-        }));
+        if (conflictoEstado && conflictoEstado.daysUntilExpiry > 30) {
+          console.log(`[VALIDAÇÃO V2] Estado ${estado} bloqueado - licença vigente por ${conflictoEstado.daysUntilExpiry} dias`);
+          
+          setEstadosBloqueados((prev) => ({
+            ...prev,
+            [estado]: {
+              numero: conflictoEstado.aetNumber || conflictoEstado.requestNumber,
+              validade: conflictoEstado.validUntil,
+              diasRestantes: conflictoEstado.daysUntilExpiry
+            }
+          }));
+        } else {
+          console.log(`[VALIDAÇÃO V2] Estado ${estado} liberado - pode renovar`);
+          
+          // Remover o estado dos bloqueados se estava bloqueado antes
+          setEstadosBloqueados((prev) => {
+            const updated = { ...prev };
+            delete updated[estado];
+            return updated;
+          });
+        }
       } else {
-        console.log(`[VALIDAÇÃO V2] Estado ${estado} liberado`);
+        console.log(`[VALIDAÇÃO V2] Estado ${estado} liberado - sem conflitos`);
         
         // Remover o estado dos bloqueados se estava bloqueado antes
         setEstadosBloqueados((prev) => {
