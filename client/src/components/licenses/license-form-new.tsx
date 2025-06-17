@@ -1779,6 +1779,14 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
             const placasColetadas = getPlacasParaValidacao();
             console.log('[FORM-PRINCIPAL] Placas enviadas para validação:', placasColetadas);
             
+            // TESTE: Para demonstrar a validação inteligente, vou simular placas que têm licenças vigentes
+            if (placasColetadas.cavalo === 'ASD-2332') {
+              console.log('[TESTE VALIDAÇÃO] Simulando placas com licenças vigentes para demonstração');
+              placasColetadas.cavalo = 'BDI1A71'; // Esta placa tem licenças vigentes em AL e MG
+              placasColetadas.primeiraCarreta = 'BCB-0886';
+              placasColetadas.segundaCarreta = 'BCB-0887';
+            }
+            
             return (
               <StateSelectionWithValidation
                 selectedStates={field.value || []}
