@@ -1776,11 +1776,14 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               return placas;
             };
 
+            const placasColetadas = getPlacasParaValidacao();
+            console.log('[FORM-PRINCIPAL] Placas enviadas para validação:', placasColetadas);
+            
             return (
               <StateSelectionWithValidation
                 selectedStates={field.value || []}
                 onStatesChange={field.onChange}
-                placas={getPlacasParaValidacao()}
+                placas={placasColetadas}
                 disabled={submitRequestMutation.isPending || saveAsDraftMutation.isPending}
               />
             );
