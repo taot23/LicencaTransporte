@@ -2539,6 +2539,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ENDPOINT ESPECÍFICO POR ESTADO - VALIDAÇÃO CRÍTICA
+  app.post('/api/licencas-vigentes-by-state', requireAuth, async (req, res) => {
+    try {
+      const { estado, placas } = req.body;
+      
+      if (!estado) {
+        return res.status(400).json({ message: 'Estado é obrigatório' });
+      }
+      
+      if (!placas || !Array.isArray(placas) || placas.length === 0) {
+        return res.status(400).json({ message: 'Placas são obrigatórias' });
+      }
+      
+      console.log(`[VALIDAÇÃO BY STATE] Verificando estado: ${estado} com placas: ${placas.join(', ')}`);
+      
+      const query = `
+        SELECT 
+          le.estado,
+          le.numero_licenca,
+          le.data_validade,
+          le.placa_unidade_tratora,
+          le.placa_primeira_carreta,
+          le.placa_segunda_carreta,
+          EXTRACT(DAY FROM (le.data_validade - CURRENT_DATE)) as dias_restantes
+        FROM licencas_emitidas le
+        WHERE le.estado = $1 
+          AND le.status = 'ativa'
+          AND le.data_validade > CURRENT_DATE
+          AND (
+            le.placa_unidade_tratora = ANY($2::text[]) OR
+            le.placa_primeira_carreta = ANY($2::text[]) OR
+            le.placa_segunda_carreta = ANY($2::text[])
+          )
+        ORDER BY le.data_validade DESC
+        LIMIT 1
+      `;
+      
+      const result = await pool.query(query, [estado, placas]);
+      
+      if (result.rows.length > 0) {
+        const license = result.rows[0];
+        const daysUntilExpiry = parseInt(license.dias_restantes);
+        
+        console.log(`[VALIDAÇÃO BY STATE] Licença encontrada: ${license.numero_licenca} - ${daysUntilExpiry} dias restantes`);
+        
+        if (daysUntilExpiry > 60) {
+          console.log(`[VALIDAÇÃO BY STATE] Estado ${estado} BLOQUEADO: ${daysUntilExpiry} dias > 60`);
+          return res.json({
+            bloqueado: true,
+            numero_licenca: license.numero_licenca,
+            data_validade: license.data_validade,
+            diasRestantes: daysUntilExpiry,
+            placas: {
+              tratora: license.placa_unidade_tratora,
+              primeira: license.placa_primeira_carreta,
+              segunda: license.placa_segunda_carreta
+            }
+          });
+        } else {
+          console.log(`[VALIDAÇÃO BY STATE] Estado ${estado} LIBERADO: ${daysUntilExpiry} dias ≤ 60`);
+          return res.json({
+            bloqueado: false,
+            diasRestantes: daysUntilExpiry,
+            message: `Pode renovar - restam ${daysUntilExpiry} dias`
+          });
+        }
+      } else {
+        console.log(`[VALIDAÇÃO BY STATE] Estado ${estado} LIBERADO: nenhuma licença ativa encontrada`);
+        return res.json({
+          bloqueado: false,
+          message: 'Nenhuma licença vigente encontrada'
+        });
+      }
+      
+    } catch (error) {
+      console.error('[VALIDAÇÃO BY STATE] Erro:', error);
+      res.status(500).json({ 
+        message: 'Erro ao verificar licenças vigentes',
+        error: String(error)
+      });
+    }
+  });
+
   // VALIDAÇÃO DEFINITIVA - BLOQUEIA PEDIDOS DUPLICADOS E EVITA CUSTOS
   app.post('/api/licenses/check-existing', requireAuth, async (req, res) => {
     try {

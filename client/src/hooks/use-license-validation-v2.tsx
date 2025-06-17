@@ -50,46 +50,43 @@ export function useLicenseValidationV2() {
         return false;
       }
 
-      // VALIDAÇÃO CRÍTICA: Usar endpoint correto para evitar custos desnecessários
-      const response = await fetch('/api/licenses/check-existing', {
+      // VALIDAÇÃO CRÍTICA DIRETA: Consulta na tabela licencas_emitidas
+      const response = await fetch('/api/licencas-vigentes-by-state', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
         body: JSON.stringify({
-          states: [estado],
-          plates: placasArray
+          estado: estado,
+          placas: placasArray
         })
       });
 
       if (!response.ok) {
-        console.error(`[VALIDAÇÃO CRÍTICA] Erro na requisição: ${response.status}`);
+        const errorText = await response.text();
+        console.error(`[VALIDAÇÃO CRÍTICA] Erro na requisição ${response.status}:`, errorText);
         return false;
       }
 
       const data = await response.json();
       console.log(`[VALIDAÇÃO CRÍTICA] Resposta da API para ${estado}:`, data);
       
-      // Verificar se há conflitos para este estado específico
-      if (data.hasConflicts && data.conflicts) {
-        const conflictForState = data.conflicts.find((c: any) => c.state === estado);
-        
-        if (conflictForState && conflictForState.daysUntilExpiry > 60) {
-          console.log(`[VALIDAÇÃO CRÍTICA] Estado ${estado} BLOQUEADO: ${conflictForState.daysUntilExpiry} dias > 60 - EVITANDO CUSTO DESNECESSÁRIO`);
-          setEstadosBloqueados((prev) => ({
-            ...prev,
-            [estado]: {
-              numero: conflictForState.licenseNumber,
-              validade: conflictForState.expiryDate,
-              diasRestantes: conflictForState.daysUntilExpiry
-            }
-          }));
-          return true; // Estado bloqueado
-        }
+      // Nova lógica baseada no endpoint específico por estado
+      if (data.bloqueado && data.diasRestantes > 60) {
+        console.log(`[VALIDAÇÃO CRÍTICA] Estado ${estado} BLOQUEADO: ${data.diasRestantes} dias > 60 - EVITANDO CUSTO DESNECESSÁRIO`);
+        setEstadosBloqueados((prev) => ({
+          ...prev,
+          [estado]: {
+            numero: data.numero_licenca,
+            validade: data.data_validade,
+            diasRestantes: data.diasRestantes
+          }
+        }));
+        return true; // Estado bloqueado
       }
       
-      console.log(`[VALIDAÇÃO CRÍTICA] Estado ${estado} LIBERADO: sem conflitos ou dias ≤ 60`);
+      console.log(`[VALIDAÇÃO CRÍTICA] Estado ${estado} LIBERADO: ${data.bloqueado ? `${data.diasRestantes} dias ≤ 60` : 'sem licença vigente'}`);
       // Remover o estado dos bloqueados se estava bloqueado antes
       setEstadosBloqueados((prev) => {
         const updated = { ...prev };
