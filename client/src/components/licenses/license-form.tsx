@@ -147,6 +147,10 @@ export function LicenseForm({
   const [showSubmitConfirmation, setShowSubmitConfirmation] = useState(false);
   const [pendingSubmitData, setPendingSubmitData] = useState<any>(null);
   const [thirdPartyVehiclesInSubmit, setThirdPartyVehiclesInSubmit] = useState<string[]>([]);
+  
+  // Estados para validação de licenças
+  const [validatingState, setValidatingState] = useState<string | null>(null);
+  const [blockedStates, setBlockedStates] = useState<Record<string, any>>({});
 
   // Fetch vehicles for the dropdown selectors
   const { data: vehicles, isLoading: isLoadingVehicles } = useQuery<Vehicle[]>({
@@ -166,6 +170,96 @@ export function LicenseForm({
   const trailers = vehicles?.filter((v) => v.type === "trailer") || [];
   const allDollys = vehicles?.filter((v) => v.type === "dolly") || [];
   const flatbeds = vehicles?.filter((v) => v.type === "flatbed") || [];
+
+  // Função para validar estado com licenças vigentes
+  const validateState = async (estado: string): Promise<boolean> => {
+    console.log(`[HANDLE STATE CLICK] Clicando em ${estado}, validating: ${validatingState}`);
+    
+    if (validatingState) return false;
+    
+    // Coletar todas as placas do formulário
+    const placas = [];
+    const watchedValues = form.watch();
+    
+    // Placa principal
+    if (watchedValues.mainVehiclePlate) {
+      placas.push(watchedValues.mainVehiclePlate);
+    }
+    
+    // Placas dos veículos selecionados
+    if (watchedValues.tractorUnitId) {
+      const tractor = vehicles?.find(v => v.id === watchedValues.tractorUnitId);
+      if (tractor?.plate) placas.push(tractor.plate);
+    }
+    
+    if (watchedValues.firstTrailerId) {
+      const first = vehicles?.find(v => v.id === watchedValues.firstTrailerId);
+      if (first?.plate) placas.push(first.plate);
+    }
+    
+    if (watchedValues.secondTrailerId) {
+      const second = vehicles?.find(v => v.id === watchedValues.secondTrailerId);
+      if (second?.plate) placas.push(second.plate);
+    }
+    
+    if (watchedValues.dollyId) {
+      const dolly = vehicles?.find(v => v.id === watchedValues.dollyId);
+      if (dolly?.plate) placas.push(dolly.plate);
+    }
+    
+    if (watchedValues.flatbedId) {
+      const flatbed = vehicles?.find(v => v.id === watchedValues.flatbedId);
+      if (flatbed?.plate) placas.push(flatbed.plate);
+    }
+    
+    // Placas adicionais
+    if (watchedValues.additionalPlates) {
+      watchedValues.additionalPlates.forEach((plate: string) => {
+        if (plate) placas.push(plate);
+      });
+    }
+    
+    console.log(`[STATE VALIDATION] Validando ${estado} com placas:`, placas);
+    
+    if (placas.length === 0) {
+      console.log(`[STATE VALIDATION] Nenhuma placa - liberando ${estado}`);
+      return false;
+    }
+    
+    setValidatingState(estado);
+    
+    try {
+      const response = await fetch('/api/validacao-critica', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado, placas })
+      });
+      
+      const result = await response.json();
+      console.log(`[STATE VALIDATION] Resultado para ${estado}:`, result);
+      
+      if (result.bloqueado) {
+        console.log(`[STATE VALIDATION] ${estado} BLOQUEADO - ${result.diasRestantes} dias restantes`);
+        setBlockedStates(prev => ({ ...prev, [estado]: result }));
+        
+        toast({
+          title: `Estado ${estado} bloqueado`,
+          description: `Já existe licença vigente (${result.numero}) com ${result.diasRestantes} dias restantes. Renovação permitida apenas com ≤60 dias.`,
+          variant: "destructive",
+          duration: 8000,
+        });
+        
+        return true; // bloqueado
+      }
+      
+      return false; // liberado
+    } catch (error) {
+      console.error(`[STATE VALIDATION] Erro ao validar ${estado}:`, error);
+      return false; // em caso de erro, liberar
+    } finally {
+      setValidatingState(null);
+    }
+  };
 
   // Define a schema that can be validated partially (for drafts)
   const formSchema = draft?.isDraft
@@ -2674,20 +2768,39 @@ export function LicenseForm({
                                 className={`cursor-pointer flex flex-col items-center justify-center p-2 rounded-md border ${
                                   isSelected
                                     ? "bg-blue-50 border-blue-300 text-blue-700 font-medium"
-                                    : "border-gray-200 hover:bg-gray-50"
+                                    : blockedStates[state.code]
+                                      ? "bg-yellow-50 border-yellow-300 cursor-not-allowed opacity-75"
+                                      : validatingState === state.code
+                                        ? "bg-gray-50 border-gray-300 opacity-50 cursor-not-allowed"
+                                        : "border-gray-200 hover:bg-gray-50"
                                 }`}
-                                onClick={() => {
+                                onClick={async () => {
+                                  console.log(`[HANDLE STATE CLICK] Clicando em ${state.code}, validating: ${validatingState}`);
+                                  
+                                  if (validatingState || blockedStates[state.code]) {
+                                    console.log(`[HANDLE STATE CLICK] Estado ${state.code} bloqueado ou validando - ignorando clique`);
+                                    return;
+                                  }
+                                  
                                   if (isSelected) {
+                                    console.log(`[HANDLE STATE CLICK] Removendo estado ${state.code}`);
                                     field.onChange(
                                       (field.value || []).filter(
                                         (value) => value !== state.code,
                                       ),
                                     );
                                   } else {
-                                    field.onChange([
-                                      ...(field.value || []),
-                                      state.code,
-                                    ]);
+                                    console.log(`[HANDLE STATE CLICK] Adicionando estado ${state.code} - iniciando validação`);
+                                    const isBloqueado = await validateState(state.code);
+                                    if (!isBloqueado) {
+                                      console.log(`[HANDLE STATE CLICK] Estado ${state.code} liberado - adicionando`);
+                                      field.onChange([
+                                        ...(field.value || []),
+                                        state.code,
+                                      ]);
+                                    } else {
+                                      console.log(`[HANDLE STATE CLICK] Estado ${state.code} bloqueado - não adicionando`);
+                                    }
                                   }
                                 }}
                               >
