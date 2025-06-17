@@ -2539,80 +2539,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ENDPOINT DE VALIDAÇÃO CRÍTICA DEFINITIVO - EVITA CUSTOS DESNECESSÁRIOS
+  // ENDPOINT DE VALIDAÇÃO CRÍTICA PARA TODOS OS ESTADOS BRASILEIROS - PRODUÇÃO
   app.post('/api/validacao-critica', requireAuth, async (req, res) => {
     try {
-      console.log('[VALIDAÇÃO CRÍTICA] Requisição recebida:', req.body);
+      console.log('[VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida:', req.body);
       
       const { estado, placas } = req.body;
       
-      if (!estado || !placas || !Array.isArray(placas) || placas.length === 0) {
-        console.log('[VALIDAÇÃO CRÍTICA] Parâmetros inválidos:', { estado, placas });
+      // Lista completa de estados brasileiros para validação
+      const estadosValidos = [
+        'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 
+        'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 
+        'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+      ];
+      
+      // Validação robusta de entrada
+      if (!estado || !estadosValidos.includes(estado.toUpperCase())) {
+        console.log('[VALIDAÇÃO CRÍTICA] Estado inválido:', estado);
         return res.status(400).json({ 
           bloqueado: false, 
-          error: 'Parâmetros inválidos',
+          error: 'Estado inválido ou não suportado',
+          estadosValidos: estadosValidos 
+        });
+      }
+      
+      if (!placas || !Array.isArray(placas) || placas.length === 0) {
+        console.log('[VALIDAÇÃO CRÍTICA] Placas inválidas:', placas);
+        return res.status(400).json({ 
+          bloqueado: false, 
+          error: 'Lista de placas é obrigatória e deve conter ao menos uma placa',
           recebido: { estado, placas }
         });
       }
 
-      console.log(`[VALIDAÇÃO CRÍTICA] Validando estado ${estado} com placas:`, placas);
+      // Normalizar estado para maiúsculo
+      const estadoNormalizado = estado.toUpperCase();
+      
+      // Normalizar e filtrar placas válidas
+      const placasNormalizadas = placas
+        .map(placa => typeof placa === 'string' ? placa.trim().toUpperCase() : '')
+        .filter(placa => placa.length >= 6); // Placas brasileiras têm pelo menos 6 caracteres
 
-      // Query SQL DIRETA para máxima confiabilidade  
+      if (placasNormalizadas.length === 0) {
+        console.log('[VALIDAÇÃO CRÍTICA] Nenhuma placa válida após normalização');
+        return res.json({ bloqueado: false });
+      }
+
+      console.log(`[VALIDAÇÃO CRÍTICA] Estado: ${estadoNormalizado}, Placas: ${placasNormalizadas.join(', ')}`);
+
+      // Query SQL otimizada com múltiplos campos de placas e validação robusta
       const query = `
         SELECT 
           numero_licenca,
           data_validade,
+          data_emissao,
           placa_unidade_tratora,
           placa_primeira_carreta,
           placa_segunda_carreta,
-          EXTRACT(DAY FROM (data_validade - CURRENT_DATE)) as dias_restantes
+          placa_dolly,
+          placa_prancha,
+          placa_reboque,
+          status,
+          EXTRACT(DAY FROM (data_validade - CURRENT_DATE)) as dias_restantes,
+          EXTRACT(DAY FROM (CURRENT_DATE - data_emissao)) as dias_desde_emissao
         FROM licencas_emitidas 
-        WHERE estado = $1 
+        WHERE UPPER(estado) = $1 
           AND status = 'ativa'
           AND data_validade > CURRENT_DATE
           AND (
-            placa_unidade_tratora = ANY($2::text[]) OR
-            placa_primeira_carreta = ANY($2::text[]) OR
-            placa_segunda_carreta = ANY($2::text[])
+            UPPER(placa_unidade_tratora) = ANY($2::text[]) OR
+            UPPER(placa_primeira_carreta) = ANY($2::text[]) OR
+            UPPER(placa_segunda_carreta) = ANY($2::text[]) OR
+            UPPER(placa_dolly) = ANY($2::text[]) OR
+            UPPER(placa_prancha) = ANY($2::text[]) OR
+            UPPER(placa_reboque) = ANY($2::text[])
           )
-        ORDER BY data_validade DESC
+        ORDER BY data_validade DESC, data_emissao DESC
         LIMIT 1
       `;
       
-      console.log(`[VALIDAÇÃO CRÍTICA] Executando query para estado ${estado}`);
-      const result = await pool.query(query, [estado, placas]);
-      console.log(`[VALIDAÇÃO CRÍTICA] Resultado da query:`, result.rows);
+      console.log(`[VALIDAÇÃO CRÍTICA] Executando validação para estado ${estadoNormalizado}`);
+      const result = await pool.query(query, [estadoNormalizado, placasNormalizadas]);
+      
+      console.log(`[VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: ${result.rows.length}`);
       
       if (result.rows.length > 0) {
         const licenca = result.rows[0];
-        const dias = parseInt(licenca.dias_restantes);
+        const dias = Math.floor(parseFloat(licenca.dias_restantes));
+        const diasDesdeEmissao = Math.floor(parseFloat(licenca.dias_desde_emissao));
         
-        console.log(`[VALIDAÇÃO CRÍTICA] ${estado}: Licença ${licenca.numero_licenca} com ${dias} dias`);
+        console.log(`[VALIDAÇÃO CRÍTICA] ${estadoNormalizado}: Licença ${licenca.numero_licenca}`);
+        console.log(`[VALIDAÇÃO CRÍTICA] Dias restantes: ${dias}, Status: ${licenca.status}`);
+        console.log(`[VALIDAÇÃO CRÍTICA] Emitida há: ${diasDesdeEmissao} dias`);
         
+        // Aplicar regra dos 60 dias
         if (dias > 60) {
-          console.log(`[VALIDAÇÃO CRÍTICA] ${estado} BLOQUEADO - ${dias} dias > 60`);
+          console.log(`[VALIDAÇÃO CRÍTICA] ❌ ${estadoNormalizado} BLOQUEADO - ${dias} dias > 60`);
+          
+          // Coletar todas as placas da licença para informar o usuário
+          const placasLicenca = [
+            licenca.placa_unidade_tratora,
+            licenca.placa_primeira_carreta, 
+            licenca.placa_segunda_carreta,
+            licenca.placa_dolly,
+            licenca.placa_prancha,
+            licenca.placa_reboque
+          ].filter(Boolean);
+          
           return res.json({
             bloqueado: true,
             numero: licenca.numero_licenca,
             validade: licenca.data_validade,
+            emissao: licenca.data_emissao,
             diasRestantes: dias,
-            placasConflitantes: [
-              licenca.placa_unidade_tratora,
-              licenca.placa_primeira_carreta, 
-              licenca.placa_segunda_carreta
-            ].filter(Boolean)
+            diasDesdeEmissao: diasDesdeEmissao,
+            placasConflitantes: placasLicenca,
+            estado: estadoNormalizado,
+            motivo: `Licença vigente com ${dias} dias restantes (> 60 dias)`
           });
+        } else {
+          console.log(`[VALIDAÇÃO CRÍTICA] ⚠️ ${estadoNormalizado} PERMITIDO - ${dias} dias ≤ 60 (renovação)`);
         }
       }
       
-      console.log(`[VALIDAÇÃO CRÍTICA] ${estado} LIBERADO`);
-      return res.json({ bloqueado: false });
+      console.log(`[VALIDAÇÃO CRÍTICA] ✅ ${estadoNormalizado} LIBERADO - Sem licenças vigentes conflitantes`);
+      return res.json({ 
+        bloqueado: false,
+        estado: estadoNormalizado,
+        placasVerificadas: placasNormalizadas.length,
+        motivo: 'Nenhuma licença vigente encontrada para as placas informadas'
+      });
       
     } catch (error) {
-      console.error('[VALIDAÇÃO CRÍTICA] Erro detalhado:', error);
+      console.error('[VALIDAÇÃO CRÍTICA] ❌ ERRO CRÍTICO:', error);
+      console.error('[VALIDAÇÃO CRÍTICA] Stack trace:', error.stack);
+      
       return res.status(500).json({ 
-        bloqueado: false, 
-        error: 'Erro interno na validação',
+        bloqueado: false, // Em caso de erro, liberar para não bloquear o usuário
+        error: 'Erro interno na validação - liberando por segurança',
+        timestamp: new Date().toISOString(),
         details: error.message 
       });
     }
