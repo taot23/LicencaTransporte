@@ -1994,7 +1994,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           le.placa_reboque
         FROM licencas_emitidas le
         WHERE le.estado = $1 
-          AND le.status = 'emitida'
+          AND le.status = 'ativa'
           AND le.data_validade > CURRENT_DATE
           AND (${conditions.join(' OR ')})
         ORDER BY le.data_validade DESC
@@ -2546,7 +2546,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             le.pedido_id
           FROM licencas_emitidas le
           WHERE le.estado = $1 
-            AND le.status = 'emitida'
+            AND le.status = 'ativa'
             AND le.data_validade > CURRENT_DATE
             AND (${conditions.join(' OR ')})
           ORDER BY le.data_validade DESC
