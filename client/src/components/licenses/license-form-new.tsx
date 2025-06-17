@@ -39,7 +39,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { CampoPlacaAdicional } from "./placas-adicionais";
 import { VehicleSelectCard } from "./vehicle-select-card";
-import { StateSelectionFinal } from "./state-selection-final";
+import { StateValidationSimple } from "./state-validation-simple";
 import { 
   LoaderCircle,
   X, 
@@ -1779,13 +1779,141 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
             const placasColetadas = getPlacasParaValidacao();
             console.log('[FORM-PRINCIPAL] Placas enviadas para validação:', placasColetadas);
             
+            // Função para validar estado em tempo real
+            const validarEstado = async (estado: string, placas: any) => {
+              try {
+                const placasArray = Object.values(placas).filter(Boolean) as string[];
+                if (placasArray.length === 0) return false;
+
+                console.log(`[VALIDAÇÃO TEMPO REAL] Validando ${estado} com placas:`, placasArray);
+                
+                const response = await fetch('/api/validacao-critica', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ estado, placas: placasArray })
+                });
+
+                if (response.ok) {
+                  const data = await response.json();
+                  console.log(`[VALIDAÇÃO TEMPO REAL] Resposta ${estado}:`, data);
+                  
+                  if (data.bloqueado && data.diasRestantes > 60) {
+                    alert(
+                      `⚠️ ESTADO ${estado} BLOQUEADO\n\n` +
+                      `Licença vigente: ${data.numero}\n` +
+                      `Vencimento: ${new Date(data.validade).toLocaleDateString('pt-BR')}\n` +
+                      `Dias restantes: ${data.diasRestantes}\n\n` +
+                      `💰 ECONOMIA: Renovação só permitida com ≤60 dias restantes.\n` +
+                      `Isso evita custos desnecessários de pedidos duplicados.`
+                    );
+                    return true; // Bloqueado
+                  }
+                }
+              } catch (error) {
+                console.error(`Erro ao validar ${estado}:`, error);
+              }
+              return false; // Liberado
+            };
+
+            const ESTADOS_BRASIL = [
+              { code: "AL", name: "Alagoas" }, { code: "BA", name: "Bahia" }, { code: "CE", name: "Ceará" },
+              { code: "DF", name: "Distrito Federal" }, { code: "DNIT", name: "FEDERAL" }, { code: "ES", name: "Espírito Santo" },
+              { code: "GO", name: "Goiás" }, { code: "MA", name: "Maranhão" }, { code: "MG", name: "Minas Gerais" },
+              { code: "MS", name: "Mato Grosso do Sul" }, { code: "MT", name: "Mato Grosso" }, { code: "PA", name: "Pará" },
+              { code: "PE", name: "Pernambuco" }, { code: "PR", name: "Paraná" }, { code: "RJ", name: "Rio de Janeiro" },
+              { code: "RS", name: "Rio Grande do Sul" }, { code: "SC", name: "Santa Catarina" }, { code: "SE", name: "Sergipe" },
+              { code: "SP", name: "São Paulo" }, { code: "TO", name: "Tocantins" }
+            ];
+
+            const [validating, setValidating] = useState<string | null>(null);
+
+            const handleStateToggle = async (stateCode: string) => {
+              if (submitRequestMutation.isPending || saveAsDraftMutation.isPending || validating) return;
+
+              const currentStates = field.value || [];
+              const isCurrentlySelected = currentStates.includes(stateCode);
+
+              if (isCurrentlySelected) {
+                // Remover estado
+                field.onChange(currentStates.filter((s: string) => s !== stateCode));
+              } else {
+                // Adicionar estado - validar primeiro
+                setValidating(stateCode);
+                
+                const bloqueado = await validarEstado(stateCode, placasColetadas);
+                
+                setValidating(null);
+                
+                if (!bloqueado) {
+                  // Estado liberado, pode adicionar
+                  field.onChange([...currentStates, stateCode]);
+                }
+                // Se bloqueado, não adiciona (alert já foi mostrado)
+              }
+            };
+
             return (
-              <StateSelectionFinal
-                selectedStates={field.value || []}
-                onStatesChange={field.onChange}
-                placas={placasColetadas}
-                disabled={submitRequestMutation.isPending || saveAsDraftMutation.isPending}
-              />
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium">Estados de Circulação</h3>
+                  {validating && (
+                    <div className="text-sm text-blue-600 flex items-center gap-2">
+                      <div className="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                      Validando {validating}...
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {ESTADOS_BRASIL.map((estado) => {
+                    const isSelected = (field.value || []).includes(estado.code);
+                    const isValidatingThis = validating === estado.code;
+                    
+                    return (
+                      <div 
+                        key={estado.code}
+                        className={`
+                          flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-all
+                          ${isSelected 
+                            ? 'bg-blue-50 border-blue-300' 
+                            : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                          }
+                          ${isValidatingThis ? 'opacity-50' : ''}
+                        `}
+                        onClick={() => handleStateToggle(estado.code)}
+                      >
+                        <Checkbox 
+                          checked={isSelected}
+                          disabled={!!validating}
+                          onChange={() => {}}
+                        />
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-gray-900">
+                            {estado.code}
+                          </div>
+                          <div className="text-xs text-gray-600">{estado.name}</div>
+                        </div>
+                        {isValidatingThis && (
+                          <div className="text-blue-600">
+                            <div className="animate-spin h-3 w-3 border border-blue-600 border-t-transparent rounded-full"></div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="text-sm text-blue-800">
+                    <div className="font-medium">💡 Validação Inteligente Ativa</div>
+                    <div className="text-xs mt-1">
+                      O sistema verifica automaticamente licenças vigentes para evitar pedidos duplicados e custos desnecessários.
+                      Estados com licenças válidas por mais de 60 dias são bloqueados automaticamente.
+                    </div>
+                  </div>
+                </div>
+              </div>
             );
           }}
         />
