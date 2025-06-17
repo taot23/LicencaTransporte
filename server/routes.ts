@@ -2441,52 +2441,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[VALIDAÇÃO INTELIGENTE] Encontradas ${result.rows.length} licenças vigentes no estado ${state}`);
         
         for (const row of result.rows) {
-          const daysUntilExpiry = Math.ceil((new Date(row.valid_until) - now) / (1000 * 60 * 60 * 24));
+          const validUntil = new Date(row.data_validade);
+          const daysUntilExpiry = Math.ceil((validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
           
-          // Identificar quais placas específicas estão em conflito
+          // Identificar placas conflitantes da licença emitida
           const conflictingPlates = [];
-          
-          if (plates.includes(row.main_vehicle_plate)) {
-            conflictingPlates.push(row.main_vehicle_plate);
-          }
-          
-          if (row.additional_plates) {
-            const additionalPlates = Array.isArray(row.additional_plates) ? row.additional_plates : [];
-            conflictingPlates.push(...additionalPlates.filter(plate => plates.includes(plate)));
-          }
-          
-          // Verificar placas dos veículos referenciados pelos IDs
-          const vehicleIds = [
-            row.tractor_unit_id,
-            row.first_trailer_id,
-            row.second_trailer_id,
-            row.dolly_id,
-            row.flatbed_id
+          const licencaPlates = [
+            row.placa_unidade_tratora,
+            row.placa_primeira_carreta,
+            row.placa_segunda_carreta,
+            row.placa_dolly,
+            row.placa_prancha,
+            row.placa_reboque
           ].filter(Boolean);
           
-          if (vehicleIds.length > 0) {
-            try {
-              const vehiclesQuery = `SELECT plate FROM vehicles WHERE id = ANY($1)`;
-              const vehiclesResult = await pool.query(vehiclesQuery, [vehicleIds]);
-              const vehiclePlates = vehiclesResult.rows.map(v => v.plate).filter(plate => plates.includes(plate));
-              conflictingPlates.push(...vehiclePlates);
-            } catch (error) {
-              console.error(`[VALIDAÇÃO INTELIGENTE] Erro ao buscar placas dos veículos:`, error);
+          plates.forEach(plate => {
+            if (licencaPlates.includes(plate)) {
+              conflictingPlates.push(plate);
             }
-          }
-          
-          conflicts.push({
-            state: row.state,
-            licenseId: row.license_id,
-            requestNumber: row.request_number,
-            aetNumber: row.aet_number,
-            validUntil: row.valid_until,
-            daysUntilExpiry,
-            conflictingPlates: [...new Set(conflictingPlates)], // Remove duplicatas
-            canRenew: daysUntilExpiry <= 30
           });
           
-          console.log(`[VALIDAÇÃO INTELIGENTE] Conflito encontrado: Estado ${state}, AET ${row.aet_number}, ${daysUntilExpiry} dias até vencer, placas: ${conflictingPlates.join(', ')}`);
+          conflicts.push({
+            state: row.estado,
+            licenseId: row.pedido_id,
+            requestNumber: `REQ-${row.pedido_id}`,
+            aetNumber: row.numero_licenca,
+            validUntil: row.data_validade,
+            daysUntilExpiry,
+            conflictingPlates,
+            canRenew: daysUntilExpiry <= 30
+          });
         }
       }
       
