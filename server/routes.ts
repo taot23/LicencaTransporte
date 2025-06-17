@@ -2133,13 +2133,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Mapear placas por tipo de veículo conforme a composição
       const placaMapping = {
-        placaUnidadeTratora: sanitizedData.mainVehiclePlate || null,
+        placaUnidadeTratora: null,
         placaPrimeiraCarreta: null,
         placaSegundaCarreta: null,
         placaDolly: null,
         placaPrancha: null,
         placaReboque: null
       };
+      
+      // Buscar placa da unidade tratora
+      if (sanitizedData.tractorUnitId) {
+        const tractor = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.tractorUnitId));
+        if (tractor[0]) placaMapping.placaUnidadeTratora = tractor[0].plate;
+      } else if (sanitizedData.mainVehiclePlate) {
+        placaMapping.placaUnidadeTratora = sanitizedData.mainVehiclePlate;
+      }
       
       // Mapear veículos específicos baseado no tipo de licença
       try {
