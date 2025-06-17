@@ -2129,11 +2129,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Creating license request with data:', JSON.stringify(sanitizedData, null, 2));
       
       // NOVA VALIDAÇÃO INTELIGENTE: Verificar licenças vigentes por composição veicular
-      console.log(`[VALIDAÇÃO NOVA] Verificando conflitos por composição veicular antes de criar licença`);
+      console.log(`[VALIDAÇÃO COMPOSIÇÃO] Iniciando validação por composição veicular`);
       
       // Mapear placas por tipo de veículo conforme a composição
       const placaMapping = {
-        placaUnidadeTratora: null,
+        placaUnidadeTratora: sanitizedData.mainVehiclePlate || null,
         placaPrimeiraCarreta: null,
         placaSegundaCarreta: null,
         placaDolly: null,
@@ -2141,53 +2141,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
         placaReboque: null
       };
       
-      // Definir placas baseado no tipo de licença e veículos selecionados
-      if (sanitizedData.mainVehiclePlate) {
-        placaMapping.placaUnidadeTratora = sanitizedData.mainVehiclePlate;
-      }
-      
       // Mapear veículos específicos baseado no tipo de licença
-      if (sanitizedData.type === 'bitrain_9_axles' || sanitizedData.type === 'bitrain_7_axles') {
-        if (sanitizedData.firstTrailerId) {
-          // Buscar placa do primeiro trailer
-          const firstTrailer = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.firstTrailerId));
-          if (firstTrailer[0]) placaMapping.placaPrimeiraCarreta = firstTrailer[0].plate;
+      try {
+        if (sanitizedData.type === 'bitrain_9_axles' || sanitizedData.type === 'bitrain_7_axles') {
+          if (sanitizedData.firstTrailerId) {
+            const firstTrailer = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.firstTrailerId));
+            if (firstTrailer[0]) placaMapping.placaPrimeiraCarreta = firstTrailer[0].plate;
+          }
+          if (sanitizedData.secondTrailerId) {
+            const secondTrailer = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.secondTrailerId));
+            if (secondTrailer[0]) placaMapping.placaSegundaCarreta = secondTrailer[0].plate;
+          }
+        } else if (sanitizedData.type === 'rodotrem') {
+          if (sanitizedData.dollyId) {
+            const dolly = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.dollyId));
+            if (dolly[0]) placaMapping.placaDolly = dolly[0].plate;
+          }
+          if (sanitizedData.secondTrailerId) {
+            const secondTrailer = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.secondTrailerId));
+            if (secondTrailer[0]) placaMapping.placaSegundaCarreta = secondTrailer[0].plate;
+          }
+        } else if (sanitizedData.type === 'prancha') {
+          if (sanitizedData.flatbedId) {
+            const flatbed = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.flatbedId));
+            if (flatbed[0]) placaMapping.placaPrancha = flatbed[0].plate;
+          }
+        } else if (sanitizedData.type === 'romeu_julieta') {
+          if (sanitizedData.firstTrailerId) {
+            const reboque = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.firstTrailerId));
+            if (reboque[0]) placaMapping.placaReboque = reboque[0].plate;
+          }
         }
-        if (sanitizedData.secondTrailerId) {
-          // Buscar placa do segundo trailer
-          const secondTrailer = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.secondTrailerId));
-          if (secondTrailer[0]) placaMapping.placaSegundaCarreta = secondTrailer[0].plate;
-        }
-      } else if (sanitizedData.type === 'rodotrem') {
-        if (sanitizedData.dollyId) {
-          const dolly = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.dollyId));
-          if (dolly[0]) placaMapping.placaDolly = dolly[0].plate;
-        }
-        if (sanitizedData.secondTrailerId) {
-          const secondTrailer = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.secondTrailerId));
-          if (secondTrailer[0]) placaMapping.placaSegundaCarreta = secondTrailer[0].plate;
-        }
-      } else if (sanitizedData.type === 'prancha') {
-        if (sanitizedData.flatbedId) {
-          const flatbed = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.flatbedId));
-          if (flatbed[0]) placaMapping.placaPrancha = flatbed[0].plate;
-        }
-      } else if (sanitizedData.type === 'romeu_julieta') {
-        if (sanitizedData.firstTrailerId) {
-          const reboque = await db.select().from(vehicles).where(eq(vehicles.id, sanitizedData.firstTrailerId));
-          if (reboque[0]) placaMapping.placaReboque = reboque[0].plate;
-        }
+      } catch (error) {
+        console.error(`[VALIDAÇÃO COMPOSIÇÃO] Erro ao buscar placas dos veículos:`, error);
+        // Continuar com validação apenas da placa principal
       }
       
-      console.log(`[VALIDAÇÃO NOVA] Placas mapeadas:`, placaMapping);
-      console.log(`[VALIDAÇÃO NOVA] Estados: ${sanitizedData.states.join(', ')}`);
+      console.log(`[VALIDAÇÃO COMPOSIÇÃO] Placas mapeadas:`, placaMapping);
+      console.log(`[VALIDAÇÃO COMPOSIÇÃO] Estados: ${sanitizedData.states.join(', ')}`);
       
       const conflicts = [];
       const now = new Date();
       const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
       
-      // Verificar conflitos para cada estado usando a nova tabela
+      // Verificar conflitos para cada estado
       for (const state of sanitizedData.states) {
+        // Construir condições dinâmicas baseadas nas placas disponíveis
+        const conditions = [];
+        const params = [state, thirtyDaysFromNow];
+        let paramIndex = 3;
+        
+        if (placaMapping.placaUnidadeTratora) {
+          conditions.push(`le.placa_unidade_tratora = $${paramIndex++}`);
+          params.push(placaMapping.placaUnidadeTratora);
+        }
+        if (placaMapping.placaPrimeiraCarreta) {
+          conditions.push(`le.placa_primeira_carreta = $${paramIndex++}`);
+          params.push(placaMapping.placaPrimeiraCarreta);
+        }
+        if (placaMapping.placaSegundaCarreta) {
+          conditions.push(`le.placa_segunda_carreta = $${paramIndex++}`);
+          params.push(placaMapping.placaSegundaCarreta);
+        }
+        if (placaMapping.placaDolly) {
+          conditions.push(`le.placa_dolly = $${paramIndex++}`);
+          params.push(placaMapping.placaDolly);
+        }
+        if (placaMapping.placaPrancha) {
+          conditions.push(`le.placa_prancha = $${paramIndex++}`);
+          params.push(placaMapping.placaPrancha);
+        }
+        if (placaMapping.placaReboque) {
+          conditions.push(`le.placa_reboque = $${paramIndex++}`);
+          params.push(placaMapping.placaReboque);
+        }
+        
+        if (conditions.length === 0) {
+          console.log(`[VALIDAÇÃO COMPOSIÇÃO] Nenhuma placa para validar no estado ${state}`);
+          continue;
+        }
+        
         const query = `
           SELECT 
             le.estado,
@@ -2207,26 +2240,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           WHERE le.estado = $1 
             AND le.status = 'emitida'
             AND le.data_validade > $2
-            AND (
-              ($3 IS NOT NULL AND le.placa_unidade_tratora = $3) OR
-              ($4 IS NOT NULL AND le.placa_primeira_carreta = $4) OR
-              ($5 IS NOT NULL AND le.placa_segunda_carreta = $5) OR
-              ($6 IS NOT NULL AND le.placa_dolly = $6) OR
-              ($7 IS NOT NULL AND le.placa_prancha = $7) OR
-              ($8 IS NOT NULL AND le.placa_reboque = $8)
-            )
+            AND (${conditions.join(' OR ')})
         `;
         
-        const result = await pool.query(query, [
-          state, 
-          thirtyDaysFromNow,
-          placaMapping.placaUnidadeTratora,
-          placaMapping.placaPrimeiraCarreta,
-          placaMapping.placaSegundaCarreta,
-          placaMapping.placaDolly,
-          placaMapping.placaPrancha,
-          placaMapping.placaReboque
-        ]);
+        console.log(`[VALIDAÇÃO COMPOSIÇÃO] Query para ${state}:`, query);
+        console.log(`[VALIDAÇÃO COMPOSIÇÃO] Params:`, params);
+        
+        const result = await pool.query(query, params);
         
         if (result.rows.length > 0) {
           for (const row of result.rows) {
@@ -2250,13 +2270,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             });
             
-            console.log(`[VALIDAÇÃO NOVA] CONFLITO: Estado ${state}, AET ${row.numero_licenca}, ${daysUntilExpiry} dias até vencer`);
+            console.log(`[VALIDAÇÃO COMPOSIÇÃO] CONFLITO: Estado ${state}, AET ${row.numero_licenca}, ${daysUntilExpiry} dias até vencer`);
           }
+        } else {
+          console.log(`[VALIDAÇÃO COMPOSIÇÃO] Nenhum conflito encontrado para estado ${state}`);
         }
       }
       
       if (conflicts.length > 0) {
-        console.log(`[VALIDAÇÃO NOVA] BLOQUEANDO CRIAÇÃO: ${conflicts.length} conflito(s) encontrado(s) por composição veicular`);
+        console.log(`[VALIDAÇÃO COMPOSIÇÃO] BLOQUEANDO CRIAÇÃO: ${conflicts.length} conflito(s) encontrado(s)`);
         return res.status(400).json({
           message: `Não é possível criar a licença. Foram encontradas ${conflicts.length} licença(s) vigente(s) para os estados e composição veicular selecionados.`,
           conflicts: conflicts,
@@ -2265,7 +2287,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      console.log(`[VALIDAÇÃO NOVA] Nenhum conflito de composição veicular encontrado. Prosseguindo com a criação da licença.`);
+      console.log(`[VALIDAÇÃO COMPOSIÇÃO] Validação concluída - nenhum conflito encontrado`);
 
       const licenseRequest = await storage.createLicenseRequest(userId, sanitizedData);
       
