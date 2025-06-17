@@ -374,7 +374,7 @@ async function sincronizarTodasLicencasAprovadas() {
         for (const stateStatus of licenca.state_statuses) {
           // Parse do formato: "ESTADO:status:data_validade:data_emissao"
           const parts = stateStatus.split(':');
-          if (parts.length >= 4 && parts[1] === 'approved') {
+          if (parts.length >= 4 && (parts[1] === 'approved' || parts[1] === 'released')) {
             const estado = parts[0];
             const dataValidade = parts[2];
             const dataEmissao = parts[3];
@@ -3818,8 +3818,8 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       
       console.log(`Histórico de status criado para licença ${licenseId}, estado ${statusData.state}: ${previousStateStatus} -> ${statusData.status}`);
       
-      // Se o status foi alterado para 'approved', sincronizar com licencas_emitidas
-      if (statusData.status === 'approved' && statusData.validUntil && statusData.aetNumber) {
+      // Se o status foi alterado para 'approved' ou 'released', sincronizar com licencas_emitidas
+      if ((statusData.status === 'approved' || statusData.status === 'released') && statusData.validUntil && statusData.aetNumber) {
         try {
           console.log(`[SINCRONIZAÇÃO AUTOMÁTICA] Licença ${licenseId} aprovada para estado ${statusData.state} - iniciando sincronização`);
           await sincronizarLicencaEmitida(updatedLicense, statusData.state, statusData.aetNumber, statusData.validUntil);

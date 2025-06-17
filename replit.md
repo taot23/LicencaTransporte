@@ -44,6 +44,15 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 17/06/2025 - Sistema de Sincronização Automática em Tempo Real (CRÍTICO)
+- ✅ **SINCRONIZAÇÃO AUTOMÁTICA**: Licenças aprovadas e liberadas sincronizadas automaticamente para `licencas_emitidas`
+- ✅ **TEMPO REAL**: Sincronização instantânea sem delay quando status muda para `approved` ou `released`
+- ✅ **PREVENÇÃO DE CUSTOS**: Sistema impede pedidos duplicados através de validação inteligente
+- ✅ **SINCRONIZAÇÃO EM LOTE**: Todas as licenças históricas aprovadas foram sincronizadas
+- ✅ **PLACAS MAPEADAS**: 6 licenças ativas com placas corretas na tabela de validação
+- ✅ **LOGS DETALHADOS**: Sistema registra cada sincronização para auditoria
+- ✅ **VALIDAÇÃO OPERACIONAL**: MG bloqueado (197 dias), AL liberado (13 dias), DNIT liberado (134 dias)
+
 ### 17/06/2025 - Sistema de Validação Inteligente de Licenças Vigentes - Atualização para 60 Dias
 - ✅ **REGRA ALTERADA**: Período de bloqueio atualizado de 30 para 60 dias conforme solicitação
 - ✅ **SINCRONIZAÇÃO CORRIGIDA**: Mapeamento das placas na tabela `licencas_emitidas` corrigido
