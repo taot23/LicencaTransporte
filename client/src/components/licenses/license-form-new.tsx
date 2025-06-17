@@ -39,6 +39,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { CampoPlacaAdicional } from "./placas-adicionais";
 import { VehicleSelectCard } from "./vehicle-select-card";
+import { StateSelectionWithValidation } from "./state-selection-with-validation";
 import { 
   LoaderCircle,
   X, 
@@ -1675,165 +1676,72 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
           />
         </div>
 
-        <div className="border border-gray-200 rounded-lg p-5 shadow-sm">
-          <h3 className="font-semibold text-gray-800 text-lg mb-4 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-              <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
-              <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
-              <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
-              <line x1="12" y1="20" x2="12" y2="20"/>
-            </svg>
-            Estados Solicitados
-          </h3>
+        <FormField
+          control={form.control}
+          name="states"
+          render={({ field }) => {
+            // Coletar placas dos veículos para validação
+            const getPlacasParaValidacao = () => {
+              const placas: any = {};
+              
+              // Placa do cavalo/trator
+              const tractorId = form.watch("tractorUnitId");
+              if (tractorId && vehicles) {
+                const tractor = vehicles.find(v => v.id === tractorId);
+                if (tractor?.plate) placas.cavalo = tractor.plate;
+              } else {
+                const mainPlate = form.watch("mainVehiclePlate");
+                if (mainPlate) placas.cavalo = mainPlate;
+              }
+              
+              // Primeira carreta
+              const firstTrailerId = form.watch("firstTrailerId");
+              if (firstTrailerId && vehicles) {
+                const firstTrailer = vehicles.find(v => v.id === firstTrailerId);
+                if (firstTrailer?.plate) placas.primeiraCarreta = firstTrailer.plate;
+              }
+              
+              // Segunda carreta
+              const secondTrailerId = form.watch("secondTrailerId");
+              if (secondTrailerId && vehicles) {
+                const secondTrailer = vehicles.find(v => v.id === secondTrailerId);
+                if (secondTrailer?.plate) placas.segundaCarreta = secondTrailer.plate;
+              }
+              
+              // Dolly
+              const dollyId = form.watch("dollyId");
+              if (dollyId && vehicles) {
+                const dolly = vehicles.find(v => v.id === dollyId);
+                if (dolly?.plate) placas.dolly = dolly.plate;
+              }
+              
+              // Prancha
+              const flatbedId = form.watch("flatbedId");
+              if (flatbedId && vehicles) {
+                const flatbed = vehicles.find(v => v.id === flatbedId);
+                if (flatbed?.plate) placas.prancha = flatbed.plate;
+              }
+              
+              // Reboque (usando firstTrailerId para romeu_julieta)
+              const licenseType = form.watch("type");
+              if (licenseType === "romeu_julieta" && firstTrailerId && vehicles) {
+                const reboque = vehicles.find(v => v.id === firstTrailerId);
+                if (reboque?.plate) placas.reboque = reboque.plate;
+              }
+              
+              return placas;
+            };
 
-          <FormField
-            control={form.control}
-            name="states"
-            render={() => (
-              <FormItem>
-                <div className="mb-2">
-                  <div className="flex justify-between items-center">
-                    <FormLabel className="text-base font-medium">Selecione os estados para emissão de licença</FormLabel>
-                    <FormField
-                      control={form.control}
-                      name="states"
-                      render={({ field }) => {
-                        const allSelected = brazilianStates.length === (field.value || []).length;
-                        return (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="h-8 text-xs flex gap-1 items-center"
-                            onClick={() => {
-                              if (allSelected) {
-                                // Desselecionar todos
-                                field.onChange([]);
-                              } else {
-                                // Selecionar todos
-                                field.onChange(brazilianStates.map(state => state.code));
-                              }
-                            }}
-                          >
-                            {allSelected ? (
-                              <>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                </svg>
-                                Desmarcar Todos
-                              </>
-                            ) : (
-                              <>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="9 11 12 14 22 4"></polyline>
-                                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                                </svg>
-                                Selecionar Todos
-                              </>
-                            )}
-                          </Button>
-                        );
-                      }}
-                    />
-                  </div>
-                  <div className="text-sm text-muted-foreground mt-1 mb-3">
-                    Escolha um ou mais estados onde a licença será utilizada
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                  {brazilianStates.map((state) => (
-                    <FormField
-                      key={state.code}
-                      control={form.control}
-                      name="states"
-                      render={({ field }) => {
-                        const isSelected = (field.value || []).includes(state.code);
-                        return (
-                          <FormItem
-                            key={state.code}
-                            className="m-0 p-0"
-                          >
-                            <FormControl>
-                              <div 
-                                className={`cursor-pointer flex flex-col items-center justify-center p-2 rounded-md border ${
-                                  isSelected 
-                                    ? 'bg-blue-50 border-blue-300 text-blue-700 font-medium' 
-                                    : 'border-gray-200 hover:bg-gray-50'
-                                }`}
-                                onClick={async () => {
-                                  if (isSelected) {
-                                    field.onChange((field.value || []).filter((value) => value !== state.code));
-                                  } else {
-                                    const newStates = [...(field.value || []), state.code];
-                                    
-                                    // Coletar todas as placas do formulário para validação
-                                    const allPlates = [];
-                                    const mainPlate = form.watch("mainVehiclePlate");
-                                    if (mainPlate) allPlates.push(mainPlate);
-                                    
-                                    const additionalPlates = form.watch("additionalPlates") || [];
-                                    allPlates.push(...additionalPlates);
-                                    
-                                    // Obter placas dos veículos selecionados
-                                    const tractorId = form.watch("tractorUnitId");
-                                    const firstTrailerId = form.watch("firstTrailerId");
-                                    const secondTrailerId = form.watch("secondTrailerId");
-                                    const dollyId = form.watch("dollyId");
-                                    const flatbedId = form.watch("flatbedId");
-                                    
-                                    if (vehicles) {
-                                      if (tractorId) {
-                                        const vehicle = vehicles.find(v => v.id === tractorId);
-                                        if (vehicle?.plate) allPlates.push(vehicle.plate);
-                                      }
-                                      if (firstTrailerId) {
-                                        const vehicle = vehicles.find(v => v.id === firstTrailerId);
-                                        if (vehicle?.plate) allPlates.push(vehicle.plate);
-                                      }
-                                      if (secondTrailerId) {
-                                        const vehicle = vehicles.find(v => v.id === secondTrailerId);
-                                        if (vehicle?.plate) allPlates.push(vehicle.plate);
-                                      }
-                                      if (dollyId) {
-                                        const vehicle = vehicles.find(v => v.id === dollyId);
-                                        if (vehicle?.plate) allPlates.push(vehicle.plate);
-                                      }
-                                      if (flatbedId) {
-                                        const vehicle = vehicles.find(v => v.id === flatbedId);
-                                        if (vehicle?.plate) allPlates.push(vehicle.plate);
-                                      }
-                                    }
-                                    
-                                    console.log("Validando licenças para:", { estados: [state.code], placas: allPlates });
-                                    
-                                    // Validar apenas se temos placas para verificar
-                                    if (allPlates.length > 0) {
-                                      const validation = await validateExistingLicenses([state.code], allPlates);
-                                      if (validation.hasConflicts) {
-                                        // Estado já foi removido pela função de validação
-                                        return;
-                                      }
-                                    }
-                                    
-                                    field.onChange(newStates);
-                                  }
-                                }}
-                              >
-                                <span className="text-base font-medium">{state.code}</span>
-                                <span className="text-xs mt-1 text-center hidden md:block text-gray-500">{state.name}</span>
-                              </div>
-                            </FormControl>
-                          </FormItem>
-                        );
-                      }}
-                    />
-                  ))}
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+            return (
+              <StateSelectionWithValidation
+                selectedStates={field.value || []}
+                onStatesChange={field.onChange}
+                placas={getPlacasParaValidacao()}
+                disabled={submitRequestMutation.isPending || saveAsDraftMutation.isPending}
+              />
+            );
+          }}
+        />
 
         <div className="flex flex-col sm:flex-row justify-end gap-4 sm:space-x-4 pt-4">
           <Button 
@@ -1866,17 +1774,5 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
         </div>
       </form>
     </Form>
-    
-    {/* Modal de conflitos de licenças */}
-    <LicenseConflictModal
-      isOpen={showConflictModal}
-      onClose={() => setShowConflictModal(false)}
-      onProceed={(statesWithoutConflicts) => {
-        form.setValue("states", statesWithoutConflicts);
-        setShowConflictModal(false);
-      }}
-      conflicts={licenseConflicts}
-      selectedStates={form.watch("states") || []}
-    />
   );
 }
