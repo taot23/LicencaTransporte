@@ -2402,9 +2402,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             sl.status,
             lr.main_vehicle_plate,
             lr.additional_plates,
-            lr.vehicles,
             lr.request_number,
-            lr.id as license_id
+            lr.id as license_id,
+            lr.tractor_unit_id,
+            lr.first_trailer_id,
+            lr.second_trailer_id,
+            lr.dolly_id,
+            lr.flatbed_id
           FROM state_licenses sl
           JOIN license_requests lr ON sl.license_request_id = lr.id
           WHERE sl.state = $1 
@@ -2412,11 +2416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             AND sl.valid_until > $2
             AND (
               lr.main_vehicle_plate = ANY($3) OR
-              lr.additional_plates && $3 OR
-              EXISTS (
-                SELECT 1 FROM jsonb_array_elements(lr.vehicles) AS vehicle
-                WHERE vehicle->>'plate' = ANY($3)
-              )
+              lr.additional_plates && $3
             )
         `;
         
@@ -2439,10 +2439,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
             conflictingPlates.push(...additionalPlates.filter(plate => plates.includes(plate)));
           }
           
-          if (row.vehicles) {
-            const vehicles = Array.isArray(row.vehicles) ? row.vehicles : [];
-            const vehiclePlates = vehicles.map(v => v.plate).filter(plate => plates.includes(plate));
-            conflictingPlates.push(...vehiclePlates);
+          // Verificar placas dos veículos referenciados pelos IDs
+          const vehicleIds = [
+            row.tractor_unit_id,
+            row.first_trailer_id,
+            row.second_trailer_id,
+            row.dolly_id,
+            row.flatbed_id
+          ].filter(Boolean);
+          
+          if (vehicleIds.length > 0) {
+            try {
+              const vehiclesQuery = `SELECT plate FROM vehicles WHERE id = ANY($1)`;
+              const vehiclesResult = await pool.query(vehiclesQuery, [vehicleIds]);
+              const vehiclePlates = vehiclesResult.rows.map(v => v.plate).filter(plate => plates.includes(plate));
+              conflictingPlates.push(...vehiclePlates);
+            } catch (error) {
+              console.error(`[VALIDAÇÃO INTELIGENTE] Erro ao buscar placas dos veículos:`, error);
+            }
           }
           
           conflicts.push({
