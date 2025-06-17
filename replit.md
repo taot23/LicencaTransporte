@@ -44,15 +44,20 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
-### 17/06/2025 - Sistema de Validação Inteligente EXPANDIDO - Produção Completa
-- ✅ **VALIDAÇÃO PARA TODOS OS ESTADOS**: Sistema expandido para todos os 27 estados brasileiros
+### 17/06/2025 - Sistema de Validação Inteligente COMPLETO - Produção Final
+- ✅ **VALIDAÇÃO PARA TODOS OS ESTADOS + ÓRGÃOS FEDERAIS**: 27 estados brasileiros + DNIT, ANTT, PRF
 - ✅ **DADOS REAIS DE PRODUÇÃO**: Funciona com todas as licenças sincronizadas na tabela `licencas_emitidas`
 - ✅ **QUERY SQL ROBUSTA**: Verifica múltiplos campos de placas (unidade tratora, primeira carreta, segunda carreta, dolly, prancha, reboque)
 - ✅ **NORMALIZAÇÃO INTELIGENTE**: Estados e placas normalizadas automaticamente (maiúsculas, filtros)
 - ✅ **VALIDAÇÃO ROBUSTA**: Apenas estados válidos aceitos, placas com mínimo 6 caracteres
 - ✅ **LOGS DETALHADOS PRODUÇÃO**: Emojis visuais nos logs (❌ bloqueado, ✅ liberado, ⚠️ renovação)
 - ✅ **INTEGRAÇÃO FORMULÁRIO ORIGINAL**: Validação em tempo real mantendo aparência exata do formulário
-- ✅ **TESTE REAL CONFIRMADO**: MG bloqueado (197 dias), SP permitido (44 dias ≤ 60), RJ liberado (sem licenças)
+- ✅ **CORREÇÃO DNIT IMPLEMENTADA**: DNIT agora incluído na validação, bloqueia licenças de 365 dias
+- ✅ **TESTE COMPLETO CONFIRMADO**: 
+  - MG bloqueado (197 dias > 60)
+  - DNIT bloqueado (365 dias > 60) 
+  - SP permitido (44 dias ≤ 60)
+  - RJ liberado (sem licenças)
 - ✅ **ERRO HANDLING**: Em caso de erro, libera estado para não bloquear usuário
 - ✅ **DADOS EXPANDIDOS**: Retorna informações completas (data emissão, dias desde emissão, motivo)
 
