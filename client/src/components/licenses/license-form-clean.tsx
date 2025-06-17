@@ -382,23 +382,47 @@ export function LicenseFormClean({ draft, onComplete, onCancel, preSelectedTrans
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <DimensionField
+                <FormField
                   control={form.control}
                   name="length"
-                  label="Comprimento (cm)"
-                  placeholder="2600"
+                  render={({ field }) => (
+                    <DimensionField
+                      field={field}
+                      label="Comprimento (cm)"
+                      placeholder="2600"
+                      description="Comprimento total do conjunto"
+                      fieldType="comprimento"
+                      licenseType={formData.type}
+                    />
+                  )}
                 />
-                <DimensionField
+                <FormField
                   control={form.control}
                   name="width"
-                  label="Largura (cm)"
-                  placeholder="260"
+                  render={({ field }) => (
+                    <DimensionField
+                      field={field}
+                      label="Largura (cm)"
+                      placeholder="260"
+                      description="Largura máxima do conjunto"
+                      fieldType="largura"
+                      licenseType={formData.type}
+                    />
+                  )}
                 />
-                <DimensionField
+                <FormField
                   control={form.control}
                   name="height"
-                  label="Altura (cm)"
-                  placeholder="440"
+                  render={({ field }) => (
+                    <DimensionField
+                      field={field}
+                      label="Altura (cm)"
+                      placeholder="440"
+                      description="Altura total do conjunto"
+                      fieldType="altura"
+                      licenseType={formData.type}
+                    />
+                  )}
                 />
               </div>
             </CardContent>

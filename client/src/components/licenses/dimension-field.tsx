@@ -27,10 +27,10 @@ export function DimensionField({
 
   // Ao inicializar, converter o valor numérico para exibição
   useEffect(() => {
-    if (displayValue === '' && typeof field.value === 'number') {
+    if (field && displayValue === '' && typeof field.value === 'number') {
       setDisplayValue(field.value.toString().replace('.', ','));
     }
-  }, [field.value, displayValue]);
+  }, [field?.value, displayValue]);
 
   // Função para lidar com teclas especiais como backspace
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -105,6 +105,8 @@ export function DimensionField({
 
   // Função para atualizar o valor no formulário
   function updateFormValue(value: string) {
+    if (!field?.onChange) return;
+    
     // Sanitizar para o modelo interno (sempre com ponto)
     const sanitized = value.replace(/,/g, '.').replace(/(\..*)\./g, '$1');
     
@@ -193,10 +195,10 @@ export function DimensionField({
   }
 
   // Gerar ID único para o campo
-  const fieldId = `${fieldType}_input_${field.name}`;
+  const fieldId = `${fieldType}_input_${field?.name || 'unknown'}`;
   
   // Verificar se o campo está vazio para mostrar alerta
-  const isEmpty = field.value === undefined || field.value === null || field.value === '';
+  const isEmpty = !field || field.value === undefined || field.value === null || field.value === '';
   
   return (
     <FormItem>
