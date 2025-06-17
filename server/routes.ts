@@ -2393,34 +2393,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const state of states) {
         console.log(`[VALIDAÇÃO INTELIGENTE] Verificando estado: ${state}`);
         
-        // Buscar licenças vigentes no estado com mais de 30 dias até vencimento
+        // Buscar licenças vigentes na tabela licencas_emitidas
+        const conditions = [];
+        const params = [state];
+        let paramIndex = 2;
+        
+        plates.forEach((placa) => {
+          if (placa && typeof placa === 'string') {
+            conditions.push(`le.placa_unidade_tratora = $${paramIndex}`);
+            conditions.push(`le.placa_primeira_carreta = $${paramIndex}`);
+            conditions.push(`le.placa_segunda_carreta = $${paramIndex}`);
+            conditions.push(`le.placa_dolly = $${paramIndex}`);
+            conditions.push(`le.placa_prancha = $${paramIndex}`);
+            conditions.push(`le.placa_reboque = $${paramIndex}`);
+            params.push(placa);
+            paramIndex++;
+          }
+        });
+        
+        if (conditions.length === 0) {
+          continue;
+        }
+        
         const query = `
           SELECT 
-            sl.state,
-            sl.aet_number,
-            sl.valid_until,
-            sl.status,
-            lr.main_vehicle_plate,
-            lr.additional_plates,
-            lr.request_number,
-            lr.id as license_id,
-            lr.tractor_unit_id,
-            lr.first_trailer_id,
-            lr.second_trailer_id,
-            lr.dolly_id,
-            lr.flatbed_id
-          FROM state_licenses sl
-          JOIN license_requests lr ON sl.license_request_id = lr.id
-          WHERE sl.state = $1 
-            AND sl.status = 'approved'
-            AND sl.valid_until > $2
-            AND (
-              lr.main_vehicle_plate = ANY($3) OR
-              lr.additional_plates && $3
-            )
+            le.estado,
+            le.numero_licenca,
+            le.data_validade,
+            le.status,
+            le.placa_unidade_tratora,
+            le.placa_primeira_carreta,
+            le.placa_segunda_carreta,
+            le.placa_dolly,
+            le.placa_prancha,
+            le.placa_reboque,
+            le.pedido_id
+          FROM licencas_emitidas le
+          WHERE le.estado = $1 
+            AND le.status = 'emitida'
+            AND le.data_validade > CURRENT_DATE
+            AND (${conditions.join(' OR ')})
+          ORDER BY le.data_validade DESC
         `;
         
-        const result = await pool.query(query, [state, thirtyDaysFromNow, plates]);
+        const result = await pool.query(query, params);
         
         console.log(`[VALIDAÇÃO INTELIGENTE] Encontradas ${result.rows.length} licenças vigentes no estado ${state}`);
         

@@ -40,13 +40,10 @@ export function useLicenseValidationV2() {
     setIsChecking(true);
     
     try {
-      console.log(`[VALIDAÇÃO V2] Verificando estado ${estado} com placas:`, placas);
-      
       // Converter placas object para array de strings
       const placasArray = Object.values(placas).filter(Boolean);
       
       if (placasArray.length === 0) {
-        console.log('[VALIDAÇÃO V2] Nenhuma placa fornecida para validação');
         return;
       }
 
@@ -72,8 +69,6 @@ export function useLicenseValidationV2() {
         const conflictoEstado = data.conflicts.find((c: any) => c.state === estado);
         
         if (conflictoEstado && conflictoEstado.daysUntilExpiry > 30) {
-          console.log(`[VALIDAÇÃO V2] Estado ${estado} bloqueado - licença vigente por ${conflictoEstado.daysUntilExpiry} dias`);
-          
           setEstadosBloqueados((prev) => ({
             ...prev,
             [estado]: {
@@ -83,8 +78,6 @@ export function useLicenseValidationV2() {
             }
           }));
         } else {
-          console.log(`[VALIDAÇÃO V2] Estado ${estado} liberado - pode renovar`);
-          
           // Remover o estado dos bloqueados se estava bloqueado antes
           setEstadosBloqueados((prev) => {
             const updated = { ...prev };
@@ -93,8 +86,6 @@ export function useLicenseValidationV2() {
           });
         }
       } else {
-        console.log(`[VALIDAÇÃO V2] Estado ${estado} liberado - sem conflitos`);
-        
         // Remover o estado dos bloqueados se estava bloqueado antes
         setEstadosBloqueados((prev) => {
           const updated = { ...prev };
@@ -103,7 +94,7 @@ export function useLicenseValidationV2() {
         });
       }
     } catch (error) {
-      console.error(`[VALIDAÇÃO V2] Erro ao verificar estado ${estado}:`, error);
+      // Silencioso em caso de erro
     } finally {
       setIsChecking(false);
     }

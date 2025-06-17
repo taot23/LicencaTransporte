@@ -1,7 +1,5 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, Clock } from 'lucide-react';
 import { useLicenseValidationV2 } from '@/hooks/use-license-validation-v2';
 
 interface Placas {
@@ -13,202 +11,191 @@ interface Placas {
   reboque?: string;
 }
 
-interface StateSelectionProps {
+interface StateSelectionWithValidationProps {
   selectedStates: string[];
   onStatesChange: (states: string[]) => void;
   placas: Placas;
   disabled?: boolean;
 }
 
-const BRAZILIAN_STATES = [
-  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 
-  'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 
-  'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+const ESTADOS_BRASIL = [
+  { code: 'AC', name: 'Acre' },
+  { code: 'AL', name: 'Alagoas' },
+  { code: 'AP', name: 'Amapá' },
+  { code: 'AM', name: 'Amazonas' },
+  { code: 'BA', name: 'Bahia' },
+  { code: 'CE', name: 'Ceará' },
+  { code: 'DF', name: 'Distrito Federal' },
+  { code: 'ES', name: 'Espírito Santo' },
+  { code: 'GO', name: 'Goiás' },
+  { code: 'MA', name: 'Maranhão' },
+  { code: 'MT', name: 'Mato Grosso' },
+  { code: 'MS', name: 'Mato Grosso do Sul' },
+  { code: 'MG', name: 'Minas Gerais' },
+  { code: 'PA', name: 'Pará' },
+  { code: 'PB', name: 'Paraíba' },
+  { code: 'PR', name: 'Paraná' },
+  { code: 'PE', name: 'Pernambuco' },
+  { code: 'PI', name: 'Piauí' },
+  { code: 'RJ', name: 'Rio de Janeiro' },
+  { code: 'RN', name: 'Rio Grande do Norte' },
+  { code: 'RS', name: 'Rio Grande do Sul' },
+  { code: 'RO', name: 'Rondônia' },
+  { code: 'RR', name: 'Roraima' },
+  { code: 'SC', name: 'Santa Catarina' },
+  { code: 'SP', name: 'São Paulo' },
+  { code: 'SE', name: 'Sergipe' },
+  { code: 'TO', name: 'Tocantins' },
 ];
 
-export function StateSelectionWithValidation({ 
-  selectedStates, 
-  onStatesChange, 
-  placas, 
-  disabled = false 
-}: StateSelectionProps) {
-  const { 
-    estadosBloqueados, 
-    isChecking, 
-    verificarEstadoComLicencaVigente, 
-    limparValidacao,
-    formatarData 
-  } = useLicenseValidationV2();
+export function StateSelectionWithValidation({ selectedStates, onStatesChange, placas, disabled }: StateSelectionWithValidationProps) {
+  const { verificarEstadoComLicencaVigente, estadosBloqueados, isChecking } = useLicenseValidationV2();
+  const [validatedStates, setValidatedStates] = useState<Set<string>>(new Set());
 
-  const [pendingValidations, setPendingValidations] = useState<Set<string>>(new Set());
-
-  // Limpar validações quando placas mudarem
+  // Verificar estados quando placas ou estados selecionados mudam
   useEffect(() => {
-    limparValidacao();
-    setPendingValidations(new Set());
-  }, [placas, limparValidacao]);
-
-  // Validar estados selecionados quando placas mudarem
-  useEffect(() => {
-    console.log('[STATE-VALIDATION] PlacasChanged:', placas);
-    console.log('[STATE-VALIDATION] SelectedStates:', selectedStates);
-    
-    if (selectedStates.length > 0 && Object.keys(placas).some(key => placas[key as keyof Placas])) {
-      console.log('[STATE-VALIDATION] Iniciando validação para estados:', selectedStates);
-      selectedStates.forEach(estado => {
-        validarEstado(estado);
-      });
-    }
-  }, [placas, selectedStates]);
-
-  const validarEstado = async (estado: string) => {
-    console.log(`[STATE-VALIDATION] Validando estado: ${estado}`);
-    console.log(`[STATE-VALIDATION] Placas disponíveis:`, placas);
-    
-    // Não validar se não temos placas suficientes
-    if (!Object.keys(placas).some(key => placas[key as keyof Placas])) {
-      console.log(`[STATE-VALIDATION] Nenhuma placa disponível para validação`);
+    if (!placas || Object.keys(placas).length === 0) {
       return;
     }
 
-    setPendingValidations(prev => new Set([...prev, estado]));
-    
-    try {
-      console.log(`[STATE-VALIDATION] Chamando verificarEstadoComLicencaVigente para ${estado}`);
-      await verificarEstadoComLicencaVigente(estado, placas);
-      console.log(`[STATE-VALIDATION] Validação concluída para ${estado}`);
-    } catch (error) {
-      console.error(`[STATE-VALIDATION] Erro na validação de ${estado}:`, error);
-    } finally {
-      setPendingValidations(prev => {
+    const placasArray = Object.values(placas).filter(Boolean);
+    if (placasArray.length === 0) {
+      return;
+    }
+
+    // Verificar cada estado selecionado
+    selectedStates.forEach(estado => {
+      if (!validatedStates.has(estado)) {
+        verificarEstadoComLicencaVigente(estado, placas);
+        setValidatedStates(prev => new Set([...prev, estado]));
+      }
+    });
+  }, [selectedStates, placas, verificarEstadoComLicencaVigente, validatedStates]);
+
+  const handleStateToggle = (stateCode: string) => {
+    if (disabled) return;
+
+    // Verificar se o estado está bloqueado
+    const estadoBloqueado = estadosBloqueados[stateCode];
+    if (estadoBloqueado) {
+      // Estado bloqueado - não permitir seleção
+      return;
+    }
+
+    const isCurrentlySelected = selectedStates.includes(stateCode);
+    let newStates: string[];
+
+    if (isCurrentlySelected) {
+      // Remover estado da seleção
+      newStates = selectedStates.filter(s => s !== stateCode);
+      setValidatedStates(prev => {
         const updated = new Set(prev);
-        updated.delete(estado);
+        updated.delete(stateCode);
         return updated;
       });
-    }
-  };
-
-  const handleStateToggle = async (estado: string, checked: boolean) => {
-    if (checked) {
-      // Adicionar estado
-      const newStates = [...selectedStates, estado];
-      onStatesChange(newStates);
-      
-      // Validar o novo estado
-      await validarEstado(estado);
     } else {
-      // Remover estado
-      const newStates = selectedStates.filter(s => s !== estado);
-      onStatesChange(newStates);
+      // Adicionar estado à seleção
+      newStates = [...selectedStates, stateCode];
+      
+      // Verificar imediatamente se há placas disponíveis
+      if (placas && Object.values(placas).some(Boolean)) {
+        verificarEstadoComLicencaVigente(stateCode, placas);
+        setValidatedStates(prev => new Set([...prev, stateCode]));
+      }
     }
+
+    onStatesChange(newStates);
   };
 
-  const isEstadoBloqueado = (estado: string) => {
-    return estadosBloqueados[estado]?.diasRestantes > 30;
-  };
-
-  const getEstadoInfo = (estado: string) => {
-    return estadosBloqueados[estado];
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('pt-BR');
+    } catch {
+      return dateString;
+    }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <span>Estados para Circulação</span>
-          {(isChecking || pendingValidations.size > 0) && (
-            <Clock className="h-4 w-4 animate-spin text-blue-500" />
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-9 gap-4">
-          {BRAZILIAN_STATES.map((estado) => {
-            const bloqueado = isEstadoBloqueado(estado);
-            const estadoInfo = getEstadoInfo(estado);
-            const isValidating = pendingValidations.has(estado);
-            const isSelected = selectedStates.includes(estado);
-
-            return (
-              <div
-                key={estado}
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium">Estados de Circulação</h3>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        {ESTADOS_BRASIL.map((estado) => {
+          const isSelected = selectedStates.includes(estado.code);
+          const estadoBloqueado = estadosBloqueados[estado.code];
+          const isBloqueado = estadoBloqueado && estadoBloqueado.diasRestantes > 30;
+          
+          return (
+            <div key={estado.code} className="space-y-1">
+              <div 
                 className={`
-                  p-3 rounded-lg border transition-all duration-200
-                  ${bloqueado 
-                    ? 'border-yellow-400 bg-yellow-50 cursor-not-allowed' 
-                    : 'border-gray-200 bg-white hover:border-blue-300'
+                  flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-all
+                  ${isBloqueado 
+                    ? 'bg-yellow-50 border-yellow-300 cursor-not-allowed' 
+                    : isSelected 
+                      ? 'bg-blue-50 border-blue-300' 
+                      : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
                   }
-                  ${isSelected && !bloqueado ? 'border-blue-500 bg-blue-50' : ''}
-                  ${isValidating ? 'opacity-70' : ''}
+                  ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
+                onClick={() => handleStateToggle(estado.code)}
               >
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`state-${estado}`}
-                    checked={isSelected}
-                    disabled={disabled || bloqueado || isValidating}
-                    onCheckedChange={(checked) => handleStateToggle(estado, checked as boolean)}
-                  />
+                <Checkbox 
+                  id={estado.code}
+                  checked={isSelected}
+                  disabled={disabled || isBloqueado}
+                  onChange={() => {}} // Controlled by parent click
+                />
+                <div className="flex-1">
                   <label 
-                    htmlFor={`state-${estado}`}
-                    className={`
-                      text-sm font-medium cursor-pointer
-                      ${bloqueado ? 'text-yellow-700' : 'text-gray-900'}
-                      ${disabled || bloqueado ? 'cursor-not-allowed' : ''}
-                    `}
+                    htmlFor={estado.code} 
+                    className={`text-sm font-medium cursor-pointer ${
+                      isBloqueado ? 'text-yellow-800' : 'text-gray-900'
+                    }`}
                   >
-                    {estado}
+                    {estado.code}
                   </label>
-                  {bloqueado && (
-                    <AlertTriangle className="h-3 w-3 text-yellow-600" />
-                  )}
-                  {isValidating && (
-                    <Clock className="h-3 w-3 animate-spin text-blue-500" />
-                  )}
+                  <div className="text-xs text-gray-600">{estado.name}</div>
                 </div>
-                
-                {estadoInfo && bloqueado && (
-                  <div className="mt-2 text-xs text-yellow-700">
-                    <div className="font-semibold">Licença vigente até:</div>
-                    <div>{formatarData(estadoInfo.validade)}</div>
-                    <div className="text-yellow-600">
-                      Nº {estadoInfo.numero}
-                    </div>
-                    <div className="text-yellow-600 mt-1">
-                      {estadoInfo.diasRestantes} dias restantes
-                    </div>
-                  </div>
-                )}
               </div>
-            );
-          })}
+              
+              {isBloqueado && estadoBloqueado && (
+                <div className="text-xs text-yellow-700 bg-yellow-100 p-2 rounded border border-yellow-200">
+                  <div className="font-medium">Licença vigente:</div>
+                  <div>Nº: {estadoBloqueado.numero}</div>
+                  <div>Vence: {formatDate(estadoBloqueado.validade)}</div>
+                  <div>Restam: {estadoBloqueado.diasRestantes} dias</div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      
+      {isChecking && (
+        <div className="text-sm text-blue-600 flex items-center gap-2">
+          <div className="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+          Verificando licenças vigentes...
         </div>
-        
-        {Object.keys(estadosBloqueados).length > 0 && (
-          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-start gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-              <div>
-                <h4 className="text-sm font-semibold text-yellow-800">
-                  Estados com Licenças Vigentes
-                </h4>
-                <p className="text-sm text-yellow-700 mt-1">
-                  Os estados marcados em amarelo possuem licenças vigentes com mais de 30 dias até o vencimento.
-                  Você só pode solicitar uma nova licença quando restarem 30 dias ou menos.
-                </p>
-              </div>
+      )}
+      
+      {Object.keys(estadosBloqueados).length > 0 && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="text-sm text-yellow-800">
+            <div className="font-medium mb-2">⚠️ Estados com licenças vigentes (bloqueados):</div>
+            <div className="space-y-1">
+              {Object.entries(estadosBloqueados).map(([estado, info]) => (
+                <div key={estado} className="text-xs">
+                  <strong>{estado}:</strong> {info.numero} - Vence em {info.diasRestantes} dias ({formatDate(info.validade)})
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 text-xs">
+              Estados só podem ser renovados quando restam 30 dias ou menos para o vencimento.
             </div>
           </div>
-        )}
-
-        {selectedStates.length > 0 && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="text-sm text-blue-800">
-              <strong>Estados selecionados:</strong> {selectedStates.join(', ')}
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </div>
   );
 }
