@@ -44,16 +44,17 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
-### 17/06/2025 - Sistema de Validação Inteligente de Licenças Vigentes Implementado e Testado
-- ✅ Endpoint `/api/licencas-vigentes` implementado conforme especificação detalhada do usuário
-- ✅ Hook `useLicenseValidationV2` criado para validação em tempo real por estado e placas
-- ✅ Componente `StateSelectionWithValidation` implementado com interface visual amarela para conflitos
-- ✅ Validação por composição veicular: cavalo + carretas/dolly/prancha/reboque por estado
-- ✅ Lógica de bloqueio: estados com licenças > 30 dias aparecem em amarelo com informações
-- ✅ Permite renovação quando restam ≤ 30 dias até vencimento
-- ✅ Sistema testado e funcionando: criação de licença com validação funcionando corretamente
-- ✅ Integração completa no formulário de licenças com coleta automática de placas
-- ✅ Feedback visual claro: data de vencimento, número da licença e dias restantes
+### 17/06/2025 - Sistema de Validação Inteligente de Licenças Vigentes - Atualização para 60 Dias
+- ✅ **REGRA ALTERADA**: Período de bloqueio atualizado de 30 para 60 dias conforme solicitação
+- ✅ **SINCRONIZAÇÃO CORRIGIDA**: Mapeamento das placas na tabela `licencas_emitidas` corrigido
+- ✅ **PROBLEMA RESOLVIDO**: Placas primeira/segunda carreta estavam no campo reboque incorretamente
+- ✅ **DADOS VALIDADOS**: 7 licenças aprovadas sincronizadas com mapeamento correto de placas
+- ✅ **VALIDAÇÃO FUNCIONAL**: Estados com licenças >60 dias bloqueados corretamente
+- ✅ **TESTE CONFIRMADO**: AL bloqueado com 80 dias, dados das placas mapeados adequadamente
+- ✅ Endpoint `/api/licencas-vigentes` usando status 'ativa' para consulta na tabela sincronizada
+- ✅ Hook `useLicenseValidationV2` atualizado para regra de 60 dias
+- ✅ Componente `StateSelectionWithValidation` com mensagem corrigida para 60 dias
+- ✅ Sistema completo testado e funcionando com dados reais sincronizados
 
 ### 16/06/2025 - Sistema de Modais Customizados para Confirmações
 - ✅ Substituído todas as notificações `confirm()` nativas por modais customizados AlertDialog
