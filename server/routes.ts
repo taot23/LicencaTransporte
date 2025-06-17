@@ -2585,7 +2585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             validUntil: row.data_validade,
             daysUntilExpiry,
             conflictingPlates,
-            canRenew: daysUntilExpiry <= 30
+            canRenew: daysUntilExpiry <= 60
           });
         }
       }
@@ -2606,6 +2606,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Erro ao verificar licenças existentes',
         error: String(error)
       });
+    }
+  });
+
+  // Endpoint para sincronizar todas as licenças aprovadas
+  app.post('/api/admin/sync-approved-licenses', requireAuth, async (req, res) => {
+    try {
+      const user = req.user!;
+      if (!isAdminUser(user)) {
+        return res.status(403).json({ message: 'Acesso negado' });
+      }
+
+      console.log('Iniciando sincronização de licenças aprovadas...');
+
+      // Buscar todas as licenças com estados aprovados
+      const query = `
+        SELECT 
+          lr.id,
+          lr.main_vehicle_plate,
+          lr.additional_plates,
+          lr.tractor_unit_id,
+          lr.first_trailer_id,
+          lr.second_trailer_id,
+          lr.dolly_id,
+          lr.flatbed_id,
+          UNNEST(string_to_array(unnest(lr.state_statuses), ':')) as state_data
+        FROM license_requests lr
+        WHERE array_length(lr.state_statuses, 1) > 0
+          AND EXISTS (
+            SELECT 1 FROM unnest(lr.state_statuses) as status
+            WHERE status LIKE '%:approved:%'
+          )
+      `;
+
+      const result = await pool.query(query);
+      let sincronizadas = 0;
+
+      // Processar cada licença aprovada
+      for (const row of result.rows) {
+        const stateStatuses = row.state_data;
+        if (!stateStatuses) continue;
+
+        // Parse do estado e status
+        const statusParts = stateStatuses.split(':');
+        if (statusParts.length >= 4 && statusParts[1] === 'approved') {
+          const estado = statusParts[0];
+          const dataValidade = statusParts[2];
+          const numeroAet = statusParts[3] || `AET-${estado}-${row.id}`;
+
+          try {
+            await sincronizarLicencaEmitida(row, estado, numeroAet, dataValidade);
+            sincronizadas++;
+          } catch (error) {
+            console.error(`Erro ao sincronizar licença ${row.id} estado ${estado}:`, error);
+          }
+        }
+      }
+
+      console.log(`Sincronização concluída: ${sincronizadas} licenças sincronizadas`);
+
+      res.json({
+        message: `Sincronização concluída com sucesso`,
+        licencasSincronizadas: sincronizadas
+      });
+
+    } catch (error) {
+      console.error('Erro na sincronização:', error);
+      res.status(500).json({ message: 'Erro na sincronização de licenças' });
     }
   });
 
