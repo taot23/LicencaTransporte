@@ -1684,51 +1684,95 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
             const getPlacasParaValidacao = () => {
               const placas: any = {};
               
+              console.log('[PLACAS-VALIDACAO] Iniciando coleta de placas...');
+              console.log('[PLACAS-VALIDACAO] Vehicles disponíveis:', vehicles?.length || 0);
+              
               // Placa do cavalo/trator
               const tractorId = form.watch("tractorUnitId");
+              console.log('[PLACAS-VALIDACAO] TractorId:', tractorId);
+              
               if (tractorId && vehicles) {
                 const tractor = vehicles.find(v => v.id === tractorId);
-                if (tractor?.plate) placas.cavalo = tractor.plate;
+                console.log('[PLACAS-VALIDACAO] Tractor encontrado:', tractor);
+                if (tractor?.plate) {
+                  placas.cavalo = tractor.plate;
+                  console.log('[PLACAS-VALIDACAO] Placa do cavalo:', tractor.plate);
+                }
               } else {
                 const mainPlate = form.watch("mainVehiclePlate");
-                if (mainPlate) placas.cavalo = mainPlate;
+                console.log('[PLACAS-VALIDACAO] MainPlate fallback:', mainPlate);
+                if (mainPlate) {
+                  placas.cavalo = mainPlate;
+                  console.log('[PLACAS-VALIDACAO] Usando mainPlate como cavalo:', mainPlate);
+                }
               }
               
               // Primeira carreta
               const firstTrailerId = form.watch("firstTrailerId");
+              console.log('[PLACAS-VALIDACAO] FirstTrailerId:', firstTrailerId);
+              
               if (firstTrailerId && vehicles) {
                 const firstTrailer = vehicles.find(v => v.id === firstTrailerId);
-                if (firstTrailer?.plate) placas.primeiraCarreta = firstTrailer.plate;
+                console.log('[PLACAS-VALIDACAO] FirstTrailer encontrado:', firstTrailer);
+                if (firstTrailer?.plate) {
+                  placas.primeiraCarreta = firstTrailer.plate;
+                  console.log('[PLACAS-VALIDACAO] Placa da primeira carreta:', firstTrailer.plate);
+                }
               }
               
               // Segunda carreta
               const secondTrailerId = form.watch("secondTrailerId");
+              console.log('[PLACAS-VALIDACAO] SecondTrailerId:', secondTrailerId);
+              
               if (secondTrailerId && vehicles) {
                 const secondTrailer = vehicles.find(v => v.id === secondTrailerId);
-                if (secondTrailer?.plate) placas.segundaCarreta = secondTrailer.plate;
+                console.log('[PLACAS-VALIDACAO] SecondTrailer encontrado:', secondTrailer);
+                if (secondTrailer?.plate) {
+                  placas.segundaCarreta = secondTrailer.plate;
+                  console.log('[PLACAS-VALIDACAO] Placa da segunda carreta:', secondTrailer.plate);
+                }
               }
               
               // Dolly
               const dollyId = form.watch("dollyId");
+              console.log('[PLACAS-VALIDACAO] DollyId:', dollyId);
+              
               if (dollyId && vehicles) {
                 const dolly = vehicles.find(v => v.id === dollyId);
-                if (dolly?.plate) placas.dolly = dolly.plate;
+                console.log('[PLACAS-VALIDACAO] Dolly encontrado:', dolly);
+                if (dolly?.plate) {
+                  placas.dolly = dolly.plate;
+                  console.log('[PLACAS-VALIDACAO] Placa do dolly:', dolly.plate);
+                }
               }
               
               // Prancha
               const flatbedId = form.watch("flatbedId");
+              console.log('[PLACAS-VALIDACAO] FlatbedId:', flatbedId);
+              
               if (flatbedId && vehicles) {
                 const flatbed = vehicles.find(v => v.id === flatbedId);
-                if (flatbed?.plate) placas.prancha = flatbed.plate;
+                console.log('[PLACAS-VALIDACAO] Flatbed encontrado:', flatbed);
+                if (flatbed?.plate) {
+                  placas.prancha = flatbed.plate;
+                  console.log('[PLACAS-VALIDACAO] Placa da prancha:', flatbed.plate);
+                }
               }
               
               // Reboque (usando firstTrailerId para romeu_julieta)
               const licenseType = form.watch("type");
+              console.log('[PLACAS-VALIDACAO] LicenseType:', licenseType);
+              
               if (licenseType === "romeu_julieta" && firstTrailerId && vehicles) {
                 const reboque = vehicles.find(v => v.id === firstTrailerId);
-                if (reboque?.plate) placas.reboque = reboque.plate;
+                console.log('[PLACAS-VALIDACAO] Reboque encontrado:', reboque);
+                if (reboque?.plate) {
+                  placas.reboque = reboque.plate;
+                  console.log('[PLACAS-VALIDACAO] Placa do reboque:', reboque.plate);
+                }
               }
               
+              console.log('[PLACAS-VALIDACAO] Placas coletadas final:', placas);
               return placas;
             };
 
