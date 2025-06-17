@@ -52,30 +52,19 @@ const getVehicleIcon = (type: string) => {
       );
     case 'dolly':
       return (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="6" cy="15" r="3" />
-          <circle cx="18" cy="15" r="3" />
-          <line x1="6" y1="12" x2="18" y2="12" />
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-orange-600" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="8" cy="16" r="3" />
+          <circle cx="16" cy="16" r="3" />
+          <rect x="2" y="8" width="20" height="4" />
+          <line x1="6" y1="8" x2="6" y2="12" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="18" y1="8" x2="18" y2="12" />
         </svg>
       );
     case 'flatbed':
-      return (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-orange-600" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="2" y="9" width="20" height="7" />
-          <line x1="6" y1="16" x2="6" y2="19" />
-          <line x1="18" y1="16" x2="18" y2="19" />
-        </svg>
-      );
-    case 'truck':
-      return (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-600" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M5 17h14M5 17a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h10v12H5zM15 17h4M15 5h2a2 2 0 0 1 2 2v3m0 4v1a2 2 0 0 1-2 2h-2" />
-          <circle cx="7" cy="17" r="2" />
-          <circle cx="17" cy="17" r="2" />
-        </svg>
-      );
+      return <FileText className="h-5 w-5 text-gray-600" />;
     default:
-      return <Truck className="h-5 w-5 text-gray-400" />;
+      return <Settings className="h-5 w-5 text-gray-400" />;
   }
 };
 
@@ -114,9 +103,9 @@ export function VehicleSelectCard({
             
             {/* Badge de status */}
             {requiredForProgress && !isFilled && (
-              <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200 px-2 text-xs flex items-center gap-1 h-6">
+              <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200 px-2 text-xs flex items-center gap-1 h-6 animate-pulse">
                 <AlertTriangle className="h-3 w-3" />
-                Obrigatório
+                OBRIGATÓRIO
               </Badge>
             )}
             
@@ -230,6 +219,9 @@ export function VehicleSelectCard({
                   <div className="text-xs text-green-600">
                     {selectedVehicle.brand} {selectedVehicle.model}
                   </div>
+                  <div className="text-xs text-green-500 mt-1">
+                    {selectedVehicle.year} • {selectedVehicle.chassisNumber.slice(-6)}
+                  </div>
                 </div>
               </div>
               
@@ -237,46 +229,18 @@ export function VehicleSelectCard({
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => onChange(undefined as unknown as number)} // Passar undefined para limpar a seleção
-                className="h-7 px-2 py-0 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={() => onChange(0)}
+                className="text-red-500 hover:text-red-600 h-6 w-6 p-0"
                 disabled={disabled}
+                title="Remover seleção"
               >
-                Remover
+                ×
               </Button>
             </div>
-            
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-2 text-xs text-green-700">
-              <div>
-                <span className="text-green-600">RENAVAM:</span> {selectedVehicle.renavam}
-              </div>
-              <div>
-                <span className="text-green-600">Ano:</span> {selectedVehicle.year}
-              </div>
-              <div>
-                <span className="text-green-600">Eixos:</span> {selectedVehicle.axleCount}
-              </div>
-              <div>
-                <span className="text-green-600">TARA:</span> {selectedVehicle.tare} kg
-              </div>
-            </div>
-            
-            {selectedVehicle.crlvUrl && (
-              <div className="mt-2 border-t border-green-200 pt-2">
-                <a 
-                  href={selectedVehicle.crlvUrl} 
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="text-xs flex items-center text-blue-600 hover:underline"
-                >
-                  <FileText className="h-3 w-3 mr-1" />
-                  Ver CRLV do veículo
-                </a>
-              </div>
-            )}
           </div>
         )}
         
-        {/* Indicador de progresso do fluxo */}
+        {/* Indicador de progresso para campos obrigatórios */}
         {requiredForProgress && (
           <div className="mt-3 flex justify-between items-center">
             <div 
