@@ -237,6 +237,122 @@ interface WSMessage {
 // Armazenamento de clientes WebSocket
 const wsClients: Set<WebSocket> = new Set();
 
+// Função para sincronizar licença aprovada com tabela licencas_emitidas
+async function sincronizarLicencaEmitida(licenca: any, estado: string, numeroAet: string, dataValidade: string) {
+  try {
+    // Buscar informações dos veículos associados
+    let placaTratora = licenca.mainVehiclePlate || null;
+    let placaPrimeiraCarreta = null;
+    let placaSegundaCarreta = null;
+    let placaDolly = null;
+    let placaPrancha = null;
+    let placaReboque = null;
+
+    // Obter placas dos veículos por ID se existirem
+    if (licenca.tractorUnitId) {
+      const tractorQuery = 'SELECT plate FROM vehicles WHERE id = $1';
+      const tractorResult = await pool.query(tractorQuery, [licenca.tractorUnitId]);
+      if (tractorResult.rows.length > 0) {
+        placaTratora = tractorResult.rows[0].plate;
+      }
+    }
+
+    if (licenca.firstTrailerId) {
+      const firstTrailerQuery = 'SELECT plate FROM vehicles WHERE id = $1';
+      const firstTrailerResult = await pool.query(firstTrailerQuery, [licenca.firstTrailerId]);
+      if (firstTrailerResult.rows.length > 0) {
+        placaPrimeiraCarreta = firstTrailerResult.rows[0].plate;
+      }
+    }
+
+    if (licenca.secondTrailerId) {
+      const secondTrailerQuery = 'SELECT plate FROM vehicles WHERE id = $1';
+      const secondTrailerResult = await pool.query(secondTrailerQuery, [licenca.secondTrailerId]);
+      if (secondTrailerResult.rows.length > 0) {
+        placaSegundaCarreta = secondTrailerResult.rows[0].plate;
+      }
+    }
+
+    if (licenca.dollyId) {
+      const dollyQuery = 'SELECT plate FROM vehicles WHERE id = $1';
+      const dollyResult = await pool.query(dollyQuery, [licenca.dollyId]);
+      if (dollyResult.rows.length > 0) {
+        placaDolly = dollyResult.rows[0].plate;
+      }
+    }
+
+    if (licenca.flatbedId) {
+      const flatbedQuery = 'SELECT plate FROM vehicles WHERE id = $1';
+      const flatbedResult = await pool.query(flatbedQuery, [licenca.flatbedId]);
+      if (flatbedResult.rows.length > 0) {
+        placaPrancha = flatbedResult.rows[0].plate;
+      }
+    }
+
+    // Adicionar placas adicionais se existirem
+    if (licenca.additionalPlates && Array.isArray(licenca.additionalPlates)) {
+      licenca.additionalPlates.forEach((placa: string, index: number) => {
+        if (placa) {
+          if (index === 0 && !placaPrimeiraCarreta) placaPrimeiraCarreta = placa;
+          else if (index === 1 && !placaSegundaCarreta) placaSegundaCarreta = placa;
+          else if (index === 2 && !placaDolly) placaDolly = placa;
+          else if (index === 3 && !placaPrancha) placaPrancha = placa;
+          else if (index === 4 && !placaReboque) placaReboque = placa;
+        }
+      });
+    }
+
+    // Verificar se já existe uma entrada para esta licença e estado
+    const existingQuery = `
+      SELECT id FROM licencas_emitidas 
+      WHERE pedido_id = $1 AND estado = $2
+    `;
+    const existingResult = await pool.query(existingQuery, [licenca.id, estado]);
+
+    if (existingResult.rows.length > 0) {
+      // Atualizar entrada existente
+      const updateQuery = `
+        UPDATE licencas_emitidas SET
+          numero_licenca = $3,
+          data_validade = $4,
+          status = 'emitida',
+          placa_unidade_tratora = $5,
+          placa_primeira_carreta = $6,
+          placa_segunda_carreta = $7,
+          placa_dolly = $8,
+          placa_prancha = $9,
+          placa_reboque = $10,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE pedido_id = $1 AND estado = $2
+      `;
+      await pool.query(updateQuery, [
+        licenca.id, estado, numeroAet, dataValidade,
+        placaTratora, placaPrimeiraCarreta, placaSegundaCarreta,
+        placaDolly, placaPrancha, placaReboque
+      ]);
+    } else {
+      // Inserir nova entrada
+      const insertQuery = `
+        INSERT INTO licencas_emitidas (
+          pedido_id, estado, numero_licenca, data_validade, status,
+          placa_unidade_tratora, placa_primeira_carreta, placa_segunda_carreta,
+          placa_dolly, placa_prancha, placa_reboque, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, 'emitida', $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `;
+      await pool.query(insertQuery, [
+        licenca.id, estado, numeroAet, dataValidade,
+        placaTratora, placaPrimeiraCarreta, placaSegundaCarreta,
+        placaDolly, placaPrancha, placaReboque
+      ]);
+    }
+
+    console.log(`Licença emitida sincronizada: ${numeroAet} para estado ${estado}`);
+  } catch (error) {
+    console.error('Erro ao sincronizar licença emitida:', error);
+    throw error;
+  }
+}
+
 // Função para transmitir mensagens a todos os clientes conectados
 const broadcastMessage = (message: WSMessage) => {
   console.log(`📡 Enviando atualização WebSocket: ${message.type}`);
@@ -3582,6 +3698,15 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       
       console.log(`Histórico de status criado para licença ${licenseId}, estado ${statusData.state}: ${previousStateStatus} -> ${statusData.status}`);
       
+      // Se o status foi alterado para 'approved', sincronizar com licencas_emitidas
+      if (statusData.status === 'approved' && statusData.validUntil && statusData.aetNumber) {
+        try {
+          await sincronizarLicencaEmitida(updatedLicense, statusData.state, statusData.aetNumber, statusData.validUntil);
+        } catch (error) {
+          console.error('Erro ao sincronizar licença emitida:', error);
+        }
+      }
+
       // Enviar notificações WebSocket para atualização de status
       broadcastLicenseUpdate(updatedLicense.id, 'status_changed', updatedLicense);
       broadcastDashboardUpdate();

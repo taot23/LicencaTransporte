@@ -123,7 +123,7 @@ export function StateSelectionWithValidation({ selectedStates, onStatesChange, p
         {ESTADOS_BRASIL.map((estado) => {
           const isSelected = selectedStates.includes(estado.code);
           const estadoBloqueado = estadosBloqueados[estado.code];
-          const isBloqueado = estadoBloqueado && estadoBloqueado.diasRestantes > 30;
+          const isBloqueado = estadoBloqueado && estadoBloqueado.diasRestantes > 60;
           
           return (
             <div key={estado.code} className="space-y-1">
@@ -191,7 +191,7 @@ export function StateSelectionWithValidation({ selectedStates, onStatesChange, p
               ))}
             </div>
             <div className="mt-2 text-xs">
-              Estados só podem ser renovados quando restam 30 dias ou menos para o vencimento.
+              Estados só podem ser renovados quando restam 60 dias ou menos para o vencimento.
             </div>
           </div>
         </div>

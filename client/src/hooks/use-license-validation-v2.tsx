@@ -68,7 +68,7 @@ export function useLicenseValidationV2() {
         // Encontrar o conflito específico para este estado
         const conflictoEstado = data.conflicts.find((c: any) => c.state === estado);
         
-        if (conflictoEstado && conflictoEstado.daysUntilExpiry > 30) {
+        if (conflictoEstado && conflictoEstado.daysUntilExpiry > 60) {
           setEstadosBloqueados((prev) => ({
             ...prev,
             [estado]: {
