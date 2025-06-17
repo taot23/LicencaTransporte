@@ -2546,11 +2546,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { estado, placas } = req.body;
       
-      // Lista completa de estados brasileiros para validação
+      // Lista completa de estados brasileiros + órgãos federais para validação
       const estadosValidos = [
         'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 
         'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 
-        'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+        'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
+        'DNIT', 'ANTT', 'PRF'  // Órgãos federais
       ];
       
       // Validação robusta de entrada
