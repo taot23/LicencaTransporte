@@ -1860,7 +1860,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
                       >
                         <Checkbox 
                           checked={isSelected}
-                          disabled={!!validating}
+                          disabled={!!stateValidationLoading}
                           onChange={() => {}}
                         />
                         <div className="flex-1">
