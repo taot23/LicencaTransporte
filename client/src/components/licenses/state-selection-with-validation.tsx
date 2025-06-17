@@ -50,23 +50,35 @@ export function StateSelectionWithValidation({
 
   // Validar estados selecionados quando placas mudarem
   useEffect(() => {
+    console.log('[STATE-VALIDATION] PlacasChanged:', placas);
+    console.log('[STATE-VALIDATION] SelectedStates:', selectedStates);
+    
     if (selectedStates.length > 0 && Object.keys(placas).some(key => placas[key as keyof Placas])) {
+      console.log('[STATE-VALIDATION] Iniciando validação para estados:', selectedStates);
       selectedStates.forEach(estado => {
         validarEstado(estado);
       });
     }
-  }, [placas]);
+  }, [placas, selectedStates]);
 
   const validarEstado = async (estado: string) => {
+    console.log(`[STATE-VALIDATION] Validando estado: ${estado}`);
+    console.log(`[STATE-VALIDATION] Placas disponíveis:`, placas);
+    
     // Não validar se não temos placas suficientes
     if (!Object.keys(placas).some(key => placas[key as keyof Placas])) {
+      console.log(`[STATE-VALIDATION] Nenhuma placa disponível para validação`);
       return;
     }
 
     setPendingValidations(prev => new Set([...prev, estado]));
     
     try {
+      console.log(`[STATE-VALIDATION] Chamando verificarEstadoComLicencaVigente para ${estado}`);
       await verificarEstadoComLicencaVigente(estado, placas);
+      console.log(`[STATE-VALIDATION] Validação concluída para ${estado}`);
+    } catch (error) {
+      console.error(`[STATE-VALIDATION] Erro na validação de ${estado}:`, error);
     } finally {
       setPendingValidations(prev => {
         const updated = new Set(prev);
