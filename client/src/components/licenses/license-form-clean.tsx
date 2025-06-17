@@ -392,7 +392,7 @@ export function LicenseFormClean({ draft, onComplete, onCancel, preSelectedTrans
                       placeholder="2600"
                       description="Comprimento total do conjunto"
                       fieldType="comprimento"
-                      licenseType={formData.type}
+                      licenseType={form.watch("type")}
                     />
                   )}
                 />
@@ -406,7 +406,7 @@ export function LicenseFormClean({ draft, onComplete, onCancel, preSelectedTrans
                       placeholder="260"
                       description="Largura máxima do conjunto"
                       fieldType="largura"
-                      licenseType={formData.type}
+                      licenseType={form.watch("type")}
                     />
                   )}
                 />
@@ -420,7 +420,7 @@ export function LicenseFormClean({ draft, onComplete, onCancel, preSelectedTrans
                       placeholder="440"
                       description="Altura total do conjunto"
                       fieldType="altura"
-                      licenseType={formData.type}
+                      licenseType={form.watch("type")}
                     />
                   )}
                 />
