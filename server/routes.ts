@@ -2018,7 +2018,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           numero_licenca: licenca.numero_licenca,
           data_validade: licenca.data_validade,
           diasRestantes,
-          bloqueado: diasRestantes > 30,
+          bloqueado: diasRestantes > 60,
           placas: {
             tratora: licenca.placa_unidade_tratora,
             primeira: licenca.placa_primeira_carreta,

@@ -72,40 +72,54 @@ export function StateSelectionWithValidation({ selectedStates, onStatesChange, p
     });
   }, [selectedStates, placas, verificarEstadoComLicencaVigente, validatedStates]);
 
-  const handleStateToggle = (stateCode: string) => {
+  const handleStateToggle = async (stateCode: string) => {
     if (disabled) return;
 
-    // Verificar se o estado está bloqueado ANTES de permitir qualquer ação
-    const estadoBloqueado = estadosBloqueados[stateCode];
-    if (estadoBloqueado && estadoBloqueado.diasRestantes > 60) {
-      // Estado bloqueado - mostrar alerta e não permitir seleção
-      alert(`Estado ${stateCode} possui licença vigente até ${formatDate(estadoBloqueado.validade)} (${estadoBloqueado.diasRestantes} dias restantes). Só é possível renovar quando restarem 60 dias ou menos.`);
-      return;
-    }
-
     const isCurrentlySelected = selectedStates.includes(stateCode);
-    let newStates: string[];
 
     if (isCurrentlySelected) {
       // Remover estado da seleção
-      newStates = selectedStates.filter(s => s !== stateCode);
+      const newStates = selectedStates.filter(s => s !== stateCode);
       setValidatedStates(prev => {
         const updated = new Set(prev);
         updated.delete(stateCode);
         return updated;
       });
+      onStatesChange(newStates);
     } else {
-      // Adicionar estado à seleção
-      newStates = [...selectedStates, stateCode];
-      
-      // Verificar imediatamente se há placas disponíveis
+      // Verificar ANTES de adicionar o estado
       if (placas && Object.values(placas).some(Boolean)) {
-        verificarEstadoComLicencaVigente(stateCode, placas);
-        setValidatedStates(prev => new Set([...prev, stateCode]));
+        // Executar validação síncrona
+        try {
+          const isBloqueado = await verificarEstadoComLicencaVigente(stateCode, placas);
+          
+          if (isBloqueado) {
+            // Estado bloqueado - buscar dados do estado bloqueado
+            const estadoBloqueado = estadosBloqueados[stateCode];
+            if (estadoBloqueado) {
+              alert(`Estado ${stateCode} possui licença vigente até ${formatDate(estadoBloqueado.validade)} (${estadoBloqueado.diasRestantes} dias restantes). Só é possível renovar quando restarem 60 dias ou menos.`);
+            } else {
+              alert(`Estado ${stateCode} possui licença vigente. Só é possível renovar quando restarem 60 dias ou menos.`);
+            }
+            return; // Não adicionar à seleção
+          }
+          
+          // Se passou na validação, adicionar à seleção
+          const newStates = [...selectedStates, stateCode];
+          setValidatedStates(prev => new Set([...prev, stateCode]));
+          onStatesChange(newStates);
+        } catch (error) {
+          console.error('Erro na validação:', error);
+          // Em caso de erro, permitir seleção
+          const newStates = [...selectedStates, stateCode];
+          onStatesChange(newStates);
+        }
+      } else {
+        // Se não há placas, adicionar sem validação
+        const newStates = [...selectedStates, stateCode];
+        onStatesChange(newStates);
       }
     }
-
-    onStatesChange(newStates);
   };
 
   const formatDate = (dateString: string) => {

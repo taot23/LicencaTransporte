@@ -34,8 +34,8 @@ export function useLicenseValidationV2() {
   const [estadosBloqueados, setEstadosBloqueados] = useState<Record<string, EstadoBloqueado>>({});
   const [isChecking, setIsChecking] = useState(false);
 
-  const verificarEstadoComLicencaVigente = useCallback(async (estado: string, placas: Placas) => {
-    if (!estado || !placas) return;
+  const verificarEstadoComLicencaVigente = useCallback(async (estado: string, placas: Placas): Promise<boolean> => {
+    if (!estado || !placas) return false;
 
     setIsChecking(true);
     
@@ -44,7 +44,7 @@ export function useLicenseValidationV2() {
       const placasArray = Object.values(placas).filter(Boolean);
       
       if (placasArray.length === 0) {
-        return;
+        return false;
       }
 
       const response = await fetch('/api/licencas-vigentes', {
@@ -74,6 +74,7 @@ export function useLicenseValidationV2() {
             diasRestantes: data.diasRestantes
           }
         }));
+        return true; // Estado bloqueado
       } else {
         // Remover o estado dos bloqueados se estava bloqueado antes
         setEstadosBloqueados((prev) => {
@@ -81,9 +82,11 @@ export function useLicenseValidationV2() {
           delete updated[estado];
           return updated;
         });
+        return false; // Estado liberado
       }
     } catch (error) {
-      // Silencioso em caso de erro
+      console.error('Erro na validação:', error);
+      return false; // Em caso de erro, liberar
     } finally {
       setIsChecking(false);
     }
@@ -106,6 +109,7 @@ export function useLicenseValidationV2() {
 
   return {
     estadosBloqueados,
+    setEstadosBloqueados,
     isChecking,
     verificarEstadoComLicencaVigente,
     limparValidacao,
