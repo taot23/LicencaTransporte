@@ -49,7 +49,7 @@ const ESTADOS_BRASIL = [
 ];
 
 export function StateSelectionWithValidation({ selectedStates, onStatesChange, placas, disabled }: StateSelectionWithValidationProps) {
-  const { verificarEstadoComLicencaVigente, estadosBloqueados, isChecking } = useLicenseValidationV2();
+  const { verificarEstadoComLicencaVigente, estadosBloqueados, isChecking, setEstadosBloqueados } = useLicenseValidationV2();
   const [validatedStates, setValidatedStates] = useState<Set<string>>(new Set());
 
   // Verificar estados quando placas ou estados selecionados mudam
@@ -75,10 +75,11 @@ export function StateSelectionWithValidation({ selectedStates, onStatesChange, p
   const handleStateToggle = (stateCode: string) => {
     if (disabled) return;
 
-    // Verificar se o estado está bloqueado
+    // Verificar se o estado está bloqueado ANTES de permitir qualquer ação
     const estadoBloqueado = estadosBloqueados[stateCode];
-    if (estadoBloqueado) {
-      // Estado bloqueado - não permitir seleção
+    if (estadoBloqueado && estadoBloqueado.diasRestantes > 60) {
+      // Estado bloqueado - mostrar alerta e não permitir seleção
+      alert(`Estado ${stateCode} possui licença vigente até ${formatDate(estadoBloqueado.validade)} (${estadoBloqueado.diasRestantes} dias restantes). Só é possível renovar quando restarem 60 dias ou menos.`);
       return;
     }
 

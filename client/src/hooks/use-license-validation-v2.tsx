@@ -47,14 +47,14 @@ export function useLicenseValidationV2() {
         return;
       }
 
-      const response = await fetch('/api/licenses/check-existing', {
+      const response = await fetch('/api/licencas-vigentes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          states: [estado],
-          plates: placasArray 
+          estado: estado,
+          placas: placas
         }),
       });
 
@@ -64,27 +64,16 @@ export function useLicenseValidationV2() {
 
       const data = await response.json();
       
-      if (data.hasConflicts && data.conflicts) {
-        // Encontrar o conflito específico para este estado
-        const conflictoEstado = data.conflicts.find((c: any) => c.state === estado);
-        
-        if (conflictoEstado && conflictoEstado.daysUntilExpiry > 60) {
-          setEstadosBloqueados((prev) => ({
-            ...prev,
-            [estado]: {
-              numero: conflictoEstado.aetNumber || conflictoEstado.requestNumber,
-              validade: conflictoEstado.validUntil,
-              diasRestantes: conflictoEstado.daysUntilExpiry
-            }
-          }));
-        } else {
-          // Remover o estado dos bloqueados se estava bloqueado antes
-          setEstadosBloqueados((prev) => {
-            const updated = { ...prev };
-            delete updated[estado];
-            return updated;
-          });
-        }
+      // A API agora retorna um objeto com os dados da licença ou null
+      if (data && data.bloqueado && data.diasRestantes > 60) {
+        setEstadosBloqueados((prev) => ({
+          ...prev,
+          [estado]: {
+            numero: data.numero_licenca,
+            validade: data.data_validade,
+            diasRestantes: data.diasRestantes
+          }
+        }));
       } else {
         // Remover o estado dos bloqueados se estava bloqueado antes
         setEstadosBloqueados((prev) => {
