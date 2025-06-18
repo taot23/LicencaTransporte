@@ -173,9 +173,12 @@ export function LicenseForm({
 
   // Função para validar estado com licenças vigentes
   const validateState = async (estado: string): Promise<boolean> => {
-    console.log(`[HANDLE STATE CLICK] Clicando em ${estado}, validating: ${validatingState}`);
+    console.log(`[STATE VALIDATION] Iniciando validação para ${estado}, validating: ${validatingState}`);
     
-    if (validatingState) return false;
+    if (validatingState) {
+      console.log(`[STATE VALIDATION] Já validando ${validatingState} - ignorando ${estado}`);
+      return false;
+    }
     
     // Coletar todas as placas do formulário
     const placas = [];
@@ -242,6 +245,13 @@ export function LicenseForm({
         console.log(`[STATE VALIDATION] ${estado} BLOQUEADO - ${result.diasRestantes} dias restantes`);
         setBlockedStates(prev => ({ ...prev, [estado]: result }));
         
+        // Remover estado da seleção se foi bloqueado
+        const currentStates = form.getValues().states || [];
+        if (currentStates.includes(estado)) {
+          console.log(`[STATE VALIDATION] Removendo ${estado} da seleção pois foi bloqueado`);
+          form.setValue('states', currentStates.filter(s => s !== estado));
+        }
+        
         toast({
           title: `Estado ${estado} bloqueado`,
           description: `Já existe licença vigente (${result.numero}) com ${result.diasRestantes} dias restantes. Renovação permitida apenas com ≤60 dias.`,
@@ -252,6 +262,13 @@ export function LicenseForm({
         return true; // bloqueado
       }
       
+      // Limpar dos bloqueados se estava bloqueado antes
+      setBlockedStates(prev => {
+        const updated = { ...prev };
+        delete updated[estado];
+        return updated;
+      });
+      
       return false; // liberado
     } catch (error) {
       console.error(`[STATE VALIDATION] Erro ao validar ${estado}:`, error);
@@ -260,6 +277,23 @@ export function LicenseForm({
       setValidatingState(null);
     }
   };
+
+  // Effect para remover automaticamente estados bloqueados da seleção
+  React.useEffect(() => {
+    const currentStates = form.watch('states') || [];
+    const blockedStateKeys = Object.keys(blockedStates);
+    
+    if (blockedStateKeys.length > 0) {
+      const shouldUpdate = currentStates.some(state => blockedStateKeys.includes(state));
+      
+      if (shouldUpdate) {
+        const cleanedStates = currentStates.filter(state => !blockedStateKeys.includes(state));
+        console.log(`[AUTO CLEANUP] Removendo estados bloqueados da seleção:`, 
+          currentStates.filter(state => blockedStateKeys.includes(state)));
+        form.setValue('states', cleanedStates);
+      }
+    }
+  }, [blockedStates, form]);
 
   // Define a schema that can be validated partially (for drafts)
   const formSchema = draft?.isDraft
@@ -2777,13 +2811,26 @@ export function LicenseForm({
                                 onClick={async () => {
                                   console.log(`[HANDLE STATE CLICK] Clicando em ${state.code}, validating: ${validatingState}`);
                                   
-                                  if (validatingState || blockedStates[state.code]) {
-                                    console.log(`[HANDLE STATE CLICK] Estado ${state.code} bloqueado ou validando - ignorando clique`);
+                                  // Prevenir cliques múltiplos ou em estados já validando
+                                  if (validatingState) {
+                                    console.log(`[HANDLE STATE CLICK] Já validando ${validatingState} - ignorando clique em ${state.code}`);
+                                    return;
+                                  }
+                                  
+                                  // Verificar se estado já está bloqueado
+                                  if (blockedStates[state.code]) {
+                                    console.log(`[HANDLE STATE CLICK] Estado ${state.code} já bloqueado - ignorando clique`);
                                     return;
                                   }
                                   
                                   if (isSelected) {
                                     console.log(`[HANDLE STATE CLICK] Removendo estado ${state.code}`);
+                                    // Limpar estado dos bloqueados se estava lá
+                                    setBlockedStates(prev => {
+                                      const updated = { ...prev };
+                                      delete updated[state.code];
+                                      return updated;
+                                    });
                                     field.onChange(
                                       (field.value || []).filter(
                                         (value) => value !== state.code,
@@ -2792,7 +2839,9 @@ export function LicenseForm({
                                   } else {
                                     console.log(`[HANDLE STATE CLICK] Adicionando estado ${state.code} - iniciando validação`);
                                     const isBloqueado = await validateState(state.code);
-                                    if (!isBloqueado) {
+                                    
+                                    // Verificação dupla após validação para evitar condição de corrida
+                                    if (!isBloqueado && !blockedStates[state.code]) {
                                       console.log(`[HANDLE STATE CLICK] Estado ${state.code} liberado - adicionando`);
                                       field.onChange([
                                         ...(field.value || []),
@@ -2800,6 +2849,12 @@ export function LicenseForm({
                                       ]);
                                     } else {
                                       console.log(`[HANDLE STATE CLICK] Estado ${state.code} bloqueado - não adicionando`);
+                                      // Garantir que estado bloqueado não seja adicionado
+                                      field.onChange(
+                                        (field.value || []).filter(
+                                          (value) => value !== state.code,
+                                        )
+                                      );
                                     }
                                   }
                                 }}
