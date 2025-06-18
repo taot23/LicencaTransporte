@@ -2721,15 +2721,36 @@ export function LicenseForm({
                             variant="outline"
                             size="sm"
                             className="h-8 text-xs flex gap-1 items-center"
-                            onClick={() => {
+                            onClick={async () => {
                               if (allSelected) {
                                 // Desselecionar todos
                                 field.onChange([]);
+                                // Limpar estados bloqueados
+                                setBlockedStates({});
                               } else {
-                                // Selecionar todos
-                                field.onChange(
-                                  brazilianStates.map((state) => state.code),
-                                );
+                                // Selecionar todos validando cada estado
+                                console.log('[SELECT ALL] Iniciando seleção com validação de todos os estados');
+                                const validStates = [];
+                                
+                                for (const state of brazilianStates) {
+                                  // Verificar se já está bloqueado
+                                  if (blockedStates[state.code]) {
+                                    console.log(`[SELECT ALL] ${state.code} já bloqueado - pulando`);
+                                    continue;
+                                  }
+                                  
+                                  // Validar o estado
+                                  const isBloqueado = await validateState(state.code);
+                                  if (!isBloqueado) {
+                                    validStates.push(state.code);
+                                    console.log(`[SELECT ALL] ${state.code} validado e adicionado`);
+                                  } else {
+                                    console.log(`[SELECT ALL] ${state.code} bloqueado durante validação`);
+                                  }
+                                }
+                                
+                                console.log(`[SELECT ALL] Estados válidos selecionados:`, validStates);
+                                field.onChange(validStates);
                               }
                             }}
                           >
