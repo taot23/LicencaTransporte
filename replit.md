@@ -60,6 +60,8 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
   - RJ liberado (sem licenças)
 - ✅ **ERRO HANDLING**: Em caso de erro, libera estado para não bloquear usuário
 - ✅ **DADOS EXPANDIDOS**: Retorna informações completas (data emissão, dias desde emissão, motivo)
+- ✅ **CORREÇÃO SELEÇÃO MÚLTIPLA**: Prevenção de condições de corrida e remoção automática de estados bloqueados
+- ✅ **FORMULÁRIO CORRIGIDO**: Erro React resolvido, componente carregando normalmente
 
 ### 17/06/2025 - Sistema de Validação Inteligente de Licenças Vigentes - Atualização para 60 Dias
 - ✅ **REGRA ALTERADA**: Período de bloqueio atualizado de 30 para 60 dias conforme solicitação

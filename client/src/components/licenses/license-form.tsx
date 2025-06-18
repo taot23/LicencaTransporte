@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -278,23 +278,6 @@ export function LicenseForm({
     }
   };
 
-  // Effect para remover automaticamente estados bloqueados da seleção
-  React.useEffect(() => {
-    const currentStates = form.watch('states') || [];
-    const blockedStateKeys = Object.keys(blockedStates);
-    
-    if (blockedStateKeys.length > 0) {
-      const shouldUpdate = currentStates.some(state => blockedStateKeys.includes(state));
-      
-      if (shouldUpdate) {
-        const cleanedStates = currentStates.filter(state => !blockedStateKeys.includes(state));
-        console.log(`[AUTO CLEANUP] Removendo estados bloqueados da seleção:`, 
-          currentStates.filter(state => blockedStateKeys.includes(state)));
-        form.setValue('states', cleanedStates);
-      }
-    }
-  }, [blockedStates, form]);
-
   // Define a schema that can be validated partially (for drafts)
   const formSchema = draft?.isDraft
     ? insertDraftLicenseSchema
@@ -358,6 +341,23 @@ export function LicenseForm({
       }
     }
   }, [preSelectedTransporterId, transporters, toast]);
+
+  // Effect para remover automaticamente estados bloqueados da seleção
+  useEffect(() => {
+    const currentStates = form.watch('states') || [];
+    const blockedStateKeys = Object.keys(blockedStates);
+    
+    if (blockedStateKeys.length > 0) {
+      const shouldUpdate = currentStates.some(state => blockedStateKeys.includes(state));
+      
+      if (shouldUpdate) {
+        const cleanedStates = currentStates.filter(state => !blockedStateKeys.includes(state));
+        console.log(`[AUTO CLEANUP] Removendo estados bloqueados da seleção:`, 
+          currentStates.filter(state => blockedStateKeys.includes(state)));
+        form.setValue('states', cleanedStates);
+      }
+    }
+  }, [blockedStates, form]);
 
   // Função para verificar e confirmar seleção de veículo de terceiro
   const handleVehicleSelection = (vehicleId: number, fieldName: string) => {
