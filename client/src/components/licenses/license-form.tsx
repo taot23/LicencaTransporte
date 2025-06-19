@@ -344,54 +344,64 @@ export function LicenseForm({
     }
   }, [preSelectedTransporterId, transporters, toast]);
 
+  // Função para coletar todas as placas do formulário atual
+  const getFormPlates = () => {
+    const placas = [];
+    const watchedValues = form.watch();
+    
+    // Placa principal
+    if (watchedValues.mainVehiclePlate) {
+      placas.push(watchedValues.mainVehiclePlate);
+    }
+    
+    // Placas dos veículos selecionados
+    if (watchedValues.tractorUnitId) {
+      const tractor = vehicles?.find(v => v.id === watchedValues.tractorUnitId);
+      if (tractor?.plate) placas.push(tractor.plate);
+    }
+    
+    if (watchedValues.firstTrailerId) {
+      const first = vehicles?.find(v => v.id === watchedValues.firstTrailerId);
+      if (first?.plate) placas.push(first.plate);
+    }
+    
+    if (watchedValues.secondTrailerId) {
+      const second = vehicles?.find(v => v.id === watchedValues.secondTrailerId);
+      if (second?.plate) placas.push(second.plate);
+    }
+    
+    if (watchedValues.dollyId) {
+      const dolly = vehicles?.find(v => v.id === watchedValues.dollyId);
+      if (dolly?.plate) placas.push(dolly.plate);
+    }
+    
+    if (watchedValues.flatbedId) {
+      const flatbed = vehicles?.find(v => v.id === watchedValues.flatbedId);
+      if (flatbed?.plate) placas.push(flatbed.plate);
+    }
+    
+    // Placas adicionais
+    if (watchedValues.additionalPlates) {
+      watchedValues.additionalPlates.forEach((plate: string) => {
+        if (plate) placas.push(plate);
+      });
+    }
+    
+    return placas;
+  };
+
   // Função para validar estado de forma silenciosa (sem alterar UI de validação)
   const validateStateSilent = async (estado: string): Promise<{ blocked: boolean; data?: any }> => {
     try {
-      // Coletar todas as placas do formulário
-      const placas = [];
-      const watchedValues = form.watch();
+      const placas = getFormPlates();
       
-      // Placa principal
-      if (watchedValues.mainVehiclePlate) {
-        placas.push(watchedValues.mainVehiclePlate);
-      }
-      
-      // Placas dos veículos selecionados
-      if (watchedValues.tractorUnitId) {
-        const tractor = vehicles?.find(v => v.id === watchedValues.tractorUnitId);
-        if (tractor?.plate) placas.push(tractor.plate);
-      }
-      
-      if (watchedValues.firstTrailerId) {
-        const first = vehicles?.find(v => v.id === watchedValues.firstTrailerId);
-        if (first?.plate) placas.push(first.plate);
-      }
-      
-      if (watchedValues.secondTrailerId) {
-        const second = vehicles?.find(v => v.id === watchedValues.secondTrailerId);
-        if (second?.plate) placas.push(second.plate);
-      }
-      
-      if (watchedValues.dollyId) {
-        const dolly = vehicles?.find(v => v.id === watchedValues.dollyId);
-        if (dolly?.plate) placas.push(dolly.plate);
-      }
-      
-      if (watchedValues.flatbedId) {
-        const flatbed = vehicles?.find(v => v.id === watchedValues.flatbedId);
-        if (flatbed?.plate) placas.push(flatbed.plate);
-      }
-      
-      // Placas adicionais
-      if (watchedValues.additionalPlates) {
-        watchedValues.additionalPlates.forEach((plate: string) => {
-          if (plate) placas.push(plate);
-        });
-      }
-      
+      // Se não há placas, não validar - deixar estado neutro
       if (placas.length === 0) {
+        console.log(`[SILENT VALIDATION] ${estado} - sem placas para validar`);
         return { blocked: false };
       }
+      
+      console.log(`[SILENT VALIDATION] Validando ${estado} com placas:`, placas);
       
       const response = await fetch('/api/validacao-critica', {
         method: 'POST',
@@ -400,6 +410,7 @@ export function LicenseForm({
       });
       
       const result = await response.json();
+      console.log(`[SILENT VALIDATION] Resultado ${estado}:`, result);
       return { blocked: result.bloqueado, data: result };
     } catch (error) {
       console.error(`[SILENT VALIDATION] Erro ao validar ${estado}:`, error);
@@ -407,13 +418,22 @@ export function LicenseForm({
     }
   };
 
-  // Effect para validar todos os estados preventivamente
+  // Effect para validar todos os estados preventivamente em tempo real
   useEffect(() => {
+    if (!vehicles || vehicles.length === 0) return;
+    
     const validateAllStates = async () => {
-      if (!vehicles || vehicles.length === 0) return;
-      if (initialValidationComplete) return;
+      const placas = getFormPlates();
       
-      console.log('[PREVENTIVE VALIDATION] Iniciando validação preventiva de todos os estados');
+      // Se não há placas, limpar status de validação
+      if (placas.length === 0) {
+        console.log('[PREVENTIVE VALIDATION] Sem placas - limpando status');
+        setStateValidationStatus({});
+        setBlockedStates({});
+        return;
+      }
+      
+      console.log('[PREVENTIVE VALIDATION] Iniciando validação preventiva com placas:', placas);
       
       // Marcar todos como carregando
       const loadingStatus: Record<string, 'loading'> = {};
@@ -446,13 +466,35 @@ export function LicenseForm({
       
       setStateValidationStatus(newStatus);
       setBlockedStates(newBlockedStates);
-      setInitialValidationComplete(true);
       
       console.log('[PREVENTIVE VALIDATION] Validação preventiva concluída');
     };
     
+    // Executar validação quando houver mudanças nos campos de placa
+    const subscription = form.watch((value, { name }) => {
+      if (name && (
+        name === 'mainVehiclePlate' ||
+        name === 'tractorUnitId' ||
+        name === 'firstTrailerId' ||
+        name === 'secondTrailerId' ||
+        name === 'dollyId' ||
+        name === 'flatbedId' ||
+        name?.startsWith('additionalPlates')
+      )) {
+        // Debounce para evitar muitas chamadas
+        const timeoutId = setTimeout(() => {
+          validateAllStates();
+        }, 300);
+        
+        return () => clearTimeout(timeoutId);
+      }
+    });
+    
+    // Executar validação inicial
     validateAllStates();
-  }, [vehicles, form, initialValidationComplete]);
+    
+    return () => subscription.unsubscribe();
+  }, [vehicles, form]);
 
   // Effect para remover automaticamente estados bloqueados da seleção
   useEffect(() => {
