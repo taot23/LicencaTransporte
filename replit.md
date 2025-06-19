@@ -44,6 +44,16 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 19/06/2025 - Correção Crítica: Erro de Exclusão de Licenças
+- ✅ **PROBLEMA RESOLVIDO**: Erro de chave estrangeira ao excluir licenças (violação constraint "state_licenses_license_request_id_fkey")
+- ✅ **CORREÇÃO IMPLEMENTADA**: Método `deleteLicenseRequest` atualizado para remover registros relacionados em ordem correta:
+  1. `status_histories` (históricos de status)
+  2. `state_licenses` (licenças por estado - tabela legacy)
+  3. `license_requests` (licença principal)
+- ✅ **TRANSAÇÃO SEGURA**: Todas as exclusões executadas dentro de uma transação para garantir integridade
+- ✅ **TESTE CONFIRMADO**: Licença AET-2025-5888 (ID 121) excluída com sucesso após correção
+- ✅ **IMPORT CORRIGIDO**: Adicionado `stateLicenses` aos imports do `transactional-storage.ts`
+
 ### 17/06/2025 - Sistema de Validação Inteligente COMPLETO - Produção Final
 - ✅ **VALIDAÇÃO PARA TODOS OS ESTADOS + ÓRGÃOS FEDERAIS**: 27 estados brasileiros + DNIT, ANTT, PRF
 - ✅ **DADOS REAIS DE PRODUÇÃO**: Funciona com todas as licenças sincronizadas na tabela `licencas_emitidas`
