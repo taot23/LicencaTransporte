@@ -64,6 +64,7 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **FORMULÁRIO CORRIGIDO**: Erro React resolvido, componente carregando normalmente
 - ✅ **BOTÃO "SELECIONAR TODOS" CORRIGIDO**: Agora valida cada estado individualmente, bloqueando automaticamente estados com licenças >60 dias
 - ✅ **VALIDAÇÃO PREVENTIVA VISUAL**: Estados mostram status "licença vigente" antes mesmo do clique, informando o usuário antecipadamente
+- ✅ **INTERFACE AMARELA**: Estados bloqueados em fundo amarelo com data de validade exibida
 
 ### 17/06/2025 - Sistema de Validação Inteligente de Licenças Vigentes - Atualização para 60 Dias
 - ✅ **REGRA ALTERADA**: Período de bloqueio atualizado de 30 para 60 dias conforme solicitação

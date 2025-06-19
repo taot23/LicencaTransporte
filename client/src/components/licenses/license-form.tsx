@@ -2867,8 +2867,13 @@ export function LicenseForm({
                       control={form.control}
                       name="states"
                       render={({ field }) => {
-                        const allSelected =
-                          brazilianStates.length === (field.value || []).length;
+                        const selectedStates = field.value || [];
+                        const availableStates = brazilianStates.filter(state => 
+                          !blockedStates[state.code] && stateValidationStatus[state.code] !== 'blocked'
+                        );
+                        const allAvailableSelected = availableStates.length > 0 && 
+                          availableStates.every(state => selectedStates.includes(state.code));
+                        const hasAnySelected = selectedStates.length > 0;
                         return (
                           <Button
                             type="button"
@@ -2876,39 +2881,20 @@ export function LicenseForm({
                             size="sm"
                             className="h-8 text-xs flex gap-1 items-center"
                             onClick={async () => {
-                              if (allSelected) {
-                                // Desselecionar todos
+                              if (hasAnySelected) {
+                                // Desmarcar todos os estados selecionados
+                                console.log('[UNSELECT ALL] Desmarcando todos os estados');
                                 field.onChange([]);
-                                // Limpar estados bloqueados
-                                setBlockedStates({});
                               } else {
-                                // Selecionar todos validando cada estado
-                                console.log('[SELECT ALL] Iniciando seleção com validação de todos os estados');
-                                const validStates = [];
-                                
-                                for (const state of brazilianStates) {
-                                  // Verificar se já está bloqueado
-                                  if (blockedStates[state.code]) {
-                                    console.log(`[SELECT ALL] ${state.code} já bloqueado - pulando`);
-                                    continue;
-                                  }
-                                  
-                                  // Validar o estado
-                                  const isBloqueado = await validateState(state.code);
-                                  if (!isBloqueado) {
-                                    validStates.push(state.code);
-                                    console.log(`[SELECT ALL] ${state.code} validado e adicionado`);
-                                  } else {
-                                    console.log(`[SELECT ALL] ${state.code} bloqueado durante validação`);
-                                  }
-                                }
-                                
-                                console.log(`[SELECT ALL] Estados válidos selecionados:`, validStates);
+                                // Selecionar apenas estados disponíveis (não bloqueados)
+                                console.log('[SELECT ALL] Selecionando todos os estados disponíveis');
+                                const validStates = availableStates.map(state => state.code);
+                                console.log(`[SELECT ALL] Estados disponíveis selecionados:`, validStates);
                                 field.onChange(validStates);
                               }
                             }}
                           >
-                            {allSelected ? (
+                            {hasAnySelected ? (
                               <>
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -2978,7 +2964,7 @@ export function LicenseForm({
                                   isSelected
                                     ? "bg-blue-50 border-blue-300 text-blue-700 font-medium"
                                     : stateValidationStatus[state.code] === 'blocked' || blockedStates[state.code]
-                                      ? "bg-red-50 border-red-300 cursor-not-allowed opacity-75"
+                                      ? "bg-yellow-50 border-yellow-300 cursor-not-allowed opacity-75"
                                       : stateValidationStatus[state.code] === 'loading'
                                         ? "bg-gray-50 border-gray-300 opacity-50 cursor-not-allowed"
                                         : validatingState === state.code
@@ -3053,6 +3039,11 @@ export function LicenseForm({
                                 {(stateValidationStatus[state.code] === 'blocked' || blockedStates[state.code]) && (
                                   <span className="text-xs mt-1 text-center text-yellow-600 font-medium">
                                     licença vigente
+                                    {blockedStates[state.code]?.validade && (
+                                      <div className="text-xs text-yellow-500 mt-1">
+                                        até {new Date(blockedStates[state.code].validade).toLocaleDateString('pt-BR')}
+                                      </div>
+                                    )}
                                   </span>
                                 )}
                                 {stateValidationStatus[state.code] === 'valid' && !blockedStates[state.code] && (
