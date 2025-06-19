@@ -3051,7 +3051,7 @@ export function LicenseForm({
                                   </span>
                                 )}
                                 {(stateValidationStatus[state.code] === 'blocked' || blockedStates[state.code]) && (
-                                  <span className="text-xs mt-1 text-center text-red-600 font-medium">
+                                  <span className="text-xs mt-1 text-center text-yellow-600 font-medium">
                                     licença vigente
                                   </span>
                                 )}
