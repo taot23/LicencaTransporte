@@ -788,6 +788,16 @@ export class TransactionalStorage implements IStorage {
       .where(eq(licenseRequests.id, data.licenseId))
       .returning();
     
+    // SINCRONIZAÇÃO AUTOMÁTICA: Se o status foi aprovado, sincronizar na tabela licencas_emitidas
+    if (data.status === "approved" && data.validUntil && data.aetNumber) {
+      try {
+        await this.sincronizarLicencaEmitida(updatedLicense, data.state, data.aetNumber, data.validUntil, data.issuedAt || new Date().toISOString().split('T')[0]);
+        console.log(`[SINCRONIZAÇÃO AUTO] Licença ${data.licenseId} sincronizada para estado ${data.state}`);
+      } catch (error) {
+        console.error(`[SINCRONIZAÇÃO AUTO] Erro ao sincronizar licença ${data.licenseId} estado ${data.state}:`, error);
+      }
+    }
+    
     return updatedLicense;
   }
   
