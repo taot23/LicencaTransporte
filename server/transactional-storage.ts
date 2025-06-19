@@ -7,7 +7,8 @@ import {
   statusHistories, type StatusHistory, type InsertStatusHistory,
   vehicleModels, type VehicleModel, type InsertVehicleModel,
   boletos, type Boleto, type InsertBoleto,
-  stateLicenses
+  stateLicenses,
+  licencasEmitidas
 } from "@shared/schema";
 import { eq, and, desc, asc, sql, gt, lt, like, not, isNull, or, count, sum } from "drizzle-orm";
 import { db, pool, withTransaction } from "./db";
@@ -1700,6 +1701,140 @@ export class TransactionalStorage implements IStorage {
     } catch (error) {
       console.error('Erro ao deletar boleto:', error);
       throw new Error('Falha ao deletar boleto');
+    }
+  }
+
+  // Método para sincronizar licenças aprovadas na tabela licencas_emitidas
+  async sincronizarLicencaEmitida(licenca: any, estado: string, numeroAet: string, dataValidade: string, dataEmissao: string): Promise<void> {
+    try {
+      // Buscar informações dos veículos associados
+      let placaTratora: string | null = licenca.mainVehiclePlate || null;
+      let placaPrimeiraCarreta: string | null = null;
+      let placaSegundaCarreta: string | null = null;
+      let placaDolly: string | null = null;
+      let placaPrancha: string | null = null;
+      let placaReboque: string | null = null;
+
+      // Obter placas dos veículos por ID se existirem
+      if (licenca.tractorUnitId) {
+        const tractorResult = await db.select({ plate: vehicles.plate })
+          .from(vehicles)
+          .where(eq(vehicles.id, licenca.tractorUnitId));
+        if (tractorResult.length > 0) {
+          placaTratora = tractorResult[0].plate;
+        }
+      }
+
+      if (licenca.firstTrailerId) {
+        const firstTrailerResult = await db.select({ plate: vehicles.plate })
+          .from(vehicles)
+          .where(eq(vehicles.id, licenca.firstTrailerId));
+        if (firstTrailerResult.length > 0) {
+          placaPrimeiraCarreta = firstTrailerResult[0].plate;
+        }
+      }
+
+      if (licenca.secondTrailerId) {
+        const secondTrailerResult = await db.select({ plate: vehicles.plate })
+          .from(vehicles)
+          .where(eq(vehicles.id, licenca.secondTrailerId));
+        if (secondTrailerResult.length > 0) {
+          placaSegundaCarreta = secondTrailerResult[0].plate;
+        }
+      }
+
+      if (licenca.dollyId) {
+        const dollyResult = await db.select({ plate: vehicles.plate })
+          .from(vehicles)
+          .where(eq(vehicles.id, licenca.dollyId));
+        if (dollyResult.length > 0) {
+          placaDolly = dollyResult[0].plate;
+        }
+      }
+
+      if (licenca.flatbedId) {
+        const flatbedResult = await db.select({ plate: vehicles.plate })
+          .from(vehicles)
+          .where(eq(vehicles.id, licenca.flatbedId));
+        if (flatbedResult.length > 0) {
+          placaPrancha = flatbedResult[0].plate;
+        }
+      }
+
+      // Adicionar placas adicionais se existirem
+      if (licenca.additionalPlates && Array.isArray(licenca.additionalPlates)) {
+        licenca.additionalPlates.forEach((placa: string, index: number) => {
+          if (placa) {
+            if (index === 0 && !placaPrimeiraCarreta) placaPrimeiraCarreta = placa;
+            else if (index === 1 && !placaSegundaCarreta) placaSegundaCarreta = placa;
+            else if (index === 2 && !placaDolly) placaDolly = placa;
+            else if (index === 3 && !placaPrancha) placaPrancha = placa;
+            else if (index === 4 && !placaReboque) placaReboque = placa;
+          }
+        });
+      }
+
+      // Buscar CNPJ selecionado para o estado
+      let cnpjSelecionado = null;
+      if (licenca.stateCnpjs && Array.isArray(licenca.stateCnpjs)) {
+        const cnpjEntry = licenca.stateCnpjs.find((entry: string) => entry.startsWith(`${estado}:`));
+        if (cnpjEntry) {
+          cnpjSelecionado = cnpjEntry.split(':')[1];
+        }
+      }
+
+      // Verificar se já existe uma entrada para esta licença e estado
+      const existingLicense = await db.select()
+        .from(licencasEmitidas)
+        .where(and(
+          eq(licencasEmitidas.pedidoId, licenca.id),
+          eq(licencasEmitidas.estado, estado)
+        ));
+
+      if (existingLicense.length > 0) {
+        // Atualizar entrada existente
+        await db.update(licencasEmitidas)
+          .set({
+            numeroLicenca: numeroAet,
+            dataValidade: new Date(dataValidade),
+            dataEmissao: new Date(dataEmissao),
+            status: 'ativa',
+            placaUnidadeTratora: placaTratora,
+            placaPrimeiraCarreta: placaPrimeiraCarreta,
+            placaSegundaCarreta: placaSegundaCarreta,
+            placaDolly: placaDolly,
+            placaPrancha: placaPrancha,
+            placaReboque: placaReboque,
+            cnpjSelecionado: cnpjSelecionado,
+            updatedAt: new Date()
+          })
+          .where(and(
+            eq(licencasEmitidas.pedidoId, licenca.id),
+            eq(licencasEmitidas.estado, estado)
+          ));
+      } else {
+        // Inserir nova entrada
+        await db.insert(licencasEmitidas).values({
+          pedidoId: licenca.id,
+          estado: estado,
+          numeroLicenca: numeroAet,
+          dataEmissao: new Date(dataEmissao),
+          dataValidade: new Date(dataValidade),
+          status: 'ativa',
+          placaUnidadeTratora: placaTratora,
+          placaPrimeiraCarreta: placaPrimeiraCarreta,
+          placaSegundaCarreta: placaSegundaCarreta,
+          placaDolly: placaDolly,
+          placaPrancha: placaPrancha,
+          placaReboque: placaReboque,
+          cnpjSelecionado: cnpjSelecionado
+        });
+      }
+
+      console.log(`[SINCRONIZAÇÃO] Licença emitida sincronizada: ${numeroAet} para estado ${estado}`);
+    } catch (error) {
+      console.error('[SINCRONIZAÇÃO] Erro ao sincronizar licença emitida:', error);
+      throw error;
     }
   }
 }
