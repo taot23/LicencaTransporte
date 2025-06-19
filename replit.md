@@ -44,6 +44,17 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 19/06/2025 - Sistema de Sincronização Automática de Licenças IMPLEMENTADO
+- ✅ **TRIGGER POSTGRESQL**: Função `sync_approved_license()` criada para sincronização automática
+- ✅ **SINCRONIZAÇÃO EM TEMPO REAL**: Trigger `trigger_sync_approved_licenses` ativa automaticamente quando licenças são aprovadas
+- ✅ **CONSTRAINT ÚNICA**: Adicionada constraint `unique_pedido_estado` para prevenir duplicações
+- ✅ **PROCESSAMENTO INTELIGENTE**: Sistema extrai dados de `stateStatuses`, `stateAETNumbers`, `stateCnpjs` automaticamente
+- ✅ **MAPEAMENTO DE PLACAS**: Sincronização inclui placas de unidade tratora, primeira e segunda carreta
+- ✅ **LOGS DETALHADOS**: Sistema registra cada sincronização com logs informativos
+- ✅ **TESTE CONFIRMADO**: 7 licenças sincronizadas automaticamente (AL, BA, CE, DF, DNIT, MG, MS)
+- ✅ **VALIDAÇÃO FUNCIONANDO**: Estados com licenças >60 dias sendo bloqueados corretamente
+- ✅ **DADOS REAIS**: Sistema usando dados de produção da tabela `licencas_emitidas`
+
 ### 19/06/2025 - Correção Crítica: Erro de Exclusão de Licenças
 - ✅ **PROBLEMA RESOLVIDO**: Erro de chave estrangeira ao excluir licenças (violação constraint "state_licenses_license_request_id_fkey")
 - ✅ **CORREÇÃO IMPLEMENTADA**: Método `deleteLicenseRequest` atualizado para remover registros relacionados em ordem correta:
