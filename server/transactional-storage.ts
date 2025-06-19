@@ -6,7 +6,8 @@ import {
   type UpdateLicenseState, LicenseStatus, LicenseType,
   statusHistories, type StatusHistory, type InsertStatusHistory,
   vehicleModels, type VehicleModel, type InsertVehicleModel,
-  boletos, type Boleto, type InsertBoleto
+  boletos, type Boleto, type InsertBoleto,
+  stateLicenses
 } from "@shared/schema";
 import { eq, and, desc, asc, sql, gt, lt, like, not, isNull, or, count, sum } from "drizzle-orm";
 import { db, pool, withTransaction } from "./db";
@@ -909,7 +910,10 @@ export class TransactionalStorage implements IStorage {
       // Primeiro, excluir todos os históricos associados
       await tx.delete(statusHistories).where(eq(statusHistories.licenseId, id));
       
-      // Depois, excluir a licença
+      // Segundo, excluir todos os state_licenses associados
+      await tx.delete(stateLicenses).where(eq(stateLicenses.licenseRequestId, id));
+      
+      // Por último, excluir a licença
       const result = await tx
         .delete(licenseRequests)
         .where(eq(licenseRequests.id, id))
