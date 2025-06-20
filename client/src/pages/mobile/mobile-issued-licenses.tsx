@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { SearchIcon, X, FileText, ArrowUpRight, CalendarIcon, AlertCircle } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/licenses/status-badge";
 import { getLicenseTypeLabel, formatShortDate, getStateLabel } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -230,14 +230,19 @@ export default function MobileIssuedLicensesPage() {
                   <DialogHeader className="sticky top-0 z-10 bg-background p-4 border-b">
                     <div className="flex items-center justify-between">
                       <DialogTitle className="text-lg font-semibold">{selectedLicense?.requestNumber}</DialogTitle>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        onClick={() => setIsDialogOpen(false)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                      <DialogClose asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={() => {
+                            setSelectedLicense(null);
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                          <span className="sr-only">Fechar</span>
+                        </Button>
+                      </DialogClose>
                     </div>
                   </DialogHeader>
                   
