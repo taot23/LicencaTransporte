@@ -11,7 +11,7 @@ import {
   Menu, 
   X,
   LogOut,
-  Building2,
+  Receipt,
   Settings,
   Check
 } from "lucide-react";
@@ -175,14 +175,14 @@ export function MobileLayout({
                     </Button>
                   </Link>
                   
-                  <Link href="/my-companies">
+                  <Link href="/meus-boletos">
                     <Button 
-                      variant={location === "/my-companies" ? "secondary" : "ghost"} 
+                      variant={location === "/meus-boletos" ? "secondary" : "ghost"} 
                       className="w-full justify-start" 
                       onClick={() => setIsOpen(false)}
                     >
-                      <Building2 className="mr-2 h-4 w-4" />
-                      Minhas Empresas
+                      <Receipt className="mr-2 h-4 w-4" />
+                      Meus Boletos
                     </Button>
                   </Link>
                   
