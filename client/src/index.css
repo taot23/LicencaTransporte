@@ -91,6 +91,110 @@
     max-height: 100vh !important;
     top: 0 !important;
   }
+  
+  /* Responsividade aprimorada para tabelas */
+  .table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .table-responsive table {
+    min-width: 600px;
+    font-size: 0.875rem;
+  }
+  
+  /* Cards mobile otimizados */
+  .mobile-card {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Formulários mobile */
+  .mobile-form {
+    padding: 1rem;
+  }
+  
+  .mobile-form .form-field {
+    margin-bottom: 1.5rem;
+  }
+  
+  .mobile-form input, 
+  .mobile-form select, 
+  .mobile-form textarea {
+    font-size: 16px; /* Previne zoom no iOS */
+    padding: 0.75rem;
+  }
+  
+  /* Botões mobile */
+  .mobile-button {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Grid responsivo */
+  .mobile-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  /* Estados loading mobile */
+  .mobile-loading {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+  
+  /* Navegação bottom */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    padding: 0.75rem;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 0.25rem;
+  }
+  
+  .bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+  }
+  
+  .bottom-nav-item.active {
+    background-color: #f3f4f6;
+    color: #3b82f6;
+  }
+  
+  .bottom-nav-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .bottom-nav-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
 }
 
 /* Custom CSS para API endpoint personalizado */

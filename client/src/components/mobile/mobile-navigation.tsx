@@ -1,66 +1,103 @@
-import { Link, useLocation } from "wouter";
-import { Truck, FileText, ClipboardCheck, Home, Clock } from "lucide-react";
+import { useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { 
+  Home, 
+  Truck, 
+  FileText, 
+  ClipboardList, 
+  ListChecks,
+  Settings
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function MobileNavigation() {
-  const [location] = useLocation();
-  
-  // Definir os itens de navegação
-  const navItems = [
-    {
-      name: "Início",
-      href: "/",
+  const [location, setLocation] = useLocation();
+  const { user } = useAuth();
+
+  const isAdminUser = (user: any): boolean => {
+    return user?.role === 'admin' || user?.role === 'operational' || user?.role === 'manager' || user?.role === 'supervisor' || user?.role === 'financial';
+  };
+
+  const navigationItems = [
+    // Dashboard - apenas para transportadores
+    ...(user?.role === 'user' ? [{
+      id: 'dashboard',
+      label: 'Início',
       icon: Home,
-      active: location === "/" || location === ""
-    },
+      path: '/',
+      active: location === '/' || location === '/dashboard'
+    }] : []),
+    
+    // Veículos
     {
-      name: "Veículos",
-      href: "/vehicles",
+      id: 'vehicles',
+      label: 'Veículos',
       icon: Truck,
-      active: location.includes("/vehicles")
+      path: '/vehicles',
+      active: location === '/vehicles'
     },
+    
+    // Nova Licença
     {
-      name: "Nova",
-      href: "/request-license",
+      id: 'new-license',
+      label: 'Nova',
       icon: FileText,
-      active: location.includes("/request-license")
+      path: '/nova-licenca',
+      active: location === '/nova-licenca'
     },
+    
+    // Acompanhar
     {
-      name: "Acompanhar",
-      href: "/track-license",
-      icon: ClipboardCheck,
-      active: location.includes("/track-license")
+      id: 'track',
+      label: 'Acompanhar',
+      icon: ClipboardList,
+      path: '/acompanhar-licenca',
+      active: location === '/acompanhar-licenca'
     },
+    
+    // Emitidas
     {
-      name: "Emitidas",
-      href: "/issued-licenses",
-      icon: Clock,
-      active: location.includes("/issued-licenses")
-    }
+      id: 'issued',
+      label: 'Emitidas',
+      icon: ListChecks,
+      path: '/licencas-emitidas',
+      active: location === '/licencas-emitidas'
+    },
+    
+    // Admin - apenas administradores
+    ...(isAdminUser(user) ? [{
+      id: 'admin',
+      label: 'Admin',
+      icon: Settings,
+      path: '/admin',
+      active: location.startsWith('/admin')
+    }] : [])
   ];
-  
+
+  // Limitar a 5 itens na navegação mobile
+  const displayItems = navigationItems.slice(0, 5);
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-16 bg-background border-t border-border flex items-center justify-around px-1 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
-      {navItems.map((item) => (
-        <Link 
-          key={item.href} 
-          href={item.href}
-          className="no-underline flex-1"
-        >
-          <div className={cn(
-            "flex flex-col items-center justify-center",
-            "h-14 mx-1 py-1 rounded-lg",
-            "transition-colors",
-            item.active ? "text-primary" : "text-muted-foreground hover:text-foreground"
-          )}>
-            <item.icon className={cn(
-              "h-5 w-5 mb-1",
-              item.active ? "text-primary" : "text-muted-foreground"
-            )} />
-            <span className="text-[10px] font-medium leading-tight">{item.name}</span>
-          </div>
-        </Link>
-      ))}
-    </div>
+    <nav className="bottom-nav md:hidden">
+      {displayItems.map((item) => {
+        const Icon = item.icon;
+        return (
+          <Button
+            key={item.id}
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "bottom-nav-item h-auto p-2 flex-col",
+              item.active && "bottom-nav-item active"
+            )}
+            onClick={() => setLocation(item.path)}
+          >
+            <Icon className="bottom-nav-icon" />
+            <span className="bottom-nav-label">{item.label}</span>
+          </Button>
+        );
+      })}
+    </nav>
   );
 }
