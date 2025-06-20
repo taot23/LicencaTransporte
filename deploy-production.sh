@@ -129,7 +129,8 @@ setup_directories() {
     
     # Configurar permissões
     if [[ "$UPLOAD_DIR" == "/var/uploads" ]]; then
-        sudo chown -R $USER:$USER $UPLOAD_DIR 2>/dev/null || true
+        ls
+        $UPLOAD_DIR 2>/dev/null || true
     fi
     chmod -R 755 $UPLOAD_DIR 2>/dev/null || true
     
