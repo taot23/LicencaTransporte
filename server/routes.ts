@@ -504,8 +504,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
   setupAuth(app);
 
-  // Servir arquivos estáticos da pasta uploads
-  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+  // Servir arquivos estáticos da pasta uploads externa
+  console.log(`[UPLOAD] Servindo arquivos de ${uploadDir} em /uploads`);
+  app.use('/uploads', express.static(uploadDir));
   
   // Criar o servidor HTTP (definido apenas uma vez)
   const httpServer = createServer(app);
