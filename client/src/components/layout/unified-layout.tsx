@@ -48,10 +48,10 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
       queryClient.setQueryData(["/api/user"], null);
       queryClient.clear();
       
-      navigate("/login");
+      navigate("/auth");
     } catch (error) {
       console.error("Erro no logout:", error);
-      navigate("/login");
+      navigate("/auth");
     } finally {
       setIsLoggingOut(false);
     }

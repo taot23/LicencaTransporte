@@ -44,6 +44,16 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 20/06/2025 - Sistema Mobile Responsivo Completo e Correção de Logout
+- ✅ **NAVEGAÇÃO MOBILE**: Sistema responsivo completo com navegação inferior funcional
+- ✅ **DASHBOARD MOBILE**: Dashboard mobile corrigido usando APIs corretas (/api/dashboard/stats)
+- ✅ **ROTAS CORRIGIDAS**: Todas as rotas mobile mapeadas corretamente (/nova-licenca, /acompanhar-licenca, /licencas-emitidas)
+- ✅ **HOOK MOBILE**: Hooks useIsMobile e useMobileDetector criados para detecção responsiva
+- ✅ **LAYOUT UNIFICADO**: UnifiedLayout responsivo com navegação condicional desktop/mobile
+- ✅ **CORREÇÃO LOGOUT**: Redirecionamento de logout corrigido de "/login" para "/auth"
+- ✅ **TEMPO REAL**: Todos os menus funcionando em tempo real com WebSocket
+- ✅ **CSS MOBILE**: Estilos CSS mobile otimizados para touch e navegação inferior
+
 ### 19/06/2025 - Sistema de Sincronização Automática de Licenças IMPLEMENTADO
 - ✅ **TRIGGER POSTGRESQL**: Função `sync_approved_license()` criada para sincronização automática
 - ✅ **SINCRONIZAÇÃO EM TEMPO REAL**: Trigger `trigger_sync_approved_licenses` ativa automaticamente quando licenças são aprovadas
