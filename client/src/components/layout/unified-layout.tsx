@@ -1,5 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Sidebar } from "./sidebar";
+import { MobileNavigation } from "@/components/mobile/mobile-navigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Loader2, LogOut } from "lucide-react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -19,6 +21,7 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [pageKey, setPageKey] = useState(`${location}-${contentKey || ''}`);
+  const isMobile = useIsMobile();
   
   // Otimização de navegação - remove delay artificial
   useEffect(() => {
@@ -70,14 +73,15 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
 
   return (
     <div className="min-h-screen flex bg-gray-50">
-      <Sidebar />
+      {/* Sidebar apenas para desktop */}
+      {!isMobile && <Sidebar />}
       
-      {/* Header fixo no topo */}
-      <div className="fixed top-0 right-0 left-0 md:left-56 lg:left-64 xl:left-72 z-30 bg-white border-b border-gray-200 h-16">
-        <div className="flex items-center justify-end h-full px-6">
+      {/* Header fixo no topo - responsivo */}
+      <div className={`fixed top-0 right-0 left-0 ${isMobile ? '' : 'md:left-56 lg:left-64 xl:left-72'} z-30 bg-white border-b border-gray-200 ${isMobile ? 'h-14' : 'h-16'} ${isMobile ? 'hidden' : ''}`}>
+        <div className={`flex items-center justify-end h-full ${isMobile ? 'px-4' : 'px-6'}`}>
           <div className="flex items-center space-x-3">
             <div className="text-right">
-              <div className="text-sm font-medium text-gray-900">
+              <div className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-gray-900`}>
                 {user?.fullName}
               </div>
               <div className="text-xs text-gray-500">
@@ -114,7 +118,7 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
         </div>
       </div>
       
-      <div className="flex-1 md:ml-56 lg:ml-64 xl:ml-72 pt-16 relative">
+      <div className={`flex-1 ${isMobile ? 'pt-0 pb-20' : 'md:ml-56 lg:ml-64 xl:ml-72 pt-16'} relative`}>
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-60 z-10">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -122,12 +126,15 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
         ) : null}
         
         <div 
-          className="md:py-8 md:px-6 p-4 md:pt-8 pt-4"
+          className={`${isMobile ? 'p-4 pt-4' : 'md:py-8 md:px-6 p-4 md:pt-8 pt-4'}`}
           key={pageKey} // Ajuda React a renderizar apenas o que mudou
         >
           {children}
         </div>
       </div>
+      
+      {/* Navegação mobile no rodapé */}
+      {isMobile && <MobileNavigation />}
     </div>
   );
 }

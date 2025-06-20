@@ -89,22 +89,22 @@ export function MobileHeader({ title, showBack = false, backPath = "/" }: Mobile
     }] : []),
     
     // Acompanhar Licenças
-    ...(permissions.canViewLicenses() ? [{
+    {
       id: 'track',
       label: 'Acompanhar Licenças',
       icon: ClipboardList,
       path: '/acompanhar-licenca',
       show: true
-    }] : []),
+    },
     
     // Licenças Emitidas
-    ...(permissions.canViewLicenses() ? [{
+    {
       id: 'issued',
       label: 'Licenças Emitidas',
       icon: ListChecks,
       path: '/licencas-emitidas',
       show: true
-    }] : []),
+    },
     
     // Transportadores - apenas para admins
     ...(isAdminUser(user) ? [{
