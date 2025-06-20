@@ -40,38 +40,51 @@ import * as fs from "fs";
 import { promisify } from "util";
 import { WebSocketServer, WebSocket } from "ws";
 
-// Set up file storage for uploads - externa ao projeto
+// Set up file storage for uploads - configuração robusta para produção
 const getUploadDir = () => {
-  // Tentar diferentes localizações baseadas no ambiente
+  // Configurações específicas por ambiente
   const possiblePaths = [
     process.env.UPLOAD_DIR, // Variável de ambiente personalizada
+    '/home/servidorvoipnvs/uploads', // Diretório específico do usuário no servidor Google
+    '/var/www/uploads', // Diretório web padrão
     '/var/uploads', // Padrão para produção
-    '/tmp/uploads', // Fallback para sistemas com permissões limitadas
+    '/tmp/uploads', // Fallback temporário
     path.join(process.cwd(), '..', 'uploads'), // Um nível acima do projeto
+    path.join(process.cwd(), 'storage'), // Dentro do projeto como storage
     path.join(process.cwd(), 'uploads') // Último recurso dentro do projeto
   ].filter(Boolean);
 
   for (const uploadPath of possiblePaths) {
     try {
-      // Tentar criar o diretório
+      // Tentar criar o diretório com permissões adequadas
       if (!fs.existsSync(uploadPath!)) {
-        fs.mkdirSync(uploadPath!, { recursive: true });
+        fs.mkdirSync(uploadPath!, { recursive: true, mode: 0o755 });
       }
+      
+      // Criar subdiretórios necessários
+      const subDirs = ['vehicles', 'transporters', 'boletos'];
+      subDirs.forEach(subDir => {
+        const subPath = path.join(uploadPath!, subDir);
+        if (!fs.existsSync(subPath)) {
+          fs.mkdirSync(subPath, { recursive: true, mode: 0o755 });
+        }
+      });
       
       // Testar se consegue escrever no diretório
       const testFile = path.join(uploadPath!, '.write-test');
       fs.writeFileSync(testFile, 'test');
       fs.unlinkSync(testFile);
       
-      console.log(`[UPLOAD] Usando diretório: ${uploadPath}`);
+      console.log(`[UPLOAD] ✅ Usando diretório: ${uploadPath}`);
+      console.log(`[UPLOAD] 📁 Subdiretórios criados: ${subDirs.join(', ')}`);
       return uploadPath!;
     } catch (error) {
-      console.warn(`[UPLOAD] Não foi possível usar ${uploadPath}:`, error.message);
+      console.warn(`[UPLOAD] ❌ Falha em ${uploadPath}:`, (error as Error).message);
       continue;
     }
   }
   
-  throw new Error('Nenhum diretório de upload válido encontrado');
+  throw new Error('❌ Nenhum diretório de upload válido encontrado');
 };
 
 const uploadDir = getUploadDir();

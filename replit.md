@@ -44,7 +44,7 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
-### 20/06/2025 - Sistema Mobile Responsivo Completo e Correção de Logout
+### 20/06/2025 - Sistema Mobile Responsivo Completo e Correção de Uploads
 - ✅ **NAVEGAÇÃO MOBILE**: Sistema responsivo completo com navegação inferior funcional
 - ✅ **DASHBOARD MOBILE**: Dashboard mobile corrigido usando APIs corretas (/api/dashboard/stats)
 - ✅ **ROTAS CORRIGIDAS**: Todas as rotas mobile mapeadas corretamente (/nova-licenca, /acompanhar-licenca, /licencas-emitidas)
@@ -57,6 +57,10 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **PÁGINA MEUS BOLETOS RESPONSIVA**: Layout mobile com cards ao invés de tabela, filtros responsivos
 - ✅ **CARDS MOBILE OTIMIZADOS**: Cards com informações organizadas, botões touch-friendly, grid responsivo
 - ✅ **ESTATÍSTICAS MOBILE**: Grid 2x2 para estatísticas em dispositivos móveis, layout otimizado
+- ✅ **SISTEMA DE UPLOADS CORRIGIDO**: Configuração robusta para servidor Google com múltiplos fallbacks
+- ✅ **SCRIPT DE SETUP**: Script automatizado para configurar uploads em produção (/home/servidorvoipnvs/uploads)
+- ✅ **ARQUIVO .ENV MODELO**: Template completo com todas as variáveis de ambiente necessárias
+- ✅ **GUIA DE CORREÇÃO**: Documentação para resolver problemas de permissão de arquivos
 
 ### 19/06/2025 - Sistema de Sincronização Automática de Licenças IMPLEMENTADO
 - ✅ **TRIGGER POSTGRESQL**: Função `sync_approved_license()` criada para sincronização automática
