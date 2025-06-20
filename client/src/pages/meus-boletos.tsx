@@ -13,6 +13,7 @@ import type { Boleto } from "@shared/schema";
 import { UnifiedLayout } from "@/components/layout/unified-layout";
 import { useToast } from "@/hooks/use-toast";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const getStatusBadgeVariant = (status: string) => {
   switch (status) {
@@ -50,6 +51,7 @@ export default function MeusBoletos() {
   const [termoBusca, setTermoBusca] = useState("");
   const { toast } = useToast();
   const { lastMessage } = useWebSocketContext();
+  const isMobile = useIsMobile();
 
   const { data: boletos = [], isLoading, error, refetch } = useQuery<Boleto[]>({
     queryKey: ["/api/meus-boletos"],
@@ -216,19 +218,19 @@ export default function MeusBoletos() {
     <UnifiedLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className={`${isMobile ? 'space-y-4' : 'flex justify-between items-center'}`}>
           <div>
-            <h1 className="text-3xl font-bold">Meus Boletos</h1>
+            <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`}>Meus Boletos</h1>
             <p className="text-muted-foreground">Gerencie seus boletos financeiros</p>
           </div>
-          <Button onClick={exportToCSV} className="ml-4">
+          <Button onClick={exportToCSV} className={`${isMobile ? 'w-full' : 'ml-4'}`}>
             <Download className="h-4 w-4 mr-2" />
             Exportar CSV
           </Button>
         </div>
 
         {/* Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-4'} gap-4`}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total de Boletos</CardTitle>
@@ -276,7 +278,7 @@ export default function MeusBoletos() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className={`grid ${isMobile ? 'grid-cols-1 gap-3' : 'grid-cols-1 md:grid-cols-4 gap-4'}`}>
               <div>
                 <Label htmlFor="busca">Buscar</Label>
                 <div className="relative">
@@ -336,7 +338,7 @@ export default function MeusBoletos() {
           </CardContent>
         </Card>
 
-        {/* Tabela de Boletos */}
+        {/* Lista de Boletos - Responsiva */}
         {boletosFiltrados.length === 0 ? (
           <Card>
             <CardContent className="py-8">
@@ -354,78 +356,159 @@ export default function MeusBoletos() {
               </div>
             </CardContent>
           </Card>
+        ) : isMobile ? (
+          // Layout Mobile - Cards
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Boletos ({boletosFiltrados.length})</h3>
+            </div>
+            {boletosFiltrados.map((boleto: Boleto) => (
+              <Card key={boleto.id} className="shadow-sm">
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    {/* Header do Card */}
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-semibold text-base">{boleto.numeroBoleto}</p>
+                        <p className="text-sm text-gray-600">{boleto.nomeTransportador}</p>
+                      </div>
+                      <Badge variant={getStatusBadgeVariant(boleto.status)}>
+                        {getStatusLabel(boleto.status)}
+                      </Badge>
+                    </div>
+                    
+                    {/* Informações principais */}
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p className="text-gray-500">CPF/CNPJ</p>
+                        <p className="font-medium">{boleto.cpfCnpj}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Valor</p>
+                        <p className="font-semibold text-green-600">
+                          {formatCurrency(parseFloat(boleto.valor.toString()))}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Emissão</p>
+                        <p>{formatDate(boleto.dataEmissao)}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Vencimento</p>
+                        <p className={isVencido(boleto.dataVencimento) ? "text-red-600 font-medium" : ""}>
+                          {formatDate(boleto.dataVencimento)}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {/* Ações */}
+                    <div className="flex gap-2 pt-2">
+                      {boleto.uploadBoletoUrl && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownloadFile(boleto.uploadBoletoUrl!, `boleto-${boleto.numeroBoleto}.pdf`)}
+                          className="flex-1"
+                        >
+                          <Receipt className="h-3 w-3 mr-1" />
+                          Boleto
+                        </Button>
+                      )}
+                      {boleto.uploadNfUrl && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownloadFile(boleto.uploadNfUrl!, `nf-${boleto.numeroBoleto}.pdf`)}
+                          className="flex-1"
+                        >
+                          <FileText className="h-3 w-3 mr-1" />
+                          NF
+                        </Button>
+                      )}
+                      {!boleto.uploadBoletoUrl && !boleto.uploadNfUrl && (
+                        <p className="text-sm text-gray-500 text-center w-full py-2">Sem arquivos</p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         ) : (
+          // Layout Desktop - Tabela
           <Card>
             <CardHeader>
               <CardTitle>Boletos ({boletosFiltrados.length})</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Número</TableHead>
-                    <TableHead>Transportador</TableHead>
-                    <TableHead>CPF/CNPJ</TableHead>
-                    <TableHead>Valor</TableHead>
-                    <TableHead>Emissão</TableHead>
-                    <TableHead>Vencimento</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {boletosFiltrados.map((boleto: Boleto) => (
-                    <TableRow key={boleto.id}>
-                      <TableCell className="font-medium">
-                        {boleto.numeroBoleto}
-                      </TableCell>
-                      <TableCell>{boleto.nomeTransportador}</TableCell>
-                      <TableCell>{boleto.cpfCnpj}</TableCell>
-                      <TableCell>{formatCurrency(parseFloat(boleto.valor.toString()))}</TableCell>
-                      <TableCell>
-                        {formatDate(boleto.dataEmissao)}
-                      </TableCell>
-                      <TableCell>
-                        <div className={isVencido(boleto.dataVencimento) ? "text-red-600" : ""}>
-                          {formatDate(boleto.dataVencimento)}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusBadgeVariant(boleto.status)}>
-                          {getStatusLabel(boleto.status)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          {boleto.uploadBoletoUrl && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDownloadFile(boleto.uploadBoletoUrl!, `boleto-${boleto.numeroBoleto}.pdf`)}
-                              title="Baixar boleto"
-                            >
-                              <Receipt className="h-3 w-3" />
-                            </Button>
-                          )}
-                          {boleto.uploadNfUrl && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDownloadFile(boleto.uploadNfUrl!, `nf-${boleto.numeroBoleto}.pdf`)}
-                              title="Baixar nota fiscal"
-                            >
-                              <FileText className="h-3 w-3" />
-                            </Button>
-                          )}
-                          {!boleto.uploadBoletoUrl && !boleto.uploadNfUrl && (
-                            <span className="text-sm text-gray-500">Sem arquivos</span>
-                          )}
-                        </div>
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Número</TableHead>
+                      <TableHead>Transportador</TableHead>
+                      <TableHead>CPF/CNPJ</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead>Emissão</TableHead>
+                      <TableHead>Vencimento</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Ações</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {boletosFiltrados.map((boleto: Boleto) => (
+                      <TableRow key={boleto.id}>
+                        <TableCell className="font-medium">
+                          {boleto.numeroBoleto}
+                        </TableCell>
+                        <TableCell>{boleto.nomeTransportador}</TableCell>
+                        <TableCell>{boleto.cpfCnpj}</TableCell>
+                        <TableCell>{formatCurrency(parseFloat(boleto.valor.toString()))}</TableCell>
+                        <TableCell>
+                          {formatDate(boleto.dataEmissao)}
+                        </TableCell>
+                        <TableCell>
+                          <div className={isVencido(boleto.dataVencimento) ? "text-red-600" : ""}>
+                            {formatDate(boleto.dataVencimento)}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={getStatusBadgeVariant(boleto.status)}>
+                            {getStatusLabel(boleto.status)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            {boleto.uploadBoletoUrl && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDownloadFile(boleto.uploadBoletoUrl!, `boleto-${boleto.numeroBoleto}.pdf`)}
+                                title="Baixar boleto"
+                              >
+                                <Receipt className="h-3 w-3" />
+                              </Button>
+                            )}
+                            {boleto.uploadNfUrl && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDownloadFile(boleto.uploadNfUrl!, `nf-${boleto.numeroBoleto}.pdf`)}
+                                title="Baixar nota fiscal"
+                              >
+                                <FileText className="h-3 w-3" />
+                              </Button>
+                            )}
+                            {!boleto.uploadBoletoUrl && !boleto.uploadNfUrl && (
+                              <span className="text-sm text-gray-500">Sem arquivos</span>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         )}

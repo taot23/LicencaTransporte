@@ -53,6 +53,10 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **CORREÇÃO LOGOUT**: Redirecionamento de logout corrigido de "/login" para "/auth"
 - ✅ **TEMPO REAL**: Todos os menus funcionando em tempo real com WebSocket
 - ✅ **CSS MOBILE**: Estilos CSS mobile otimizados para touch e navegação inferior
+- ✅ **MENU HAMBURGER ATUALIZADO**: "Minhas Empresas" substituído por "Meus Boletos" com ícone Receipt
+- ✅ **PÁGINA MEUS BOLETOS RESPONSIVA**: Layout mobile com cards ao invés de tabela, filtros responsivos
+- ✅ **CARDS MOBILE OTIMIZADOS**: Cards com informações organizadas, botões touch-friendly, grid responsivo
+- ✅ **ESTATÍSTICAS MOBILE**: Grid 2x2 para estatísticas em dispositivos móveis, layout otimizado
 
 ### 19/06/2025 - Sistema de Sincronização Automática de Licenças IMPLEMENTADO
 - ✅ **TRIGGER POSTGRESQL**: Função `sync_approved_license()` criada para sincronização automática
