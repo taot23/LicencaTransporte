@@ -142,7 +142,7 @@ export default function MobileIssuedLicensesPage() {
   });
   
   // Filtrar licenças baseado no termo de busca
-  const filteredLicenses = issuedLicenses?.filter((license: any) => {
+  const filteredLicenses = Array.isArray(issuedLicenses) ? issuedLicenses.filter((license: any) => {
     if (!searchTerm) return true;
     
     const search = searchTerm.toLowerCase();
@@ -152,7 +152,7 @@ export default function MobileIssuedLicensesPage() {
       (license.states && license.states.some((state: string) => state.toLowerCase().includes(search))) ||
       (license.stateAETNumbers && license.stateAETNumbers.some((aet: string) => aet.toLowerCase().includes(search)))
     );
-  });
+  }) : [];
   
   // Iniciar processo de renovação
   const handleRenew = (license: any, state: string) => {
