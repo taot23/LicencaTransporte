@@ -11,7 +11,7 @@ import {
   licencasEmitidas
 } from "@shared/schema";
 import { eq, and, desc, asc, sql, gt, lt, like, not, isNull, or, count, sum } from "drizzle-orm";
-import { db, pool, withTransaction } from "./db";
+import { db, pool, withTransaction, withRetry } from "./db";
 import { IStorage, DashboardStats, ChartData } from "./storage";
 import {
   getDashboardStatsCombined,
@@ -47,8 +47,10 @@ export class TransactionalStorage implements IStorage {
   }
   
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user;
+    return await withRetry(async () => {
+      const [user] = await db.select().from(users).where(eq(users.email, email));
+      return user;
+    });
   }
   
   async createUser(userData: InsertUser): Promise<User> {

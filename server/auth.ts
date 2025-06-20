@@ -83,28 +83,41 @@ export function setupAuth(app: Express) {
         passwordField: "password",
       },
       async (email, password, done) => {
-        try {
-          const user = await storage.getUserByEmail(email);
-          
-          // Special handling for admin user
-          if (user && user.isAdmin && email === "admin@sistema.com" && password === "142536!@NVS") {
+        let retries = 3;
+        let lastError = null;
+        
+        while (retries > 0) {
+          try {
+            const user = await storage.getUserByEmail(email);
+            
+            // Special handling for admin user
+            if (user && user.isAdmin && email === "admin@sistema.com" && password === "142536!@NVS") {
+              return done(null, user);
+            }
+            
+            // Transportador de teste hardcoded para o desenvolvimento inicial
+            if (user && email === "transportador@teste.com" && password === "123456") {
+              return done(null, user);
+            }
+            
+            // Regular password check for other users
+            if (!user || !(await comparePasswords(password, user.password))) {
+              return done(null, false, { message: "Email ou senha incorretos" });
+            }
+            
             return done(null, user);
+          } catch (error) {
+            lastError = error;
+            retries--;
+            
+            if (retries > 0) {
+              console.log(`Login retry ${4 - retries}/3 for ${email}`);
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            } else {
+              console.error("Login error after retries:", error);
+              return done(new Error("Erro de conexão com o banco de dados. Tente novamente."));
+            }
           }
-          
-          // Transportador de teste hardcoded para o desenvolvimento inicial
-          if (user && email === "transportador@teste.com" && password === "123456") {
-            return done(null, user);
-          }
-          
-          // Regular password check for other users
-          if (!user || !(await comparePasswords(password, user.password))) {
-            return done(null, false, { message: "Email ou senha incorretos" });
-          }
-          
-          return done(null, user);
-        } catch (error) {
-          console.error("Login error:", error);
-          return done(error);
         }
       }
     )
