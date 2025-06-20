@@ -64,14 +64,21 @@ export default function MobileTrackLicensePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLicense, setSelectedLicense] = useState<any>(null);
   
-  // Buscar licenças em progresso
+  // Buscar licenças em progresso (usar a mesma rota que desktop)
   const { data: licenses, isLoading } = useQuery({
-    queryKey: ["/api/licenses/track"],
+    queryKey: ["/api/licenses"],
     staleTime: 1000 * 60 * 2, // 2 minutos
   });
   
-  // Filtrar licenças baseado no termo de busca
-  const filteredLicenses = licenses?.filter((license: any) => {
+  // Filtrar licenças em progresso (excluir finalizadas) e aplicar busca
+  const filteredLicenses = Array.isArray(licenses) ? licenses.filter((license: any) => {
+    // Excluir licenças finalizadas (approved, rejected, cancelled)
+    const inProgressStatuses = ['pending_registration', 'under_review', 'pending_payment', 'pending_documentation'];
+    const isInProgress = inProgressStatuses.includes(license.status);
+    
+    if (!isInProgress) return false;
+    
+    // Aplicar filtro de busca se especificado
     if (!searchTerm) return true;
     
     const search = searchTerm.toLowerCase();
@@ -80,7 +87,7 @@ export default function MobileTrackLicensePage() {
       (license.mainVehiclePlate && license.mainVehiclePlate.toLowerCase().includes(search)) ||
       (license.states && license.states.some((state: string) => state.toLowerCase().includes(search)))
     );
-  });
+  }) : [];
   
   return (
     <MobileLayout title="Acompanhar Licenças">
