@@ -45,8 +45,26 @@ export function MobileLayout({
   const { user, logoutMutation } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   
-  const handleLogout = () => {
-    logoutMutation.mutate();
+  const handleLogout = async () => {
+    try {
+      // Limpa o cache imediatamente para logout instantâneo
+      const { queryClient } = await import("@/lib/queryClient");
+      queryClient.setQueryData(["/api/user"], null);
+      queryClient.clear();
+      
+      // Faz logout no servidor em background
+      await fetch("/api/logout", { 
+        method: "POST",
+        credentials: "include"
+      });
+      
+      // Força redirecionamento para tela inicial
+      window.location.href = "/auth";
+    } catch (error) {
+      console.error("Erro no logout:", error);
+      // Mesmo com erro, redireciona para tela inicial
+      window.location.href = "/auth";
+    }
   };
   
   // Obtém as iniciais do nome do usuário

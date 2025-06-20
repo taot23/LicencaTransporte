@@ -39,19 +39,23 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
     setIsLoggingOut(true);
     
     try {
+      // Limpa o cache imediatamente para logout instantâneo
+      const { queryClient } = await import("@/lib/queryClient");
+      queryClient.setQueryData(["/api/user"], null);
+      queryClient.clear();
+      
+      // Faz logout no servidor em background
       await fetch("/api/logout", { 
         method: "POST",
         credentials: "include"
       });
       
-      const { queryClient } = await import("@/lib/queryClient");
-      queryClient.setQueryData(["/api/user"], null);
-      queryClient.clear();
-      
-      navigate("/auth");
+      // Força redirecionamento para tela inicial
+      window.location.href = "/auth";
     } catch (error) {
       console.error("Erro no logout:", error);
-      navigate("/auth");
+      // Mesmo com erro, redireciona para tela inicial
+      window.location.href = "/auth";
     } finally {
       setIsLoggingOut(false);
     }

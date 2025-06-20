@@ -50,11 +50,29 @@ export function Sidebar({ className }: SidebarProps) {
     .substring(0, 2)
     .toUpperCase();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     // Previne múltiplos cliques durante logout
     if (logoutMutation.isPending) return;
     
-    logoutMutation.mutate();
+    try {
+      // Limpa o cache imediatamente para logout instantâneo
+      const { queryClient } = await import("@/lib/queryClient");
+      queryClient.setQueryData(["/api/user"], null);
+      queryClient.clear();
+      
+      // Faz logout no servidor em background
+      await fetch("/api/logout", { 
+        method: "POST",
+        credentials: "include"
+      });
+      
+      // Força redirecionamento para tela inicial
+      window.location.href = "/auth";
+    } catch (error) {
+      console.error("Erro no logout:", error);
+      // Mesmo com erro, redireciona para tela inicial
+      window.location.href = "/auth";
+    }
   };
 
   const handleNavigate = (path: string) => {
