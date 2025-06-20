@@ -27,7 +27,7 @@ function MobileIssuedLicenseCard({ license, onRenew }: { license: any, onRenew: 
         const parts = ss.split(':');
         return { state: parts[0], date: new Date(parts[2]) };
       })
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
+      .sort((a: any, b: any) => a.date.getTime() - b.date.getTime());
     
     if (expiryDates.length === 0) return null;
     
@@ -228,7 +228,17 @@ export default function MobileIssuedLicensesPage() {
                 
                 <DialogContent className="sm:max-w-[425px] p-0 max-h-[90vh] overflow-y-auto mobile-form-dialog">
                   <DialogHeader className="sticky top-0 z-10 bg-background p-4 border-b">
-                    <DialogTitle className="text-lg font-semibold">{selectedLicense?.requestNumber}</DialogTitle>
+                    <div className="flex items-center justify-between">
+                      <DialogTitle className="text-lg font-semibold">{selectedLicense?.requestNumber}</DialogTitle>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => setIsDialogOpen(false)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </DialogHeader>
                   
                   {selectedLicense && (
@@ -347,18 +357,29 @@ export default function MobileIssuedLicensesPage() {
                                           Renovar
                                         </Button>
                                         
-                                        {fileUrl && (
+                                        {fileUrl ? (
                                           <Button 
                                             variant="secondary" 
                                             size="sm" 
                                             className="text-xs h-8 flex-1"
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              window.open(fileUrl, '_blank');
+                                              const fullUrl = fileUrl.startsWith('http') ? fileUrl : `/uploads/${fileUrl}`;
+                                              window.open(fullUrl, '_blank');
                                             }}
                                           >
                                             <FileText className="mr-1 h-3 w-3" />
                                             Ver documento
+                                          </Button>
+                                        ) : (
+                                          <Button 
+                                            variant="outline" 
+                                            size="sm" 
+                                            className="text-xs h-8 flex-1"
+                                            disabled
+                                          >
+                                            <FileText className="mr-1 h-3 w-3" />
+                                            Documento não disponível
                                           </Button>
                                         )}
                                       </div>
@@ -373,7 +394,8 @@ export default function MobileIssuedLicensesPage() {
                                         className="w-full text-xs h-8"
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          window.open(fileUrl, '_blank');
+                                          const fullUrl = fileUrl.startsWith('http') ? fileUrl : `/uploads/${fileUrl}`;
+                                          window.open(fullUrl, '_blank');
                                         }}
                                       >
                                         <FileText className="mr-1 h-3 w-3" />

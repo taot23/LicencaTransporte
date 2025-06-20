@@ -87,8 +87,22 @@ export function MobileNavigation() {
     }] : [])
   ];
 
-  // Limitar a 5 itens na navegação mobile
-  const displayItems = navigationItems.slice(0, 5);
+  // Priorizar itens importantes na navegação mobile (máximo 5)
+  // Garantir que "Meus Boletos" apareça para transportadores
+  let displayItems = navigationItems;
+  
+  // Se temos mais de 5 itens, priorizar mantendo "Meus Boletos" para transportadores
+  if (navigationItems.length > 5) {
+    const hasBoletosItem = navigationItems.some(item => item.id === 'boletos');
+    const isTransporter = user?.role === 'user' && hasBoletosItem;
+    
+    if (isTransporter) {
+      // Para transportadores, remover "Admin" se presente para dar espaço aos boletos
+      displayItems = navigationItems.filter(item => item.id !== 'admin').slice(0, 5);
+    } else {
+      displayItems = navigationItems.slice(0, 5);
+    }
+  }
 
   return (
     <nav className="bottom-nav md:hidden">
