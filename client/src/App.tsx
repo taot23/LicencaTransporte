@@ -39,8 +39,11 @@ function Router() {
     <Switch>
       <Route path="/auth" component={AuthPage} />
       
-      {/* Página inicial com redirecionamento inteligente baseado no papel */}
-      <ProtectedRoute path="/" component={RedirectPage} />
+      {/* Página inicial - Dashboard direto sem redirecionamento */}
+      <ProtectedRoute 
+        path="/" 
+        component={isMobile ? MobileDashboardPage : RegularDashboardPage} 
+      />
       
       {/* Portal Admin - Rotas acessíveis via hierarquia de permissões */}
       <AdminRoute path="/admin" component={AdminDashboardPage} />
@@ -66,8 +69,16 @@ function Router() {
         component={isMobile ? MobileVehiclesPage : VehiclesPage} 
       />
       <ProtectedRoute 
+        path="/nova-licenca" 
+        component={RequestLicensePage} 
+      />
+      <ProtectedRoute 
         path="/request-license" 
         component={RequestLicensePage} 
+      />
+      <ProtectedRoute 
+        path="/acompanhar-licenca" 
+        component={isMobile ? MobileTrackLicensePage : TrackLicensePage} 
       />
       <ProtectedRoute 
         path="/track-license" 
