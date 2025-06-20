@@ -1,12 +1,14 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { usePermissions } from "@/hooks/use-permissions";
 import { 
   Home, 
   Truck, 
   FileText, 
   ClipboardList, 
   ListChecks,
+  Receipt,
   Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,6 +16,7 @@ import { cn } from "@/lib/utils";
 export function MobileNavigation() {
   const [location, setLocation] = useLocation();
   const { user } = useAuth();
+  const permissions = usePermissions();
 
   const isAdminUser = (user: any): boolean => {
     return user?.role === 'admin' || user?.role === 'operational' || user?.role === 'manager' || user?.role === 'supervisor' || user?.role === 'financial';
@@ -64,6 +67,15 @@ export function MobileNavigation() {
       path: '/licencas-emitidas',
       active: location === '/licencas-emitidas'
     },
+    
+    // Meus Boletos - apenas para usuários com permissão
+    ...(permissions.canViewMyBoletos() ? [{
+      id: 'boletos',
+      label: 'Boletos',
+      icon: Receipt,
+      path: '/meus-boletos',
+      active: location === '/meus-boletos'
+    }] : []),
     
     // Admin - apenas administradores
     ...(isAdminUser(user) ? [{
