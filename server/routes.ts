@@ -189,43 +189,21 @@ const requireAdmin = (req: any, res: any, next: any) => {
 
 // Middleware para usuários com papel Operacional
 const requireOperational = (req: any, res: any, next: any) => {
-  console.log('[requireOperational] Verificando permissões...');
-  console.log('[requireOperational] URL:', req.url);
-  console.log('[requireOperational] Método:', req.method);
-  console.log('[requireOperational] Autenticado:', req.isAuthenticated());
-  
   if (!req.isAuthenticated()) {
-    console.log('[requireOperational] Usuário não autenticado');
     return res.status(401).json({ message: "Não autenticado" });
   }
-  
-  console.log('[requireOperational] Dados do usuário:', {
-    id: req.user?.id,
-    email: req.user?.email,
-    role: req.user?.role,
-    isAdmin: req.user?.isAdmin
-  });
   
   // Verifica se o usuário tem papel Operacional, Supervisor ou Admin
   const hasPermission = req.user!.role === 'operational' || 
                        req.user!.role === 'supervisor' || 
                        req.user!.isAdmin;
   
-  console.log('[requireOperational] Tem permissão:', hasPermission);
-  console.log('[requireOperational] Role check:', {
-    isOperational: req.user!.role === 'operational',
-    isSupervisor: req.user!.role === 'supervisor', 
-    isAdmin: req.user!.isAdmin
-  });
-  
   if (!hasPermission) {
-    console.log('[requireOperational] ACESSO NEGADO - Role:', req.user!.role, 'isAdmin:', req.user!.isAdmin);
     return res.status(403).json({ 
       message: "Acesso negado. Apenas usuários com perfil Operacional ou Supervisor podem acessar." 
     });
   }
   
-  console.log('[requireOperational] ACESSO PERMITIDO');
   next();
 };
 
@@ -1081,7 +1059,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   function canManageTransporters(user: Express.User): boolean {
-    return hasPermission(user.role as UserRole, 'transporters', 'edit');
+    // Permitir para usuários operacionais, supervisores e admins
+    return user.role === 'operational' || 
+           user.role === 'supervisor' || 
+           user.role === 'admin' ||
+           user.isAdmin ||
+           hasPermission(user.role as UserRole, 'transporters', 'edit');
   }
 
   function canManageVehicleModels(user: Express.User): boolean {
