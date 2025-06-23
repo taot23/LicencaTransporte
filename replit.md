@@ -44,11 +44,14 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
-### 23/06/2025 - Campo CNPJ/CPF Inteligente Implementado
+### 23/06/2025 - Campo CNPJ/CPF Inteligente e Consulta de Filiais Implementados
 - ✅ **ENTRADA FLEXÍVEL**: Campos aceitam CNPJ/CPF com ou sem formatação (51.410.529/0009-71 ou 51410529000971)
 - ✅ **FORMATAÇÃO AUTOMÁTICA**: Sistema detecta automaticamente se é CNPJ (14 dígitos) ou CPF (11 dígitos) e aplica formatação
 - ✅ **VALIDAÇÃO INTELIGENTE**: Valida documentos independente do formato de entrada
 - ✅ **CONSULTA API MANTIDA**: Botão de consulta CNPJ funciona com qualquer formato de entrada
+- ✅ **CONSULTA FILIAIS**: Botões de consulta CNPJ implementados em cada filial individual
+- ✅ **PREENCHIMENTO AUTOMÁTICO FILIAIS**: Dados da filial preenchidos automaticamente via consulta API
+- ✅ **LOADING INDIVIDUAL**: Estados de carregamento separados para cada filial evitam conflitos
 - ✅ **FILIAIS INCLUÍDAS**: Campos de CNPJ das filiais também têm formatação automática
 - ✅ **PESSOA FÍSICA**: Campo CPF para pessoa física com mesma funcionalidade inteligente
 - ✅ **BACKEND LIMPO**: Sistema envia apenas números para backend, mantendo compatibilidade

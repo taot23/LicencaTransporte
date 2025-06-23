@@ -143,6 +143,7 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
     powerOfAttorney: null,
   });
   const [isLoadingCnpj, setIsLoadingCnpj] = useState(false);
+  const [loadingSubsidiaries, setLoadingSubsidiaries] = useState<{ [key: number]: boolean }>({});
   const [selectedUserId, setSelectedUserId] = useState<number | null>(transporter?.userId || null);
   
   // Formulário para pessoa jurídica
@@ -853,19 +854,83 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label>CNPJ Filial</Label>
-                            <Input
-                              value={subsidiary.cnpj}
-                              onChange={(e) => updateSubsidiary(index, "cnpj", e.target.value)}
-                              onBlur={(e) => {
-                                // Ao sair do campo, formatar automaticamente
-                                const value = e.target.value;
-                                const formatted = formatDocument(value);
-                                if (formatted !== value) {
-                                  updateSubsidiary(index, "cnpj", formatted);
-                                }
-                              }}
-                              placeholder="00.000.000/0000-00 ou 00000000000000"
-                            />
+                            <div className="flex gap-2">
+                              <Input
+                                value={subsidiary.cnpj}
+                                onChange={(e) => updateSubsidiary(index, "cnpj", e.target.value)}
+                                onBlur={(e) => {
+                                  // Ao sair do campo, formatar automaticamente
+                                  const value = e.target.value;
+                                  const formatted = formatDocument(value);
+                                  if (formatted !== value) {
+                                    updateSubsidiary(index, "cnpj", formatted);
+                                  }
+                                }}
+                                placeholder="00.000.000/0000-00 ou 00000000000000"
+                                className="flex-1"
+                              />
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="icon" 
+                                disabled={loadingSubsidiaries[index] || !subsidiary.cnpj || !isValidCNPJ(subsidiary.cnpj)}
+                                onClick={async () => {
+                                  const cnpjNumbers = extractDocumentNumbers(subsidiary.cnpj);
+                                  
+                                  if (cnpjNumbers && cnpjNumbers.length === 14) {
+                                    try {
+                                      setLoadingSubsidiaries(prev => ({ ...prev, [index]: true }));
+                                      // Usar apenas números para consulta na API
+                                      const response = await fetch(`/api/external/cnpj/${cnpjNumbers}`, {
+                                        headers: {
+                                          'Accept': 'application/json',
+                                          'X-Requested-With': 'XmlHttpRequest'
+                                        }
+                                      });
+                                      
+                                      if (!response.ok) {
+                                        throw new Error(`Erro ao consultar CNPJ: ${response.status}`);
+                                      }
+                                      
+                                      const data = await response.json();
+                                      
+                                      if (!data.razao_social) {
+                                        throw new Error('Não foi possível obter dados do CNPJ');
+                                      }
+                                      
+                                      // Preencher os campos da filial com os dados consultados
+                                      updateSubsidiary(index, "name", data.razao_social);
+                                      updateSubsidiary(index, "tradeName", data.nome_fantasia || "");
+                                      
+                                      // Preencher endereço da filial
+                                      if (data.logradouro) updateSubsidiary(index, "street", data.logradouro);
+                                      if (data.numero) updateSubsidiary(index, "number", data.numero);
+                                      if (data.complemento) updateSubsidiary(index, "complement", data.complemento);
+                                      if (data.cep) updateSubsidiary(index, "zipCode", data.cep.replace(/\D/g, ''));
+                                      if (data.municipio) updateSubsidiary(index, "city", data.municipio);
+                                      if (data.uf) updateSubsidiary(index, "state", data.uf);
+                                      
+                                      toast({
+                                        title: "CNPJ da filial consultado com sucesso",
+                                        description: "Dados da filial preenchidos automaticamente",
+                                      });
+                                    } catch (error) {
+                                      console.error("Erro ao consultar CNPJ da filial:", error);
+                                      
+                                      toast({
+                                        title: "Serviço de consulta CNPJ indisponível",
+                                        description: "Não foi possível consultar o CNPJ automaticamente. Preencha os dados manualmente.",
+                                        variant: "destructive",
+                                      });
+                                    } finally {
+                                      setLoadingSubsidiaries(prev => ({ ...prev, [index]: false }));
+                                    }
+                                  }
+                                }}
+                              >
+                                {loadingSubsidiaries[index] ? <LoadingSpinner size="sm" /> : <SearchIcon className="h-4 w-4" />}
+                              </Button>
+                            </div>
                           </div>
                           
                           <div className="space-y-2">
