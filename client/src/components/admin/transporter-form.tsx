@@ -21,6 +21,67 @@ import { Separator } from "@/components/ui/separator";
 import { Plus, Trash2, Upload, File, FileText, Search as SearchIcon } from "lucide-react";
 import { UserSelect } from "./user-select";
 
+// Função para formatar CNPJ
+const formatCNPJ = (value: string): string => {
+  // Remove tudo que não é número
+  const numbers = value.replace(/\D/g, '');
+  
+  // Aplica máscara de CNPJ
+  if (numbers.length <= 14) {
+    return numbers.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+  }
+  
+  return numbers.slice(0, 14).replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+};
+
+// Função para formatar CPF
+const formatCPF = (value: string): string => {
+  // Remove tudo que não é número
+  const numbers = value.replace(/\D/g, '');
+  
+  // Aplica máscara de CPF
+  if (numbers.length <= 11) {
+    return numbers.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+  }
+  
+  return numbers.slice(0, 11).replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+};
+
+// Função para extrair apenas números do documento (CNPJ/CPF)
+const extractDocumentNumbers = (value: string): string => {
+  return value.replace(/\D/g, '');
+};
+
+// Função para validar CNPJ
+const isValidCNPJ = (cnpj: string): boolean => {
+  const numbers = extractDocumentNumbers(cnpj);
+  return numbers.length === 14;
+};
+
+// Função para validar CPF
+const isValidCPF = (cpf: string): boolean => {
+  const numbers = extractDocumentNumbers(cpf);
+  return numbers.length === 11;
+};
+
+// Função para detectar tipo de documento e formatar
+const formatDocument = (value: string): string => {
+  const numbers = extractDocumentNumbers(value);
+  
+  if (numbers.length === 11) {
+    return formatCPF(value);
+  } else if (numbers.length === 14) {
+    return formatCNPJ(value);
+  }
+  
+  return value; // Retorna o valor original se não for CPF nem CNPJ válido
+};
+
+// Função para validar documento (CPF ou CNPJ)
+const isValidDocument = (document: string): boolean => {
+  return isValidCPF(document) || isValidCNPJ(document);
+};
+
 // Interface para filial
 interface Subsidiary {
   cnpj: string;
@@ -89,7 +150,12 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
     resolver: zodResolver(z.object({
       personType: personTypeEnum,
       name: z.string().min(3, "A razão social deve ter pelo menos 3 caracteres"),
-      documentNumber: z.string().min(14, "CNPJ deve ter pelo menos 14 dígitos"),
+      documentNumber: z.string()
+        .min(1, "CNPJ é obrigatório")
+        .refine((val) => {
+          const numbers = extractDocumentNumbers(val);
+          return numbers.length === 14;
+        }, "CNPJ deve conter 14 dígitos"),
       tradeName: z.string().optional(),
       legalResponsible: z.string().min(3, "Nome do responsável legal é obrigatório"),
       email: z.string().email("Email inválido"),
@@ -330,6 +396,18 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
 
   // Handler para submissão do formulário
   const onSubmit = (data: InsertTransporter) => {
+    // Extrair apenas números do CNPJ/CPF antes de enviar para o backend
+    data.documentNumber = extractCNPJNumbers(data.documentNumber);
+    
+    // Limpar CNPJs das filiais também
+    if (personType === "pj" && subsidiaries.length > 0) {
+      subsidiaries.forEach((subsidiary, index) => {
+        if (subsidiary.cnpj) {
+          subsidiary.cnpj = extractCNPJNumbers(subsidiary.cnpj);
+        }
+      });
+    }
+    
     // Copiar dados dos contatos para retro-compatibilidade
     if (personType === "pj") {
       data.contact1Name = data.legalResponsible;
@@ -408,19 +486,37 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
                           <FormLabel>CNPJ Principal</FormLabel>
                           <div className="flex gap-2">
                             <FormControl>
-                              <Input placeholder="Somente números" {...field} />
+                              <Input 
+                                placeholder="00.000.000/0000-00 ou 00000000000000" 
+                                {...field}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  // Mantém o valor original no estado do formulário (pode ser com ou sem formatação)
+                                  field.onChange(value);
+                                }}
+                                onBlur={(e) => {
+                                  // Ao sair do campo, formatar automaticamente
+                                  const value = e.target.value;
+                                  const formatted = formatDocument(value);
+                                  if (formatted !== value) {
+                                    field.onChange(formatted);
+                                  }
+                                }}
+                              />
                             </FormControl>
                             <Button 
                               type="button" 
                               variant="outline" 
                               size="icon" 
-                              disabled={isLoadingCnpj || !field.value || field.value.length < 14}
+                              disabled={isLoadingCnpj || !field.value || !isValidCNPJ(field.value)}
                               onClick={async () => {
-                                if (field.value && field.value.length === 14) {
+                                const cnpjNumbers = extractCNPJNumbers(field.value);
+                                
+                                if (cnpjNumbers && cnpjNumbers.length === 14) {
                                   try {
                                     setIsLoadingCnpj(true);
-                                    // Acessar diretamente a API oficial via proxy do backend
-                                    const response = await fetch(`/api/external/cnpj/${field.value}`, {
+                                    // Usar apenas números para consulta na API
+                                    const response = await fetch(`/api/external/cnpj/${cnpjNumbers}`, {
                                       headers: {
                                         'Accept': 'application/json',
                                         'X-Requested-With': 'XmlHttpRequest'
@@ -457,9 +553,6 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
                                   } catch (error) {
                                     console.error("Erro ao consultar CNPJ:", error);
                                     
-                                    // Mostrar diálogo de confirmação para permitir preenchimento manual
-                                    setIsLoadingCnpj(false);
-                                    
                                     toast({
                                       title: "Serviço de consulta CNPJ indisponível",
                                       description: "Não foi possível consultar o CNPJ automaticamente. Por favor, preencha os dados manualmente.",
@@ -467,7 +560,7 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
                                     });
                                     
                                     // Se o CNPJ parece válido, habilitar os campos para preenchimento manual
-                                    if (field.value && field.value.length === 14) {
+                                    if (isValidCNPJ(field.value)) {
                                       toast({
                                         title: "Preenchimento manual habilitado",
                                         description: "Continue o cadastro preenchendo os dados manualmente.",
@@ -482,7 +575,9 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
                               {isLoadingCnpj ? <LoadingSpinner size="sm" /> : <SearchIcon className="h-4 w-4" />}
                             </Button>
                           </div>
-                          <FormDescription>Informe o CNPJ com 14 dígitos e clique em consultar</FormDescription>
+                          <FormDescription>
+                            Informe o CNPJ com ou sem formatação (ex: 00.000.000/0000-00 ou 00000000000000)
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -761,7 +856,18 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
                             <Input
                               value={subsidiary.cnpj}
                               onChange={(e) => updateSubsidiary(index, "cnpj", e.target.value)}
-                              placeholder="Somente números"
+                              onBlur={(e) => {
+                                // Ao sair do campo, formatar se contém apenas números
+                                const value = e.target.value;
+                                const numbersOnly = extractCNPJNumbers(value);
+                                
+                                if (numbersOnly.length === 14) {
+                                  // Se tem 14 dígitos, formatar
+                                  const formatted = formatCNPJ(value);
+                                  updateSubsidiary(index, "cnpj", formatted);
+                                }
+                              }}
+                              placeholder="00.000.000/0000-00 ou 00000000000000"
                             />
                           </div>
                           
