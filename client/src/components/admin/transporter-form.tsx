@@ -397,13 +397,13 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
   // Handler para submissão do formulário
   const onSubmit = (data: InsertTransporter) => {
     // Extrair apenas números do CNPJ/CPF antes de enviar para o backend
-    data.documentNumber = extractCNPJNumbers(data.documentNumber);
+    data.documentNumber = extractDocumentNumbers(data.documentNumber);
     
     // Limpar CNPJs das filiais também
     if (personType === "pj" && subsidiaries.length > 0) {
       subsidiaries.forEach((subsidiary, index) => {
         if (subsidiary.cnpj) {
-          subsidiary.cnpj = extractCNPJNumbers(subsidiary.cnpj);
+          subsidiary.cnpj = extractDocumentNumbers(subsidiary.cnpj);
         }
       });
     }
@@ -510,7 +510,7 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
                               size="icon" 
                               disabled={isLoadingCnpj || !field.value || !isValidCNPJ(field.value)}
                               onClick={async () => {
-                                const cnpjNumbers = extractCNPJNumbers(field.value);
+                                const cnpjNumbers = extractDocumentNumbers(field.value);
                                 
                                 if (cnpjNumbers && cnpjNumbers.length === 14) {
                                   try {
@@ -857,13 +857,10 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
                               value={subsidiary.cnpj}
                               onChange={(e) => updateSubsidiary(index, "cnpj", e.target.value)}
                               onBlur={(e) => {
-                                // Ao sair do campo, formatar se contém apenas números
+                                // Ao sair do campo, formatar automaticamente
                                 const value = e.target.value;
-                                const numbersOnly = extractCNPJNumbers(value);
-                                
-                                if (numbersOnly.length === 14) {
-                                  // Se tem 14 dígitos, formatar
-                                  const formatted = formatCNPJ(value);
+                                const formatted = formatDocument(value);
+                                if (formatted !== value) {
                                   updateSubsidiary(index, "cnpj", formatted);
                                 }
                               }}
@@ -1016,8 +1013,27 @@ export function TransporterForm({ transporter, onSuccess }: TransporterFormProps
                       <FormItem>
                         <FormLabel>CPF</FormLabel>
                         <FormControl>
-                          <Input placeholder="Somente números" {...field} />
+                          <Input 
+                            placeholder="000.000.000-00 ou 00000000000" 
+                            {...field}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              // Mantém o valor original no estado do formulário (pode ser com ou sem formatação)
+                              field.onChange(value);
+                            }}
+                            onBlur={(e) => {
+                              // Ao sair do campo, formatar automaticamente
+                              const value = e.target.value;
+                              const formatted = formatDocument(value);
+                              if (formatted !== value) {
+                                field.onChange(formatted);
+                              }
+                            }}
+                          />
                         </FormControl>
+                        <FormDescription>
+                          Informe o CPF com ou sem formatação (ex: 000.000.000-00 ou 00000000000)
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}

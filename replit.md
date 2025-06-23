@@ -44,6 +44,17 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 23/06/2025 - Campo CNPJ/CPF Inteligente Implementado
+- ✅ **ENTRADA FLEXÍVEL**: Campos aceitam CNPJ/CPF com ou sem formatação (51.410.529/0009-71 ou 51410529000971)
+- ✅ **FORMATAÇÃO AUTOMÁTICA**: Sistema detecta automaticamente se é CNPJ (14 dígitos) ou CPF (11 dígitos) e aplica formatação
+- ✅ **VALIDAÇÃO INTELIGENTE**: Valida documentos independente do formato de entrada
+- ✅ **CONSULTA API MANTIDA**: Botão de consulta CNPJ funciona com qualquer formato de entrada
+- ✅ **FILIAIS INCLUÍDAS**: Campos de CNPJ das filiais também têm formatação automática
+- ✅ **PESSOA FÍSICA**: Campo CPF para pessoa física com mesma funcionalidade inteligente
+- ✅ **BACKEND LIMPO**: Sistema envia apenas números para backend, mantendo compatibilidade
+- ✅ **UX MELHORADA**: Placeholders explicativos mostram formatos aceitos
+- ✅ **PERMISSÕES CORRIGIDAS**: Usuário teste@teste.com atualizado para role 'operational'
+
 ### 20/06/2025 - Sistema Mobile Responsivo Completo e Correção de Uploads
 - ✅ **NAVEGAÇÃO MOBILE**: Sistema responsivo completo com navegação inferior funcional
 - ✅ **DASHBOARD MOBILE**: Dashboard mobile corrigido usando APIs corretas (/api/dashboard/stats)
