@@ -44,6 +44,17 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 25/06/2025 - Correção de Permissões para Servidor Google Cloud IMPLEMENTADA
+- ✅ **DIAGNÓSTICO COMPLETO**: Identificados problemas específicos do ambiente de produção
+- ✅ **SCRIPT DE CORREÇÃO**: `fix-permissions-production.js` para corrigir senhas e roles inconsistentes
+- ✅ **TESTE AUTOMATIZADO**: `test-permissions-server.js` para validar permissões no servidor
+- ✅ **DEBUG MELHORADO**: Logs detalhados de autenticação e permissões para diagnóstico
+- ✅ **CONFIGURAÇÃO PM2**: Ecosystem.config.js atualizado com variáveis de debug
+- ✅ **TEMPLATE .ENV**: Arquivo `.env.production.exemplo` com todas configurações necessárias
+- ✅ **DEPLOY AUTOMATIZADO**: Script `deploy-permissions-fix.sh` para aplicar correções
+- ✅ **GUIA COMPLETO**: `GUIA_CORRECAO_PERMISSOES.md` com solução passo a passo
+- ✅ **COMPATIBILIDADE PRODUÇÃO**: Servidor de produção configurado para carregar .env explicitamente
+
 ### 25/06/2025 - Verificação Completa das Permissões de Usuários CONCLUÍDA
 - ✅ **TESTE ABRANGENTE**: Verificação sistemática de todos os tipos de usuários (user, operational, supervisor, financial, manager, admin)
 - ✅ **MATRIZ DE PERMISSÕES VALIDADA**: Cada endpoint testado para cada role com validação correta de acesso/negação
