@@ -4,6 +4,10 @@ import { fileURLToPath } from "url";
 import { createServer } from "http";
 import { registerRoutes } from "./routes.js";
 
+// Carregar variáveis de ambiente explicitamente
+import dotenv from "dotenv";
+dotenv.config();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

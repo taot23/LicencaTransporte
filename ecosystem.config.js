@@ -5,7 +5,9 @@ module.exports = {
     cwd: '/var/www/aetlicensesystem/LicencaTransporte',
     env: {
       NODE_ENV: 'production',
-      PORT: 5000
+      PORT: 5000,
+      // Forçar carregamento do .env em produção
+      ENV_PATH: '/var/www/aetlicensesystem/LicencaTransporte/.env'
     },
     instances: 1,
     exec_mode: 'fork',
@@ -17,6 +19,12 @@ module.exports = {
     time: true,
     restart_delay: 5000,
     max_restarts: 10,
-    min_uptime: '10s'
+    min_uptime: '10s',
+    // Variáveis específicas para debug de permissões
+    env_production: {
+      NODE_ENV: 'production',
+      DEBUG_PERMISSIONS: 'true',
+      DEBUG_AUTH: 'true'
+    }
   }]
 };
