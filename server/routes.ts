@@ -3444,8 +3444,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/users', requireAuth, async (req, res) => {
     const user = req.user!;
     
-    // Apenas supervisores e admins podem ver lista de usuários
-    if (!['supervisor', 'admin'].includes(user.role)) {
+    // Supervisores, managers e admins podem ver lista de usuários
+    if (!['supervisor', 'manager', 'admin'].includes(user.role)) {
       return res.status(403).json({ message: "Acesso negado" });
     }
     
@@ -3462,8 +3462,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/users', requireAuth, async (req, res) => {
     const user = req.user!;
     
-    // Apenas supervisores e admins podem criar usuários
-    if (!['supervisor', 'admin'].includes(user.role)) {
+    // Supervisores, managers e admins podem criar usuários
+    if (!['supervisor', 'manager', 'admin'].includes(user.role)) {
       return res.status(403).json({ message: "Acesso negado - permissão insuficiente" });
     }
     
@@ -4911,7 +4911,13 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // Criar novo boleto (apenas admin e financial)
-  app.post("/api/boletos", requireAuth, requirePermission('financial', 'create'), async (req, res) => {
+  app.post("/api/boletos", requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    // Verificar se o usuário pode criar boletos
+    if (!['supervisor', 'financial', 'manager', 'admin'].includes(user.role)) {
+      return res.status(403).json({ message: "Acesso negado - permissão insuficiente" });
+    }
 
     try {
       // Os uploads já foram feitos separadamente via /api/upload/boleto

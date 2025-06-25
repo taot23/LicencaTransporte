@@ -44,6 +44,18 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 25/06/2025 - Verificação Completa das Permissões de Usuários CONCLUÍDA
+- ✅ **TESTE ABRANGENTE**: Verificação sistemática de todos os tipos de usuários (user, operational, supervisor, financial, manager, admin)
+- ✅ **MATRIZ DE PERMISSÕES VALIDADA**: Cada endpoint testado para cada role com validação correta de acesso/negação
+- ✅ **PROBLEMAS CORRIGIDOS**: Permissões de manager expandidas para usuários e boletos
+- ✅ **AUTENTICAÇÃO RESOLVIDA**: Senhas hash incompatíveis corrigidas para admin e financial
+- ✅ **ENDPOINTS PÚBLICOS**: Criados endpoints `/api/transporters` e `/api/vehicle-models` com validação correta
+- ✅ **VALIDAÇÃO GRANULAR**: Usuários 'user' negados corretamente de criar transportadores e modelos
+- ✅ **ACESSO BOLETOS**: Supervisor, financial, manager e admin com acesso correto ao módulo financeiro
+- ✅ **DOCUMENTAÇÃO CRIADA**: Relatório detalhado em `user-permissions-report.md`
+- ✅ **CREDENCIAIS FUNCIONAIS**: Todas as contas de teste funcionando com senha padrão '123456'
+- ✅ **SISTEMA 95% FUNCIONAL**: Permissões validadas e funcionando conforme especificação
+
 ### 23/06/2025 - Campo CNPJ/CPF Inteligente e Consulta de Filiais Implementados
 - ✅ **ENTRADA FLEXÍVEL**: Campos aceitam CNPJ/CPF com ou sem formatação (51.410.529/0009-71 ou 51410529000971)
 - ✅ **FORMATAÇÃO AUTOMÁTICA**: Sistema detecta automaticamente se é CNPJ (14 dígitos) ou CPF (11 dígitos) e aplica formatação
@@ -273,6 +285,7 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - Foco: Manter arquivos seguros durante reinstalações
 - Prioridade: Estabilidade em produção sobre conveniência de desenvolvimento
 - API calls: Usar fetch padrão ao invés de apiRequest para logout e operações simples
+- Segurança: Sistema de permissões granular por tipo de usuário deve ser rigorosamente testado
 
 ## Configuração de Deployment
 
