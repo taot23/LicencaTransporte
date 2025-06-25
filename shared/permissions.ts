@@ -132,9 +132,9 @@ export function canAccessRoute(userRole: UserRole, method: string, path: string)
     return ['financial', 'admin'].includes(userRole);
   }
 
-  // POST /transportador: todos exceto operacional
+  // POST /transportador: operational, supervisor, manager, admin (corrigido)
   if (method === 'POST' && path.includes('/transporters')) {
-    return userRole !== 'operational';
+    return ['operational', 'supervisor', 'financial', 'manager', 'admin'].includes(userRole);
   }
 
   return true;

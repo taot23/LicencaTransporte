@@ -3440,7 +3440,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ roles: roleValues });
   });
   
-  // Rota para listagem de usuários (transportadores)
+  // Endpoint público para listar usuários (sem permissão específica - para compatibilidade)
+  app.get('/api/users', requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    // Apenas usuários administrativos podem ver lista de usuários
+    if (!isAdminUser(user)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+    
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Erro ao buscar usuários:", error);
+      res.status(500).json({ message: "Erro ao buscar usuários" });
+    }
+  });
+
+  // Endpoint para criar usuários (compatibilidade - com validação correta)
+  app.post('/api/users', requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    // Apenas supervisores e admins podem criar usuários
+    if (!['supervisor', 'admin'].includes(user.role)) {
+      return res.status(403).json({ message: "Acesso negado - permissão insuficiente" });
+    }
+    
+    try {
+      const { fullName, email, password, role = "user", phone = "" } = req.body;
+      
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Este e-mail já está em uso" });
+      }
+      
+      const hashedPassword = await hashPassword(password);
+      const newUser = await storage.createUser({
+        fullName,
+        email,
+        password: hashedPassword,
+        role,
+        phone,
+        isAdmin: role === 'admin'
+      });
+      
+      res.status(201).json(newUser);
+    } catch (error) {
+      console.error("Erro ao criar usuário:", error);
+      res.status(500).json({ message: "Erro ao criar usuário" });
+    }
+  });
+
+  // Rota para listagem de usuários (transportadores) - admin panel
   app.get('/api/admin/users', requireAuth, requirePermission('users', 'view'), async (req, res) => {
     try {
       const users = await storage.getAllUsers();
@@ -4713,12 +4765,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // Listar todos os boletos (apenas admin e financial) com filtros
-  app.get("/api/boletos", requireAuth, async (req, res) => {
-    const user = req.user!;
-    
-    if (!canAccessFinancial(user)) {
-      return res.status(403).json({ message: "Acesso negado" });
-    }
+  app.get("/api/boletos", requireAuth, requirePermission('financial', 'view'), async (req, res) => {
 
     try {
       const { status, vencimento } = req.query;

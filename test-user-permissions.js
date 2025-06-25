@@ -157,9 +157,5 @@ async function testUserPermissions() {
   console.log('\n🏁 TESTE DE PERMISSÕES CONCLUÍDO');
 }
 
-// Executar apenas se chamado diretamente
-if (require.main === module) {
-  testUserPermissions().catch(console.error);
-}
-
-module.exports = { testUserPermissions, users, expectedPermissions };
+// Executar o teste
+testUserPermissions().catch(console.error);
