@@ -297,6 +297,7 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - Prioridade: Estabilidade em produção sobre conveniência de desenvolvimento
 - API calls: Usar fetch padrão ao invés de apiRequest para logout e operações simples
 - Segurança: Sistema de permissões granular por tipo de usuário deve ser rigorosamente testado
+- Senhas: Não alterar senhas existentes dos usuários em produção - preservar credenciais originais
 
 ## Configuração de Deployment
 

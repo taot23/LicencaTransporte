@@ -58,11 +58,10 @@ async function corrigirPermissoes() {
       console.log(`  - ${user.email} (${user.role}) - ${user.full_name}`);
     });
 
-    // 3. Padronizar senhas para hash bcrypt compatível
-    console.log('\n🔐 Padronizando senhas dos usuários...');
-    const senhaHash = await bcrypt.hash('123456', 10);
+    // 3. Verificar senhas existentes (sem alterar)
+    console.log('\n🔐 Verificando senhas dos usuários...');
     
-    const emailsParaCorrigir = [
+    const emailsParaVerificar = [
       'admin@sistema.com',
       'financeiro@nvslicencas.com.br',
       'gerente@sistema.com',
@@ -72,14 +71,15 @@ async function corrigirPermissoes() {
       'fiscal@nscaravaggio.com.br'
     ];
 
-    for (const email of emailsParaCorrigir) {
-      const resultado = await pool.query(
-        'UPDATE users SET password = $1 WHERE email = $2',
-        [senhaHash, email]
+    for (const email of emailsParaVerificar) {
+      const { rows } = await pool.query(
+        'SELECT email, password FROM users WHERE email = $1',
+        [email]
       );
       
-      if (resultado.rowCount > 0) {
-        console.log(`✅ Senha atualizada para: ${email}`);
+      if (rows.length > 0) {
+        const passwordExists = rows[0].password && rows[0].password.length > 0;
+        console.log(`✅ Usuário encontrado: ${email} (senha: ${passwordExists ? 'configurada' : 'ausente'})`);
       } else {
         console.log(`⚠️  Usuário não encontrado: ${email}`);
       }
@@ -109,34 +109,20 @@ async function corrigirPermissoes() {
       }
     }
 
-    // 5. Criar usuário admin se não existir
-    console.log('\n👨‍💼 Verificando usuário administrador...');
+    // 5. Verificar usuários administradores existentes
+    console.log('\n👨‍💼 Verificando usuários administradores...');
     const { rows: admins } = await pool.query(
-      "SELECT * FROM users WHERE role = 'admin' OR is_admin = true"
+      "SELECT email, role, is_admin, full_name FROM users WHERE role = 'admin' OR is_admin = true"
     );
 
     if (admins.length === 0) {
-      console.log('⚠️  Nenhum administrador encontrado. Criando usuário admin...');
-      
-      await pool.query(`
-        INSERT INTO users (email, password, full_name, role, is_admin, phone)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        ON CONFLICT (email) DO UPDATE SET
-          password = EXCLUDED.password,
-          role = EXCLUDED.role,
-          is_admin = EXCLUDED.is_admin
-      `, [
-        'admin@sistema.com',
-        senhaHash,
-        'Administrador do Sistema',
-        'admin',
-        true,
-        '(11) 99999-9999'
-      ]);
-      
-      console.log('✅ Usuário administrador criado: admin@sistema.com / 123456');
+      console.log('⚠️  Nenhum administrador encontrado no sistema');
+      console.log('💡 Recomenda-se ter pelo menos um usuário com role "admin"');
     } else {
-      console.log(`✅ ${admins.length} administrador(es) encontrado(s)`);
+      console.log(`✅ ${admins.length} administrador(es) encontrado(s):`);
+      admins.forEach(admin => {
+        console.log(`   - ${admin.email} (${admin.role}) - ${admin.full_name}`);
+      });
     }
 
     // 6. Testar permissões simulando requisições
@@ -162,16 +148,16 @@ async function corrigirPermissoes() {
       console.log(`  ${teste.role}: Boletos ${statusBoletos} | Transportadores ${statusTransportadores}`);
     }
 
-    console.log('\n🎉 CORREÇÃO DE PERMISSÕES CONCLUÍDA COM SUCESSO!');
+    console.log('\n🎉 VERIFICAÇÃO DE PERMISSÕES CONCLUÍDA COM SUCESSO!');
     console.log('============================================================');
     console.log('');
-    console.log('📋 CREDENCIAIS DE TESTE:');
-    console.log('- admin@sistema.com / 123456 (Admin)');
-    console.log('- gerente@sistema.com / 123456 (Manager)');
-    console.log('- supervisor@sistema.com / 123456 (Supervisor)');
-    console.log('- financeiro@nvslicencas.com.br / 123456 (Financial)');
-    console.log('- operacional01@sistema.com / 123456 (Operational)');
-    console.log('- fiscal@nscaravaggio.com.br / 123456 (User/Transportador)');
+    console.log('📋 USUÁRIOS NO SISTEMA:');
+    usuarios.forEach(user => {
+      console.log(`- ${user.email} (${user.role}) - ${user.full_name}`);
+    });
+    console.log('');
+    console.log('⚠️  SENHAS MANTIDAS: As senhas existentes foram preservadas');
+    console.log('📞 Se houver problemas de login, verifique as senhas individualmente');
     console.log('');
     console.log('🔄 Reinicie o servidor PM2 para aplicar as mudanças:');
     console.log('   pm2 restart aet-license-system');

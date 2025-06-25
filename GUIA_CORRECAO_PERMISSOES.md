@@ -6,10 +6,10 @@ As permissões de usuários não estão funcionando corretamente no servidor Goo
 
 ## Principais Causas
 
-1. **Senhas Hash Incompatíveis**: Alguns usuários têm senhas em formato scrypt que não são compatíveis com bcrypt
-2. **Roles Inconsistentes**: Usuários podem ter roles incorretos no banco de produção
-3. **Middleware de Autenticação**: Diferenças na configuração de autenticação entre ambientes
-4. **Variáveis de Ambiente**: Configurações específicas do servidor Google podem estar ausentes
+1. **Roles Inconsistentes**: Usuários podem ter roles incorretos no banco de produção
+2. **Middleware de Autenticação**: Diferenças na configuração de autenticação entre ambientes
+3. **Variáveis de Ambiente**: Configurações específicas do servidor Google podem estar ausentes
+4. **Configuração de Sessão**: Problemas na persistência de sessões entre requisições
 
 ## Solução Passo a Passo
 
