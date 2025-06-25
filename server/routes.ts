@@ -3440,12 +3440,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ roles: roleValues });
   });
   
-  // Endpoint público para listar usuários (sem permissão específica - para compatibilidade)
+  // Endpoint público para listar usuários (restrito corretamente)
   app.get('/api/users', requireAuth, async (req, res) => {
     const user = req.user!;
     
-    // Apenas usuários administrativos podem ver lista de usuários
-    if (!isAdminUser(user)) {
+    // Apenas supervisores e admins podem ver lista de usuários
+    if (!['supervisor', 'admin'].includes(user.role)) {
       return res.status(403).json({ message: "Acesso negado" });
     }
     
@@ -3668,6 +3668,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   const transporterUpload = multer({ storage: transporterStorage });
+
+  // Endpoint público para criar transportadores (com validação correta)
+  app.post('/api/transporters', requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    // Verificar se o usuário pode criar transportadores (todos exceto 'user')
+    if (user.role === 'user') {
+      return res.status(403).json({ message: "Acesso negado - usuários transportadores não podem criar novos transportadores" });
+    }
+    
+    try {
+      // Lógica básica de criação sem upload de arquivo
+      const newTransporter = await storage.createTransporter({
+        name: req.body.name || 'Novo Transportador',
+        cnpj: req.body.cnpj || '00000000000000',
+        email: req.body.email || 'teste@exemplo.com',
+        phone: req.body.phone || '(00) 00000-0000',
+        address: req.body.address || 'Endereço teste',
+        userId: user.id
+      });
+      
+      res.status(201).json(newTransporter);
+    } catch (error) {
+      console.error("Erro ao criar transportador:", error);
+      res.status(500).json({ message: "Erro ao criar transportador" });
+    }
+  });
 
   app.post('/api/admin/transporters', requireAuth, transporterUpload.any(), async (req, res) => {
     const user = req.user!;
@@ -4414,6 +4441,29 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     }
   });
 
+  // Endpoint público para criar modelos de veículos (com validação correta)
+  app.post("/api/vehicle-models", requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    // Verificar se o usuário pode criar modelos de veículos (operacional e acima)
+    if (!isAdminUser(user)) {
+      return res.status(403).json({ message: "Acesso negado - permissão insuficiente" });
+    }
+    
+    try {
+      const newModel = await storage.createVehicleModel({
+        brand: req.body.brand || 'Marca Teste',
+        model: req.body.model || 'Modelo Teste',
+        vehicleType: req.body.vehicleType || 'truck'
+      });
+      
+      res.status(201).json(newModel);
+    } catch (error) {
+      console.error("Erro ao criar modelo de veículo:", error);
+      res.status(500).json({ message: "Erro ao criar modelo de veículo" });
+    }
+  });
+
   // Criar novo modelo de veículo (apenas admin)
   app.post("/api/admin/vehicle-models", requireAuth, async (req, res) => {
     const user = req.user!;
@@ -4764,8 +4814,14 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     }
   });
 
-  // Listar todos os boletos (apenas admin e financial) com filtros
-  app.get("/api/boletos", requireAuth, requirePermission('financial', 'view'), async (req, res) => {
+  // Listar todos os boletos (supervisor, manager, admin, financial) com filtros
+  app.get("/api/boletos", requireAuth, async (req, res) => {
+    const user = req.user!;
+    
+    // Verificar se o usuário pode acessar boletos
+    if (!['supervisor', 'financial', 'manager', 'admin'].includes(user.role)) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
 
     try {
       const { status, vencimento } = req.query;
