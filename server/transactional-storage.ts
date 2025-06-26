@@ -91,10 +91,13 @@ export class TransactionalStorage implements IStorage {
     // Usando transação para garantir que todas as operações sejam concluídas
     // ou nenhuma delas seja
     await withTransaction(async (tx) => {
-      // Primeiro, exclua todos os veículos do usuário
+      // Primeiro, remover históricos de status relacionados ao usuário
+      await tx.delete(statusHistories).where(eq(statusHistories.userId, id));
+      
+      // Segundo, exclua todos os veículos do usuário
       await tx.delete(vehicles).where(eq(vehicles.userId, id));
       
-      // Em seguida, exclua os transportadores do usuário
+      // Terceiro, exclua os transportadores do usuário
       await tx.delete(transporters).where(eq(transporters.userId, id));
       
       // Por fim, exclua o usuário
