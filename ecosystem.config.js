@@ -1,13 +1,14 @@
 module.exports = {
   apps: [{
     name: 'aet-license-system',
-    script: 'server/production-server.js',
+    script: 'npx tsx server/index.ts',
     cwd: '/var/www/aetlicensesystem/LicencaTransporte',
     env: {
       NODE_ENV: 'production',
       PORT: 5000,
-      // Forçar carregamento do .env em produção
-      ENV_PATH: '/var/www/aetlicensesystem/LicencaTransporte/.env'
+      DATABASE_URL: 'postgresql://aetuser:nvs123@localhost:5432/aetlicensesystem',
+      DEBUG_PERMISSIONS: 'true',
+      DEBUG_AUTH: 'true'
     },
     instances: 1,
     exec_mode: 'fork',
@@ -19,12 +20,6 @@ module.exports = {
     time: true,
     restart_delay: 5000,
     max_restarts: 10,
-    min_uptime: '10s',
-    // Variáveis específicas para debug de permissões
-    env_production: {
-      NODE_ENV: 'production',
-      DEBUG_PERMISSIONS: 'true',
-      DEBUG_AUTH: 'true'
-    }
+    min_uptime: '10s'
   }]
 };

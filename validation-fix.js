@@ -9,8 +9,11 @@ import dotenv from 'dotenv';
 // Carregar variáveis de ambiente
 dotenv.config();
 
+// Usar DATABASE_URL fornecida via linha de comando ou variável de ambiente
+const databaseUrl = process.env.DATABASE_URL || 'postgresql://aetuser:nvs123@localhost:5432/aetlicensesystem';
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: databaseUrl,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 

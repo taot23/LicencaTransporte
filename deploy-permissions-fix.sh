@@ -64,9 +64,13 @@ echo "⏹️  Parando aplicação atual..."
 pm2 stop aet-license-system 2>/dev/null || true
 pm2 delete aet-license-system 2>/dev/null || true
 
-# 6. Iniciar com nova configuração
+# 6. Configurar variável de ambiente DATABASE_URL
+echo "🔧 Configurando DATABASE_URL..."
+export DATABASE_URL="postgresql://aetuser:nvs123@localhost:5432/aetlicensesystem"
+
+# 7. Iniciar com nova configuração
 echo "🔄 Iniciando aplicação com configurações corrigidas..."
-pm2 start ecosystem.config.js
+pm2 start "npx tsx server/index.ts" --name aet-license-system --env DATABASE_URL="postgresql://aetuser:nvs123@localhost:5432/aetlicensesystem" --env NODE_ENV="production" --env DEBUG_PERMISSIONS="true"
 
 # 7. Salvar configuração PM2
 pm2 save
