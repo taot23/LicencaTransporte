@@ -19,7 +19,10 @@ As permissões de usuários não estão funcionando corretamente no servidor Goo
 # No servidor Google, navegue até o diretório do projeto
 cd /var/www/aetlicensesystem/LicencaTransporte
 
-# Execute o script de correção
+# Execute o script de correção (mantendo dados)
+node reset-permissions-only.js
+
+# OU execute o script completo (se necessário)
 node fix-permissions-production.js
 
 # Teste as permissões diretamente

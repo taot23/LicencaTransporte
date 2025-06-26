@@ -43,7 +43,7 @@ if [ ! -f ".env" ]; then
 fi
 
 # 4. Executar correção de permissões no banco
-echo "🔧 Executando correção de permissões no banco de dados..."
+echo "🔧 Executando reinicialização de permissões..."
 
 # Verificar se axios está instalado (necessário para os scripts)
 if ! npm list axios >/dev/null 2>&1; then
@@ -51,7 +51,25 @@ if ! npm list axios >/dev/null 2>&1; then
     npm install axios
 fi
 
-node fix-permissions-production.js
+echo "⚠️  Escolha o tipo de correção:"
+echo "1) Reinicializar apenas permissões (recomendado - mantém todos os dados)"
+echo "2) Correção completa (inclui verificação de senhas)"
+read -p "Digite sua escolha (1 ou 2): " choice
+
+case $choice in
+    1)
+        echo "🔄 Executando reinicialização apenas de permissões..."
+        node reset-permissions-only.js
+        ;;
+    2)
+        echo "🔧 Executando correção completa..."
+        node fix-permissions-production.js
+        ;;
+    *)
+        echo "❌ Opção inválida. Usando reinicialização de permissões..."
+        node reset-permissions-only.js
+        ;;
+esac
 
 if [ $? -ne 0 ]; then
     echo "❌ Erro na correção de permissões"
