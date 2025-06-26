@@ -549,7 +549,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
     
     // Enviar mensagem inicial para confirmar conexão
-    ws.send(JSON.stringify({ type: 'CONNECTED', message: 'Conectado ao servidor' }));
+    ws.send(JSON.stringify({ 
+      type: 'CONNECTED', 
+      message: 'Conectado ao servidor',
+      timestamp: new Date().toISOString()
+    }));
   });
 
   // Cache para armazenar tokens de acesso
