@@ -3,8 +3,12 @@
  * Execute este script no servidor Google para garantir que as permissões funcionem corretamente
  */
 
-const { Pool } = require('pg');
-const bcrypt = require('bcrypt');
+import { Pool } from 'pg';
+import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
+
+// Carregar variáveis de ambiente
+dotenv.config();
 
 // Configuração do banco de dados
 const pool = new Pool({
@@ -171,8 +175,15 @@ async function corrigirPermissoes() {
 }
 
 // Executar correção se script for chamado diretamente
-if (require.main === module) {
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Verificar se o script está sendo executado diretamente
+if (process.argv[1] === __filename) {
   corrigirPermissoes().catch(console.error);
 }
 
-module.exports = { corrigirPermissoes };
+export { corrigirPermissoes };

@@ -44,10 +44,18 @@ fi
 
 # 4. Executar correção de permissões no banco
 echo "🔧 Executando correção de permissões no banco de dados..."
+
+# Verificar se axios está instalado (necessário para os scripts)
+if ! npm list axios >/dev/null 2>&1; then
+    echo "📦 Instalando dependência axios..."
+    npm install axios
+fi
+
 node fix-permissions-production.js
 
 if [ $? -ne 0 ]; then
     echo "❌ Erro na correção de permissões"
+    echo "💡 Verifique se o arquivo .env está configurado corretamente"
     exit 1
 fi
 
@@ -67,9 +75,13 @@ pm2 save
 echo "📊 Verificando status da aplicação..."
 pm2 show aet-license-system
 
-# 9. Testar permissões
-echo "🧪 Testando permissões..."
-node test-permissions-server.js
+# 9. Teste de validação rápido
+echo "🧪 Executando validação do sistema..."
+node validation-fix.js
+
+echo ""
+echo "🔍 Para teste completo de permissões (opcional):"
+echo "   node test-permissions-server.js"
 
 echo ""
 echo "✅ CORREÇÕES APLICADAS COM SUCESSO!"
