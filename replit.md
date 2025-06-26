@@ -44,6 +44,13 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 26/06/2025 - Configuração WebSocket para HTTPS/SSL IMPLEMENTADA
+- ✅ **PROBLEMA IDENTIFICADO**: WebSocket offline devido ao uso de HTTPS com certificado SSL
+- ✅ **SOLUÇÃO APLICADA**: WebSocket configurado para usar WSS (protocolo seguro) automaticamente
+- ✅ **CONFIGURAÇÃO NGINX**: Necessário proxy pass para /ws funcionar com certificado SSL
+- ✅ **DETECÇÃO AUTOMÁTICA**: Sistema detecta HTTPS e usa WSS apropriadamente
+- ✅ **COMPATIBILIDADE**: Mantém funcionamento em desenvolvimento (HTTP/WS) e produção (HTTPS/WSS)
+
 ### 25/06/2025 - Correção de Permissões para Servidor Google Cloud IMPLEMENTADA
 - ✅ **DIAGNÓSTICO COMPLETO**: Identificados problemas específicos do ambiente de produção
 - ✅ **SCRIPT DE CORREÇÃO**: `fix-permissions-production.js` para corrigir roles inconsistentes

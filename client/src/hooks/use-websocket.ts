@@ -115,19 +115,9 @@ export function useWebSocket() {
   useEffect(() => {
     // Função para conectar ao WebSocket
     const connectWebSocket = () => {
-      // Detectar se está em produção (servidor Google) ou desenvolvimento (Replit)
-      const isProduction = window.location.hostname !== 'localhost' && 
-                          !window.location.hostname.includes('replit.dev');
-      
-      let wsUrl;
-      if (isProduction) {
-        // Em produção, usar HTTP direto na porta 5000
-        wsUrl = `ws://${window.location.hostname}:5000/ws`;
-      } else {
-        // Em desenvolvimento, usar o protocolo normal
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        wsUrl = `${protocol}//${window.location.host}/ws`;
-      }
+      // Para HTTPS com subdomínio, usar WSS através do mesmo host
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
       
       console.log(`Conectando ao WebSocket em ${wsUrl}`);
       
