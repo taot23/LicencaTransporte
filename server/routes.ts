@@ -3041,6 +3041,173 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint para cadastro em massa de veículos via CSV
+  app.post("/api/vehicles/bulk-import", requireAuth, upload.single('csvFile'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "Arquivo CSV é obrigatório"
+        });
+      }
+
+      const csvContent = req.file.buffer.toString('utf-8');
+      const lines = csvContent.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        return res.status(400).json({
+          success: false,
+          message: "Arquivo CSV deve conter pelo menos um cabeçalho e uma linha de dados"
+        });
+      }
+
+      const header = lines[0].split(';').map(col => col.trim());
+      const expectedColumns = [
+        'placa', 'tipo_veiculo', 'marca', 'modelo', 'ano_fabricacao',
+        'ano_crlv', 'chassi', 'renavam', 'cmt', 'tara', 'eixo', 'transportador_cpf_cnpj'
+      ];
+
+      // Validar se todas as colunas obrigatórias estão presentes
+      const missingColumns = expectedColumns.filter(col => !header.includes(col));
+      if (missingColumns.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Colunas obrigatórias faltando: ${missingColumns.join(', ')}`
+        });
+      }
+
+      const results = { inserted: 0, errors: [] as any[] };
+      const validVehicles = [];
+
+      // Mapear tipos de veículo aceitos
+      const vehicleTypeMap: Record<string, string> = {
+        'Unidade Tratora (Cavalo)': 'tractor_unit',
+        'Cavalo Mecânico': 'tractor_unit',
+        'Cavalo': 'tractor_unit',
+        'Primeira Carreta': 'semi_trailer',
+        'Segunda Carreta': 'semi_trailer',
+        'Semirreboque': 'semi_trailer',
+        'Carreta': 'semi_trailer',
+        'Reboque': 'trailer',
+        'Dolly': 'dolly',
+        'Prancha': 'flatbed',
+        'Caminhão': 'truck'
+      };
+
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line.trim()) continue;
+
+        const data = line.split(';').map(col => col.trim());
+        const rowData: Record<string, string> = {};
+        
+        header.forEach((col, index) => {
+          rowData[col] = data[index] || '';
+        });
+
+        try {
+          // Validações
+          if (!rowData.placa || rowData.placa.length < 6) {
+            throw new Error("Placa inválida (mínimo 6 caracteres)");
+          }
+
+          if (!rowData.tipo_veiculo || !vehicleTypeMap[rowData.tipo_veiculo]) {
+            throw new Error(`Tipo de veículo inválido: ${rowData.tipo_veiculo}`);
+          }
+
+          if (!rowData.transportador_cpf_cnpj) {
+            throw new Error("CPF/CNPJ do transportador é obrigatório");
+          }
+
+          // Verificar se o transportador existe
+          const transporterDoc = rowData.transportador_cpf_cnpj.replace(/\D/g, '');
+          const allTransporters = await storage.getAllTransporters();
+          const transporter = allTransporters.find(t => 
+            t.documentNumber?.replace(/\D/g, '') === transporterDoc
+          );
+          
+          if (!transporter) {
+            throw new Error(`Transportador não encontrado: ${rowData.transportador_cpf_cnpj}`);
+          }
+
+          // Verificar se a placa já existe
+          const allVehicles = await storage.getAllVehicles();
+          const existingVehicle = allVehicles.find(v => 
+            v.plate.toUpperCase() === rowData.placa.toUpperCase()
+          );
+          
+          if (existingVehicle) {
+            throw new Error(`Placa já cadastrada: ${rowData.placa}`);
+          }
+
+          // Preparar dados do veículo
+          const vehicleData = {
+            plate: rowData.placa.toUpperCase(),
+            type: vehicleTypeMap[rowData.tipo_veiculo],
+            make: rowData.marca || '',
+            model: rowData.modelo || '',
+            year: parseInt(rowData.ano_fabricacao) || new Date().getFullYear(),
+            crlvYear: parseInt(rowData.ano_crlv) || new Date().getFullYear(),
+            chassis: rowData.chassi || '',
+            renavam: rowData.renavam || '',
+            cmt: parseFloat(rowData.cmt) || 0,
+            tara: parseFloat(rowData.tara) || 0,
+            axles: parseInt(rowData.eixo) || 2,
+            transporterId: transporter.id,
+            userId: req.user!.id,
+            bodyType: 'flatbed' as any,
+            status: 'pending_documents' as any
+          };
+
+          validVehicles.push(vehicleData);
+
+        } catch (error: any) {
+          results.errors.push({
+            row: i + 1,
+            data: rowData,
+            error: error.message
+          });
+        }
+      }
+
+      // Inserir veículos válidos no banco
+      for (const vehicleData of validVehicles) {
+        try {
+          await storage.createVehicle(vehicleData);
+          results.inserted++;
+        } catch (error: any) {
+          results.errors.push({
+            row: 0,
+            data: vehicleData,
+            error: `Erro ao salvar: ${error.message}`
+          });
+        }
+      }
+
+      // Notificar via WebSocket sobre novos veículos
+      if (results.inserted > 0) {
+        broadcastMessage({
+          type: 'VEHICLE_UPDATE',
+          data: { action: 'bulk_create', count: results.inserted }
+        });
+      }
+
+      res.json({
+        success: true,
+        inserted: results.inserted,
+        errors: results.errors,
+        validVehicles: validVehicles
+      });
+
+    } catch (error: any) {
+      console.error('Erro no upload CSV:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || "Erro interno do servidor"
+      });
+    }
+  });
+
   // Endpoint para buscar o histórico de status de uma licença
   app.get('/api/licenses/:id/status-history', requireAuth, async (req, res) => {
     try {
