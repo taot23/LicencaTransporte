@@ -41,9 +41,12 @@ export function BulkVehiclesPage() {
       const response = await fetch("/api/vehicles/bulk-import", {
         method: "POST",
         body: formData,
+        credentials: "include", // Importante para enviar cookies de autenticação
       });
+      
       if (!response.ok) {
-        throw new Error("Erro ao processar arquivo CSV");
+        const errorData = await response.json().catch(() => ({ message: "Erro desconhecido" }));
+        throw new Error(errorData.message || "Erro ao processar arquivo CSV");
       }
       return response.json();
     },
