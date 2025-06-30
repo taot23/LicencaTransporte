@@ -19,6 +19,7 @@ import VehicleModelsPage from "@/pages/admin/vehicle-models-page";
 import BoletosPage from "@/pages/admin/boletos-page";
 import DashboardAET from "@/pages/admin/dashboard-aet";
 import MeusBoletos from "@/pages/meus-boletos";
+import { BulkVehiclesPage } from "@/pages/bulk-vehicles-page";
 import RedirectPage from "@/pages/redirect-page";
 import { ProtectedRoute, AdminRoute, StaffRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
@@ -97,6 +98,12 @@ function Router() {
       <ProtectedRoute 
         path="/meus-boletos" 
         component={MeusBoletos} 
+      />
+      
+      {/* Cadastro em massa de veículos - disponível para todos usuários */}
+      <ProtectedRoute 
+        path="/cadastro-massa-veiculos" 
+        component={BulkVehiclesPage} 
       />
       
       <Route component={NotFound} />

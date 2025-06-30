@@ -1,0 +1,104 @@
+Preciso de um menu para cadastro em massa de veículos onde ele tenha um pequeno passo a passo de como subir a planilha salva em csv separada ";" ela tem de 
+ser disponíveis para todos usuários tem de manter o mesmo formato de pagina da aplicação com sidebar lateral e tudo sendo resposivo 
+
+
+📥 Formato Esperado do Arquivo CSV
+Baseado no seu arquivo, o formato pode seguir esse padrão (colunas obrigatórias):
+
+placa	tipo_veiculo	marca	modelo	ano_fabricacao	ano_crlv	chassi	renavam	cmt	tara	eixo	transportador_cpf_cnpj
+ABC1D23	Unidade Tratora (Cavalo)	Scania	R440	2018	2024	9BWZZZ377VT004251	12345678901	45.000	10.500	5	12345678000199
+
+✅ Dica: Aceite também colunas adicionais para futuro uso (ex: observações)
+
+🔧 1. Tela de Importação (Frontend)
+Interface:
+Botão: Importar Veículos em Massa
+
+Campo de upload com suporte a:
+
+Arrastar e soltar
+
+Validação de extensão .csv
+
+Exibição de preview (opcional)
+
+Exemplo de código React (Dropzone simples):
+jsx
+Copiar
+Editar
+<input
+  type="file"
+  accept=".csv"
+  onChange={handleCSVUpload}
+/>
+🔄 2. Processamento no Backend
+Endpoint sugerido:
+http
+Copiar
+Editar
+POST /api/veiculos/importar-csv
+Content-Type: multipart/form-data
+Processamento:
+Parse do CSV com Papaparse (frontend) ou csv-parser (backend)
+
+Validação de campos:
+
+Placa com formato válido
+
+Tipo de veículo existente
+
+CPF/CNPJ do transportador válido e existente
+
+Veículos válidos são salvos no banco
+
+Retorno com:
+
+Lista de veículos inseridos
+
+Lista de erros (linha + motivo)
+
+Exemplo de backend (Node.js + Express + csv-parser):
+ts
+Copiar
+Editar
+router.post('/importar-csv', upload.single('arquivo'), async (req, res) => {
+  const resultados = [];
+  const erros = [];
+
+  fs.createReadStream(req.file.path)
+    .pipe(csvParser())
+    .on('data', (linha) => {
+      try {
+        validarCampos(linha);
+        resultados.push(formatarParaBanco(linha));
+      } catch (err) {
+        erros.push({ linha, erro: err.message });
+      }
+    })
+    .on('end', async () => {
+      await Veiculo.insertMany(resultados);
+      res.json({ inseridos: resultados.length, erros });
+    });
+});
+🧾 3. Após a Importação: Upload de Documentos
+Cada veículo importado estará disponível na listagem
+
+O botão “📎 Enviar Documentos” poderá ser usado por veículo
+
+Arquivos esperados: CRLV, ANTT, foto do veículo, etc.
+
+✅ Permissões e Segurança
+Perfil	Pode importar CSV?
+Administrador	✅
+Operacional	✅
+Supervisor	✅
+Transportador	✅  
+📦 Benefícios
+Agiliza cadastros de grandes frotas
+
+Minimiza erros manuais
+
+Padroniza os dados
+
+Reduz retrabalho operacional
+
