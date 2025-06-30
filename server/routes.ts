@@ -3064,7 +3064,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const header = lines[0].split(';').map(col => col.trim());
       const expectedColumns = [
         'placa', 'tipo_veiculo', 'marca', 'modelo', 'ano_fabricacao',
-        'ano_crlv', 'chassi', 'renavam', 'cmt', 'tara', 'eixo', 'transportador_cpf_cnpj'
+        'ano_crlv', 'renavam', 'cmt', 'tara', 'eixo', 'transportador_cpf_cnpj'
       ];
 
       // Validar se todas as colunas obrigatórias estão presentes
@@ -3148,7 +3148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             model: rowData.modelo || '',
             year: parseInt(rowData.ano_fabricacao) || new Date().getFullYear(),
             crlvYear: parseInt(rowData.ano_crlv) || new Date().getFullYear(),
-            chassis: rowData.chassi || '',
+            chassis: '', // Campo removido do CSV, valor padrão vazio
             renavam: rowData.renavam || '',
             cmt: parseFloat(rowData.cmt) || 0,
             tara: parseFloat(rowData.tara) || 0,
