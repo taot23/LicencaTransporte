@@ -3062,17 +3062,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const header = lines[0].split(';').map(col => col.trim());
-      const expectedColumns = [
+      const requiredColumns = [
         'placa', 'tipo_veiculo', 'marca', 'modelo', 'ano_fabricacao',
-        'ano_crlv', 'renavam', 'cmt', 'tara', 'eixo', 'transportador_cpf_cnpj'
+        'ano_crlv', 'renavam', 'cmt', 'tara', 'transportador_cpf_cnpj'
       ];
+      const optionalColumns = ['eixo']; // Eixo é opcional, padrão 2
 
       // Validar se todas as colunas obrigatórias estão presentes
-      const missingColumns = expectedColumns.filter(col => !header.includes(col));
+      const missingColumns = requiredColumns.filter(col => !header.includes(col));
       if (missingColumns.length > 0) {
         return res.status(400).json({
           success: false,
-          message: `Colunas obrigatórias faltando: ${missingColumns.join(', ')}`
+          message: `Colunas obrigatórias faltando: ${missingColumns.join(', ')}. Formato esperado: placa;tipo_veiculo;marca;modelo;ano_fabricacao;ano_crlv;renavam;cmt;tara;eixo;transportador_cpf_cnpj`
         });
       }
 
@@ -3152,7 +3153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             renavam: rowData.renavam || '',
             cmt: parseFloat(rowData.cmt) || 0,
             tara: parseFloat(rowData.tara) || 0,
-            axles: parseInt(rowData.eixo) || 2,
+            axles: parseInt(rowData.eixo) || 2, // Valor padrão 2 se não informado
             transporterId: transporter.id,
             userId: req.user!.id,
             bodyType: 'flatbed' as any,
