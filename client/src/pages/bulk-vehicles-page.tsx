@@ -101,6 +101,8 @@ export function BulkVehiclesPage() {
   };
 
   const onSubmit = () => {
+    console.log('[FRONTEND] onSubmit chamado, csvFile:', csvFile);
+    
     if (!csvFile) {
       toast({
         title: "Arquivo necessário",
@@ -112,6 +114,13 @@ export function BulkVehiclesPage() {
 
     const formData = new FormData();
     formData.append('csvFile', csvFile);
+    
+    console.log('[FRONTEND] FormData criado:', {
+      hasFile: formData.has('csvFile'),
+      fileName: csvFile.name,
+      fileSize: csvFile.size
+    });
+    
     importMutation.mutate(formData);
   };
 
@@ -209,7 +218,7 @@ export function BulkVehiclesPage() {
             <CardTitle>Upload do Arquivo CSV</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-4">
               <div
                 className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                   isDragOver
@@ -253,13 +262,13 @@ export function BulkVehiclesPage() {
               )}
 
               <Button
-                type="submit"
+                onClick={onSubmit}
                 disabled={!csvFile || importMutation.isPending}
                 className="w-full"
               >
                 {importMutation.isPending ? "Processando..." : "Importar Veículos"}
               </Button>
-            </form>
+            </div>
           </CardContent>
         </Card>
 
@@ -356,9 +365,9 @@ export function BulkVehiclesPage() {
                   </AlertDescription>
                 </Alert>
               )}
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </MainLayout>
   );
