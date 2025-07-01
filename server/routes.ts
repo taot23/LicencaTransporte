@@ -3167,23 +3167,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
             throw new Error(`Placa já cadastrada: ${rowData.placa}`);
           }
 
-          // Preparar dados do veículo
+          // Preparar dados do veículo (conforme schema do banco)
           const vehicleData = {
             plate: rowData.placa.toUpperCase(),
             type: vehicleTypeMap[rowData.tipo_veiculo],
-            make: rowData.marca || '',
+            brand: rowData.marca || '',
             model: rowData.modelo || '',
             year: parseInt(rowData.ano_fabricacao) || new Date().getFullYear(),
             crlvYear: parseInt(rowData.ano_crlv) || new Date().getFullYear(),
-            chassis: '', // Campo removido do CSV, valor padrão vazio
             renavam: rowData.renavam || '',
             cmt: parseFloat(rowData.cmt) || 0,
-            tara: parseFloat(rowData.tara) || 0,
-            axles: parseInt(rowData.eixo) || 2, // Valor padrão 2 se não informado
+            tare: parseFloat(rowData.tara) || 0,
+            axleCount: parseInt(rowData.eixo) || 2, // Valor padrão 2 se não informado
             transporterId: transporter.id,
-            userId: req.user!.id,
             bodyType: 'flatbed' as any,
-            status: 'pending_documents' as any
+            status: 'pending_documents' as any,
+            ownershipType: 'proprio' as any
           };
 
           console.log('[BULK IMPORT] Veículo validado:', vehicleData);
@@ -3206,7 +3205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const vehicleData of validVehicles) {
         try {
           console.log('[BULK IMPORT] Tentando criar veículo:', vehicleData.plate);
-          await storage.createVehicle(vehicleData);
+          await storage.createVehicle(req.user!.id, vehicleData);
           console.log('[BULK IMPORT] Veículo criado com sucesso:', vehicleData.plate);
           results.inserted++;
         } catch (error: any) {
