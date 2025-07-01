@@ -166,6 +166,14 @@ const upload = multer({
   }
 });
 
+// Upload específico para CSV (sem fileFilter)
+const uploadCSV = multer({
+  storage: multer.memoryStorage(), // Usar memória para CSV
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB max para CSV
+  }
+});
+
 // Authentication middleware
 const requireAuth = (req: any, res: any, next: any) => {
   if (!req.isAuthenticated()) {
@@ -3042,7 +3050,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Endpoint para cadastro em massa de veículos via CSV
-  app.post("/api/vehicles/bulk-import", requireAuth, upload.single('csvFile'), async (req, res) => {
+  app.post("/api/vehicles/bulk-import", requireAuth, uploadCSV.single('csvFile'), async (req, res) => {
     try {
       console.log('[BULK IMPORT] Iniciando importação:', {
         hasFile: !!req.file,
