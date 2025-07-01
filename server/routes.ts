@@ -3044,7 +3044,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint para cadastro em massa de veículos via CSV
   app.post("/api/vehicles/bulk-import", requireAuth, upload.single('csvFile'), async (req, res) => {
     try {
+      console.log('[BULK IMPORT] Iniciando importação:', {
+        hasFile: !!req.file,
+        fileName: req.file?.originalname,
+        fileSize: req.file?.size,
+        user: req.user?.email
+      });
+
       if (!req.file) {
+        console.log('[BULK IMPORT] Erro: Arquivo não encontrado');
         return res.status(400).json({
           success: false,
           message: "Arquivo CSV é obrigatório"
@@ -3052,9 +3060,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const csvContent = req.file.buffer.toString('utf-8');
+      console.log('[BULK IMPORT] Conteúdo CSV (primeiros 200 chars):', csvContent.substring(0, 200));
+      
       const lines = csvContent.split('\n').filter(line => line.trim());
+      console.log('[BULK IMPORT] Número de linhas:', lines.length);
       
       if (lines.length < 2) {
+        console.log('[BULK IMPORT] Erro: CSV com menos de 2 linhas');
         return res.status(400).json({
           success: false,
           message: "Arquivo CSV deve conter pelo menos um cabeçalho e uma linha de dados"
@@ -3062,6 +3074,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const header = lines[0].split(';').map(col => col.trim());
+      console.log('[BULK IMPORT] Header detectado:', header);
+      
       const requiredColumns = [
         'placa', 'tipo_veiculo', 'marca', 'modelo', 'ano_fabricacao',
         'ano_crlv', 'renavam', 'cmt', 'tara', 'transportador_cpf_cnpj'
@@ -3070,7 +3084,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validar se todas as colunas obrigatórias estão presentes
       const missingColumns = requiredColumns.filter(col => !header.includes(col));
+      console.log('[BULK IMPORT] Colunas obrigatórias:', requiredColumns);
+      console.log('[BULK IMPORT] Colunas faltando:', missingColumns);
+      
       if (missingColumns.length > 0) {
+        console.log('[BULK IMPORT] Erro: Colunas faltando');
         return res.status(400).json({
           success: false,
           message: `Colunas obrigatórias faltando: ${missingColumns.join(', ')}. Formato esperado: placa;tipo_veiculo;marca;modelo;ano_fabricacao;ano_crlv;renavam;cmt;tara;eixo;transportador_cpf_cnpj`
