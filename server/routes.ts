@@ -3157,6 +3157,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             throw new Error(`Transportador não encontrado: ${rowData.transportador_cpf_cnpj}`);
           }
 
+          // Verificar se o transportador tem um usuário vinculado
+          if (!transporter.userId) {
+            throw new Error(`Transportador ${transporter.name} não possui usuário vinculado`);
+          }
+
           // Verificar se a placa já existe
           const allVehicles = await storage.getAllVehicles();
           const existingVehicle = allVehicles.find(v => 
@@ -3168,6 +3173,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           // Preparar dados do veículo (conforme schema do banco)
+          // O userId deve ser o do transportador, não do usuário que está fazendo a importação
           const vehicleData = {
             plate: rowData.placa.toUpperCase(),
             type: vehicleTypeMap[rowData.tipo_veiculo],
@@ -3179,10 +3185,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             cmt: parseFloat(rowData.cmt) || 0,
             tare: parseFloat(rowData.tara) || 0,
             axleCount: parseInt(rowData.eixo) || 2, // Valor padrão 2 se não informado
-            transporterId: transporter.id,
             bodyType: 'flatbed' as any,
             status: 'pending_documents' as any,
-            ownershipType: 'proprio' as any
+            ownershipType: 'proprio' as any,
+            transporterUserId: transporter.userId // Usar o userId do transportador
           };
 
           console.log('[BULK IMPORT] Veículo validado:', vehicleData);
@@ -3205,9 +3211,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const vehicleData of validVehicles) {
         try {
           console.log('[BULK IMPORT] Tentando criar veículo:', vehicleData.plate);
-          await storage.createVehicle(req.user!.id, vehicleData);
-          console.log('[BULK IMPORT] Veículo criado com sucesso:', vehicleData.plate);
+          
+          // Usar o userId do transportador, não do usuário logado
+          const { transporterUserId, ...vehicleDataClean } = vehicleData;
+          await storage.createVehicle(transporterUserId, vehicleDataClean);
+          
+          console.log('[BULK IMPORT] Veículo criado com sucesso para transportador:', vehicleData.plate);
           results.inserted++;
+          
+          // Enviar notificação WebSocket sobre o novo veículo
+          broadcastMessage({
+            type: 'VEHICLE_UPDATE',
+            data: {
+              action: 'created',
+              vehicleId: null, // Será definido após criação
+              message: `Novo veículo importado: ${vehicleData.plate}`
+            }
+          });
+          
         } catch (error: any) {
           console.log('[BULK IMPORT] Erro ao criar veículo:', vehicleData.plate, error.message);
           results.errors.push({
