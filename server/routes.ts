@@ -3186,9 +3186,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             status: 'pending_documents' as any
           };
 
+          console.log('[BULK IMPORT] Veículo validado:', vehicleData);
           validVehicles.push(vehicleData);
 
         } catch (error: any) {
+          console.log('[BULK IMPORT] Erro na linha', i + 1, ':', error.message);
           results.errors.push({
             row: i + 1,
             data: rowData,
@@ -3197,12 +3199,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      console.log('[BULK IMPORT] Total de veículos válidos:', validVehicles.length);
+      console.log('[BULK IMPORT] Erros encontrados:', results.errors.length);
+
       // Inserir veículos válidos no banco
       for (const vehicleData of validVehicles) {
         try {
+          console.log('[BULK IMPORT] Tentando criar veículo:', vehicleData.plate);
           await storage.createVehicle(vehicleData);
+          console.log('[BULK IMPORT] Veículo criado com sucesso:', vehicleData.plate);
           results.inserted++;
         } catch (error: any) {
+          console.log('[BULK IMPORT] Erro ao criar veículo:', vehicleData.plate, error.message);
           results.errors.push({
             row: 0,
             data: vehicleData,
