@@ -107,12 +107,18 @@ export function VehicleList({ vehicles, isLoading, onEdit, onRefresh }: VehicleL
     switch (status) {
       case "active":
         return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Ativo</Badge>;
+      case "pending_documents":
+        return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-200">Pendente Documentação</Badge>;
       case "maintenance":
         return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">Em Manutenção</Badge>;
       case "inactive":
         return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">Inativo</Badge>;
+      case "blocked":
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Bloqueado</Badge>;
+      case "expired":
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-200">Vencido</Badge>;
       default:
-        return <Badge>{status}</Badge>;
+        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">{status}</Badge>;
     }
   };
 
