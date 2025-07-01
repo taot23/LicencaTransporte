@@ -1,27 +1,35 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Upload, FileText, CheckCircle, XCircle, AlertTriangle, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Upload,
-  Download,
-  FileText,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  Info
-} from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { MainLayout } from "@/components/layout/main-layout";
 
-export default function BulkVehiclesPage() {
+interface ImportResult {
+  success: boolean;
+  inserted: number;
+  errors: ImportError[];
+  validVehicles: any[];
+}
+
+interface ImportError {
+  row: number;
+  data: any;
+  error: string;
+}
+
+export function BulkVehiclesPage() {
   const [csvFile, setCsvFile] = useState<File | null>(null);
-  const [previewData, setPreviewData] = useState<string[][]>([]);
-  const [importResult, setImportResult] = useState<any>(null);
+  const [previewData, setPreviewData] = useState<any[]>([]);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -33,7 +41,7 @@ export default function BulkVehiclesPage() {
       const response = await fetch("/api/vehicles/bulk-import", {
         method: "POST",
         body: formData,
-        credentials: "include",
+        credentials: "include", // Importante para enviar cookies de autenticação
       });
       
       if (!response.ok) {
@@ -159,39 +167,45 @@ export default function BulkVehiclesPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid md:grid-cols-3 gap-4">
-              <div className="text-center">
-                <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-2 font-bold">
+              <div className="flex items-start gap-3">
+                <div className="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center font-semibold text-sm">
                   1
                 </div>
-                <h4 className="font-semibold mb-1">Baixar Modelo</h4>
-                <p className="text-sm text-muted-foreground">
-                  Clique em "Baixar Modelo" para obter o arquivo CSV com o formato correto
-                </p>
+                <div>
+                  <h3 className="font-semibold">Baixe o modelo</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Clique em "Baixar Modelo" para obter a planilha com formato correto
+                  </p>
+                </div>
               </div>
-              <div className="text-center">
-                <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-2 font-bold">
+              <div className="flex items-start gap-3">
+                <div className="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center font-semibold text-sm">
                   2
                 </div>
-                <h4 className="font-semibold mb-1">Preencher Dados</h4>
-                <p className="text-sm text-muted-foreground">
-                  Complete o arquivo com os dados dos seus veículos seguindo o formato
-                </p>
+                <div>
+                  <h3 className="font-semibold">Preencha os dados</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Complete a planilha com os dados dos veículos e salve como CSV
+                  </p>
+                </div>
               </div>
-              <div className="text-center">
-                <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-2 font-bold">
+              <div className="flex items-start gap-3">
+                <div className="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center font-semibold text-sm">
                   3
                 </div>
-                <h4 className="font-semibold mb-1">Fazer Upload</h4>
-                <p className="text-sm text-muted-foreground">
-                  Arraste o arquivo preenchido ou clique para selecionar
-                </p>
+                <div>
+                  <h3 className="font-semibold">Faça o upload</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Arraste o arquivo ou clique para selecionar e importar
+                  </p>
+                </div>
               </div>
             </div>
 
             <Alert>
-              <Info className="h-4 w-4" />
+              <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                <strong>Importante:</strong> 
+                <strong>Importante:</strong> O arquivo deve estar em formato CSV com separador ";" (ponto e vírgula).
                 Certifique-se de que os CPF/CNPJ dos transportadores já estão cadastrados no sistema.
               </AlertDescription>
             </Alert>
@@ -309,9 +323,20 @@ export default function BulkVehiclesPage() {
                 Resultado da Importação
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              {!importResult.success && importResult.errors && importResult.errors.length > 0 && (
-                <div className="space-y-4">
+            <CardContent className="space-y-4">
+              <div className="flex gap-4">
+                <Badge variant="outline" className="text-green-600">
+                  {importResult.inserted} importados
+                </Badge>
+                {importResult.errors.length > 0 && (
+                  <Badge variant="outline" className="text-red-600">
+                    {importResult.errors.length} erros
+                  </Badge>
+                )}
+              </div>
+
+              {importResult.errors.length > 0 && (
+                <div>
                   <h4 className="font-semibold mb-2">Erros encontrados:</h4>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {importResult.errors.map((error, index) => (
@@ -340,9 +365,9 @@ export default function BulkVehiclesPage() {
                   </AlertDescription>
                 </Alert>
               )}
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </MainLayout>
   );
