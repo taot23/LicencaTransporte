@@ -18,6 +18,7 @@ import {
   Building2, 
   ClipboardEdit,
   LayoutDashboard,
+  ArrowLeftRight,
   Users,
   Settings,
   Car,
@@ -279,6 +280,21 @@ export function Sidebar({ className }: SidebarProps) {
               >
                 <Car className="mr-3 h-5 w-5" />
                 Modelos de Veículos
+              </Button>
+            )}
+            
+            {/* Transferir Veículos - apenas para admins */}
+            {permissions.canViewUsers() && (
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start text-white hover:bg-gray-700",
+                  location === "/admin/vehicle-transfer" ? "bg-gray-700" : "bg-transparent"
+                )}
+                onClick={() => handleNavigate("/admin/vehicle-transfer")}
+              >
+                <RefreshCw className="mr-3 h-5 w-5" />
+                Transferir Veículos
               </Button>
             )}
             

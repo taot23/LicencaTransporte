@@ -4256,6 +4256,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Erro ao transferir veículos" });
     }
   });
+
+  // Endpoint para listar todos os veículos (admin)
+  app.get('/api/vehicles/all', requireAdmin, async (req, res) => {
+    try {
+      const vehicles = await storage.getAllVehicles();
+      res.json(vehicles);
+    } catch (error) {
+      console.error("Erro ao buscar todos os veículos:", error);
+      res.status(500).json({ message: "Erro ao buscar veículos" });
+    }
+  });
   
   // Rota para obter usuários não-admin para seleção
   app.get('/api/admin/non-admin-users', requireAdmin, async (req, res) => {
