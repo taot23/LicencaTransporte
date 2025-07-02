@@ -61,6 +61,8 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **LOGOUT OTIMIZADO**: Redirecionamento instantâneo sem aguardar servidor, cache limpo imediatamente
 - ✅ **CACHE REDUZIDO**: Tempo de cache diminuído para 30s, facilitando logout mais rápido
 - ✅ **TRANSIÇÕES ACELERADAS**: Delays de animação reduzidos para máximo 50ms
+- ✅ **IMPORTAÇÃO SEM USUÁRIO**: Sistema permite importar veículos mesmo quando transportador não tem usuário vinculado
+- ✅ **FALLBACK INTELIGENTE**: Usa usuário administrativo como fallback quando transportador não tem usuário próprio
 
 ### 26/06/2025 - Configuração WebSocket para HTTPS/SSL IMPLEMENTADA
 - ✅ **PROBLEMA IDENTIFICADO**: WebSocket offline devido ao uso de HTTPS com certificado SSL

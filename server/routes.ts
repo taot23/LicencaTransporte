@@ -3052,11 +3052,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint para cadastro em massa de veículos via CSV
   app.post("/api/vehicles/bulk-import", requireAuth, uploadCSV.single('csvFile'), async (req, res) => {
     try {
+      const user = req.user!;
+      
       console.log('[BULK IMPORT] Iniciando importação:', {
         hasFile: !!req.file,
         fileName: req.file?.originalname,
         fileSize: req.file?.size,
-        user: req.user?.email
+        user: user.email
       });
 
       if (!req.file) {
@@ -3157,9 +3159,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             throw new Error(`Transportador não encontrado: ${rowData.transportador_cpf_cnpj}`);
           }
 
-          // Verificar se o transportador tem um usuário vinculado
+          // Se o transportador não tem usuário vinculado, usar o usuário que está fazendo a importação
+          let targetUserId = transporter.userId;
+          
           if (!transporter.userId) {
-            throw new Error(`Transportador ${transporter.name} não possui usuário vinculado`);
+            console.log(`[BULK IMPORT] Transportador ${transporter.name} não possui usuário vinculado. Usando usuário da importação: ${user.email}`);
+            targetUserId = user.id;
           }
 
           // Verificar se a placa já existe
@@ -3173,7 +3178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           // Preparar dados do veículo (conforme schema do banco)
-          // O userId deve ser o do transportador, não do usuário que está fazendo a importação
+          // Usar o userId do transportador ou fallback para o usuário da importação
           const vehicleData = {
             plate: rowData.placa.toUpperCase(),
             type: vehicleTypeMap[rowData.tipo_veiculo],
@@ -3188,7 +3193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             bodyType: 'flatbed' as any,
             status: 'pending_documents' as any,
             ownershipType: 'proprio' as any,
-            transporterUserId: transporter.userId // Usar o userId do transportador
+            transporterUserId: targetUserId // Usar o userId do transportador ou fallback para o usuário da importação
           };
 
           console.log('[BULK IMPORT] Veículo validado:', vehicleData);
