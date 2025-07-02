@@ -1795,9 +1795,6 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
 
 
 
-          }}
-        />
-
         <div className="flex flex-col sm:flex-row justify-end gap-4 sm:space-x-4 pt-4">
           <Button 
             type="button" 

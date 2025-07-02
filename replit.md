@@ -44,6 +44,20 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 02/07/2025 - Remoção Completa do Estado Maranhão (MA) do Sistema CONCLUÍDA
+- ✅ **ESTADO MA REMOVIDO**: Maranhão completamente removido de todos os componentes do sistema
+- ✅ **SHARED/SCHEMA.TS ATUALIZADO**: Lista brazilianStates no schema principal sem MA
+- ✅ **COMPONENTES UNIFICADOS**: Todos os componentes de seleção de estados agora usam brazilianStates compartilhado
+- ✅ **STATE-SELECTION-WITH-VALIDATION.TSX**: Atualizado para usar import shared
+- ✅ **STATE-SELECTION-FINAL.TSX**: Atualizado para usar import shared  
+- ✅ **STATE-SELECTOR-WITH-VALIDATION.TSX**: Atualizado para usar import shared
+- ✅ **LICENSE-FORM-NEW.TSX**: Atualizado para usar import shared, código comentado removido
+- ✅ **UTILS.TS CORRIGIDO**: Função getStateLabel sem referência ao MA
+- ✅ **ARQUIVOS LEGACY CORRIGIDOS**: license-form-fixed.tsx e state-validation-simple.tsx atualizados
+- ✅ **ADMIN-LICENSES.TSX**: Lista local de estados atualizada sem MA
+- ✅ **CONSISTÊNCIA TOTAL**: Todas as referências ao Maranhão (MA) removidas de todo o sistema
+- ✅ **VALIDAÇÃO FUNCIONANDO**: Sistema de validação inteligente operando apenas com estados válidos (26 estados + DNIT)
+
 ### 02/07/2025 - Sistema de Navegação Hierárquica Implementado
 - ✅ **MENU HIERÁRQUICO**: Implementado menu "Veículos" com submenus expansíveis no sidebar
 - ✅ **SUBMENUS ORGANIZADOS**: Agrupados em: Veículos Cadastrados, Cadastro em Massa, Modelos de Veículos, Transferir Veículos

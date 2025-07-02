@@ -552,7 +552,7 @@ export const allBrazilianStates = [
   { code: "DF", name: "Distrito Federal" },
   { code: "ES", name: "Espírito Santo" },
   { code: "GO", name: "Goiás" },
-  { code: "MA", name: "Maranhão" },
+
   { code: "MT", name: "Mato Grosso" },
   { code: "MS", name: "Mato Grosso do Sul" },
   { code: "MG", name: "Minas Gerais" },

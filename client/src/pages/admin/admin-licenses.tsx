@@ -55,7 +55,7 @@ import { TransporterInfo } from "@/components/transporters/transporter-info";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 // Lista simplificada de estados brasileiros para uso como strings
-const brazilianStates = ["SP", "MG", "MT", "PE", "TO", "MS", "PR", "ES", "DNIT", "RS", "BA", "PA", "SC", "DF", "MA", "GO", "RJ", "CE", "AL", "SE"];
+const brazilianStates = ["SP", "MG", "MT", "PE", "TO", "MS", "PR", "ES", "DNIT", "RS", "BA", "PA", "SC", "DF", "GO", "RJ", "CE", "AL", "SE"];
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
