@@ -63,6 +63,8 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **TRANSIÇÕES ACELERADAS**: Delays de animação reduzidos para máximo 50ms
 - ✅ **IMPORTAÇÃO SEM USUÁRIO**: Sistema permite importar veículos mesmo quando transportador não tem usuário vinculado
 - ✅ **FALLBACK INTELIGENTE**: Usa usuário administrativo como fallback quando transportador não tem usuário próprio
+- ✅ **COMPORTAMENTO DE VISIBILIDADE**: Veículos importados ficam visíveis para administradores; usuários comuns só veem seus próprios veículos
+- ✅ **SOLUÇÃO RECOMENDADA**: Vincular usuário ao transportador ANTES da importação para melhor organização
 
 ### 26/06/2025 - Configuração WebSocket para HTTPS/SSL IMPLEMENTADA
 - ✅ **PROBLEMA IDENTIFICADO**: WebSocket offline devido ao uso de HTTPS com certificado SSL

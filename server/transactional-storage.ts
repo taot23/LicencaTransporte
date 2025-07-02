@@ -168,29 +168,45 @@ export class TransactionalStorage implements IStorage {
   }
   
   async linkTransporterToUser(transporterId: number, userId: number | null): Promise<Transporter> {
-    // Verificar se o transportador existe
-    const transporter = await this.getTransporterById(transporterId);
-    if (!transporter) {
-      throw new Error("Transportador não encontrado");
-    }
-    
-    // Se userId for null, estamos apenas removendo a vinculação
-    if (userId !== null) {
-      // Verificar se o usuário existe
-      const user = await this.getUser(userId);
-      if (!user) {
-        throw new Error("Usuário não encontrado");
+    return await withTransaction(async (tx) => {
+      // Verificar se o transportador existe
+      const transporter = await this.getTransporterById(transporterId);
+      if (!transporter) {
+        throw new Error("Transportador não encontrado");
       }
-    }
-    
-    // Atualizar o transportador
-    const [updatedTransporter] = await db
-      .update(transporters)
-      .set({ userId })
-      .where(eq(transporters.id, transporterId))
-      .returning();
-    
-    return updatedTransporter;
+      
+      // Se userId for null, estamos apenas removendo a vinculação
+      if (userId !== null) {
+        // Verificar se o usuário existe
+        const user = await this.getUser(userId);
+        if (!user) {
+          throw new Error("Usuário não encontrado");
+        }
+      }
+      
+      // Transferir veículos que podem ter sido importados para este transportador
+      // mas ficaram sob outros usuários administrativos
+      if (userId) {
+        console.log(`[LINK USER] Verificando transferência de veículos para usuário ${userId} do transportador ${transporterId}`);
+        
+        // Por simplicidade, vamos usar uma estratégia baseada em logs para identificar
+        // veículos que precisam ser transferidos. Em uma implementação futura,
+        // poderia adicionar um campo transporterId na tabela vehicles
+        
+        // Para agora, o administrador precisará fazer a transferência manual
+        // ou re-importar os veículos após vincular o usuário
+        console.log(`[LINK USER] Transportador ${transporterId} vinculado ao usuário ${userId}. Veículos existentes podem precisar de transferência manual.`);
+      }
+      
+      // Atualizar o transportador
+      const [updatedTransporter] = await tx
+        .update(transporters)
+        .set({ userId })
+        .where(eq(transporters.id, transporterId))
+        .returning();
+      
+      return updatedTransporter;
+    });
   }
   
   async deleteTransporter(id: number): Promise<void> {
