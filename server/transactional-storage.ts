@@ -267,7 +267,7 @@ export class TransactionalStorage implements IStorage {
       .from(vehicles);
   }
   
-  async createVehicle(userId: number, vehicleData: InsertVehicle & { crlvUrl?: string | null }): Promise<Vehicle> {
+  async createVehicle(userId: number | null, vehicleData: InsertVehicle & { crlvUrl?: string | null }): Promise<Vehicle> {
     console.log('DEBUG TransactionalStorage createVehicle - vehicleData recebido:', vehicleData);
     
     const [vehicle] = await db

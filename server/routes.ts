@@ -3166,12 +3166,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
             throw new Error(`Transportador não encontrado: ${rowData.transportador_cpf_cnpj}`);
           }
 
-          // Se o transportador não tem usuário vinculado, usar o usuário que está fazendo a importação
+          // Determinar userId para o veículo baseado no perfil do usuário e vinculação do transportador
           let targetUserId = transporter.userId;
           
+          // Se o usuário que está fazendo a importação é administrativo,
+          // não vincular veículo a ele, deixar como "Usuário undefined"
+          const isAdministrativeUser = isAdminUser(user);
+          
           if (!transporter.userId) {
-            console.log(`[BULK IMPORT] Transportador ${transporter.name} não possui usuário vinculado. Usando usuário da importação: ${user.email}`);
-            targetUserId = user.id;
+            if (isAdministrativeUser) {
+              console.log(`[BULK IMPORT] Transportador ${transporter.name} não possui usuário vinculado. Usuário administrativo ${user.email} - deixando veículo sem vinculação (undefined)`);
+              targetUserId = null;
+            } else {
+              console.log(`[BULK IMPORT] Transportador ${transporter.name} não possui usuário vinculado. Usando usuário da importação: ${user.email}`);
+              targetUserId = user.id;
+            }
           }
 
           // Verificar se a placa já existe
