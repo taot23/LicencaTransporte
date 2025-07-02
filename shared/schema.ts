@@ -168,7 +168,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
 // Vehicle model
 export const vehicles = pgTable("vehicles", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
+  userId: integer("user_id").references(() => users.id),
   plate: text("plate").notNull(),
   type: text("type").notNull(), // Unidade Tratora, Semirreboque, Reboque, Dolly, Prancha
   bodyType: text("body_type"), // Tipo de Carroceria: ABERTA, BASCULANTE, PORTA-CONTÊINER, FECHADA, TANQUE

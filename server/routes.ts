@@ -1269,7 +1269,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/vehicles', requireAuth, upload.single('crlvFile'), processVehicleData, async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const currentUser = req.user!;
+      
+      // Para usuários administrativos, não vincular o veículo a eles
+      // Deixar como "Usuário undefined" (userId = null)
+      const isAdministrativeUser = isAdminUser(currentUser);
+      const userId = isAdministrativeUser ? null : currentUser.id;
+      
+      console.log(`[VEHICLE CREATION] Usuário: ${currentUser.email} (${currentUser.role}), Administrativo: ${isAdministrativeUser}, userId assinado: ${userId}`);
       
       // Extrair dados do campo vehicleData (JSON string)
       let vehicleData;

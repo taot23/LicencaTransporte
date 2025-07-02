@@ -89,7 +89,7 @@ export interface IStorage {
   getVehiclesByUserId(userId: number): Promise<Vehicle[]>;
   getAllVehicles(): Promise<Vehicle[]>;
   createVehicle(
-    userId: number,
+    userId: number | null,
     vehicle: InsertVehicle & { crlvUrl?: string | null },
   ): Promise<Vehicle>;
   updateVehicle(id: number, vehicle: Partial<Vehicle>): Promise<Vehicle>;
