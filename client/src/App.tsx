@@ -18,6 +18,7 @@ import AdminVehiclesPage from "@/pages/admin/admin-vehicles";
 import VehicleModelsPage from "@/pages/admin/vehicle-models-page";
 import BoletosPage from "@/pages/admin/boletos-page";
 import DashboardAET from "@/pages/admin/dashboard-aet";
+import VehicleTransferPage from "@/pages/admin/vehicle-transfer-page";
 import MeusBoletos from "@/pages/meus-boletos";
 import BulkVehiclesPage from "@/pages/bulk-vehicles-page";
 import RedirectPage from "@/pages/redirect-page";
@@ -53,6 +54,7 @@ function Router() {
       <AdminRoute path="/admin/users" component={AdminUsersPage} />
       <StaffRoute path="/admin/vehicles" component={AdminVehiclesPage} requiredRole="operational" />
       <AdminRoute path="/admin/vehicle-models" component={VehicleModelsPage} />
+      <AdminRoute path="/admin/vehicle-transfer" component={VehicleTransferPage} />
       <StaffRoute path="/admin/boletos" component={BoletosPage} requiredRole="financial" />
       <AdminRoute path="/admin/dashboard-aet" component={DashboardAET} />
       

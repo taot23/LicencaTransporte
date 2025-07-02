@@ -4210,6 +4210,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Erro ao vincular transportador a usuário" });
     }
   });
+
+  // Endpoint para transferir veículos para outro usuário
+  app.post('/api/admin/vehicles/transfer', requireAdmin, async (req, res) => {
+    try {
+      const { vehicleIds, targetUserId } = req.body;
+      
+      if (!vehicleIds || !Array.isArray(vehicleIds) || vehicleIds.length === 0) {
+        return res.status(400).json({ message: "Lista de veículos é obrigatória" });
+      }
+      
+      if (!targetUserId) {
+        return res.status(400).json({ message: "Usuário de destino é obrigatório" });
+      }
+      
+      // Verificar se o usuário de destino existe
+      const targetUser = await storage.getUser(targetUserId);
+      if (!targetUser) {
+        return res.status(404).json({ message: "Usuário de destino não encontrado" });
+      }
+      
+      // Transferir veículos um por um
+      const transferredVehicles = [];
+      for (const vehicleId of vehicleIds) {
+        try {
+          const vehicle = await storage.getVehicleById(vehicleId);
+          if (vehicle) {
+            await storage.updateVehicle(vehicleId, { userId: targetUserId });
+            transferredVehicles.push(vehicleId);
+          }
+        } catch (error) {
+          console.error(`Erro ao transferir veículo ${vehicleId}:`, error);
+        }
+      }
+      
+      console.log(`[TRANSFER] ${transferredVehicles.length} veículos transferidos para usuário ${targetUserId}`);
+      
+      res.json({
+        success: true,
+        transferredCount: transferredVehicles.length,
+        transferredVehicles
+      });
+    } catch (error) {
+      console.error("Erro ao transferir veículos:", error);
+      res.status(500).json({ message: "Erro ao transferir veículos" });
+    }
+  });
   
   // Rota para obter usuários não-admin para seleção
   app.get('/api/admin/non-admin-users', requireAdmin, async (req, res) => {
