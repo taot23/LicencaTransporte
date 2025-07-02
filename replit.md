@@ -44,6 +44,17 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 02/07/2025 - Sistema de Navegação Hierárquica Implementado
+- ✅ **MENU HIERÁRQUICO**: Implementado menu "Veículos" com submenus expansíveis no sidebar
+- ✅ **SUBMENUS ORGANIZADOS**: Agrupados em: Veículos Cadastrados, Cadastro em Massa, Modelos de Veículos, Transferir Veículos
+- ✅ **SCROLL FUNCIONAL**: Sidebar agora tem scroll para melhor navegação em telas menores
+- ✅ **AUTO-EXPANSÃO**: Menu expande automaticamente quando navegando para páginas relacionadas a veículos
+- ✅ **PERMISSÕES CORRETAS**: Usuários transportadores (role 'user') bloqueados de acessar "Modelos de Veículos" e "Cadastro em Massa"
+- ✅ **INDICADORES VISUAIS**: Setas ChevronRight/ChevronDown mostram estado do menu (expandido/retraído)
+- ✅ **DESIGN HIERÁRQUICO**: Indentação e bordas visuais para clara hierarquia de menus
+- ✅ **DUPLICATAS REMOVIDAS**: Menus duplicados removidos da seção administrativa
+- ✅ **ÍCONES APROPRIADOS**: Upload para "Cadastro em Massa", Car para "Modelos", RefreshCw para "Transferir"
+
 ### 02/07/2025 - Sistema de Importação em Massa de Veículos via CSV COMPLETO + Correções
 - ✅ **IMPORTAÇÃO FUNCIONANDO**: Sistema de bulk import via CSV totalmente operacional
 - ✅ **PROBLEMA VINCULAÇÃO CORRIGIDO**: Veículos agora são corretamente vinculados aos transportadores pelo CNPJ/CPF da planilha

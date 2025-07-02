@@ -23,7 +23,8 @@ import {
   Car,
   RefreshCw,
   Receipt,
-  BarChart3
+  BarChart3,
+  UploadCloud
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -165,13 +166,13 @@ export function Sidebar({ className }: SidebarProps) {
                     )}
                     onClick={() => handleNavigate("/cadastro-massa-veiculos")}
                   >
-                    <RefreshCw className="mr-3 h-4 w-4" />
+                    <UploadCloud className="mr-3 h-4 w-4" />
                     Cadastro em Massa
                   </Button>
                 )}
                 
-                {/* Modelos de Veículos - Apenas para admins */}
-                {permissions.canViewVehicleModels() && (
+                {/* Modelos de Veículos - Apenas para usuários administrativos (não transportadores) */}
+                {permissions.canViewVehicleModels() && user?.role !== 'user' && (
                   <Button
                     variant="ghost"
                     className={cn(
@@ -185,8 +186,8 @@ export function Sidebar({ className }: SidebarProps) {
                   </Button>
                 )}
                 
-                {/* Transferir Veículos - Apenas para admins */}
-                {permissions.canViewUsers() && (
+                {/* Transferir Veículos - Apenas para usuários administrativos (não transportadores) */}
+                {permissions.canViewUsers() && user?.role !== 'user' && (
                   <Button
                     variant="ghost"
                     className={cn(
