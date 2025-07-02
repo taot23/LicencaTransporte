@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -14,11 +14,10 @@ import {
   ListChecks, 
   LogOut, 
   ChevronRight, 
-  ChevronLeft,
+  ChevronDown,
   Building2, 
   ClipboardEdit,
   LayoutDashboard,
-  ArrowLeftRight,
   Users,
   Settings,
   Car,
@@ -43,6 +42,7 @@ export function Sidebar({ className }: SidebarProps) {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [vehicleMenuExpanded, setVehicleMenuExpanded] = useState(false);
 
   const userInitials = user?.fullName
     .split(' ')
@@ -92,7 +92,7 @@ export function Sidebar({ className }: SidebarProps) {
         <Logo width={120} className="py-2" />
       </div>
       
-      <div className="px-2 py-4 space-y-1">
+      <div className="px-2 py-4 space-y-1 overflow-y-auto h-full max-h-screen scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
         {/* Dashboard - Apenas para transportadores (usuários comuns) */}
         {user?.role === 'user' && (
           <Button
@@ -110,34 +110,90 @@ export function Sidebar({ className }: SidebarProps) {
         
 
         
-        {/* Veículos Cadastrados - Todos podem ver */}
+        {/* Menu Hierárquico de Veículos */}
         {permissions.canViewVehicles() && (
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start text-white hover:bg-gray-700",
-              location === "/vehicles" ? "bg-gray-700" : "bg-transparent"
+          <div className="space-y-1">
+            {/* Menu Principal de Veículos */}
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full justify-start text-white hover:bg-gray-700",
+                (location === "/vehicles" || location === "/admin/vehicle-models" || location === "/admin/vehicle-transfer" || location === "/cadastro-massa-veiculos") ? "bg-gray-700" : "bg-transparent"
+              )}
+              onClick={() => setVehicleMenuExpanded(!vehicleMenuExpanded)}
+            >
+              <Truck className="mr-3 h-5 w-5" />
+              <span className="flex-1 text-left">Veículos</span>
+              {vehicleMenuExpanded ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </Button>
+            
+            {/* Submenus de Veículos */}
+            {vehicleMenuExpanded && (
+              <div className="ml-6 space-y-1 border-l border-gray-600 pl-4">
+                {/* Veículos Cadastrados */}
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start text-white hover:bg-gray-600 text-sm",
+                    location === "/vehicles" ? "bg-gray-600" : "bg-transparent"
+                  )}
+                  onClick={() => handleNavigate("/vehicles")}
+                >
+                  <Truck className="mr-3 h-4 w-4" />
+                  Veículos Cadastrados
+                </Button>
+                
+                {/* Cadastro em Massa - Apenas para usuários administrativos */}
+                {user?.role !== 'user' && (
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start text-white hover:bg-gray-600 text-sm",
+                      location === "/cadastro-massa-veiculos" ? "bg-gray-600" : "bg-transparent"
+                    )}
+                    onClick={() => handleNavigate("/cadastro-massa-veiculos")}
+                  >
+                    <RefreshCw className="mr-3 h-4 w-4" />
+                    Cadastro em Massa
+                  </Button>
+                )}
+                
+                {/* Modelos de Veículos - Apenas para admins */}
+                {permissions.canViewVehicleModels() && (
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start text-white hover:bg-gray-600 text-sm",
+                      location === "/admin/vehicle-models" ? "bg-gray-600" : "bg-transparent"
+                    )}
+                    onClick={() => handleNavigate("/admin/vehicle-models")}
+                  >
+                    <Car className="mr-3 h-4 w-4" />
+                    Modelos de Veículos
+                  </Button>
+                )}
+                
+                {/* Transferir Veículos - Apenas para admins */}
+                {permissions.canViewUsers() && (
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start text-white hover:bg-gray-600 text-sm",
+                      location === "/admin/vehicle-transfer" ? "bg-gray-600" : "bg-transparent"
+                    )}
+                    onClick={() => handleNavigate("/admin/vehicle-transfer")}
+                  >
+                    <RefreshCw className="mr-3 h-4 w-4" />
+                    Transferir Veículos
+                  </Button>
+                )}
+              </div>
             )}
-            onClick={() => handleNavigate("/vehicles")}
-          >
-            <Truck className="mr-3 h-5 w-5" />
-            Veículos Cadastrados
-          </Button>
-        )}
-        
-        {/* Cadastro em Massa de Veículos - Apenas para usuários administrativos */}
-        {user?.role !== 'user' && (
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start text-white hover:bg-gray-700",
-              location === "/cadastro-massa-veiculos" ? "bg-gray-700" : "bg-transparent"
-            )}
-            onClick={() => handleNavigate("/cadastro-massa-veiculos")}
-          >
-            <RefreshCw className="mr-3 h-5 w-5" />
-            Cadastro em Massa
-          </Button>
+          </div>
         )}
         
         {/* Solicitar Licença - Todos podem solicitar */}
@@ -268,35 +324,7 @@ export function Sidebar({ className }: SidebarProps) {
               </Button>
             )}
             
-            {/* Modelos de Veículos - conforme permissões */}
-            {permissions.canViewVehicleModels() && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-white hover:bg-gray-700",
-                  location === "/admin/vehicle-models" ? "bg-gray-700" : "bg-transparent"
-                )}
-                onClick={() => handleNavigate("/admin/vehicle-models")}
-              >
-                <Car className="mr-3 h-5 w-5" />
-                Modelos de Veículos
-              </Button>
-            )}
-            
-            {/* Transferir Veículos - apenas para admins */}
-            {permissions.canViewUsers() && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-white hover:bg-gray-700",
-                  location === "/admin/vehicle-transfer" ? "bg-gray-700" : "bg-transparent"
-                )}
-                onClick={() => handleNavigate("/admin/vehicle-transfer")}
-              >
-                <RefreshCw className="mr-3 h-5 w-5" />
-                Transferir Veículos
-              </Button>
-            )}
+
             
             {/* Módulo Financeiro - apenas para perfis financeiro, manager e admin */}
             {permissions.canViewFinancial() && (
