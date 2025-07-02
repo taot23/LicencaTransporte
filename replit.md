@@ -44,6 +44,18 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 02/07/2025 - Sistema de Busca por Veículo na Página "Transferir Veículos" IMPLEMENTADO
+- ✅ **CAMPO DE BUSCA**: Implementado campo de busca inteligente por placa, marca, modelo ou tipo de veículo
+- ✅ **FILTRO EM TEMPO REAL**: Busca instantânea com filtro usando useMemo para performance otimizada
+- ✅ **ÍCONES INTUITIVOS**: Ícone de lupa (Search) e botão X para limpar busca com feedback visual
+- ✅ **CONTADOR DE RESULTADOS**: Exibe quantos veículos foram encontrados versus total disponível
+- ✅ **ESTADO VAZIO PERSONALIZADO**: Mensagem contextual quando nenhum veículo é encontrado na busca
+- ✅ **BUSCA MULTILINGUAL**: Funciona com tipos traduzidos (ex: "Unidade Tratora", "Semirreboque")
+- ✅ **INTERFACE RESPONSIVA**: Campo de busca integrado ao design existente com posicionamento absoluto
+- ✅ **SELEÇÃO INTELIGENTE**: Botão "Selecionar Todos" agora considera apenas veículos filtrados
+- ✅ **LÓGICA OTIMIZADA**: Sistema usa filteredVehicles em todas as operações de exibição
+- ✅ **UX APRIMORADA**: Busca case-insensitive com trim automático para melhor experiência
+
 ### 02/07/2025 - Remoção Completa do Estado Maranhão (MA) do Sistema CONCLUÍDA
 - ✅ **ESTADO MA REMOVIDO**: Maranhão completamente removido de todos os componentes do sistema
 - ✅ **SHARED/SCHEMA.TS ATUALIZADO**: Lista brazilianStates no schema principal sem MA

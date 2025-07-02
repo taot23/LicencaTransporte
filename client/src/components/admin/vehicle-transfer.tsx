@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -11,13 +11,15 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { UserSelect } from "./user-select";
 import { Vehicle, User } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Truck } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowRight, Truck, Search, X } from "lucide-react";
 
 export function VehicleTransfer() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedVehicleIds, setSelectedVehicleIds] = useState<number[]>([]);
   const [targetUserId, setTargetUserId] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Carregar todos os veículos
   const { data: vehicles = [], isLoading: vehiclesLoading } = useQuery<Vehicle[]>({
@@ -28,6 +30,19 @@ export function VehicleTransfer() {
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
   });
+
+  // Filtrar veículos com base na busca
+  const filteredVehicles = useMemo(() => {
+    if (!searchTerm.trim()) return vehicles;
+    
+    const search = searchTerm.toLowerCase().trim();
+    return vehicles.filter(vehicle => 
+      vehicle.plate?.toLowerCase().includes(search) ||
+      vehicle.brand?.toLowerCase().includes(search) ||
+      vehicle.model?.toLowerCase().includes(search) ||
+      getVehicleTypeName(vehicle.type).toLowerCase().includes(search)
+    );
+  }, [vehicles, searchTerm]);
 
   // Mutação para transferir veículos
   const transferMutation = useMutation({
@@ -67,10 +82,14 @@ export function VehicleTransfer() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedVehicleIds(vehicles.map(v => v.id));
+      setSelectedVehicleIds(filteredVehicles.map(v => v.id));
     } else {
       setSelectedVehicleIds([]);
     }
+  };
+
+  const clearSearch = () => {
+    setSearchTerm("");
   };
 
   const getUserName = (userId: number) => {
@@ -106,6 +125,36 @@ export function VehicleTransfer() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Campo de busca de veículos */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Buscar veículos:</label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              type="text"
+              placeholder="Buscar por placa, marca, modelo ou tipo..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-10"
+            />
+            {searchTerm && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100"
+                onClick={clearSearch}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          {searchTerm && (
+            <p className="text-sm text-gray-600">
+              Mostrando {filteredVehicles.length} de {vehicles.length} veículos
+            </p>
+          )}
+        </div>
+
         {/* Seleção de usuário de destino */}
         <div className="space-y-2">
           <label className="text-sm font-medium">Transferir para usuário:</label>
@@ -145,29 +194,40 @@ export function VehicleTransfer() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {vehicles.map((vehicle) => (
-                  <TableRow key={vehicle.id}>
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedVehicleIds.includes(vehicle.id)}
-                        onCheckedChange={(checked) => 
-                          handleSelectVehicle(vehicle.id, checked as boolean)
-                        }
-                      />
-                    </TableCell>
-                    <TableCell className="font-mono font-semibold">
-                      {vehicle.plate}
-                    </TableCell>
-                    <TableCell>{getVehicleTypeName(vehicle.type)}</TableCell>
-                    <TableCell>{vehicle.brand} {vehicle.model}</TableCell>
-                    <TableCell>{getUserName(vehicle.userId)}</TableCell>
-                    <TableCell>
-                      <Badge variant={vehicle.status === 'active' ? 'default' : 'secondary'}>
-                        {vehicle.status === 'active' ? 'Ativo' : 'Inativo'}
-                      </Badge>
+                {filteredVehicles.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                      {searchTerm ? 
+                        `Nenhum veículo encontrado para "${searchTerm}"` : 
+                        "Nenhum veículo disponível"
+                      }
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  filteredVehicles.map((vehicle) => (
+                    <TableRow key={vehicle.id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedVehicleIds.includes(vehicle.id)}
+                          onCheckedChange={(checked) => 
+                            handleSelectVehicle(vehicle.id, checked as boolean)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell className="font-mono font-semibold">
+                        {vehicle.plate}
+                      </TableCell>
+                      <TableCell>{getVehicleTypeName(vehicle.type)}</TableCell>
+                      <TableCell>{vehicle.brand} {vehicle.model}</TableCell>
+                      <TableCell>{getUserName(vehicle.userId)}</TableCell>
+                      <TableCell>
+                        <Badge variant={vehicle.status === 'active' ? 'default' : 'secondary'}>
+                          {vehicle.status === 'active' ? 'Ativo' : 'Inativo'}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
