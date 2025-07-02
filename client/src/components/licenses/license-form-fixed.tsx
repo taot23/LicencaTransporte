@@ -61,7 +61,7 @@ const brazilianStates = [
   { value: "DF", label: "Distrito Federal" },
   { value: "ES", label: "Espírito Santo" },
   { value: "GO", label: "Goiás" },
-  { value: "MA", label: "Maranhão" },
+
   { value: "MT", label: "Mato Grosso" },
   { value: "MS", label: "Mato Grosso do Sul" },
   { value: "MG", label: "Minas Gerais" },

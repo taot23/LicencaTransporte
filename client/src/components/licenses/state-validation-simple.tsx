@@ -9,7 +9,7 @@ const ESTADOS_BRASIL = [
   { code: "DNIT", name: "FEDERAL" },
   { code: "ES", name: "Espírito Santo" },
   { code: "GO", name: "Goiás" },
-  { code: "MA", name: "Maranhão" },
+
   { code: "MG", name: "Minas Gerais" },
   { code: "MS", name: "Mato Grosso do Sul" },
   { code: "MT", name: "Mato Grosso" },

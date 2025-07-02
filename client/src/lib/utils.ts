@@ -87,7 +87,7 @@ export function getStateLabel(stateCode: string): string {
     'RN': 'Rio Grande do Norte',
     'CE': 'Ceará',
     'PI': 'Piauí',
-    'MA': 'Maranhão',
+
     'PA': 'Pará',
     'AP': 'Amapá',
     'AM': 'Amazonas',
