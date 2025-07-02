@@ -58,6 +58,9 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **WEBSOCKET INTEGRADO**: Notificações em tempo real de novos veículos importados
 - ✅ **ACESSO RESTRITO**: Menu "Cadastro em Massa" removido para usuários transportadores (role 'user')
 - ✅ **APENAS ADMINISTRATIVOS**: Cadastro em massa disponível apenas para admin, operational, supervisor, manager, financial
+- ✅ **LOGOUT OTIMIZADO**: Redirecionamento instantâneo sem aguardar servidor, cache limpo imediatamente
+- ✅ **CACHE REDUZIDO**: Tempo de cache diminuído para 30s, facilitando logout mais rápido
+- ✅ **TRANSIÇÕES ACELERADAS**: Delays de animação reduzidos para máximo 50ms
 
 ### 26/06/2025 - Configuração WebSocket para HTTPS/SSL IMPLEMENTADA
 - ✅ **PROBLEMA IDENTIFICADO**: WebSocket offline devido ao uso de HTTPS com certificado SSL

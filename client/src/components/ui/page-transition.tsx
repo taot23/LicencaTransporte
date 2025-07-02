@@ -10,12 +10,8 @@ export function PageTransition({ children, className }: PageTransitionProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Short delay to ensure transition is visible
-    const timeout = setTimeout(() => {
-      setIsVisible(true);
-    }, 10);
-
-    return () => clearTimeout(timeout);
+    // Immediate transition for faster page loads
+    setIsVisible(true);
   }, []);
 
   return (
@@ -43,9 +39,10 @@ export function FadeIn({
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    // Remove artificial delays for faster page loads
     const timeout = setTimeout(() => {
       setIsVisible(true);
-    }, delay);
+    }, Math.min(delay, 50)); // Max 50ms delay
 
     return () => clearTimeout(timeout);
   }, [delay]);

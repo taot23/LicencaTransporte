@@ -107,10 +107,10 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
-      // Performance otimizada: cache por 2 minutos para dados dinâmicos
-      staleTime: 2 * 60 * 1000, // 2 minutos
-      // Cache mais longo para reduzir requisições desnecessárias
-      gcTime: 10 * 60 * 1000, // 10 minutos (antigo cacheTime)
+      // Performance otimizada: cache reduzido para logout mais rápido
+      staleTime: 30 * 1000, // 30 segundos apenas
+      // Cache reduzido para limpeza mais rápida
+      gcTime: 2 * 60 * 1000, // 2 minutos apenas
       // Desabilita refetch automático para melhor performance
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
