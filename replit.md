@@ -44,19 +44,20 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
-### 01/07/2025 - Sistema de Importação em Massa de Veículos via CSV COMPLETO
+### 02/07/2025 - Sistema de Importação em Massa de Veículos via CSV COMPLETO + Correções
 - ✅ **IMPORTAÇÃO FUNCIONANDO**: Sistema de bulk import via CSV totalmente operacional
+- ✅ **PROBLEMA VINCULAÇÃO CORRIGIDO**: Veículos agora são corretamente vinculados aos transportadores pelo CNPJ/CPF da planilha
+- ✅ **LÓGICA CORRIGIDA**: Sistema usa userId do transportador encontrado, não do usuário que faz a importação
+- ✅ **VALIDAÇÃO APRIMORADA**: Verifica se transportador existe e tem usuário vinculado antes da importação
 - ✅ **MULTER CONFIGURADO**: Configuração específica `uploadCSV` para processar arquivos CSV com `memoryStorage`
 - ✅ **VALIDAÇÃO ROBUSTA**: Validação de formato CSV, colunas obrigatórias e tipos de veículos
 - ✅ **MAPEAMENTO CORRETO**: Tipos de veículos mapeados corretamente (Unidade Tratora → tractor_unit)
-- ✅ **INTEGRAÇÃO DATABASE**: Correção na chamada `createVehicle(userId, vehicleData)` para compatibilidade com storage
 - ✅ **CAMPOS TRADUZIDOS**: Status e tipos de veículos traduzidos para português brasileiro
-- ✅ **TESTE CONFIRMADO**: Importação de 2 veículos (QJH5634, QTM4295) para BENDO & CIA LTDA realizada com sucesso
 - ✅ **LOGS DETALHADOS**: Sistema de logs completo para debugging e monitoramento de importações
-- ✅ **VALIDAÇÃO TRANSPORTADOR**: Verificação automática de existência do transportador via CNPJ/CPF
 - ✅ **PREVENÇÃO DUPLICATAS**: Verificação de placas existentes antes da importação
 - ✅ **WEBSOCKET INTEGRADO**: Notificações em tempo real de novos veículos importados
-- ✅ **STATUS TRADUZIDOS**: "pending_documents" → "Pendente Documentação", "active" → "Ativo"
+- ✅ **ACESSO RESTRITO**: Menu "Cadastro em Massa" removido para usuários transportadores (role 'user')
+- ✅ **APENAS ADMINISTRATIVOS**: Cadastro em massa disponível apenas para admin, operational, supervisor, manager, financial
 
 ### 26/06/2025 - Configuração WebSocket para HTTPS/SSL IMPLEMENTADA
 - ✅ **PROBLEMA IDENTIFICADO**: WebSocket offline devido ao uso de HTTPS com certificado SSL

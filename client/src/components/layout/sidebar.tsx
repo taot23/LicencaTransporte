@@ -124,18 +124,20 @@ export function Sidebar({ className }: SidebarProps) {
           </Button>
         )}
         
-        {/* Cadastro em Massa de Veículos - Todos podem usar */}
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start text-white hover:bg-gray-700",
-            location === "/cadastro-massa-veiculos" ? "bg-gray-700" : "bg-transparent"
-          )}
-          onClick={() => handleNavigate("/cadastro-massa-veiculos")}
-        >
-          <RefreshCw className="mr-3 h-5 w-5" />
-          Cadastro em Massa
-        </Button>
+        {/* Cadastro em Massa de Veículos - Apenas para usuários administrativos */}
+        {user?.role !== 'user' && (
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-white hover:bg-gray-700",
+              location === "/cadastro-massa-veiculos" ? "bg-gray-700" : "bg-transparent"
+            )}
+            onClick={() => handleNavigate("/cadastro-massa-veiculos")}
+          >
+            <RefreshCw className="mr-3 h-5 w-5" />
+            Cadastro em Massa
+          </Button>
+        )}
         
         {/* Solicitar Licença - Todos podem solicitar */}
         {permissions.canCreateLicenses() && (
