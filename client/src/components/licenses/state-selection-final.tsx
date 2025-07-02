@@ -1,29 +1,7 @@
 import { useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLicenseValidationFinal } from "@/hooks/use-license-validation-final";
-
-const ESTADOS_BRASIL = [
-  { code: "AL", name: "Alagoas" },
-  { code: "BA", name: "Bahia" },
-  { code: "CE", name: "Ceará" },
-  { code: "DF", name: "Distrito Federal" },
-  { code: "DNIT", name: "FEDERAL" },
-  { code: "ES", name: "Espírito Santo" },
-  { code: "GO", name: "Goiás" },
-  { code: "MA", name: "Maranhão" },
-  { code: "MG", name: "Minas Gerais" },
-  { code: "MS", name: "Mato Grosso do Sul" },
-  { code: "MT", name: "Mato Grosso" },
-  { code: "PA", name: "Pará" },
-  { code: "PE", name: "Pernambuco" },
-  { code: "PR", name: "Paraná" },
-  { code: "RJ", name: "Rio de Janeiro" },
-  { code: "RS", name: "Rio Grande do Sul" },
-  { code: "SC", name: "Santa Catarina" },
-  { code: "SE", name: "Sergipe" },
-  { code: "SP", name: "São Paulo" },
-  { code: "TO", name: "Tocantins" }
-];
+import { brazilianStates } from "@shared/schema";
 
 interface Placas {
   cavalo?: string;
@@ -136,7 +114,7 @@ export function StateSelectionFinal({ selectedStates, onStatesChange, placas, di
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        {ESTADOS_BRASIL.map((estado) => {
+        {brazilianStates.map((estado) => {
           const isSelected = selectedStates.includes(estado.code);
           const estadoBloqueado = estadosBloqueados[estado.code];
           const isBloqueado = estadoBloqueado && estadoBloqueado.diasRestantes > 60;

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useLicenseValidationV2 } from '@/hooks/use-license-validation-v2';
+import { brazilianStates } from '@shared/schema';
 
 interface Placas {
   cavalo?: string;
@@ -18,35 +19,7 @@ interface StateSelectionWithValidationProps {
   disabled?: boolean;
 }
 
-const ESTADOS_BRASIL = [
-  { code: 'AC', name: 'Acre' },
-  { code: 'AL', name: 'Alagoas' },
-  { code: 'AP', name: 'Amapá' },
-  { code: 'AM', name: 'Amazonas' },
-  { code: 'BA', name: 'Bahia' },
-  { code: 'CE', name: 'Ceará' },
-  { code: 'DF', name: 'Distrito Federal' },
-  { code: 'ES', name: 'Espírito Santo' },
-  { code: 'GO', name: 'Goiás' },
-  { code: 'MA', name: 'Maranhão' },
-  { code: 'MT', name: 'Mato Grosso' },
-  { code: 'MS', name: 'Mato Grosso do Sul' },
-  { code: 'MG', name: 'Minas Gerais' },
-  { code: 'PA', name: 'Pará' },
-  { code: 'PB', name: 'Paraíba' },
-  { code: 'PR', name: 'Paraná' },
-  { code: 'PE', name: 'Pernambuco' },
-  { code: 'PI', name: 'Piauí' },
-  { code: 'RJ', name: 'Rio de Janeiro' },
-  { code: 'RN', name: 'Rio Grande do Norte' },
-  { code: 'RS', name: 'Rio Grande do Sul' },
-  { code: 'RO', name: 'Rondônia' },
-  { code: 'RR', name: 'Roraima' },
-  { code: 'SC', name: 'Santa Catarina' },
-  { code: 'SP', name: 'São Paulo' },
-  { code: 'SE', name: 'Sergipe' },
-  { code: 'TO', name: 'Tocantins' },
-];
+
 
 export function StateSelectionWithValidation({ selectedStates, onStatesChange, placas, disabled }: StateSelectionWithValidationProps) {
   const { verificarEstadoComLicencaVigente, estadosBloqueados, isChecking, setEstadosBloqueados } = useLicenseValidationV2();
@@ -135,7 +108,7 @@ export function StateSelectionWithValidation({ selectedStates, onStatesChange, p
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Estados de Circulação</h3>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        {ESTADOS_BRASIL.map((estado) => {
+        {brazilianStates.map((estado) => {
           const isSelected = selectedStates.includes(estado.code);
           const estadoBloqueado = estadosBloqueados[estado.code];
           const isBloqueado = estadoBloqueado && estadoBloqueado.diasRestantes > 60;
