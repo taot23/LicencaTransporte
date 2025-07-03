@@ -44,7 +44,15 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
-### 03/07/2025 - Correções de Permissões e Autenticação para Usuários Operacionais
+### 03/07/2025 - Sistema WebSocket Completo para Tempo Real + Permissões Operacionais
+- ✅ **WEBSOCKET EXPANSÃO COMPLETA**: Sistema WebSocket agora cobre TODOS os módulos do sistema em tempo real
+- ✅ **NOVOS TIPOS DE MENSAGEM**: Adicionados BOLETO_UPDATE, VEHICLE_MODEL_UPDATE, USER_UPDATE para cobertura total
+- ✅ **BACKEND BROADCASTS IMPLEMENTADOS**: Todas operações CRUD (criar, editar, excluir) agora enviam notificações WebSocket
+  • Usuários: broadcastUserUpdate para criação, edição e exclusão
+  • Boletos: broadcastBoletoUpdate para operações financeiras
+  • Modelos de Veículos: broadcastVehicleModelUpdate para gestão administrativa
+- ✅ **FRONTEND CACHE INVALIDATION**: Hook useWebSocket expandido para processar todos os novos tipos de mensagem
+- ✅ **PERMISSÕES OPERACIONAL CORRIGIDAS**: Usuários operacionais agora podem visualizar lista de usuários para transferir veículos
 - ✅ **SISTEMA VEÍCULOS ADMINISTRATIVOS**: Implementado sistema para desvinculação de veículos de usuários administrativos
 - ✅ **USUÁRIOS ADMINISTRATIVOS**: Veículos cadastrados por admin/operational/supervisor/manager/financial ficam como "Usuário undefined" (userId = null)
 - ✅ **SCHEMA ATUALIZADO**: Campo userId na tabela vehicles aceita valores null corretamente
@@ -62,7 +70,6 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **PROBLEMA DUPLICAÇÃO DE PLACAS RESOLVIDO**: Correção na função `getFormPlates()` para eliminar placas duplicadas que causavam falsos negativos
 - ✅ **NOVA REGRA DE VALIDAÇÃO FUNCIONANDO**: Backend processa corretamente composições idênticas vs diferentes
 - ✅ **WEBSOCKET IMPLEMENTADO EM RASCUNHOS**: Usuários transportadores agora recebem atualizações em tempo real quando rascunhos são criados/excluídos
-- ✅ **PERMISSÕES OPERACIONAL CORRIGIDAS**: Usuários operacionais agora podem visualizar lista de usuários para transferir veículos
 - ⚠️ **TESTE PENDENTE**: Necessário testar estados AL, BA, CE, DF, DNIT, MG, MS que devem bloquear com placas BDI1A71+BCB-0886+BCB-0887
 
 ### 02/07/2025 - Sistema de Busca por Veículo na Página "Transferir Veículos" IMPLEMENTADO

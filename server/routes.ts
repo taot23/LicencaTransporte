@@ -255,7 +255,7 @@ const requireOwnerOrStaff = (req: any, res: any, next: any) => {
 
 // Tipo para as mensagens WebSocket
 interface WSMessage {
-  type: 'STATUS_UPDATE' | 'LICENSE_UPDATE' | 'DASHBOARD_UPDATE' | 'VEHICLE_UPDATE' | 'TRANSPORTER_UPDATE' | 'USER_UPDATE' | 'ACTIVITY_LOG_UPDATE' | 'CACHE_INVALIDATION';
+  type: 'STATUS_UPDATE' | 'LICENSE_UPDATE' | 'DASHBOARD_UPDATE' | 'VEHICLE_UPDATE' | 'TRANSPORTER_UPDATE' | 'USER_UPDATE' | 'ACTIVITY_LOG_UPDATE' | 'CACHE_INVALIDATION' | 'BOLETO_UPDATE' | 'VEHICLE_MODEL_UPDATE';
   data: any;
 }
 
@@ -512,6 +512,42 @@ const broadcastCacheInvalidation = (queryKeys: string[]) => {
     type: 'CACHE_INVALIDATION',
     data: {
       queryKeys,
+      timestamp: new Date().toISOString()
+    }
+  });
+};
+
+const broadcastUserUpdate = (userId: number, action: string, user?: any) => {
+  broadcastMessage({
+    type: 'USER_UPDATE',
+    data: {
+      userId,
+      action, // 'created', 'updated', 'deleted'
+      user,
+      timestamp: new Date().toISOString()
+    }
+  });
+};
+
+const broadcastBoletoUpdate = (boletoId: number, action: string, boleto?: any) => {
+  broadcastMessage({
+    type: 'BOLETO_UPDATE',
+    data: {
+      boletoId,
+      action, // 'created', 'updated', 'deleted'
+      boleto,
+      timestamp: new Date().toISOString()
+    }
+  });
+};
+
+const broadcastVehicleModelUpdate = (modelId: number, action: string, model?: any) => {
+  broadcastMessage({
+    type: 'VEHICLE_MODEL_UPDATE',
+    data: {
+      modelId,
+      action, // 'created', 'updated', 'deleted'
+      model,
       timestamp: new Date().toISOString()
     }
   });
@@ -3830,6 +3866,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Remover a senha do objeto retornado
       const { password: _, ...userWithoutPassword } = newUser;
       
+      // Notificar via WebSocket sobre novo usuário
+      broadcastUserUpdate(newUser.id, 'created', userWithoutPassword);
+      broadcastDashboardUpdate();
+      
       res.status(201).json(userWithoutPassword);
     } catch (error) {
       console.error("Erro ao criar usuário:", error);
@@ -3889,6 +3929,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Remover a senha do objeto retornado
       const { password: _, ...userWithoutPassword } = updatedUser;
       
+      // Notificar via WebSocket sobre atualização de usuário
+      broadcastUserUpdate(updatedUser.id, 'updated', userWithoutPassword);
+      
       res.json(userWithoutPassword);
     } catch (error) {
       console.error("Erro ao atualizar usuário:", error);
@@ -3917,6 +3960,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Excluir o usuário
       await storage.deleteUser(userId);
+      
+      // Notificar via WebSocket sobre exclusão de usuário
+      broadcastUserUpdate(userId, 'deleted', { id: userId });
+      broadcastDashboardUpdate();
       
       res.json({ message: "Usuário excluído com sucesso" });
     } catch (error) {
@@ -4819,6 +4866,10 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     try {
       const vehicleModelData = insertVehicleModelSchema.parse(req.body);
       const newModel = await storage.createVehicleModel(vehicleModelData);
+      
+      // Notificar via WebSocket sobre novo modelo de veículo
+      broadcastVehicleModelUpdate(newModel.id, 'created', newModel);
+      
       res.status(201).json(newModel);
     } catch (error) {
       console.error("Erro ao criar modelo de veículo:", error);
@@ -4846,6 +4897,9 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       if (!updatedModel) {
         return res.status(404).json({ message: "Modelo de veículo não encontrado" });
       }
+      
+      // Notificar via WebSocket sobre atualização de modelo de veículo (PATCH)
+      broadcastVehicleModelUpdate(id, 'updated', updatedModel);
       
       res.json(updatedModel);
     } catch (error) {
@@ -4875,6 +4929,9 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         return res.status(404).json({ message: "Modelo de veículo não encontrado" });
       }
       
+      // Notificar via WebSocket sobre atualização de modelo de veículo (PUT)
+      broadcastVehicleModelUpdate(id, 'updated', updatedModel);
+      
       res.json(updatedModel);
     } catch (error) {
       console.error("Erro ao atualizar modelo de veículo:", error);
@@ -4897,6 +4954,10 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     try {
       const id = parseInt(req.params.id);
       await storage.deleteVehicleModel(id);
+      
+      // Notificar via WebSocket sobre exclusão de modelo de veículo
+      broadcastVehicleModelUpdate(id, 'deleted', { id });
+      
       res.status(204).send();
     } catch (error) {
       console.error("Erro ao deletar modelo de veículo:", error);
@@ -5269,6 +5330,10 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       const validatedData = insertBoletoSchema.parse(req.body);
       const boleto = await storage.createBoleto(validatedData);
       
+      // Notificar via WebSocket sobre novo boleto
+      broadcastBoletoUpdate(boleto.id, 'created', boleto);
+      broadcastDashboardUpdate();
+      
       res.status(201).json(boleto);
     } catch (error) {
       console.error("Erro ao criar boleto:", error);
@@ -5291,6 +5356,10 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       // Os uploads já foram feitos separadamente via /api/upload/boleto
       // Aqui recebemos apenas os dados do formulário incluindo as URLs dos arquivos
       const boleto = await storage.updateBoleto(id, req.body);
+      
+      // Notificar via WebSocket sobre atualização de boleto
+      broadcastBoletoUpdate(id, 'updated', boleto);
+      
       res.json(boleto);
     } catch (error) {
       console.error("Erro ao atualizar boleto:", error);
@@ -5311,6 +5380,10 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     try {
       const id = parseInt(req.params.id);
       await storage.deleteBoleto(id);
+      
+      // Notificar via WebSocket sobre exclusão de boleto
+      broadcastBoletoUpdate(id, 'deleted', { id });
+      
       res.status(204).send();
     } catch (error) {
       console.error("Erro ao deletar boleto:", error);
