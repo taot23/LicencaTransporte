@@ -1,3 +1,4 @@
+
 module.exports = {
   apps: [{
     name: 'aet-license-system',
@@ -6,7 +7,7 @@ module.exports = {
     env: {
       NODE_ENV: 'production',
       PORT: 5000,
-      DATABASE_URL: 'postgresql://aetuser:nvs123@localhost:5432/aetlicensesystem',
+      DATABASE_URL: 'postgresql://aetuser:AET@License2025!@localhost:5432/aetlicensesystem',
       DEBUG_PERMISSIONS: 'true',
       DEBUG_AUTH: 'true'
     },
