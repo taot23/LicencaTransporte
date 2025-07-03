@@ -1,0 +1,654 @@
+/home/servidorvoipnvs/.pm2/logs/aet-license-system-out.log last 10 lines:
+2|aet-lice | Novo cliente WebSocket conectado
+2|aet-lice | 4:23:34 AM [express] GET /api/licenses/drafts 401 in 2ms :: {"message":"Não autenticado"}
+2|aet-lice | 4:23:34 AM [express] GET /api/licenses/drafts 401 in 1ms :: {"message":"Não autenticado"}
+2|aet-lice | 4:23:35 AM [express] GET /api/licenses/drafts 401 in 1ms :: {"message":"Não autenticado"}
+2|aet-lice | Cliente WebSocket desconectado
+2|aet-lice | 4:23:58 AM [express] GET /api/user 401 in 1ms :: {"message":"Não autenticado"}
+2|aet-lice | Novo cliente WebSocket conectado
+2|aet-lice | Novo cliente WebSocket conectado
+2|aet-lice | Cliente WebSocket desconectado
+2|aet-lice | Novo cliente WebSocket conectado
+
+2|aet-license-system  | Login bem-sucedido via fallback para admin@sistema.com
+2|aet-license-system  | 4:24:17 AM [express] POST /api/login 200 in 3ms :: {"email":"admin@sistema.com","isAdmin":true,"id":…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | 4:24:18 AM [express] GET /api/dashboard/vehicle-stats 304 in 25ms :: []
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [DASHBOARD NEW] Usuário 1 (admin@sistema.com) role: admin
+2|aet-license-system  | [DASHBOARD NEW] ADMIN - Coletando dados globais
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | 4:24:18 AM [express] GET /api/dashboard/state-stats 200 in 42ms :: []
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [DASHBOARD NEW] ADMIN - Retornando: {
+2|aet-license-system  |   issuedLicenses: 13,
+2|aet-license-system  |   pendingLicenses: 4,
+2|aet-license-system  |   registeredVehicles: 68,
+2|aet-license-system  |   activeVehicles: 68,
+2|aet-license-system  |   recentLicenses: [
+2|aet-license-system  |     {
+2|aet-license-system  |       id: 28,
+2|aet-license-system  |       requestNumber: 'AET-2025-4759',
+2|aet-license-system  |       type: 'bitrain_9_axles',
+2|aet-license-system  |       mainVehiclePlate: 'BDH9E30',
+2|aet-license-system  |       states: [Array],
+2|aet-license-system  |       status: 'pending_registration',
+2|aet-license-system  |       createdAt: 2025-07-02T12:36:36.125Z
+2|aet-license-system  |     },
+2|aet-license-system  |     {
+2|aet-license-system  |       id: 24,
+2|aet-license-system  |       requestNumber: 'AET-2025-5330',
+2|aet-license-system  |       type: 'bitrain_9_axles',
+2|aet-license-system  |       mainVehiclePlate: 'RRP1C83',
+2|aet-license-system  |       states: [Array],
+2|aet-license-system  |       status: 'approved',
+2|aet-license-system  |       createdAt: 2025-06-13T16:52:35.997Z
+2|aet-license-system  |     },
+2|aet-license-system  |     {
+2|aet-license-system  |       id: 23,
+2|aet-license-system  |       requestNumber: 'AET-2025-3613',
+2|aet-license-system  |       type: 'bitrain_9_axles',
+2|aet-license-system  |       mainVehiclePlate: 'RRP1D23',
+2|aet-license-system  |       states: [Array],
+2|aet-license-system  |       status: 'pending_registration',
+2|aet-license-system  |       createdAt: 2025-06-13T16:49:47.979Z
+2|aet-license-system  |     },
+2|aet-license-system  |     {
+2|aet-license-system  |       id: 22,
+2|aet-license-system  |       requestNumber: 'AET-2025-6440',
+2|aet-license-system  |       type: 'bitrain_9_axles',
+2|aet-license-system  |       mainVehiclePlate: 'RRP0I53',
+2|aet-license-system  |       states: [Array],
+2|aet-license-system  |       status: 'approved',
+2|aet-license-system  |       createdAt: 2025-06-13T16:47:19.495Z
+2|aet-license-system  |     },
+2|aet-license-system  |     {
+2|aet-license-system  |       id: 21,
+2|aet-license-system  |       requestNumber: 'AET-2025-7389',
+2|aet-license-system  |       type: 'bitrain_9_axles',
+2|aet-license-system  |       mainVehiclePlate: 'RRP1H63',
+2|aet-license-system  |       states: [Array],
+2|aet-license-system  |       status: 'approved',
+2|aet-license-system  |       createdAt: 2025-06-13T14:13:46.803Z
+2|aet-license-system  |     }
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | 4:24:18 AM [express] GET /api/admin/transporters 304 in 30ms :: [{"id":1,"personType":"pj","name":"T…
+2|aet-license-system  | 4:24:18 AM [express] GET /api/dashboard/stats 200 in 78ms :: {"issuedLicenses":13,"pendingLicenses":…
+2|aet-license-system  | Licença exemplo recuperada: {
+2|aet-license-system  |   "id": 6,
+2|aet-license-system  |   "userId": 8,
+2|aet-license-system  |   "transporterId": 1,
+2|aet-license-system  |   "requestNumber": "AET-2025-3299",
+2|aet-license-system  |   "type": "bitrain_9_axles",
+2|aet-license-system  |   "mainVehiclePlate": "BCX9H20",
+2|aet-license-system  |   "tractorUnitId": 53,
+2|aet-license-system  |   "firstTrailerId": 54,
+2|aet-license-system  |   "dollyId": null,
+2|aet-license-system  |   "secondTrailerId": 55,
+2|aet-license-system  |   "flatbedId": null,
+2|aet-license-system  |   "length": 2600,
+2|aet-license-system  |   "width": 260,
+2|aet-license-system  |   "height": 440,
+2|aet-license-system  |   "cargoType": "liquid_cargo",
+2|aet-license-system  |   "additionalPlates": [],
+2|aet-license-system  |   "additionalPlatesDocuments": [],
+2|aet-license-system  |   "states": [
+2|aet-license-system  |     "DNIT",
+2|aet-license-system  |     "PR",
+2|aet-license-system  |     "SP",
+2|aet-license-system  |     "MS"
+2|aet-license-system  |   ],
+2|aet-license-system  |   "status": "pending_registration",
+2|aet-license-system  |   "stateStatuses": [
+2|aet-license-system  |     "SP:registration_in_progress"
+2|aet-license-system  |   ],
+2|aet-license-system  |   "stateFiles": [],
+2|aet-license-system  |   "stateAETNumbers": [],
+2|aet-license-system  |   "createdAt": "2025-06-04T12:52:20.115Z",
+2|aet-license-system  |   "updatedAt": "2025-06-09T13:24:09.127Z",
+2|aet-license-system  |   "isDraft": false,
+2|aet-license-system  |   "comments": "",
+2|aet-license-system  |   "licenseFileUrl": null,
+2|aet-license-system  |   "validUntil": null,
+2|aet-license-system  |   "issuedAt": null,
+2|aet-license-system  |   "aetNumber": null,
+2|aet-license-system  |   "selectedCnpj": null,
+2|aet-license-system  |   "stateCnpjs": [
+2|aet-license-system  |     "SP:08916636000190"
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | Mesma licença diretamente do banco de dados: {
+2|aet-license-system  |   "id": 6,
+2|aet-license-system  |   "userId": 8,
+2|aet-license-system  |   "transporterId": 1,
+2|aet-license-system  |   "requestNumber": "AET-2025-3299",
+2|aet-license-system  |   "type": "bitrain_9_axles",
+2|aet-license-system  |   "mainVehiclePlate": "BCX9H20",
+2|aet-license-system  |   "tractorUnitId": 53,
+2|aet-license-system  |   "firstTrailerId": 54,
+2|aet-license-system  |   "dollyId": null,
+2|aet-license-system  |   "secondTrailerId": 55,
+2|aet-license-system  |   "flatbedId": null,
+2|aet-license-system  |   "length": 2600,
+2|aet-license-system  |   "width": 260,
+2|aet-license-system  |   "height": 440,
+2|aet-license-system  |   "cargoType": "liquid_cargo",
+2|aet-license-system  |   "additionalPlates": [],
+2|aet-license-system  |   "additionalPlatesDocuments": [],
+2|aet-license-system  |   "states": [
+2|aet-license-system  |     "DNIT",
+2|aet-license-system  |     "PR",
+2|aet-license-system  |     "SP",
+2|aet-license-system  |     "MS"
+2|aet-license-system  |   ],
+2|aet-license-system  |   "status": "pending_registration",
+2|aet-license-system  |   "stateStatuses": [
+2|aet-license-system  |     "SP:registration_in_progress"
+2|aet-license-system  |   ],
+2|aet-license-system  |   "stateFiles": [],
+2|aet-license-system  |   "stateAETNumbers": [],
+2|aet-license-system  |   "createdAt": "2025-06-04T12:52:20.115Z",
+2|aet-license-system  |   "updatedAt": "2025-06-09T13:24:09.127Z",
+2|aet-license-system  |   "isDraft": false,
+2|aet-license-system  |   "comments": "",
+2|aet-license-system  |   "licenseFileUrl": null,
+2|aet-license-system  |   "validUntil": null,
+2|aet-license-system  |   "issuedAt": null,
+2|aet-license-system  |   "aetNumber": null,
+2|aet-license-system  |   "selectedCnpj": null,
+2|aet-license-system  |   "stateCnpjs": [
+2|aet-license-system  |     "SP:08916636000190"
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | Total de licenças admin: 18, filtradas: 17, incluindo renovação: false
+2|aet-license-system  | 4:24:18 AM [express] GET /api/admin/licenses 304 in 51ms :: [{"id":28,"userId":11,"transporterId":1,…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | 4:24:18 AM [express] GET /api/public/transporters/1 304 in 6ms :: {"id":1,"name":"TRANSPORTADORA NOS…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | 4:24:18 AM [express] GET /api/public/transporters/1 304 in 16ms :: {"id":1,"name":"TRANSPORTADORA NO…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | Usuário admin@sistema.com (admin) tem acesso administrativo. Buscando todos os rascunhos.
+2|aet-license-system  | [DEBUG RENOVAÇÃO] Parâmetro includeRenewal: true
+2|aet-license-system  | [DEBUG RENOVAÇÃO] Total de rascunhos encontrados: 1
+2|aet-license-system  | [DEBUG RENOVAÇÃO] Total de rascunhos retornados: 1
+2|aet-license-system  | [DEBUG DETALHES] Retornando 1 licenças com os seguintes IDs:
+2|aet-license-system  | - ID: 31, isDraft: true, status: pending_registration, transporterId: 1, cargoType: liquid_cargo, comments: Renovação da licença AET-2025-
+2|aet-license-system  | 4:24:20 AM [express] GET /api/licenses/drafts 304 in 7ms :: [{"id":31,"user_id":11,"transporter_id":…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [DEBUG VEHICLES] Usuário admin@sistema.com (ID: 1, role: admin) buscando veículos
+2|aet-license-system  | [DEBUG VEHICLES] Usuário admin - buscando todos os veículos
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [DEBUG TRANSPORTERS] Usuário admin@sistema.com (ID: 1, role: admin) buscando transportadores
+2|aet-license-system  | [DEBUG VEHICLES] Admin encontrou 68 veículos no total
+2|aet-license-system  | 4:24:22 AM [express] GET /api/vehicles 304 in 13ms :: [{"id":59,"userId":8,"plate":"APK-4438","type"…
+2|aet-license-system  | [DEBUG TRANSPORTERS] Total de transportadores no sistema: 2
+2|aet-license-system  | [DEBUG TRANSPORTERS] Usuário admin - retornando todos os 2 transportadores
+2|aet-license-system  | 4:24:22 AM [express] GET /api/user/transporters 304 in 12ms :: [{"id":1,"personType":"pj","name":"TR…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'AL',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: AL, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado AL
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ AL LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:22 AM [express] POST /api/validacao-critica 200 in 8ms :: {"bloqueado":false,"estado":"AL","pla…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'BA',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: BA, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado BA
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ BA LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:22 AM [express] POST /api/validacao-critica 200 in 11ms :: {"bloqueado":false,"estado":"BA","pl…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'CE',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: CE, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado CE
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ CE LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:22 AM [express] POST /api/validacao-critica 200 in 6ms :: {"bloqueado":false,"estado":"CE","pla…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'DF',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: DF, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado DF
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ DF LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:22 AM [express] POST /api/validacao-critica 200 in 7ms :: {"bloqueado":false,"estado":"DF","pla…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'DNIT',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: DNIT, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado DNIT
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 2
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Verificando licença 189516/2025E (308 dias restantes)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Cavalo existente: SFK9H69, novo: RRP1C83, igual: false
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Composição existente: [AYP8B74,AYP8B75,BCB0I71,BCB0I71,BCB0I72], nova: [AYM8F14,AYM8F19,AYP8B74,AYP8B75,BCB0I71,BCB0I72,BCB0I74,BCB0I83,BCB0I84,BCD6C01,BCR9D55,BCR9D58,BCS0C75,BCS0C86,BCT6I78,BCT6I80,BCW1A69,BCW1A71,RRQ6F03,RRQ6F33,RRQ6F53,RRQ6I43,RRQ6I93,RRQ6J13,RRS2E12,RRS2E22,RRS3H02,RRS3H22], igual: false
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ Licença 189516/2025E não bloqueia - cavalo diferente ou composição diferente
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Verificando licença 25033/2025E (200 dias restantes)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Cavalo existente: TAZ3I28, novo: RRP1C83, igual: false
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Composição existente: [AYP8B74,AYP8B75,BCB-0886,BCB-0887,BCB0I71], nova: [AYM8F14,AYM8F19,AYP8B74,AYP8B75,BCB0I71,BCB0I72,BCB0I74,BCB0I83,BCB0I84,BCD6C01,BCR9D55,BCR9D58,BCS0C75,BCS0C86,BCT6I78,BCT6I80,BCW1A69,BCW1A71,RRQ6F03,RRQ6F33,RRQ6F53,RRQ6I43,RRQ6I93,RRQ6J13,RRS2E12,RRS2E22,RRS3H02,RRS3H22], igual: false
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ Licença 25033/2025E não bloqueia - cavalo diferente ou composição diferente
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ DNIT LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:23 AM [express] POST /api/validacao-critica 200 in 11ms :: {"bloqueado":false,"estado":"DNIT","…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'ES',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: ES, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado ES
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ ES LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:23 AM [express] POST /api/validacao-critica 200 in 7ms :: {"bloqueado":false,"estado":"ES","pla…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'GO',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: GO, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado GO
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ GO LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:24 AM [express] POST /api/validacao-critica 200 in 5ms :: {"bloqueado":false,"estado":"GO","pla…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'MG',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: MG, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado MG
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ MG LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:24 AM [express] POST /api/validacao-critica 200 in 7ms :: {"bloqueado":false,"estado":"MG","pla…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'MS',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: MS, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado MS
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ MS LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:24 AM [express] POST /api/validacao-critica 200 in 5ms :: {"bloqueado":false,"estado":"MS","pla…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'MT',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: MT, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado MT
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ MT LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:24 AM [express] POST /api/validacao-critica 200 in 11ms :: {"bloqueado":false,"estado":"MT","pl…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'PA',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: PA, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado PA
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ PA LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:24 AM [express] POST /api/validacao-critica 200 in 6ms :: {"bloqueado":false,"estado":"PA","pla…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'PE',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: PE, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado PE
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ PE LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:25 AM [express] POST /api/validacao-critica 200 in 8ms :: {"bloqueado":false,"estado":"PE","pla…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'PR',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: PR, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado PR
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ PR LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:25 AM [express] POST /api/validacao-critica 200 in 7ms :: {"bloqueado":false,"estado":"PR","pla…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'RJ',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: RJ, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado RJ
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ RJ LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:26 AM [express] POST /api/validacao-critica 200 in 7ms :: {"bloqueado":false,"estado":"RJ","pla…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'RS',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: RS, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado RS
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ RS LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:26 AM [express] POST /api/validacao-critica 200 in 6ms :: {"bloqueado":false,"estado":"RS","pla…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'SC',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: SC, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado SC
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ SC LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:26 AM [express] POST /api/validacao-critica 200 in 5ms :: {"bloqueado":false,"estado":"SC","pla…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'SE',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: SE, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado SE
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ SE LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:26 AM [express] POST /api/validacao-critica 200 in 7ms :: {"bloqueado":false,"estado":"SE","pla…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'SP',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: SP, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado SP
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 1
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Verificando licença 234234 (113 dias restantes)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Cavalo existente: RRP1C83, novo: RRP1C83, igual: true
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Composição existente: [AYP8B74,AYP8B75,BCB0I71,RRS2E12,RRS3H22], nova: [AYM8F14,AYM8F19,AYP8B74,AYP8B75,BCB0I71,BCB0I72,BCB0I74,BCB0I83,BCB0I84,BCD6C01,BCR9D55,BCR9D58,BCS0C75,BCS0C86,BCT6I78,BCT6I80,BCW1A69,BCW1A71,RRQ6F03,RRQ6F33,RRQ6F53,RRQ6I43,RRQ6I93,RRQ6J13,RRS2E12,RRS2E22,RRS3H02,RRS3H22], igual: false
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ Licença 234234 não bloqueia - cavalo diferente ou composição diferente
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ SP LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:26 AM [express] POST /api/validacao-critica 200 in 8ms :: {"bloqueado":false,"estado":"SP","pla…
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+2|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida: {
+2|aet-license-system  |   estado: 'TO',
+2|aet-license-system  |   placas: [
+2|aet-license-system  |     'RRP1C83', 'RRS2E12', 'RRS3H22',
+2|aet-license-system  |     'AYM8F14', 'AYM8F19', 'AYP8B74',
+2|aet-license-system  |     'AYP8B75', 'BCB0I71', 'BCB0I72',
+2|aet-license-system  |     'BCB0I74', 'BCB0I83', 'BCB0I84',
+2|aet-license-system  |     'BCD6C01', 'BCR9D55', 'BCR9D58',
+2|aet-license-system  |     'BCS0C75', 'BCS0C86', 'BCT6I78',
+2|aet-license-system  |     'BCT6I80', 'BCW1A69', 'BCW1A71',
+2|aet-license-system  |     'RRQ6F03', 'RRQ6F33', 'RRQ6F53',
+2|aet-license-system  |     'RRQ6I43', 'RRQ6I93', 'RRQ6J13',
+2|aet-license-system  |     'RRS2E22', 'RRS3H02'
+2|aet-license-system  |   ]
+2|aet-license-system  | }
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Estado: TO, Placas: RRP1C83, RRS2E12, RRS3H22, AYM8F14, AYM8F19, AYP8B74, AYP8B75, BCB0I71, BCB0I72, BCB0I74, BCB0I83, BCB0I84, BCD6C01, BCR9D55, BCR9D58, BCS0C75, BCS0C86, BCT6I78, BCT6I80, BCW1A69, BCW1A71, RRQ6F03, RRQ6F33, RRQ6F53, RRQ6I43, RRQ6I93, RRQ6J13, RRS2E22, RRS3H02
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Executando validação para estado TO
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: 0
+2|aet-license-system  | [VALIDAÇÃO CRÍTICA] ✅ TO LIBERADO - Sem licenças vigentes conflitantes
+2|aet-license-system  | 4:24:27 AM [express] POST /api/validacao-critica 200 in 8ms :: {"bloqueado":false,"estado":"TO","pla…
+2|aet-license-system  | Cliente WebSocket desconectado
+2|aet-license-system  | Cliente WebSocket desconectado
+2|aet-license-system  | Novo cliente WebSocket conectado
+2|aet-license-system  | Novo cliente WebSocket conectado
+2|aet-license-system  | Cliente WebSocket desconectado
+2|aet-license-system  | Novo cliente WebSocket conectado
+2|aet-license-system  | Cliente WebSocket desconectado
+2|aet-license-system  | Cliente WebSocket desconectado
+2|aet-license-system  | Novo cliente WebSocket conectado
+2|aet-license-system  | Novo cliente WebSocket conectado
+2|aet-license-system  | Cliente WebSocket desconectado
+2|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 11
+2|aet-license-system  | [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+2|aet-license-system  | Novo cliente WebSocket conectado
