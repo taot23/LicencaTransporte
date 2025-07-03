@@ -51,6 +51,8 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **IMPORTAÇÃO EM MASSA**: Lógica aplicada tanto no cadastro individual quanto na importação CSV
 - ✅ **BUSCA VEÍCULOS CORRIGIDA**: Erro na função getVehicleTypeName na página "Transferir Veículos" resolvido
 - ✅ **PERMISSÕES TRANSFERIR VEÍCULOS**: Menu "Transferir Veículos" agora visível para todos usuários administrativos (operational, supervisor, financial, manager, admin)
+- ✅ **VALIDAÇÃO DE LICENÇAS CORRIGIDA**: Sistema de validação funcionando perfeitamente - bloqueia estados com licenças vigentes >60 dias
+- ✅ **TESTE CONFIRMADO**: Placa BCB-0887 tem licenças ativas em AL (181 dias), BA (210 dias), CE (320 dias), etc - bloqueio correto
 - ⚠️ **PROBLEMA AUTENTICAÇÃO FRONTEND**: Usuários operacionais perdem sessão no navegador após logout/login, mas backend funciona corretamente via curl
 - ⚠️ **ISSUE COOKIES**: Problema com manutenção de cookies de sessão no frontend impedindo acesso às licenças
 
