@@ -21,6 +21,19 @@ export function VehicleTransfer() {
   const [targetUserId, setTargetUserId] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Função para obter nome traduzido do tipo de veículo
+  const getVehicleTypeName = (type: string) => {
+    const typeMap: Record<string, string> = {
+      'tractor_unit': 'Unidade Tratora',
+      'semi_trailer': 'Semirreboque',
+      'trailer': 'Reboque',
+      'dolly': 'Dolly',
+      'flatbed': 'Prancha',
+      'truck': 'Caminhão'
+    };
+    return typeMap[type] || type;
+  };
+
   // Carregar todos os veículos
   const { data: vehicles = [], isLoading: vehiclesLoading } = useQuery<Vehicle[]>({
     queryKey: ["/api/vehicles/all"],
@@ -92,21 +105,10 @@ export function VehicleTransfer() {
     setSearchTerm("");
   };
 
-  const getUserName = (userId: number) => {
+  const getUserName = (userId: number | null) => {
+    if (userId === null) return "Usuário undefined";
     const user = users.find(u => u.id === userId);
     return user ? user.fullName : `Usuário ${userId}`;
-  };
-
-  const getVehicleTypeName = (type: string) => {
-    const typeMap: Record<string, string> = {
-      'tractor_unit': 'Unidade Tratora',
-      'semi_trailer': 'Semirreboque',
-      'trailer': 'Reboque',
-      'dolly': 'Dolly',
-      'flatbed': 'Prancha',
-      'truck': 'Caminhão'
-    };
-    return typeMap[type] || type;
   };
 
   if (vehiclesLoading || usersLoading) {
