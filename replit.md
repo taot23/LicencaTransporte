@@ -59,10 +59,10 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
   • Cavalo igual + composição diferente = PERMITIDO ✅  
   • Cavalo diferente + composição igual = PERMITIDO ✅
   • Ordem das placas não importa = funciona corretamente ✅
-- ⚠️ **PROBLEMA CRÍTICO AUTENTICAÇÃO**: Validação preventiva não funciona no frontend devido a erro 401 (usuário não autenticado)
-- ⚠️ **BACKEND FUNCIONANDO**: Via curl, validação nova está 100% funcional - AL bloqueia corretamente com composição idêntica
-- ⚠️ **FRONTEND SEM SESSÃO**: Navegador perde sessão, impedindo validação em tempo real dos estados bloqueados
-- ⚠️ **IMPACT**: Estados como AL, BA, CE, DF, DNIT, MG, MS não aparecem com "licença vigente" em amarelo como deveriam
+- ✅ **PROBLEMA DUPLICAÇÃO DE PLACAS RESOLVIDO**: Correção na função `getFormPlates()` para eliminar placas duplicadas que causavam falsos negativos
+- ✅ **NOVA REGRA DE VALIDAÇÃO FUNCIONANDO**: Backend processa corretamente composições idênticas vs diferentes
+- ✅ **WEBSOCKET IMPLEMENTADO EM RASCUNHOS**: Usuários transportadores agora recebem atualizações em tempo real quando rascunhos são criados/excluídos
+- ⚠️ **TESTE PENDENTE**: Necessário testar estados AL, BA, CE, DF, DNIT, MG, MS que devem bloquear com placas BDI1A71+BCB-0886+BCB-0887
 
 ### 02/07/2025 - Sistema de Busca por Veículo na Página "Transferir Veículos" IMPLEMENTADO
 - ✅ **CAMPO DE BUSCA**: Implementado campo de busca inteligente por placa, marca, modelo ou tipo de veículo
