@@ -386,7 +386,7 @@ export default function AdminLicensesPage() {
       
       // Incluir arquivo da licença se o status for "approved" (Liberada)
       if (data.licenseFile && data.status === "approved") {
-        formData.append("stateFile", data.licenseFile);
+        formData.append("licenseFile", data.licenseFile);
       }
       
       // Incluir número da AET se o status for "under_review" (Análise do Órgão), "pending_approval" (Pendente Liberação) ou "approved" (Liberada)
