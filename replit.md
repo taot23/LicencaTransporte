@@ -62,6 +62,7 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **PROBLEMA DUPLICAÇÃO DE PLACAS RESOLVIDO**: Correção na função `getFormPlates()` para eliminar placas duplicadas que causavam falsos negativos
 - ✅ **NOVA REGRA DE VALIDAÇÃO FUNCIONANDO**: Backend processa corretamente composições idênticas vs diferentes
 - ✅ **WEBSOCKET IMPLEMENTADO EM RASCUNHOS**: Usuários transportadores agora recebem atualizações em tempo real quando rascunhos são criados/excluídos
+- ✅ **PERMISSÕES OPERACIONAL CORRIGIDAS**: Usuários operacionais agora podem visualizar lista de usuários para transferir veículos
 - ⚠️ **TESTE PENDENTE**: Necessário testar estados AL, BA, CE, DF, DNIT, MG, MS que devem bloquear com placas BDI1A71+BCB-0886+BCB-0887
 
 ### 02/07/2025 - Sistema de Busca por Veículo na Página "Transferir Veículos" IMPLEMENTADO
