@@ -2585,7 +2585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('[VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida:', req.body);
       
-      const { estado, placas } = req.body;
+      const { estado, placas, cavalo, composicao } = req.body;
       
       // Lista completa de estados brasileiros + órgãos federais para validação
       const estadosValidos = [
@@ -2629,7 +2629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`[VALIDAÇÃO CRÍTICA] Estado: ${estadoNormalizado}, Placas: ${placasNormalizadas.join(', ')}`);
 
-      // Query SQL otimizada com múltiplos campos de placas e validação robusta
+      // NOVA REGRA: Buscar todas as licenças vigentes do estado (não apenas por placa)
       const query = `
         SELECT 
           numero_licenca,
@@ -2648,35 +2648,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
         WHERE UPPER(estado) = $1 
           AND status = 'ativa'
           AND data_validade > CURRENT_DATE
-          AND (
-            UPPER(placa_unidade_tratora) = ANY($2::text[]) OR
-            UPPER(placa_primeira_carreta) = ANY($2::text[]) OR
-            UPPER(placa_segunda_carreta) = ANY($2::text[]) OR
-            UPPER(placa_dolly) = ANY($2::text[]) OR
-            UPPER(placa_prancha) = ANY($2::text[]) OR
-            UPPER(placa_reboque) = ANY($2::text[])
-          )
         ORDER BY data_validade DESC, data_emissao DESC
-        LIMIT 1
       `;
       
       console.log(`[VALIDAÇÃO CRÍTICA] Executando validação para estado ${estadoNormalizado}`);
-      const result = await pool.query(query, [estadoNormalizado, placasNormalizadas]);
+      const result = await pool.query(query, [estadoNormalizado]);
       
       console.log(`[VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: ${result.rows.length}`);
       
-      if (result.rows.length > 0) {
-        const licenca = result.rows[0];
+      // NOVA LÓGICA: Verificar cada licença individualmente com regra específica
+      for (const licenca of result.rows) {
         const dias = Math.floor(parseFloat(licenca.dias_restantes));
         const diasDesdeEmissao = Math.floor(parseFloat(licenca.dias_desde_emissao));
         
-        console.log(`[VALIDAÇÃO CRÍTICA] ${estadoNormalizado}: Licença ${licenca.numero_licenca}`);
-        console.log(`[VALIDAÇÃO CRÍTICA] Dias restantes: ${dias}, Status: ${licenca.status}`);
-        console.log(`[VALIDAÇÃO CRÍTICA] Emitida há: ${diasDesdeEmissao} dias`);
+        // Aplicar regra dos 60 dias primeiro
+        if (dias <= 60) {
+          console.log(`[VALIDAÇÃO CRÍTICA] ⚠️ Licença ${licenca.numero_licenca} pode ser renovada - ${dias} dias ≤ 60`);
+          continue; // Pode renovar, não bloqueia
+        }
+
+        console.log(`[VALIDAÇÃO CRÍTICA] Verificando licença ${licenca.numero_licenca} (${dias} dias restantes)`);
         
-        // Aplicar regra dos 60 dias
-        if (dias > 60) {
-          console.log(`[VALIDAÇÃO CRÍTICA] ❌ ${estadoNormalizado} BLOQUEADO - ${dias} dias > 60`);
+        // Extrair placas da licença existente
+        const cavaloExistente = licenca.placa_unidade_tratora ? licenca.placa_unidade_tratora.trim().toUpperCase() : '';
+        const placasComposicaoExistente = [
+          licenca.placa_primeira_carreta,
+          licenca.placa_segunda_carreta,
+          licenca.placa_dolly,
+          licenca.placa_prancha,
+          licenca.placa_reboque
+        ]
+          .filter(Boolean)
+          .map(p => p.trim().toUpperCase())
+          .sort(); // Ordenar para comparação
+        
+        // VERIFICAR NOVA REGRA: Cavalo igual + composição igual
+        // Suporte para dados estruturados ou lista simples de placas
+        let cavaloNovo = '';
+        let placasComposicaoNova: string[] = [];
+        
+        if (cavalo) {
+          // Dados estruturados (novo formato)
+          cavaloNovo = cavalo.trim().toUpperCase();
+          placasComposicaoNova = (composicao || [])
+            .filter(Boolean)
+            .map((p: string) => p.trim().toUpperCase())
+            .sort();
+        } else {
+          // Compatibilidade com formato antigo (primeira placa = cavalo)
+          cavaloNovo = placasNormalizadas[0] || '';
+          placasComposicaoNova = placasNormalizadas.slice(1).sort();
+        }
+        
+        const cavaloIgual = cavaloExistente === cavaloNovo;
+        const composicaoIgual = 
+          placasComposicaoExistente.length === placasComposicaoNova.length &&
+          placasComposicaoExistente.every(p => placasComposicaoNova.includes(p));
+        
+        console.log(`[VALIDAÇÃO CRÍTICA] Cavalo existente: ${cavaloExistente}, novo: ${cavaloNovo}, igual: ${cavaloIgual}`);
+        console.log(`[VALIDAÇÃO CRÍTICA] Composição existente: [${placasComposicaoExistente.join(',')}], nova: [${placasComposicaoNova.join(',')}], igual: ${composicaoIgual}`);
+        
+        // BLOQUEAR apenas se cavalo E composição forem iguais
+        if (cavaloIgual && composicaoIgual) {
+          console.log(`[VALIDAÇÃO CRÍTICA] ❌ ${estadoNormalizado} BLOQUEADO - Cavalo e composição idênticos à licença ${licenca.numero_licenca}`);
           
           // Coletar todas as placas da licença para informar o usuário
           const placasLicenca = [
@@ -2697,10 +2731,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             diasDesdeEmissao: diasDesdeEmissao,
             placasConflitantes: placasLicenca,
             estado: estadoNormalizado,
-            motivo: `Licença vigente com ${dias} dias restantes (> 60 dias)`
+            motivo: `Composição idêntica já licenciada com ${dias} dias restantes (> 60 dias)`,
+            detalhes: {
+              cavaloIgual,
+              composicaoIgual,
+              cavaloExistente,
+              composicaoExistente: placasComposicaoExistente
+            }
           });
         } else {
-          console.log(`[VALIDAÇÃO CRÍTICA] ⚠️ ${estadoNormalizado} PERMITIDO - ${dias} dias ≤ 60 (renovação)`);
+          console.log(`[VALIDAÇÃO CRÍTICA] ✅ Licença ${licenca.numero_licenca} não bloqueia - cavalo diferente ou composição diferente`);
         }
       }
       
