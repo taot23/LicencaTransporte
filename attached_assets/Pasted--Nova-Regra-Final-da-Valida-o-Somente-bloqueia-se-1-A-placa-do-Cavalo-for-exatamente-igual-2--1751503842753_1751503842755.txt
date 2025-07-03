@@ -1,0 +1,85 @@
+✅ Nova Regra Final da Validação
+Somente bloqueia se:
+1️⃣ A placa do Cavalo for exatamente igual
+2️⃣ As placas da composição (carretas, dolly, prancha, reboque) coincidirem com a licença existente, mesmo que em ordem diferente
+
+🧠 O que muda?
+Agora você vai precisar comparar:
+
+Cavalo: Igual
+
+Conjunto de placas da linha de frente: Igual, desconsiderando a ordem
+
+🧩 Lógica detalhada passo a passo
+Vamos organizar como ficaria:
+
+🔄 Passo 1 — Buscar licenças vigentes
+Mesmo critério:
+
+javascript
+Copiar
+Editar
+const licencas = await Licenca.find({
+  estado: estadoSelecionado,
+  status: 'Emitida',
+  data_validade: { $gt: hojeMais30Dias }
+});
+🔄 Passo 2 — Verificar cada licença
+Para cada licença vigente:
+
+javascript
+Copiar
+Editar
+for (const licenca of licencas) {
+  const cavaloIgual = licenca.placa_cavalo === nova.placa_cavalo;
+
+  const placasExistentes = [
+    licenca.placa_primeira_carreta,
+    licenca.placa_segunda_carreta,
+    licenca.placa_dolly,
+    licenca.placa_prancha,
+    licenca.placa_reboque
+  ].filter(Boolean); // Remove nulls
+
+  const placasNovas = [
+    nova.placa_primeira_carreta,
+    nova.placa_segunda_carreta,
+    nova.placa_dolly,
+    nova.placa_prancha,
+    nova.placa_reboque
+  ].filter(Boolean);
+
+  const mesmasPlacasLinhaFrente =
+    placasExistentes.length === placasNovas.length &&
+    placasExistentes.every((p) => placasNovas.includes(p));
+
+  if (cavaloIgual && mesmasPlacasLinhaFrente) {
+    // BLOQUEIA pois composição coincide, mesmo em ordem diferente
+    return {
+      bloquear: true,
+      licenca
+    };
+  }
+}
+✅ Resumo da Nova Regra
+Critério	Deve Bloquear?
+Cavalo igual + placas iguais na mesma ordem	🚫 Sim
+Cavalo igual + placas iguais em ordem diferente	🚫 Sim
+Cavalo igual + placas parcialmente diferentes	✅ Não
+Cavalo diferente	✅ Não
+
+🧠 Por que usar .every() e .includes()?
+Para garantir que o conjunto de placas seja o mesmo, sem depender da ordem.
+
+✅ Exemplo prático
+Licença existente:
+
+Cavalo: AAA1234
+
+Linha de frente: BBB1234, CCC1234
+
+Nova solicitação	Resultado
+Cavalo AAA1234 + BBB1234, CCC1234	🚫 Bloqueia
+Cavalo AAA1234 + CCC1234, BBB1234	🚫 Bloqueia
+Cavalo AAA1234 + BBB1234, DDD1234	✅ Permite
+Cavalo ZZZ9999 + BBB1234, CCC1234	✅ Permite
