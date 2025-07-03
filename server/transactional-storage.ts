@@ -693,8 +693,11 @@ export class TransactionalStorage implements IStorage {
     if (data.file && typeof data.file !== 'string') {
       // Extrair o nome do arquivo do caminho completo
       const filename = data.file.filename;
-      const fileUrl = `/uploads/${filename}`;
+      // Arquivos de licenças agora ficam na pasta licenses com nomenclatura organizada
+      const fileUrl = `/uploads/licenses/${filename}`;
       const newStateFile = `${data.state}:${fileUrl}`;
+      
+      console.log(`[UPLOAD LICENSE] Arquivo salvo: ${filename} -> URL: ${fileUrl}`);
       
       const existingFileIndex = stateFiles.findIndex(s => s.startsWith(`${data.state}:`));
       if (existingFileIndex >= 0) {

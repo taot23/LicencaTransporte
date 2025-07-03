@@ -62,7 +62,7 @@ const getUploadDir = () => {
       }
       
       // Criar subdiretórios necessários
-      const subDirs = ['vehicles', 'transporters', 'boletos'];
+      const subDirs = ['vehicles', 'transporters', 'boletos', 'licenses'];
       subDirs.forEach(subDir => {
         const subPath = path.join(uploadPath!, subDir);
         if (!fs.existsSync(subPath)) {
@@ -97,6 +97,58 @@ const storage_config = multer.diskStorage({
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
     cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+  }
+});
+
+// Configuração específica para arquivos de licenças com nomenclatura organizada
+const licenseStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const licensesDir = path.join(uploadDir, 'licenses');
+    cb(null, licensesDir);
+  },
+  filename: function (req, file, cb) {
+    // Função para gerar nome do arquivo de licença: PLACA_ESTADO_NUMEROAET
+    const generateLicenseFilename = async () => {
+      try {
+        let mainVehiclePlate = req.body.mainVehiclePlate || 'PLACA';
+        const state = req.body.state || 'XX';
+        const aetNumber = req.body.aetNumber || Date.now().toString();
+        const ext = path.extname(file.originalname);
+        
+        // Se não tiver placa no body, buscar da licença pelo ID
+        if (!req.body.mainVehiclePlate && req.params.id) {
+          try {
+            const licenseId = parseInt(req.params.id);
+            const license = await storage.getLicenseRequestById(licenseId);
+            if (license && license.mainVehiclePlate) {
+              mainVehiclePlate = license.mainVehiclePlate;
+            }
+          } catch (error) {
+            console.log('[UPLOAD LICENSE] Erro ao buscar placa da licença:', error);
+          }
+        }
+        
+        // Limpar a placa removendo caracteres especiais
+        const cleanPlate = mainVehiclePlate.replace(/[^A-Z0-9]/g, '');
+        
+        return `${cleanPlate}_${state}_${aetNumber}${ext}`;
+      } catch (error) {
+        console.error('[UPLOAD LICENSE] Erro ao gerar nome do arquivo:', error);
+        const timestamp = Date.now();
+        const ext = path.extname(file.originalname);
+        return `LICENSE_${timestamp}${ext}`;
+      }
+    };
+    
+    // Como multer espera função síncrona, usar callback
+    generateLicenseFilename().then(filename => {
+      console.log(`[UPLOAD LICENSE] Nome do arquivo gerado: ${filename}`);
+      cb(null, filename);
+    }).catch(error => {
+      console.error('[UPLOAD LICENSE] Erro:', error);
+      const fallbackName = `LICENSE_${Date.now()}${path.extname(file.originalname)}`;
+      cb(null, fallbackName);
+    });
   }
 });
 
@@ -164,6 +216,13 @@ const upload = multer({
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB max file size
   }
+});
+
+// Upload específico para licenças com nomenclatura organizada
+const uploadLicense = multer({ 
+  storage: licenseStorage, 
+  fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
 // Upload específico para CSV (sem fileFilter)
@@ -4399,7 +4458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Rota para atualizar o status de uma licença - acessível para Admin, Operacional e Supervisor
-app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('licenseFile'), async (req, res) => {
+app.patch('/api/admin/licenses/:id/status', requireOperational, uploadLicense.single('licenseFile'), async (req, res) => {
     try {
       const licenseId = parseInt(req.params.id);
       const statusData: {

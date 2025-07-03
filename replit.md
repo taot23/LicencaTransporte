@@ -44,7 +44,12 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
-### 03/07/2025 - Sistema WebSocket Completo + Correção de Logout Duplo Clique
+### 03/07/2025 - Sistema de Organização de Arquivos de Licenças + WebSocket Completo + Correção de Logout Duplo Clique
+- ✅ **SISTEMA DE ARQUIVOS ORGANIZADOS**: Implementado sistema de organização de arquivos de licenças na pasta `/uploads/licenses/`
+- ✅ **NOMENCLATURA PADRONIZADA**: Arquivos salvos com padrão `PLACA_ESTADO_NUMEROAET` (ex: BDI1A71_SP_123456.pdf)
+- ✅ **UPLOAD INTELIGENTE**: Sistema busca automaticamente placa da unidade tratora da licença para nomenclatura
+- ✅ **PASTA LICENSES CRIADA**: Subdiretório específico para arquivos de licenças separado de outros uploads
+- ✅ **MULTER CONFIGURADO**: Configuração específica `uploadLicense` para arquivos de licenças com nomenclatura organizada
 - ✅ **WEBSOCKET EXPANSÃO COMPLETA**: Sistema WebSocket agora cobre TODOS os módulos do sistema em tempo real
 - ✅ **NOVOS TIPOS DE MENSAGEM**: Adicionados BOLETO_UPDATE, VEHICLE_MODEL_UPDATE, USER_UPDATE para cobertura total
 - ✅ **BACKEND BROADCASTS IMPLEMENTADOS**: Todas operações CRUD (criar, editar, excluir) agora enviam notificações WebSocket
