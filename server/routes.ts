@@ -62,7 +62,7 @@ const getUploadDir = () => {
       }
       
       // Criar subdiretórios necessários
-      const subDirs = ['vehicles', 'transporters', 'boletos', 'licenses'];
+      const subDirs = ['vehicles', 'transporters', 'boletos'];
       subDirs.forEach(subDir => {
         const subPath = path.join(uploadPath!, subDir);
         if (!fs.existsSync(subPath)) {
@@ -97,58 +97,6 @@ const storage_config = multer.diskStorage({
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
     cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-  }
-});
-
-// Configuração específica para arquivos de licenças com nomenclatura organizada
-const licenseStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const licensesDir = path.join(uploadDir, 'licenses');
-    cb(null, licensesDir);
-  },
-  filename: function (req, file, cb) {
-    // Função para gerar nome do arquivo de licença: PLACA_ESTADO_NUMEROAET
-    const generateLicenseFilename = async () => {
-      try {
-        let mainVehiclePlate = req.body.mainVehiclePlate || 'PLACA';
-        const state = req.body.state || 'XX';
-        const aetNumber = req.body.aetNumber || Date.now().toString();
-        const ext = path.extname(file.originalname);
-        
-        // Se não tiver placa no body, buscar da licença pelo ID
-        if (!req.body.mainVehiclePlate && req.params.id) {
-          try {
-            const licenseId = parseInt(req.params.id);
-            const license = await storage.getLicenseRequestById(licenseId);
-            if (license && license.mainVehiclePlate) {
-              mainVehiclePlate = license.mainVehiclePlate;
-            }
-          } catch (error) {
-            console.log('[UPLOAD LICENSE] Erro ao buscar placa da licença:', error);
-          }
-        }
-        
-        // Limpar a placa removendo caracteres especiais
-        const cleanPlate = mainVehiclePlate.replace(/[^A-Z0-9]/g, '');
-        
-        return `${cleanPlate}_${state}_${aetNumber}${ext}`;
-      } catch (error) {
-        console.error('[UPLOAD LICENSE] Erro ao gerar nome do arquivo:', error);
-        const timestamp = Date.now();
-        const ext = path.extname(file.originalname);
-        return `LICENSE_${timestamp}${ext}`;
-      }
-    };
-    
-    // Como multer espera função síncrona, usar callback
-    generateLicenseFilename().then(filename => {
-      console.log(`[UPLOAD LICENSE] Nome do arquivo gerado: ${filename}`);
-      cb(null, filename);
-    }).catch(error => {
-      console.error('[UPLOAD LICENSE] Erro:', error);
-      const fallbackName = `LICENSE_${Date.now()}${path.extname(file.originalname)}`;
-      cb(null, fallbackName);
-    });
   }
 });
 
@@ -216,13 +164,6 @@ const upload = multer({
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB max file size
   }
-});
-
-// Upload específico para licenças com nomenclatura organizada
-const uploadLicense = multer({ 
-  storage: licenseStorage, 
-  fileFilter,
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
 // Upload específico para CSV (sem fileFilter)
@@ -314,7 +255,7 @@ const requireOwnerOrStaff = (req: any, res: any, next: any) => {
 
 // Tipo para as mensagens WebSocket
 interface WSMessage {
-  type: 'STATUS_UPDATE' | 'LICENSE_UPDATE' | 'DASHBOARD_UPDATE' | 'VEHICLE_UPDATE' | 'TRANSPORTER_UPDATE' | 'USER_UPDATE' | 'ACTIVITY_LOG_UPDATE' | 'CACHE_INVALIDATION' | 'BOLETO_UPDATE' | 'VEHICLE_MODEL_UPDATE';
+  type: 'STATUS_UPDATE' | 'LICENSE_UPDATE' | 'DASHBOARD_UPDATE' | 'VEHICLE_UPDATE' | 'TRANSPORTER_UPDATE' | 'USER_UPDATE' | 'ACTIVITY_LOG_UPDATE' | 'CACHE_INVALIDATION';
   data: any;
 }
 
@@ -571,42 +512,6 @@ const broadcastCacheInvalidation = (queryKeys: string[]) => {
     type: 'CACHE_INVALIDATION',
     data: {
       queryKeys,
-      timestamp: new Date().toISOString()
-    }
-  });
-};
-
-const broadcastUserUpdate = (userId: number, action: string, user?: any) => {
-  broadcastMessage({
-    type: 'USER_UPDATE',
-    data: {
-      userId,
-      action, // 'created', 'updated', 'deleted'
-      user,
-      timestamp: new Date().toISOString()
-    }
-  });
-};
-
-const broadcastBoletoUpdate = (boletoId: number, action: string, boleto?: any) => {
-  broadcastMessage({
-    type: 'BOLETO_UPDATE',
-    data: {
-      boletoId,
-      action, // 'created', 'updated', 'deleted'
-      boleto,
-      timestamp: new Date().toISOString()
-    }
-  });
-};
-
-const broadcastVehicleModelUpdate = (modelId: number, action: string, model?: any) => {
-  broadcastMessage({
-    type: 'VEHICLE_MODEL_UPDATE',
-    data: {
-      modelId,
-      action, // 'created', 'updated', 'deleted'
-      model,
       timestamp: new Date().toISOString()
     }
   });
@@ -1728,14 +1633,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         allDrafts = Array.from(uniqueMap.values());
       }
       
-      // Para garantir que rascunhos de renovação apareçam imediatamente, sempre incluir todos os rascunhos
-      console.log(`[DEBUG RENOVAÇÃO] Parâmetro includeRenewal: ${req.query.includeRenewal}`);
-      console.log(`[DEBUG RENOVAÇÃO] Total de rascunhos encontrados: ${allDrafts.length}`);
+      // Verificar se deve incluir rascunhos de renovação
+      const shouldIncludeRenewalDrafts = req.query.includeRenewal === 'true';
       
-      // Sempre retornar todos os rascunhos para garantir que renovações apareçam
-      const drafts = allDrafts;
+      // Se não deve incluir rascunhos de renovação, filtrar aqueles que têm comentários sobre renovação
+      const drafts = shouldIncludeRenewalDrafts 
+        ? allDrafts 
+        : allDrafts.filter(draft => {
+            // Se o comentário menciona "Renovação", é um rascunho de renovação
+            return !(draft.comments && draft.comments.includes('Renovação'));
+          });
       
-      console.log(`[DEBUG RENOVAÇÃO] Total de rascunhos retornados: ${drafts.length}`);
+      console.log(`Total de rascunhos: ${allDrafts.length}, filtrados: ${drafts.length}, incluindo renovação: ${shouldIncludeRenewalDrafts}`);
       
       // Log detalhado dos rascunhos
       console.log(`[DEBUG DETALHES] Retornando ${drafts.length} licenças com os seguintes IDs:`);
@@ -2648,10 +2557,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Logar o rascunho criado
       console.log("[RENOVAÇÃO] Rascunho criado com sucesso:", JSON.stringify(newDraft, null, 2));
       
-      // ✅ NOTIFICAÇÃO WEBSOCKET PARA RENOVAÇÃO DE LICENÇA
-      broadcastLicenseUpdate(newDraft.id, 'created', newDraft);
-      broadcastDashboardUpdate();
-      
       // Responder com o novo rascunho criado
       res.status(201).json({
         message: `Licença renovada com sucesso para o estado ${state}`,
@@ -2680,7 +2585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('[VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida:', req.body);
       
-      const { estado, placas, cavalo, composicao } = req.body;
+      const { estado, placas } = req.body;
       
       // Lista completa de estados brasileiros + órgãos federais para validação
       const estadosValidos = [
@@ -2724,7 +2629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`[VALIDAÇÃO CRÍTICA] Estado: ${estadoNormalizado}, Placas: ${placasNormalizadas.join(', ')}`);
 
-      // NOVA REGRA: Buscar todas as licenças vigentes do estado (não apenas por placa)
+      // Query SQL otimizada com múltiplos campos de placas e validação robusta
       const query = `
         SELECT 
           numero_licenca,
@@ -2743,69 +2648,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         WHERE UPPER(estado) = $1 
           AND status = 'ativa'
           AND data_validade > CURRENT_DATE
+          AND (
+            UPPER(placa_unidade_tratora) = ANY($2::text[]) OR
+            UPPER(placa_primeira_carreta) = ANY($2::text[]) OR
+            UPPER(placa_segunda_carreta) = ANY($2::text[]) OR
+            UPPER(placa_dolly) = ANY($2::text[]) OR
+            UPPER(placa_prancha) = ANY($2::text[]) OR
+            UPPER(placa_reboque) = ANY($2::text[])
+          )
         ORDER BY data_validade DESC, data_emissao DESC
+        LIMIT 1
       `;
       
       console.log(`[VALIDAÇÃO CRÍTICA] Executando validação para estado ${estadoNormalizado}`);
-      const result = await pool.query(query, [estadoNormalizado]);
+      const result = await pool.query(query, [estadoNormalizado, placasNormalizadas]);
       
       console.log(`[VALIDAÇÃO CRÍTICA] Consulta executada. Registros encontrados: ${result.rows.length}`);
       
-      // NOVA LÓGICA: Verificar cada licença individualmente com regra específica
-      for (const licenca of result.rows) {
+      if (result.rows.length > 0) {
+        const licenca = result.rows[0];
         const dias = Math.floor(parseFloat(licenca.dias_restantes));
         const diasDesdeEmissao = Math.floor(parseFloat(licenca.dias_desde_emissao));
         
-        // Aplicar regra dos 60 dias primeiro
-        if (dias <= 60) {
-          console.log(`[VALIDAÇÃO CRÍTICA] ⚠️ Licença ${licenca.numero_licenca} pode ser renovada - ${dias} dias ≤ 60`);
-          continue; // Pode renovar, não bloqueia
-        }
-
-        console.log(`[VALIDAÇÃO CRÍTICA] Verificando licença ${licenca.numero_licenca} (${dias} dias restantes)`);
+        console.log(`[VALIDAÇÃO CRÍTICA] ${estadoNormalizado}: Licença ${licenca.numero_licenca}`);
+        console.log(`[VALIDAÇÃO CRÍTICA] Dias restantes: ${dias}, Status: ${licenca.status}`);
+        console.log(`[VALIDAÇÃO CRÍTICA] Emitida há: ${diasDesdeEmissao} dias`);
         
-        // Extrair placas da licença existente
-        const cavaloExistente = licenca.placa_unidade_tratora ? licenca.placa_unidade_tratora.trim().toUpperCase() : '';
-        const placasComposicaoExistente = [
-          licenca.placa_primeira_carreta,
-          licenca.placa_segunda_carreta,
-          licenca.placa_dolly,
-          licenca.placa_prancha,
-          licenca.placa_reboque
-        ]
-          .filter(Boolean)
-          .map(p => p.trim().toUpperCase())
-          .sort(); // Ordenar para comparação
-        
-        // VERIFICAR NOVA REGRA: Cavalo igual + composição igual
-        // Suporte para dados estruturados ou lista simples de placas
-        let cavaloNovo = '';
-        let placasComposicaoNova: string[] = [];
-        
-        if (cavalo) {
-          // Dados estruturados (novo formato)
-          cavaloNovo = cavalo.trim().toUpperCase();
-          placasComposicaoNova = (composicao || [])
-            .filter(Boolean)
-            .map((p: string) => p.trim().toUpperCase())
-            .sort();
-        } else {
-          // Compatibilidade com formato antigo (primeira placa = cavalo)
-          cavaloNovo = placasNormalizadas[0] || '';
-          placasComposicaoNova = placasNormalizadas.slice(1).sort();
-        }
-        
-        const cavaloIgual = cavaloExistente === cavaloNovo;
-        const composicaoIgual = 
-          placasComposicaoExistente.length === placasComposicaoNova.length &&
-          placasComposicaoExistente.every(p => placasComposicaoNova.includes(p));
-        
-        console.log(`[VALIDAÇÃO CRÍTICA] Cavalo existente: ${cavaloExistente}, novo: ${cavaloNovo}, igual: ${cavaloIgual}`);
-        console.log(`[VALIDAÇÃO CRÍTICA] Composição existente: [${placasComposicaoExistente.join(',')}], nova: [${placasComposicaoNova.join(',')}], igual: ${composicaoIgual}`);
-        
-        // BLOQUEAR apenas se cavalo E composição forem iguais
-        if (cavaloIgual && composicaoIgual) {
-          console.log(`[VALIDAÇÃO CRÍTICA] ❌ ${estadoNormalizado} BLOQUEADO - Cavalo e composição idênticos à licença ${licenca.numero_licenca}`);
+        // Aplicar regra dos 60 dias
+        if (dias > 60) {
+          console.log(`[VALIDAÇÃO CRÍTICA] ❌ ${estadoNormalizado} BLOQUEADO - ${dias} dias > 60`);
           
           // Coletar todas as placas da licença para informar o usuário
           const placasLicenca = [
@@ -2826,16 +2697,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             diasDesdeEmissao: diasDesdeEmissao,
             placasConflitantes: placasLicenca,
             estado: estadoNormalizado,
-            motivo: `Composição idêntica já licenciada com ${dias} dias restantes (> 60 dias)`,
-            detalhes: {
-              cavaloIgual,
-              composicaoIgual,
-              cavaloExistente,
-              composicaoExistente: placasComposicaoExistente
-            }
+            motivo: `Licença vigente com ${dias} dias restantes (> 60 dias)`
           });
         } else {
-          console.log(`[VALIDAÇÃO CRÍTICA] ✅ Licença ${licenca.numero_licenca} não bloqueia - cavalo diferente ou composição diferente`);
+          console.log(`[VALIDAÇÃO CRÍTICA] ⚠️ ${estadoNormalizado} PERMITIDO - ${dias} dias ≤ 60 (renovação)`);
         }
       }
       
@@ -3925,10 +3790,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Remover a senha do objeto retornado
       const { password: _, ...userWithoutPassword } = newUser;
       
-      // Notificar via WebSocket sobre novo usuário
-      broadcastUserUpdate(newUser.id, 'created', userWithoutPassword);
-      broadcastDashboardUpdate();
-      
       res.status(201).json(userWithoutPassword);
     } catch (error) {
       console.error("Erro ao criar usuário:", error);
@@ -3988,9 +3849,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Remover a senha do objeto retornado
       const { password: _, ...userWithoutPassword } = updatedUser;
       
-      // Notificar via WebSocket sobre atualização de usuário
-      broadcastUserUpdate(updatedUser.id, 'updated', userWithoutPassword);
-      
       res.json(userWithoutPassword);
     } catch (error) {
       console.error("Erro ao atualizar usuário:", error);
@@ -4019,10 +3877,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Excluir o usuário
       await storage.deleteUser(userId);
-      
-      // Notificar via WebSocket sobre exclusão de usuário
-      broadcastUserUpdate(userId, 'deleted', { id: userId });
-      broadcastDashboardUpdate();
       
       res.json({ message: "Usuário excluído com sucesso" });
     } catch (error) {
@@ -4458,7 +4312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Rota para atualizar o status de uma licença - acessível para Admin, Operacional e Supervisor
-app.patch('/api/admin/licenses/:id/status', requireOperational, uploadLicense.single('licenseFile'), async (req, res) => {
+app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('licenseFile'), async (req, res) => {
     try {
       const licenseId = parseInt(req.params.id);
       const statusData: {
@@ -4657,7 +4511,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, uploadLicense.si
   });
 
   // Endpoint específico para atualizar o status de um estado específico em uma licença
-  app.patch('/api/admin/licenses/:id/state-status', requireOperational, uploadLicense.single('licenseFile'), async (req, res) => {
+  app.patch('/api/admin/licenses/:id/state-status', requireOperational, upload.single('stateFile'), async (req, res) => {
     console.log('=== ENDPOINT STATE-STATUS CHAMADO ===');
     console.log('URL completa:', req.url);
     console.log('Método:', req.method);
@@ -4665,18 +4519,6 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, uploadLicense.si
     console.log('Body completo:', req.body);
     console.log('issuedAt no body:', req.body.issuedAt);
     console.log('Tipo do issuedAt:', typeof req.body.issuedAt);
-    
-    // Log específico para arquivo de licença
-    if (req.file) {
-      console.log('[UPLOAD LICENSE] Arquivo recebido:', {
-        filename: req.file.filename,
-        originalname: req.file.originalname,
-        path: req.file.path,
-        size: req.file.size
-      });
-    } else {
-      console.log('[UPLOAD LICENSE] Nenhum arquivo recebido no upload');
-    }
     try {
       const licenseId = parseInt(req.params.id);
       
@@ -4937,10 +4779,6 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, uploadLicense.si
     try {
       const vehicleModelData = insertVehicleModelSchema.parse(req.body);
       const newModel = await storage.createVehicleModel(vehicleModelData);
-      
-      // Notificar via WebSocket sobre novo modelo de veículo
-      broadcastVehicleModelUpdate(newModel.id, 'created', newModel);
-      
       res.status(201).json(newModel);
     } catch (error) {
       console.error("Erro ao criar modelo de veículo:", error);
@@ -4968,9 +4806,6 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, uploadLicense.si
       if (!updatedModel) {
         return res.status(404).json({ message: "Modelo de veículo não encontrado" });
       }
-      
-      // Notificar via WebSocket sobre atualização de modelo de veículo (PATCH)
-      broadcastVehicleModelUpdate(id, 'updated', updatedModel);
       
       res.json(updatedModel);
     } catch (error) {
@@ -5000,9 +4835,6 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, uploadLicense.si
         return res.status(404).json({ message: "Modelo de veículo não encontrado" });
       }
       
-      // Notificar via WebSocket sobre atualização de modelo de veículo (PUT)
-      broadcastVehicleModelUpdate(id, 'updated', updatedModel);
-      
       res.json(updatedModel);
     } catch (error) {
       console.error("Erro ao atualizar modelo de veículo:", error);
@@ -5025,10 +4857,6 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, uploadLicense.si
     try {
       const id = parseInt(req.params.id);
       await storage.deleteVehicleModel(id);
-      
-      // Notificar via WebSocket sobre exclusão de modelo de veículo
-      broadcastVehicleModelUpdate(id, 'deleted', { id });
-      
       res.status(204).send();
     } catch (error) {
       console.error("Erro ao deletar modelo de veículo:", error);
@@ -5401,10 +5229,6 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, uploadLicense.si
       const validatedData = insertBoletoSchema.parse(req.body);
       const boleto = await storage.createBoleto(validatedData);
       
-      // Notificar via WebSocket sobre novo boleto
-      broadcastBoletoUpdate(boleto.id, 'created', boleto);
-      broadcastDashboardUpdate();
-      
       res.status(201).json(boleto);
     } catch (error) {
       console.error("Erro ao criar boleto:", error);
@@ -5427,10 +5251,6 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, uploadLicense.si
       // Os uploads já foram feitos separadamente via /api/upload/boleto
       // Aqui recebemos apenas os dados do formulário incluindo as URLs dos arquivos
       const boleto = await storage.updateBoleto(id, req.body);
-      
-      // Notificar via WebSocket sobre atualização de boleto
-      broadcastBoletoUpdate(id, 'updated', boleto);
-      
       res.json(boleto);
     } catch (error) {
       console.error("Erro ao atualizar boleto:", error);
@@ -5451,10 +5271,6 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, uploadLicense.si
     try {
       const id = parseInt(req.params.id);
       await storage.deleteBoleto(id);
-      
-      // Notificar via WebSocket sobre exclusão de boleto
-      broadcastBoletoUpdate(id, 'deleted', { id });
-      
       res.status(204).send();
     } catch (error) {
       console.error("Erro ao deletar boleto:", error);

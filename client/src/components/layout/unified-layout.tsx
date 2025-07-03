@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { performLogout } from "@/utils/logout";
+import { apiRequest } from "@/lib/queryClient";
 
 interface UnifiedLayoutProps {
   children: ReactNode;
@@ -39,7 +39,20 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
     setIsLoggingOut(true);
     
     try {
-      await performLogout(navigate);
+      // Limpa o cache imediatamente
+      const { queryClient } = await import("@/lib/queryClient");
+      queryClient.setQueryData(["/api/user"], null);
+      queryClient.removeQueries();
+      
+      // Logout no servidor sem aguardar resposta
+      fetch("/api/logout", { 
+        method: "POST",
+        credentials: "include"
+      }).catch(() => {}); // Ignora erros para não bloquear o redirecionamento
+      
+      // Redirecionamento instantâneo
+      navigate("/auth");
+      
     } catch (error) {
       console.error("Erro no logout:", error);
       navigate("/auth");

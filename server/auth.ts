@@ -206,29 +206,9 @@ export function setupAuth(app: Express) {
 
   // Logout endpoint
   app.post("/api/logout", (req, res, next) => {
-    // Se já não está autenticado, apenas retorna sucesso
-    if (!req.isAuthenticated()) {
-      return res.status(200).json({ message: "Logout realizado com sucesso" });
-    }
-    
     req.logout((err) => {
-      if (err) {
-        console.error("[AUTH] Erro no logout:", err);
-        return next(err);
-      }
-      
-      // Destruir a sessão completamente
-      req.session.destroy((destroyErr) => {
-        if (destroyErr) {
-          console.error("[AUTH] Erro ao destruir sessão:", destroyErr);
-          // Mesmo com erro na destruição da sessão, retornamos sucesso
-          // pois o req.logout() já foi executado
-        }
-        
-        // Limpar o cookie da sessão
-        res.clearCookie('connect.sid');
-        res.status(200).json({ message: "Logout realizado com sucesso" });
-      });
+      if (err) return next(err);
+      res.status(200).json({ message: "Logout realizado com sucesso" });
     });
   });
 

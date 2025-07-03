@@ -2,12 +2,11 @@ import { useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { LicenseRequest, InsertLicenseRequest } from "@shared/schema";
 import { LicenseForm } from "@/components/licenses/license-form";
 import { LicenseList } from "@/components/licenses/license-list";
 import { useToast } from "@/hooks/use-toast";
-import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import { 
   Dialog, 
   DialogContent, 
@@ -23,8 +22,6 @@ export default function RequestLicensePage() {
   const [currentDraft, setCurrentDraft] = useState<LicenseRequest | null>(null);
   const [preSelectedTransporterId, setPreSelectedTransporterId] = useState<number | null>(null);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const { lastMessage } = useWebSocketContext();
 
   // Verificar se há um transportador pré-selecionado
   useEffect(() => {
@@ -87,33 +84,6 @@ export default function RequestLicensePage() {
     setCurrentDraft(null);
     refetch();
   };
-
-  // Effect para invalidar cache quando houver atualizações via WebSocket
-  useEffect(() => {
-    if (lastMessage && lastMessage.data) {
-      try {
-        const message = JSON.parse(lastMessage.data);
-        
-        // Invalidar cache para atualizações de licenças/rascunhos
-        if (message.type === 'LICENSE_UPDATE' || message.type === 'STATUS_UPDATE') {
-          console.log('[REALTIME DRAFTS] Recebida atualização, invalidando cache:', message);
-          
-          // Invalidar cache dos rascunhos
-          queryClient.invalidateQueries({ queryKey: ['/api/licenses/drafts'] });
-          
-          // Forçar refetch imediato
-          refetch();
-          
-          toast({
-            title: "Dados atualizados",
-            description: "Seus rascunhos foram atualizados automaticamente.",
-          });
-        }
-      } catch (error) {
-        console.log('[REALTIME DRAFTS] Erro ao processar mensagem WebSocket:', error);
-      }
-    }
-  }, [lastMessage, queryClient, refetch, toast]);
 
   return (
     <MainLayout>

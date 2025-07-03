@@ -28,8 +28,6 @@ export function useWebSocket() {
         queryClient.invalidateQueries({ queryKey: ['/api/admin/licenses'] });
         queryClient.invalidateQueries({ queryKey: ['/api/licenses/issued'] });
         queryClient.invalidateQueries({ queryKey: ['/api/licenses/drafts'] });
-        // Invalidar especificamente rascunhos com renovação
-        queryClient.invalidateQueries({ queryKey: ['/api/licenses/drafts', 'includeRenewal'] });
         
         // Se tiver ID específico da licença
         if (data.licenseId) {
@@ -72,23 +70,6 @@ export function useWebSocket() {
         // Invalidar queries de usuários
         queryClient.invalidateQueries({ queryKey: ['/api/users'] });
         queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-        break;
-
-      case 'BOLETO_UPDATE':
-        // Invalidar queries de boletos/financeiro
-        queryClient.invalidateQueries({ queryKey: ['/api/boletos'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/boletos'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/meus-boletos'] });
-        
-        if (data.boletoId) {
-          queryClient.invalidateQueries({ queryKey: [`/api/boletos/${data.boletoId}`] });
-        }
-        break;
-
-      case 'VEHICLE_MODEL_UPDATE':
-        // Invalidar queries de modelos de veículos
-        queryClient.invalidateQueries({ queryKey: ['/api/vehicle-models'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/vehicle-models'] });
         break;
         
       case 'ACTIVITY_LOG_UPDATE':

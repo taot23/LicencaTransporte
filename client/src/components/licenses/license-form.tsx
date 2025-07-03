@@ -387,8 +387,7 @@ export function LicenseForm({
       });
     }
     
-    // Remover duplicatas e retornar apenas placas únicas
-    return Array.from(new Set(placas.filter(Boolean)));
+    return placas;
   };
 
   // Função para validar estado de forma silenciosa (sem alterar UI de validação)

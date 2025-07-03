@@ -34,7 +34,7 @@ const ROLE_PERMISSIONS: Record<UserRole, ModulePermissions> = {
   },
   operational: {
     dashboard: { view: false, create: false, edit: false, delete: false },
-    users: { view: true, create: false, edit: false, delete: false },
+    users: { view: false, create: false, edit: false, delete: false },
     financial: { view: false, create: false, edit: false, delete: false },
     myBoletos: { view: false, create: false, edit: false, delete: false },
     vehicles: { view: true, create: true, edit: true, delete: false },
