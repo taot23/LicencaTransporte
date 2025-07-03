@@ -44,7 +44,7 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
-### 03/07/2025 - Sistema WebSocket Completo para Tempo Real + Permissões Operacionais
+### 03/07/2025 - Sistema WebSocket Completo + Correção de Logout Duplo Clique
 - ✅ **WEBSOCKET EXPANSÃO COMPLETA**: Sistema WebSocket agora cobre TODOS os módulos do sistema em tempo real
 - ✅ **NOVOS TIPOS DE MENSAGEM**: Adicionados BOLETO_UPDATE, VEHICLE_MODEL_UPDATE, USER_UPDATE para cobertura total
 - ✅ **BACKEND BROADCASTS IMPLEMENTADOS**: Todas operações CRUD (criar, editar, excluir) agora enviam notificações WebSocket
@@ -52,6 +52,8 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
   • Boletos: broadcastBoletoUpdate para operações financeiras
   • Modelos de Veículos: broadcastVehicleModelUpdate para gestão administrativa
 - ✅ **FRONTEND CACHE INVALIDATION**: Hook useWebSocket expandido para processar todos os novos tipos de mensagem
+- ✅ **RENOVAÇÃO DE LICENÇAS EM TEMPO REAL**: Notificações WebSocket adicionadas na rota de renovação (/api/licenses/renew)
+- ✅ **CORREÇÃO LOGOUT DUPLO CLIQUE**: Implementada função centralizada `performLogout` com debounce e proteção contra múltiplos cliques
 - ✅ **PERMISSÕES OPERACIONAL CORRIGIDAS**: Usuários operacionais agora podem visualizar lista de usuários para transferir veículos
 - ✅ **SISTEMA VEÍCULOS ADMINISTRATIVOS**: Implementado sistema para desvinculação de veículos de usuários administrativos
 - ✅ **USUÁRIOS ADMINISTRATIVOS**: Veículos cadastrados por admin/operational/supervisor/manager/financial ficam como "Usuário undefined" (userId = null)
