@@ -89,7 +89,6 @@ const getUploadDir = () => {
 
 const uploadDir = getUploadDir();
 
-// Configuração geral para uploads (veículos, transportadores, etc.)
 const storage_config = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, uploadDir);
@@ -98,50 +97,6 @@ const storage_config = multer.diskStorage({
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
     cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-  }
-});
-
-// Configuração específica para licenças emitidas organizadas por estado
-const licenseStorage_config = multer.diskStorage({
-  destination: function (req, file, cb) {
-    // Obter o estado da requisição
-    const state = req.body.state || req.query.state || 'GERAL';
-    
-    // Criar pasta do estado dentro de licencas-emitidas
-    const licenseDir = path.join(process.cwd(), 'licencas-emitidas', state);
-    
-    try {
-      // Garantir que a pasta existe
-      if (!fs.existsSync(licenseDir)) {
-        fs.mkdirSync(licenseDir, { recursive: true, mode: 0o755 });
-      }
-      cb(null, licenseDir);
-    } catch (error) {
-      console.error(`Erro ao criar diretório para estado ${state}:`, error);
-      // Fallback para pasta geral se houver erro
-      const fallbackDir = path.join(process.cwd(), 'licencas-emitidas', 'GERAL');
-      if (!fs.existsSync(fallbackDir)) {
-        fs.mkdirSync(fallbackDir, { recursive: true, mode: 0o755 });
-      }
-      cb(null, fallbackDir);
-    }
-  },
-  filename: function (req, file, cb) {
-    // Obter dados da licença para criar nome organizado
-    const state = req.body.state || 'XX';
-    const aetNumber = req.body.aetNumber || req.body.requestNumber || 'SEM-NUMERO';
-    const today = new Date();
-    const dateStr = today.getFullYear().toString() + 
-                   (today.getMonth() + 1).toString().padStart(2, '0') + 
-                   today.getDate().toString().padStart(2, '0');
-    
-    const ext = path.extname(file.originalname);
-    
-    // Formato: AET-AAAA-NNNN_ESTADO_AAAAMMDD.pdf
-    const filename = `${aetNumber}_${state}_${dateStr}${ext}`;
-    
-    console.log(`[UPLOAD LICENÇA] Salvando arquivo: ${filename} na pasta: ${state}/`);
-    cb(null, filename);
   }
 });
 
@@ -208,15 +163,6 @@ const upload = multer({
   fileFilter,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB max file size
-  }
-});
-
-// Upload específico para licenças emitidas organizadas
-const uploadLicense = multer({ 
-  storage: licenseStorage_config,
-  fileFilter,
-  limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB max para licenças
   }
 });
 
@@ -4565,7 +4511,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // Endpoint específico para atualizar o status de um estado específico em uma licença
-  app.patch('/api/admin/licenses/:id/state-status', requireOperational, uploadLicense.single('stateFile'), async (req, res) => {
+  app.patch('/api/admin/licenses/:id/state-status', requireOperational, upload.single('stateFile'), async (req, res) => {
     console.log('=== ENDPOINT STATE-STATUS CHAMADO ===');
     console.log('URL completa:', req.url);
     console.log('Método:', req.method);
@@ -5335,13 +5281,8 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   // Servir arquivos de upload da pasta externa
   app.use('/uploads', express.static(uploadDir));
   
-  // Servir arquivos da pasta de licenças emitidas organizadas
-  const licenseEmittidasDir = path.join(process.cwd(), 'licencas-emitidas');
-  app.use('/licencas-emitidas', express.static(licenseEmittidasDir));
-  
   // Log da configuração final de uploads
   console.log(`[UPLOAD] Servindo arquivos de ${uploadDir} em /uploads`);
-  console.log(`[LICENÇAS] Servindo licenças emitidas de ${licenseEmittidasDir} em /licencas-emitidas`);
 
   return httpServer;
 }

@@ -44,17 +44,6 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
-### 03/07/2025 - Sistema de Organização de Licenças Emitidas IMPLEMENTADO
-- ✅ **PASTA ESTRUTURADA**: Criada pasta `licencas-emitidas/` para organização sistemática de arquivos
-- ✅ **ORGANIZAÇÃO POR ESTADO**: 26 estados brasileiros + DF + 3 órgãos federais (DNIT, ANTT, PRF)
-- ✅ **ESTRUTURA HIERÁRQUICA**: Subpastas por estado com organização por ano de emissão
-- ✅ **CONVENÇÃO DE NOMENCLATURA**: Padrão AET-AAAA-NNNN_ESTADO_AAAAMMDD.pdf para arquivos
-- ✅ **DOCUMENTAÇÃO COMPLETA**: README.md principal e instruções detalhadas em templates/
-- ✅ **EXEMPLO PRÁTICO**: Demonstração de organização na pasta SP/ 
-- ✅ **EXCLUSÃO MA MANTIDA**: Sistema sem Maranhão conforme especificação do projeto
-- ✅ **COMPATIBILIDADE**: Estrutura alinhada com sistema de validação de licenças vigentes
-- ✅ **PREPARAÇÃO BACKUP**: Estrutura preparada para arquivamento histórico e backup
-
 ### 02/07/2025 - Sistema de Busca por Veículo na Página "Transferir Veículos" IMPLEMENTADO
 - ✅ **CAMPO DE BUSCA**: Implementado campo de busca inteligente por placa, marca, modelo ou tipo de veículo
 - ✅ **FILTRO EM TEMPO REAL**: Busca instantânea com filtro usando useMemo para performance otimizada
