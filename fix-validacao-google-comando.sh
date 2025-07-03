@@ -57,7 +57,7 @@ EOF
     echo ""
     echo "📋 PRÓXIMOS PASSOS:"
     echo "1. Se tabela NÃO_EXISTE ou total_registros = 0:"
-    echo "   Execute: node sync-approved-licenses.js"
+    echo "   Execute: node sync-approved-licenses.cjs"
     echo ""
     echo "2. Reiniciar PM2:"
     echo "   pm2 restart ecosystem.config.js"
