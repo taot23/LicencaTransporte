@@ -59,8 +59,10 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
   • Cavalo igual + composição diferente = PERMITIDO ✅  
   • Cavalo diferente + composição igual = PERMITIDO ✅
   • Ordem das placas não importa = funciona corretamente ✅
-- ⚠️ **PROBLEMA AUTENTICAÇÃO FRONTEND**: Usuários operacionais perdem sessão no navegador após logout/login, mas backend funciona corretamente via curl
-- ⚠️ **ISSUE COOKIES**: Problema com manutenção de cookies de sessão no frontend impedindo acesso às licenças
+- ⚠️ **PROBLEMA CRÍTICO AUTENTICAÇÃO**: Validação preventiva não funciona no frontend devido a erro 401 (usuário não autenticado)
+- ⚠️ **BACKEND FUNCIONANDO**: Via curl, validação nova está 100% funcional - AL bloqueia corretamente com composição idêntica
+- ⚠️ **FRONTEND SEM SESSÃO**: Navegador perde sessão, impedindo validação em tempo real dos estados bloqueados
+- ⚠️ **IMPACT**: Estados como AL, BA, CE, DF, DNIT, MG, MS não aparecem com "licença vigente" em amarelo como deveriam
 
 ### 02/07/2025 - Sistema de Busca por Veículo na Página "Transferir Veículos" IMPLEMENTADO
 - ✅ **CAMPO DE BUSCA**: Implementado campo de busca inteligente por placa, marca, modelo ou tipo de veículo
