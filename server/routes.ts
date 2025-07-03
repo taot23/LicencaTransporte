@@ -4657,7 +4657,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, uploadLicense.si
   });
 
   // Endpoint específico para atualizar o status de um estado específico em uma licença
-  app.patch('/api/admin/licenses/:id/state-status', requireOperational, upload.single('stateFile'), async (req, res) => {
+  app.patch('/api/admin/licenses/:id/state-status', requireOperational, uploadLicense.single('licenseFile'), async (req, res) => {
     console.log('=== ENDPOINT STATE-STATUS CHAMADO ===');
     console.log('URL completa:', req.url);
     console.log('Método:', req.method);
@@ -4665,6 +4665,18 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, uploadLicense.si
     console.log('Body completo:', req.body);
     console.log('issuedAt no body:', req.body.issuedAt);
     console.log('Tipo do issuedAt:', typeof req.body.issuedAt);
+    
+    // Log específico para arquivo de licença
+    if (req.file) {
+      console.log('[UPLOAD LICENSE] Arquivo recebido:', {
+        filename: req.file.filename,
+        originalname: req.file.originalname,
+        path: req.file.path,
+        size: req.file.size
+      });
+    } else {
+      console.log('[UPLOAD LICENSE] Nenhum arquivo recebido no upload');
+    }
     try {
       const licenseId = parseInt(req.params.id);
       
