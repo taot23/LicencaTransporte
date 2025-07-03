@@ -72,6 +72,26 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **PROBLEMA DUPLICAÇÃO DE PLACAS RESOLVIDO**: Correção na função `getFormPlates()` para eliminar placas duplicadas que causavam falsos negativos
 - ✅ **NOVA REGRA DE VALIDAÇÃO FUNCIONANDO**: Backend processa corretamente composições idênticas vs diferentes
 - ✅ **WEBSOCKET IMPLEMENTADO EM RASCUNHOS**: Usuários transportadores agora recebem atualizações em tempo real quando rascunhos são criados/excluídos
+- ✅ **CORREÇÃO CRÍTICA RASCUNHOS DE RENOVAÇÃO**: Removido filtro que bloqueava exibição de rascunhos de renovação
+- ✅ **LOGOUT OTIMIZADO**: Redirecionamento instantâneo sem aguardar resposta do servidor, função centralizada com proteção contra duplo clique
+- ✅ **CACHE WEBSOCKET**: Invalidação específica para rascunhos com parâmetro includeRenewal para garantir atualizações em tempo real
+- ✅ **SISTEMA VEÍCULOS ADMINISTRATIVOS**: Implementado sistema para desvinculação de veículos de usuários administrativos
+- ✅ **USUÁRIOS ADMINISTRATIVOS**: Veículos cadastrados por admin/operational/supervisor/manager/financial ficam como "Usuário undefined" (userId = null)
+- ✅ **SCHEMA ATUALIZADO**: Campo userId na tabela vehicles aceita valores null corretamente
+- ✅ **IMPORTAÇÃO EM MASSA**: Lógica aplicada tanto no cadastro individual quanto na importação CSV
+- ✅ **BUSCA VEÍCULOS CORRIGIDA**: Erro na função getVehicleTypeName na página "Transferir Veículos" resolvido
+- ✅ **PERMISSÕES TRANSFERIR VEÍCULOS**: Menu "Transferir Veículos" agora visível para todos usuários administrativos (operational, supervisor, financial, manager, admin)
+- ✅ **NOVA REGRA DE VALIDAÇÃO IMPLEMENTADA**: Sistema agora bloqueia apenas quando cavalo E composição são idênticos
+- ✅ **VALIDAÇÃO INTELIGENTE**: Bloqueia se cavalo igual + conjunto de placas igual (independente da ordem)
+- ✅ **PERMITE REUTILIZAÇÃO PARCIAL**: Cavalo igual com composição diferente = PERMITIDO
+- ✅ **TESTE COMPLETO CONFIRMADO**: 4 cenários testados e funcionando perfeitamente
+  • Cavalo igual + composição igual = BLOQUEADO ❌
+  • Cavalo igual + composição diferente = PERMITIDO ✅  
+  • Cavalo diferente + composição igual = PERMITIDO ✅
+  • Ordem das placas não importa = funciona corretamente ✅
+- ✅ **PROBLEMA DUPLICAÇÃO DE PLACAS RESOLVIDO**: Correção na função `getFormPlates()` para eliminar placas duplicadas que causavam falsos negativos
+- ✅ **NOVA REGRA DE VALIDAÇÃO FUNCIONANDO**: Backend processa corretamente composições idênticas vs diferentes
+- ✅ **WEBSOCKET IMPLEMENTADO EM RASCUNHOS**: Usuários transportadores agora recebem atualizações em tempo real quando rascunhos são criados/excluídos
 - ⚠️ **TESTE PENDENTE**: Necessário testar estados AL, BA, CE, DF, DNIT, MG, MS que devem bloquear com placas BDI1A71+BCB-0886+BCB-0887
 
 ### 02/07/2025 - Sistema de Busca por Veículo na Página "Transferir Veículos" IMPLEMENTADO

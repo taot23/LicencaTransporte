@@ -28,6 +28,8 @@ export function useWebSocket() {
         queryClient.invalidateQueries({ queryKey: ['/api/admin/licenses'] });
         queryClient.invalidateQueries({ queryKey: ['/api/licenses/issued'] });
         queryClient.invalidateQueries({ queryKey: ['/api/licenses/drafts'] });
+        // Invalidar especificamente rascunhos com renovação
+        queryClient.invalidateQueries({ queryKey: ['/api/licenses/drafts', 'includeRenewal'] });
         
         // Se tiver ID específico da licença
         if (data.licenseId) {

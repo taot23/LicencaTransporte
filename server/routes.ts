@@ -1669,18 +1669,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         allDrafts = Array.from(uniqueMap.values());
       }
       
-      // Verificar se deve incluir rascunhos de renovação
-      const shouldIncludeRenewalDrafts = req.query.includeRenewal === 'true';
+      // Para garantir que rascunhos de renovação apareçam imediatamente, sempre incluir todos os rascunhos
+      console.log(`[DEBUG RENOVAÇÃO] Parâmetro includeRenewal: ${req.query.includeRenewal}`);
+      console.log(`[DEBUG RENOVAÇÃO] Total de rascunhos encontrados: ${allDrafts.length}`);
       
-      // Se não deve incluir rascunhos de renovação, filtrar aqueles que têm comentários sobre renovação
-      const drafts = shouldIncludeRenewalDrafts 
-        ? allDrafts 
-        : allDrafts.filter(draft => {
-            // Se o comentário menciona "Renovação", é um rascunho de renovação
-            return !(draft.comments && draft.comments.includes('Renovação'));
-          });
+      // Sempre retornar todos os rascunhos para garantir que renovações apareçam
+      const drafts = allDrafts;
       
-      console.log(`Total de rascunhos: ${allDrafts.length}, filtrados: ${drafts.length}, incluindo renovação: ${shouldIncludeRenewalDrafts}`);
+      console.log(`[DEBUG RENOVAÇÃO] Total de rascunhos retornados: ${drafts.length}`);
       
       // Log detalhado dos rascunhos
       console.log(`[DEBUG DETALHES] Retornando ${drafts.length} licenças com os seguintes IDs:`);

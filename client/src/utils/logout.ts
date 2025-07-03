@@ -1,57 +1,51 @@
-import { apiRequest } from "@/lib/queryClient";
-
 let isLoggingOut = false;
-let logoutTimeout: NodeJS.Timeout | null = null;
 
 /**
  * Função centralizada de logout com proteção contra múltiplos cliques
  */
 export const performLogout = async (navigate?: (path: string) => void) => {
-  // Previne múltiplos cliques em um período curto
+  // Previne múltiplos cliques
   if (isLoggingOut) {
     console.log("Logout já em andamento, ignorando...");
     return;
   }
 
-  // Debounce para evitar duplo clique
-  if (logoutTimeout) {
-    clearTimeout(logoutTimeout);
-  }
-
-  logoutTimeout = setTimeout(async () => {
-    isLoggingOut = true;
+  isLoggingOut = true;
+  
+  try {
+    console.log("Iniciando processo de logout...");
     
-    try {
-      console.log("Iniciando processo de logout...");
-      
-      // Limpa o cache imediatamente
-      const { queryClient } = await import("@/lib/queryClient");
-      queryClient.clear();
-      
-      // Fazer logout no servidor
-      await apiRequest("POST", "/api/logout");
-      console.log("Logout no servidor concluído");
-      
-      // Redirecionamento
-      if (navigate) {
-        navigate("/auth");
-      } else {
-        window.location.href = "/auth";
-      }
-      
-    } catch (error) {
-      console.error("Erro no logout:", error);
-      // Mesmo com erro, redirecionar para garantir que o usuário saia
-      if (navigate) {
-        navigate("/auth");
-      } else {
-        window.location.href = "/auth";
-      }
-    } finally {
-      // Reset do flag após um delay para permitir novo logout se necessário
-      setTimeout(() => {
-        isLoggingOut = false;
-      }, 2000);
+    // Limpa o cache imediatamente
+    const { queryClient } = await import("@/lib/queryClient");
+    queryClient.clear();
+    
+    // Redirecionamento IMEDIATO - não aguardar servidor
+    if (navigate) {
+      navigate("/auth");
+    } else {
+      window.location.href = "/auth";
     }
-  }, 100); // Debounce de 100ms
+    
+    // Logout no servidor em background - não bloquear redirecionamento
+    fetch("/api/logout", { 
+      method: "POST",
+      credentials: "include"
+    }).catch(() => {
+      // Ignorar erros - o redirecionamento já aconteceu
+    });
+    
+  } catch (error) {
+    console.error("Erro no logout:", error);
+    // Mesmo com erro, redirecionar
+    if (navigate) {
+      navigate("/auth");
+    } else {
+      window.location.href = "/auth";
+    }
+  } finally {
+    // Reset do flag após um tempo menor
+    setTimeout(() => {
+      isLoggingOut = false;
+    }, 500);
+  }
 };
