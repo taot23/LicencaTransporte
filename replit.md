@@ -50,6 +50,12 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **UPLOAD INTELIGENTE**: Sistema busca automaticamente placa da unidade tratora da licença para nomenclatura
 - ✅ **PASTA LICENSES CRIADA**: Subdiretório específico para arquivos de licenças separado de outros uploads
 - ✅ **MULTER CONFIGURADO**: Configuração específica `uploadLicense` para arquivos de licenças com nomenclatura organizada
+- ✅ **SCRIPTS DE DIAGNÓSTICO CRIADOS**: Ferramentas para resolver problemas de validação no servidor Google
+  • `diagnostico-validacao-google.js` - Análise completa do sistema de validação
+  • `teste-validacao-servidor.js` - Teste específico de licenças vigentes  
+  • `corrigir-validacao-google.js` - Correção automática de problemas
+  • `setup-uploads-google.sh` - Configuração automática de pastas de upload
+  • `GUIA_UPLOADS_SERVIDOR_GOOGLE.md` - Guia passo a passo para o servidor
 - ✅ **WEBSOCKET EXPANSÃO COMPLETA**: Sistema WebSocket agora cobre TODOS os módulos do sistema em tempo real
 - ✅ **NOVOS TIPOS DE MENSAGEM**: Adicionados BOLETO_UPDATE, VEHICLE_MODEL_UPDATE, USER_UPDATE para cobertura total
 - ✅ **BACKEND BROADCASTS IMPLEMENTADOS**: Todas operações CRUD (criar, editar, excluir) agora enviam notificações WebSocket
