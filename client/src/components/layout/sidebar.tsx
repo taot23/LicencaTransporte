@@ -186,8 +186,8 @@ export function Sidebar({ className }: SidebarProps) {
                   </Button>
                 )}
                 
-                {/* Transferir Veículos - Apenas para usuários administrativos (não transportadores) */}
-                {permissions.canViewUsers() && user?.role !== 'user' && (
+                {/* Transferir Veículos - Para todos os usuários administrativos */}
+                {permissions.isAdministrative() && (
                   <Button
                     variant="ghost"
                     className={cn(
