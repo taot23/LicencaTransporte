@@ -44,6 +44,16 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 03/07/2025 - Correções de Permissões e Autenticação para Usuários Operacionais
+- ✅ **SISTEMA VEÍCULOS ADMINISTRATIVOS**: Implementado sistema para desvinculação de veículos de usuários administrativos
+- ✅ **USUÁRIOS ADMINISTRATIVOS**: Veículos cadastrados por admin/operational/supervisor/manager/financial ficam como "Usuário undefined" (userId = null)
+- ✅ **SCHEMA ATUALIZADO**: Campo userId na tabela vehicles aceita valores null corretamente
+- ✅ **IMPORTAÇÃO EM MASSA**: Lógica aplicada tanto no cadastro individual quanto na importação CSV
+- ✅ **BUSCA VEÍCULOS CORRIGIDA**: Erro na função getVehicleTypeName na página "Transferir Veículos" resolvido
+- ✅ **PERMISSÕES TRANSFERIR VEÍCULOS**: Menu "Transferir Veículos" agora visível para todos usuários administrativos (operational, supervisor, financial, manager, admin)
+- ⚠️ **PROBLEMA AUTENTICAÇÃO FRONTEND**: Usuários operacionais perdem sessão no navegador após logout/login, mas backend funciona corretamente via curl
+- ⚠️ **ISSUE COOKIES**: Problema com manutenção de cookies de sessão no frontend impedindo acesso às licenças
+
 ### 02/07/2025 - Sistema de Busca por Veículo na Página "Transferir Veículos" IMPLEMENTADO
 - ✅ **CAMPO DE BUSCA**: Implementado campo de busca inteligente por placa, marca, modelo ou tipo de veículo
 - ✅ **FILTRO EM TEMPO REAL**: Busca instantânea com filtro usando useMemo para performance otimizada
