@@ -2602,6 +2602,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Logar o rascunho criado
       console.log("[RENOVAÇÃO] Rascunho criado com sucesso:", JSON.stringify(newDraft, null, 2));
       
+      // Enviar atualização WebSocket para notificar criação do rascunho de renovação
+      broadcastLicenseUpdate(newDraft.id, 'DRAFT_CREATED', newDraft);
+      
       // Responder com o novo rascunho criado
       res.status(201).json({
         message: `Licença renovada com sucesso para o estado ${state}`,
