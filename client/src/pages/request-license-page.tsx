@@ -78,10 +78,13 @@ export default function RequestLicensePage() {
       console.log('[REQUEST LICENSE PAGE] Detectada atualização de licença via WebSocket:', lastMessage.data);
       if (lastMessage.data.action === 'DRAFT_CREATED') {
         console.log('[REQUEST LICENSE PAGE] Novo rascunho criado, forçando refetch');
-        refetch();
+        console.log('[REQUEST LICENSE PAGE] Antes do refetch - draftLicenses.length:', draftLicenses?.length);
+        refetch().then(() => {
+          console.log('[REQUEST LICENSE PAGE] Refetch concluído');
+        });
       }
     }
-  }, [lastMessage, refetch]);
+  }, [lastMessage, refetch, draftLicenses]);
 
   const handleNewRequest = () => {
     setCurrentDraft(null);

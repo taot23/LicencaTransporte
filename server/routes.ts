@@ -1522,6 +1522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/licenses/drafts', requireAuth, async (req, res) => {
     try {
       const user = req.user!;
+      console.log(`[DRAFTS ENDPOINT] Usuário ${user.email} buscando rascunhos com parâmetros:`, req.query);
       let allDrafts = [];
       
       // Se for usuário administrativo, buscar todos os rascunhos
