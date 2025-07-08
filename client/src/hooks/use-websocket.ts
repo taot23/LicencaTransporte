@@ -23,11 +23,21 @@ export function useWebSocket() {
     switch (type) {
       case 'STATUS_UPDATE':
       case 'LICENSE_UPDATE':
-        // Invalidar todas as queries relacionadas a licenças
-        queryClient.invalidateQueries({ queryKey: ['/api/licenses'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/licenses'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/licenses/issued'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/licenses/drafts'] });
+        // Invalidar todas as queries relacionadas a licenças usando prefix matching
+        console.log('🔄 Invalidando queries de licenças via WebSocket');
+        queryClient.invalidateQueries({ 
+          predicate: (query) => {
+            const key = query.queryKey[0];
+            const shouldInvalidate = typeof key === 'string' && (
+              key.startsWith('/api/licenses') ||
+              key.startsWith('/api/admin/licenses')
+            );
+            if (shouldInvalidate) {
+              console.log('🔄 Invalidando query:', query.queryKey);
+            }
+            return shouldInvalidate;
+          }
+        });
         
         // Se tiver ID específico da licença
         if (data.licenseId) {
