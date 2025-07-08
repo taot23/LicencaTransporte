@@ -41,8 +41,8 @@ export default function TrackLicensePage() {
   const { data: licenses, isLoading, refetch } = useQuery<LicenseRequest[]>({
     queryKey: ["/api/licenses"],
     queryFn: async () => {
-      // O parâmetro includeRenewal=false é o padrão, mas explicitamos para clareza
-      const res = await fetch("/api/licenses?includeRenewal=false", {
+      // Incluir rascunhos de renovação para que apareçam em tempo real
+      const res = await fetch("/api/licenses?includeRenewal=true", {
         credentials: "include"
       });
       if (!res.ok) {

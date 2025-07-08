@@ -44,7 +44,7 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
-### 08/07/2025 - Sistema de Nomeação Inteligente de Arquivos IMPLEMENTADO
+### 08/07/2025 - Sistema de Nomeação Inteligente de Arquivos IMPLEMENTADO + Correção WebSocket Renovação
 - ✅ **CRLV DE VEÍCULOS**: Arquivos CRLV mantêm nome original sanitizado (caracteres especiais removidos)
 - ✅ **LICENÇAS LIBERADAS**: Arquivos de estado usam formato `{número_AET}_{estado}_{data_validade}.ext`
 - ✅ **LOGS DETALHADOS**: Sistema registra processo de nomeação para debugging
@@ -53,6 +53,8 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **MIDDLEWARE CONFIGURADO**: Endpoint `/api/admin/licenses/:id/state-status` preparado para nova nomenclatura
 - ✅ **VALIDAÇÃO ROBUSTA**: Verificação de dados obrigatórios (AET, estado, validade) antes da nomeação específica
 - ✅ **COMPATIBILIDADE**: Sistema mantém funcionamento para outros tipos de arquivos com padrão anterior
+- ✅ **WEBSOCKET RENOVAÇÃO CORRIGIDO**: Adicionado `broadcastLicenseUpdate` ao endpoint de renovação
+- ✅ **PARÂMETRO INCLUDERENEWAL**: Página "Acompanhar Licença" agora usa `includeRenewal=true` para mostrar rascunhos em tempo real
 
 ### 02/07/2025 - Sistema de Busca por Veículo na Página "Transferir Veículos" IMPLEMENTADO
 - ✅ **CAMPO DE BUSCA**: Implementado campo de busca inteligente por placa, marca, modelo ou tipo de veículo
