@@ -89,14 +89,59 @@ const getUploadDir = () => {
 
 const uploadDir = getUploadDir();
 
+// Configuração de storage com lógica de nomeação específica
 const storage_config = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+    
+    console.log(`[UPLOAD NAMING] Campo: ${file.fieldname}, Arquivo original: ${file.originalname}`);
+    console.log(`[UPLOAD NAMING] Dados do request:`, {
+      state: req.body?.state,
+      aetNumber: req.body?.aetNumber,
+      validUntil: req.body?.validUntil
+    });
+    
+    // Para CRLV de veículos - manter nome original
+    if (file.fieldname === 'crlvFile' || file.fieldname.includes('crlv')) {
+      // Sanitizar o nome original para evitar problemas de caracteres especiais
+      const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+      console.log(`[UPLOAD NAMING] CRLV: mantendo nome original sanitizado: ${originalName}`);
+      cb(null, originalName);
+      return;
+    }
+    
+    // Para arquivos de estado de licenças liberadas - usar padrão específico
+    if (file.fieldname === 'stateFile' || file.fieldname.includes('stateFile')) {
+      const stateParam = req.body?.state || req.params?.state || req.query?.state;
+      const aetNumber = req.body?.aetNumber || req.query?.aetNumber;
+      const validUntil = req.body?.validUntil || req.query?.validUntil;
+      
+      console.log(`[UPLOAD NAMING] StateFile - Estado: ${stateParam}, AET: ${aetNumber}, Validade: ${validUntil}`);
+      
+      if (aetNumber && stateParam && validUntil) {
+        try {
+          // Formatar data de validade (YYYY-MM-DD)
+          const formattedDate = new Date(validUntil).toISOString().split('T')[0];
+          const filename = `${aetNumber}_${stateParam}_${formattedDate}${ext}`;
+          console.log(`[UPLOAD NAMING] StateFile: usando nome específico: ${filename}`);
+          cb(null, filename);
+          return;
+        } catch (error) {
+          console.warn(`[UPLOAD NAMING] Erro ao processar data de validade: ${error}`);
+        }
+      }
+      
+      console.log(`[UPLOAD NAMING] StateFile: informações incompletas, usando padrão genérico`);
+    }
+    
+    // Para outros tipos de arquivos - usar padrão padrão
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const genericFilename = file.fieldname + '-' + uniqueSuffix + ext;
+    console.log(`[UPLOAD NAMING] Genérico: ${genericFilename}`);
+    cb(null, genericFilename);
   }
 });
 
@@ -4511,7 +4556,13 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // Endpoint específico para atualizar o status de um estado específico em uma licença
-  app.patch('/api/admin/licenses/:id/state-status', requireOperational, upload.single('stateFile'), async (req, res) => {
+  app.patch('/api/admin/licenses/:id/state-status', requireOperational, (req, res, next) => {
+    // Adicionar informações do AET ao request para o sistema de upload
+    req.body.state = req.body.state;
+    req.body.aetNumber = req.body.aetNumber;
+    req.body.validUntil = req.body.validUntil;
+    next();
+  }, upload.single('stateFile'), async (req, res) => {
     console.log('=== ENDPOINT STATE-STATUS CHAMADO ===');
     console.log('URL completa:', req.url);
     console.log('Método:', req.method);
