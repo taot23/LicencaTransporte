@@ -7,6 +7,7 @@ import { LicenseRequest, InsertLicenseRequest } from "@shared/schema";
 import { LicenseForm } from "@/components/licenses/license-form";
 import { LicenseList } from "@/components/licenses/license-list";
 import { useToast } from "@/hooks/use-toast";
+import { useWebSocket } from "@/hooks/use-websocket";
 import { 
   Dialog, 
   DialogContent, 
@@ -22,6 +23,7 @@ export default function RequestLicensePage() {
   const [currentDraft, setCurrentDraft] = useState<LicenseRequest | null>(null);
   const [preSelectedTransporterId, setPreSelectedTransporterId] = useState<number | null>(null);
   const { toast } = useToast();
+  const { lastMessage } = useWebSocket();
 
   // Verificar se há um transportador pré-selecionado
   useEffect(() => {
@@ -43,6 +45,17 @@ export default function RequestLicensePage() {
     }
   }, []);
 
+  // Escutar mudanças WebSocket e forçar refetch quando há novos rascunhos
+  useEffect(() => {
+    if (lastMessage && lastMessage.type === 'LICENSE_UPDATE') {
+      console.log('[REQUEST LICENSE PAGE] Detectada atualização de licença via WebSocket:', lastMessage.data);
+      if (lastMessage.data.action === 'DRAFT_CREATED') {
+        console.log('[REQUEST LICENSE PAGE] Novo rascunho criado, forçando refetch');
+        refetch();
+      }
+    }
+  }, [lastMessage, refetch]);
+
   const { data: draftLicenses, isLoading, refetch } = useQuery<LicenseRequest[]>({
     queryKey: ["/api/licenses/drafts", "includeRenewal"],
     queryFn: async () => {
@@ -57,6 +70,7 @@ export default function RequestLicensePage() {
       
       // Log para verificar o que realmente está vindo do servidor
       console.log("[DEBUG CLIENT] Recebidos do servidor:", data.length, "rascunhos");
+      console.log("[DEBUG CLIENT] Query key usada:", "/api/licenses/drafts?includeRenewal=true");
       data.forEach((draft: any) => {
         console.log(`- ID: ${draft.id}, isDraft: ${draft.isDraft}, status: ${draft.status}, transporterId: ${draft.transporterId}`);
       });
