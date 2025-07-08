@@ -45,17 +45,6 @@ export default function RequestLicensePage() {
     }
   }, []);
 
-  // Escutar mudanças WebSocket e forçar refetch quando há novos rascunhos
-  useEffect(() => {
-    if (lastMessage && lastMessage.type === 'LICENSE_UPDATE') {
-      console.log('[REQUEST LICENSE PAGE] Detectada atualização de licença via WebSocket:', lastMessage.data);
-      if (lastMessage.data.action === 'DRAFT_CREATED') {
-        console.log('[REQUEST LICENSE PAGE] Novo rascunho criado, forçando refetch');
-        refetch();
-      }
-    }
-  }, [lastMessage, refetch]);
-
   const { data: draftLicenses, isLoading, refetch } = useQuery<LicenseRequest[]>({
     queryKey: ["/api/licenses/drafts", "includeRenewal"],
     queryFn: async () => {
@@ -82,6 +71,17 @@ export default function RequestLicensePage() {
       return data;
     }
   });
+
+  // Escutar mudanças WebSocket e forçar refetch quando há novos rascunhos
+  useEffect(() => {
+    if (lastMessage && lastMessage.type === 'LICENSE_UPDATE') {
+      console.log('[REQUEST LICENSE PAGE] Detectada atualização de licença via WebSocket:', lastMessage.data);
+      if (lastMessage.data.action === 'DRAFT_CREATED') {
+        console.log('[REQUEST LICENSE PAGE] Novo rascunho criado, forçando refetch');
+        refetch();
+      }
+    }
+  }, [lastMessage, refetch]);
 
   const handleNewRequest = () => {
     setCurrentDraft(null);
