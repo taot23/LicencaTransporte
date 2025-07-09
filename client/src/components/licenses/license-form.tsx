@@ -521,6 +521,25 @@ export function LicenseForm({
   // ✅ VALIDAÇÃO AUTOMÁTICA INTELIGENTE: Monitora mudanças nos veículos sem loops
   const [lastValidatedCombination, setLastValidatedCombination] = useState<string>("");
   
+  // Função para obter combinação atual dos veículos
+  const getCurrentCombination = () => {
+    if (!vehicles || vehicles.length === 0) return { cavalo: "", carreta1: "", carreta2: "" };
+    
+    const tractorId = form.watch("tractorUnitId");
+    const firstTrailerId = form.watch("firstTrailerId");
+    const secondTrailerId = form.watch("secondTrailerId");
+    
+    const tractor = vehicles.find(v => v.id === tractorId);
+    const firstTrailer = vehicles.find(v => v.id === firstTrailerId);
+    const secondTrailer = vehicles.find(v => v.id === secondTrailerId);
+    
+    return {
+      cavalo: tractor?.plate || "",
+      carreta1: firstTrailer?.plate || "",
+      carreta2: secondTrailer?.plate || ""
+    };
+  };
+  
   useEffect(() => {
     if (!vehicles || vehicles.length === 0) return;
     
