@@ -1057,20 +1057,28 @@ export function LicenseForm({
 
       // Contornar qualquer validação e enviar de forma direta
       setTimeout(() => {
+        // Debug: verificar estados antes da conversão (prancha)
+        const currentFormValues = form.getValues();
+        console.log("Estados no form.getValues() (prancha):", currentFormValues.states);
+        console.log("Estados no selectedStates (prancha):", selectedStates);
+        
         // Obter valores atualizados após as modificações
         const updatedData = {
-          ...form.getValues(),
+          ...currentFormValues,
+          // Garantir que os estados selecionados são preservados
+          states: selectedStates,
           // Converter comprimento, largura e altura de metros para centímetros
-          length: Math.round((form.getValues("length") || 0) * 100),
-          width: Math.round((form.getValues("width") || 0) * 100),
-          height: Math.round((form.getValues("height") || 0) * 100),
+          length: Math.round((currentFormValues.length || 0) * 100),
+          width: Math.round((currentFormValues.width || 0) * 100),
+          height: Math.round((currentFormValues.height || 0) * 100),
           isDraft: false,
         };
 
         // Remover isDraft do payload
         const { isDraft, ...requestData } = updatedData;
 
-        // Tentar o envio diretamente
+        // Debug final (prancha)
+        console.log("Estados no requestData final (prancha):", requestData.states);
         console.log("Enviando dados prancha:", requestData);
         submitRequestMutation.mutate(requestData as any);
       }, 500);
@@ -1100,19 +1108,27 @@ export function LicenseForm({
 
       // Enviar diretamente para evitar problemas de validação no modal
       setTimeout(() => {
+        // Debug: verificar estados antes da conversão
+        const currentFormValues = form.getValues();
+        console.log("Estados no form.getValues():", currentFormValues.states);
+        console.log("Estados no selectedStates:", selectedStates);
+        
         const updatedData = {
-          ...form.getValues(),
+          ...currentFormValues,
+          // Garantir que os estados selecionados são preservados
+          states: selectedStates,
           // Converter comprimento, largura e altura de metros para centímetros
-          length: Math.round((form.getValues("length") || 0) * 100),
-          width: Math.round((form.getValues("width") || 0) * 100),
-          height: Math.round((form.getValues("height") || 0) * 100),
+          length: Math.round((currentFormValues.length || 0) * 100),
+          width: Math.round((currentFormValues.width || 0) * 100),
+          height: Math.round((currentFormValues.height || 0) * 100),
           isDraft: false,
         };
 
         // Remover isDraft do payload
         const { isDraft, ...requestData } = updatedData;
 
-        // Tentar o envio diretamente
+        // Debug final
+        console.log("Estados no requestData final:", requestData.states);
         console.log("Enviando dados:", requestData);
         submitRequestMutation.mutate(requestData as any);
       }, 300);
