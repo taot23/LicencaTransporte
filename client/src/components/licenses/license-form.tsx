@@ -1060,13 +1060,12 @@ export function LicenseForm({
         // Debug: verificar estados antes da conversão (prancha)
         const currentFormValues = form.getValues();
         console.log("Estados no form.getValues() (prancha):", currentFormValues.states);
-        console.log("Estados no selectedStates (prancha):", selectedStates);
         
         // Obter valores atualizados após as modificações
         const updatedData = {
           ...currentFormValues,
           // Garantir que os estados selecionados são preservados
-          states: selectedStates,
+          states: currentFormValues.states,
           // Converter comprimento, largura e altura de metros para centímetros
           length: Math.round((currentFormValues.length || 0) * 100),
           width: Math.round((currentFormValues.width || 0) * 100),
@@ -1111,12 +1110,11 @@ export function LicenseForm({
         // Debug: verificar estados antes da conversão
         const currentFormValues = form.getValues();
         console.log("Estados no form.getValues():", currentFormValues.states);
-        console.log("Estados no selectedStates:", selectedStates);
         
         const updatedData = {
           ...currentFormValues,
           // Garantir que os estados selecionados são preservados
-          states: selectedStates,
+          states: currentFormValues.states,
           // Converter comprimento, largura e altura de metros para centímetros
           length: Math.round((currentFormValues.length || 0) * 100),
           width: Math.round((currentFormValues.width || 0) * 100),
