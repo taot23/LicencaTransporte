@@ -518,10 +518,65 @@ export function LicenseForm({
     });
   };
   
-  // ✅ REMOVIDO: useEffect que causava loop infinito
-  // Validação será apenas manual através do botão
+  // ✅ VALIDAÇÃO AUTOMÁTICA INTELIGENTE: Monitora mudanças nos veículos sem loops
+  const [lastValidatedCombination, setLastValidatedCombination] = useState<string>("");
+  
+  useEffect(() => {
+    if (!vehicles || vehicles.length === 0) return;
+    
+    // Obter combinação atual
+    const currentCombination = getCurrentCombination();
+    const combinationKey = `${currentCombination.cavalo}-${currentCombination.carreta1}-${currentCombination.carreta2}`;
+    
+    // Só executar se:
+    // 1. Combinação completa (todos os 3 veículos)
+    // 2. Combinação diferente da última validada
+    // 3. Não está executando validação
+    if (currentCombination.cavalo && 
+        currentCombination.carreta1 && 
+        currentCombination.carreta2 &&
+        combinationKey !== lastValidatedCombination &&
+        !preventiveValidationRunning) {
+      
+      console.log(`[AUTO] 🚀 Executando validação automática para nova combinação: ${combinationKey}`);
+      
+      // Marcar como validada ANTES de executar para evitar loops
+      setLastValidatedCombination(combinationKey);
+      
+      // Executar validação com pequeno delay para evitar múltiplas chamadas
+      const timeoutId = setTimeout(() => {
+        validateAllStatesManual();
+      }, 300);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [
+    form.watch("tractorUnitId"),
+    form.watch("firstTrailerId"), 
+    form.watch("secondTrailerId"),
+    vehicles,
+    preventiveValidationRunning,
+    lastValidatedCombination
+  ]);
 
-  // ✅ REMOVIDO: Auto-cleanup para evitar loops - apenas validação manual ao clicar
+  // ✅ LIMPEZA AUTOMÁTICA: Limpa validações quando combinação muda
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name && (
+        name === 'tractorUnitId' ||
+        name === 'firstTrailerId' ||
+        name === 'secondTrailerId'
+      )) {
+        console.log(`[CLEANUP] Campo ${name} alterado - limpando validações antigas`);
+        setStateValidationStatus({});
+        setBlockedStates({});
+        // Resetar combinação validada para permitir nova validação
+        setLastValidatedCombination("");
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   // Função para verificar e confirmar seleção de veículo de terceiro
   const handleVehicleSelection = (vehicleId: number, fieldName: string) => {
