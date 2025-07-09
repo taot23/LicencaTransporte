@@ -1682,9 +1682,13 @@ export function LicenseForm({
                   
                   const filtered = transporters.filter(transporter => {
                     const nameMatch = transporter.name.toLowerCase().includes(search);
-                    const cnpjMatch = transporter.documentNumber && transporter.documentNumber.includes(search.replace(/\D/g, ''));
                     
-                    console.log(`[TRANSPORTER SEARCH] ${transporter.name} - nome: ${nameMatch}, cnpj: ${cnpjMatch}`);
+                    // Só fazer busca por CNPJ se o termo contém números
+                    const numericSearch = search.replace(/\D/g, '');
+                    const cnpjMatch = numericSearch && transporter.documentNumber && 
+                                     transporter.documentNumber.replace(/\D/g, '').includes(numericSearch);
+                    
+                    console.log(`[TRANSPORTER SEARCH] ${transporter.name} - nome: ${nameMatch}, cnpj: ${cnpjMatch}, termo numérico: "${numericSearch}"`);
                     
                     return nameMatch || cnpjMatch;
                   });
