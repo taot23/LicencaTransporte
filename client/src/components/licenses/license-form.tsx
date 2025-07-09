@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -565,7 +565,7 @@ export function LicenseForm({
   };
 
   // ✅ VALIDAÇÃO AUTOMÁTICA SILENCIOSA: Executa validação e aplica resultados automaticamente
-  const executeAutomaticValidation = async () => {
+  const executeAutomaticValidation = useCallback(async () => {
     console.log('[AUTO] 🎯 INICIO executeAutomaticValidation');
     
     if (!vehicles || vehicles.length === 0) {
@@ -585,80 +585,85 @@ export function LicenseForm({
     console.log('[AUTO] 🚀 Executando validação automática silenciosa...');
     setPreventiveValidationRunning(true);
     
-    // Determinar tipo de composição automaticamente
-    const hasSecondTrailer = !!currentCombination.carreta2;
-    const hasDolly = !!currentCombination.dolly;
-    
-    let tipoComposicao = "SIMPLES";
-    if (hasDolly && hasSecondTrailer) {
-      tipoComposicao = "RODOTREM";
-    } else if (hasDolly && !hasSecondTrailer) {
-      tipoComposicao = "DOLLY_ONLY";
-    } else if (!hasDolly && hasSecondTrailer) {
-      tipoComposicao = "BITREM";
-    }
-    
-    console.log(`[AUTO] Tipo de composição: ${tipoComposicao}`);
-    console.log('[AUTO] ✅ INICIANDO validação automática para combinação:', currentCombination);
-    
-    const newStatus: Record<string, string> = {};
-    const newBlockedStates: Record<string, any> = {};
-    
-    // Validar todos os estados em paralelo
-    const validationPromises = brazilianStates.map(async (state) => {
-      try {
-        const composicao = {
-          cavalo: currentCombination.cavalo,
-          carreta1: currentCombination.carreta1,
-          carreta2: currentCombination.carreta2 || undefined,
-          dolly: currentCombination.dolly || undefined
-        };
-        
-        const response = await fetch('/api/licencas-vigentes-by-combination', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            estado: state.code,
-            composicao
-          })
-        });
-        
-        const result = await response.json();
-        
-        if (result.bloqueado) {
-          newStatus[state.code] = 'blocked';
-          newBlockedStates[state.code] = result;
-          console.log(`[AUTO] ${state.code} bloqueado - ${result.dias_restantes || 'N/A'} dias`);
-        } else {
-          newStatus[state.code] = 'valid';
-          console.log(`[AUTO] ${state.code} liberado`);
-        }
-      } catch (error) {
-        newStatus[state.code] = 'error';
-        console.log(`[AUTO] ${state.code} erro na validação:`, error);
+    try {
+      // Determinar tipo de composição automaticamente
+      const hasSecondTrailer = !!currentCombination.carreta2;
+      const hasDolly = !!currentCombination.dolly;
+      
+      let tipoComposicao = "SIMPLES";
+      if (hasDolly && hasSecondTrailer) {
+        tipoComposicao = "RODOTREM";
+      } else if (hasDolly && !hasSecondTrailer) {
+        tipoComposicao = "DOLLY_ONLY";
+      } else if (!hasDolly && hasSecondTrailer) {
+        tipoComposicao = "BITREM";
       }
-    });
-    
-    // Aguardar todas as validações
-    await Promise.all(validationPromises);
-    
-    // Aplicar resultados
-    setStateValidationStatus(newStatus);
-    setBlockedStates(newBlockedStates);
-    setPreventiveValidationRunning(false);
-    
-    console.log('[AUTO] ✅ Validação automática concluída - status atualizado');
-    
-    // Remover estados bloqueados da seleção atual
-    const currentSelectedStates = form.getValues().states || [];
-    const blockedStatesCodes = Object.keys(newBlockedStates);
-    const newSelectedStates = currentSelectedStates.filter(state => !blockedStatesCodes.includes(state));
-    
-    if (newSelectedStates.length !== currentSelectedStates.length) {
-      console.log(`[AUTO] Removendo estados bloqueados da seleção:`, blockedStatesCodes);
-      form.setValue('states', newSelectedStates);
+      
+      console.log(`[AUTO] Tipo de composição: ${tipoComposicao}`);
+      console.log('[AUTO] ✅ INICIANDO validação automática para combinação:', currentCombination);
+      
+      const newStatus: Record<string, string> = {};
+      const newBlockedStates: Record<string, any> = {};
+      
+      // Validar todos os estados em paralelo
+      const validationPromises = brazilianStates.map(async (state) => {
+        try {
+          const composicao = {
+            cavalo: currentCombination.cavalo,
+            carreta1: currentCombination.carreta1,
+            carreta2: currentCombination.carreta2 || undefined,
+            dolly: currentCombination.dolly || undefined
+          };
+          
+          const response = await fetch('/api/licencas-vigentes-by-combination', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              estado: state.code,
+              composicao
+            })
+          });
+          
+          const result = await response.json();
+          
+          if (result.bloqueado) {
+            newStatus[state.code] = 'blocked';
+            newBlockedStates[state.code] = result;
+            console.log(`[AUTO] ${state.code} bloqueado - ${result.dias_restantes || 'N/A'} dias`);
+          } else {
+            newStatus[state.code] = 'valid';
+            console.log(`[AUTO] ${state.code} liberado`);
+          }
+        } catch (error) {
+          newStatus[state.code] = 'error';
+          console.log(`[AUTO] ${state.code} erro na validação:`, error);
+        }
+      });
+      
+      // Aguardar todas as validações
+      await Promise.all(validationPromises);
+      
+      // Aplicar resultados
+      setStateValidationStatus(newStatus);
+      setBlockedStates(newBlockedStates);
+      
+      console.log('[AUTO] ✅ Validação automática concluída - status atualizado');
+      
+      // Remover estados bloqueados da seleção atual
+      const currentSelectedStates = form.getValues().states || [];
+      const blockedStatesCodes = Object.keys(newBlockedStates);
+      const newSelectedStates = currentSelectedStates.filter(state => !blockedStatesCodes.includes(state));
+      
+      if (newSelectedStates.length !== currentSelectedStates.length) {
+        console.log(`[AUTO] Removendo estados bloqueados da seleção:`, blockedStatesCodes);
+        form.setValue('states', newSelectedStates);
+      }
+    } catch (error) {
+      console.error('[AUTO] ❌ Erro na validação automática:', error);
+    } finally {
+      setPreventiveValidationRunning(false);
     }
-  };
+  }, [vehicles, getCurrentCombination, setPreventiveValidationRunning, setStateValidationStatus, setBlockedStates, form]);
   
   useEffect(() => {
     if (!vehicles || vehicles.length === 0) return;
