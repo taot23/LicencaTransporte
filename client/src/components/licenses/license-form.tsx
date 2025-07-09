@@ -449,18 +449,30 @@ export function LicenseForm({
       vehicles?.find(v => v.id === watchedValues.firstTrailerId)?.plate : null;
     const carreta2 = watchedValues.secondTrailerId ? 
       vehicles?.find(v => v.id === watchedValues.secondTrailerId)?.plate : null;
+    const dolly = watchedValues.dollyId ? 
+      vehicles?.find(v => v.id === watchedValues.dollyId)?.plate : null;
     
-    // Se não temos combinação completa
-    if (!cavalo || !carreta1 || !carreta2) {
+    // Se não temos pelo menos cavalo + carreta1
+    if (!cavalo || !carreta1) {
       toast({
         title: "Combinação incompleta",
-        description: "Selecione Cavalo + Carreta 1 + Carreta 2 para validar estados",
+        description: "Selecione pelo menos Cavalo + Carreta 1 para validar estados",
         variant: "destructive"
       });
       return;
     }
     
-    console.log('[MANUAL] ✅ INICIANDO validação manual para combinação:', { cavalo, carreta1, carreta2 });
+    // Verificar se temos bitrem (carreta2) ou rodotrem (dolly)
+    if (!carreta2 && !dolly) {
+      toast({
+        title: "Composição incompleta",
+        description: "Selecione Carreta 2 (bitrem) ou Dolly (rodotrem) para completar a combinação",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    console.log('[MANUAL] ✅ INICIANDO validação manual para combinação:', { cavalo, carreta1, carreta2, dolly });
     
     setPreventiveValidationRunning(true);
     
@@ -481,7 +493,7 @@ export function LicenseForm({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ estado: state.code, composicao: { cavalo, carreta1, carreta2 } })
+          body: JSON.stringify({ estado: state.code, composicao: { cavalo, carreta1, carreta2, dolly } })
         });
         
         if (!response.ok) {
@@ -523,20 +535,23 @@ export function LicenseForm({
   
   // Função para obter combinação atual dos veículos
   const getCurrentCombination = () => {
-    if (!vehicles || vehicles.length === 0) return { cavalo: "", carreta1: "", carreta2: "" };
+    if (!vehicles || vehicles.length === 0) return { cavalo: "", carreta1: "", carreta2: "", dolly: "" };
     
     const tractorId = form.watch("tractorUnitId");
     const firstTrailerId = form.watch("firstTrailerId");
     const secondTrailerId = form.watch("secondTrailerId");
+    const dollyId = form.watch("dollyId");
     
     const tractor = vehicles.find(v => v.id === tractorId);
     const firstTrailer = vehicles.find(v => v.id === firstTrailerId);
     const secondTrailer = vehicles.find(v => v.id === secondTrailerId);
+    const dolly = vehicles.find(v => v.id === dollyId);
     
     return {
       cavalo: tractor?.plate || "",
       carreta1: firstTrailer?.plate || "",
-      carreta2: secondTrailer?.plate || ""
+      carreta2: secondTrailer?.plate || "",
+      dolly: dolly?.plate || ""
     };
   };
   
@@ -545,15 +560,17 @@ export function LicenseForm({
     
     // Obter combinação atual
     const currentCombination = getCurrentCombination();
-    const combinationKey = `${currentCombination.cavalo}-${currentCombination.carreta1}-${currentCombination.carreta2}`;
+    const combinationKey = `${currentCombination.cavalo}-${currentCombination.carreta1}-${currentCombination.carreta2}-${currentCombination.dolly}`;
     
     // Só executar se:
-    // 1. Combinação completa (todos os 3 veículos)
+    // 1. Combinação completa (cavalo + pelo menos carreta1, carreta2 pode estar vazio se não for bitrem)
     // 2. Combinação diferente da última validada
     // 3. Não está executando validação
-    if (currentCombination.cavalo && 
-        currentCombination.carreta1 && 
-        currentCombination.carreta2 &&
+    const hasMinimumCombination = currentCombination.cavalo && currentCombination.carreta1;
+    const hasCompleteCombination = hasMinimumCombination && 
+      (currentCombination.carreta2 || currentCombination.dolly); // Bitrem OU rodotrem
+    
+    if (hasCompleteCombination &&
         combinationKey !== lastValidatedCombination &&
         !preventiveValidationRunning) {
       
@@ -573,6 +590,7 @@ export function LicenseForm({
     form.watch("tractorUnitId"),
     form.watch("firstTrailerId"), 
     form.watch("secondTrailerId"),
+    form.watch("dollyId"),
     vehicles,
     preventiveValidationRunning,
     lastValidatedCombination
@@ -584,7 +602,8 @@ export function LicenseForm({
       if (name && (
         name === 'tractorUnitId' ||
         name === 'firstTrailerId' ||
-        name === 'secondTrailerId'
+        name === 'secondTrailerId' ||
+        name === 'dollyId'
       )) {
         console.log(`[CLEANUP] Campo ${name} alterado - limpando validações antigas`);
         setStateValidationStatus({});
