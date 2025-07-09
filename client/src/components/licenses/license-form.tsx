@@ -173,7 +173,7 @@ export function LicenseForm({
   const allDollys = vehicles?.filter((v) => v.type === "dolly") || [];
   const flatbeds = vehicles?.filter((v) => v.type === "flatbed") || [];
 
-  // Função para validar estado com licenças vigentes
+  // ✅ NOVA FUNÇÃO: Validação por combinação específica
   const validateState = async (estado: string): Promise<boolean> => {
     console.log(`[STATE VALIDATION] Iniciando validação para ${estado}, validating: ${validatingState}`);
     
@@ -182,69 +182,104 @@ export function LicenseForm({
       return false;
     }
     
-    // Coletar todas as placas do formulário
-    const placas = [];
+    // Coletar placas do formulário
     const watchedValues = form.watch();
     
-    // Placa principal
-    if (watchedValues.mainVehiclePlate) {
-      placas.push(watchedValues.mainVehiclePlate);
-    }
+    // ✅ NOVA LÓGICA: Verificar se temos combinação completa (Cavalo + Carreta1 + Carreta2)
+    let composicao = null;
     
-    // Placas dos veículos selecionados
+    // Placa do cavalo/trator
+    let cavalo = null;
     if (watchedValues.tractorUnitId) {
       const tractor = vehicles?.find(v => v.id === watchedValues.tractorUnitId);
-      if (tractor?.plate) placas.push(tractor.plate);
+      if (tractor?.plate) cavalo = tractor.plate;
+    } else if (watchedValues.mainVehiclePlate) {
+      cavalo = watchedValues.mainVehiclePlate;
     }
     
+    // Primeira carreta
+    let carreta1 = null;
     if (watchedValues.firstTrailerId) {
       const first = vehicles?.find(v => v.id === watchedValues.firstTrailerId);
-      if (first?.plate) placas.push(first.plate);
+      if (first?.plate) carreta1 = first.plate;
     }
     
+    // Segunda carreta
+    let carreta2 = null;
     if (watchedValues.secondTrailerId) {
       const second = vehicles?.find(v => v.id === watchedValues.secondTrailerId);
-      if (second?.plate) placas.push(second.plate);
+      if (second?.plate) carreta2 = second.plate;
     }
     
-    if (watchedValues.dollyId) {
-      const dolly = vehicles?.find(v => v.id === watchedValues.dollyId);
-      if (dolly?.plate) placas.push(dolly.plate);
-    }
-    
-    if (watchedValues.flatbedId) {
-      const flatbed = vehicles?.find(v => v.id === watchedValues.flatbedId);
-      if (flatbed?.plate) placas.push(flatbed.plate);
-    }
-    
-    // Placas adicionais
-    if (watchedValues.additionalPlates) {
-      watchedValues.additionalPlates.forEach((plate: string) => {
-        if (plate) placas.push(plate);
-      });
-    }
-    
-    console.log(`[STATE VALIDATION] Validando ${estado} com placas:`, placas);
-    
-    if (placas.length === 0) {
-      console.log(`[STATE VALIDATION] Nenhuma placa - liberando ${estado}`);
-      return false;
+    // Se temos combinação completa, usar validação específica
+    if (cavalo && carreta1 && carreta2) {
+      composicao = { cavalo, carreta1, carreta2 };
+      console.log(`[STATE VALIDATION] ✅ COMBINAÇÃO COMPLETA para ${estado}:`, composicao);
+    } else {
+      console.log(`[STATE VALIDATION] ⚠️ Combinação incompleta para ${estado} - usando validação tradicional`);
+      console.log(`[STATE VALIDATION] Cavalo: ${cavalo}, Carreta1: ${carreta1}, Carreta2: ${carreta2}`);
+      
+      // Fallback para validação tradicional por placas individuais
+      const placas = [];
+      if (cavalo) placas.push(cavalo);
+      if (carreta1) placas.push(carreta1);
+      if (carreta2) placas.push(carreta2);
+      
+      // Adicionar outras placas
+      if (watchedValues.dollyId) {
+        const dolly = vehicles?.find(v => v.id === watchedValues.dollyId);
+        if (dolly?.plate) placas.push(dolly.plate);
+      }
+      
+      if (watchedValues.flatbedId) {
+        const flatbed = vehicles?.find(v => v.id === watchedValues.flatbedId);
+        if (flatbed?.plate) placas.push(flatbed.plate);
+      }
+      
+      if (watchedValues.additionalPlates) {
+        watchedValues.additionalPlates.forEach((plate: string) => {
+          if (plate) placas.push(plate);
+        });
+      }
+      
+      if (placas.length === 0) {
+        console.log(`[STATE VALIDATION] Nenhuma placa - liberando ${estado}`);
+        return false;
+      }
     }
     
     setValidatingState(estado);
     
     try {
-      const response = await fetch('/api/validacao-critica', {
+      // Escolher endpoint correto baseado no tipo de validação
+      const endpoint = composicao ? '/api/licencas-vigentes-by-combination' : '/api/validacao-critica';
+      const requestBody = composicao 
+        ? { estado, composicao }
+        : { estado, placas: [cavalo, carreta1, carreta2].filter(Boolean) };
+      
+      console.log(`[STATE VALIDATION] Usando endpoint ${endpoint} para ${estado}`);
+      console.log(`[STATE VALIDATION] Request body:`, requestBody);
+      
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ estado, placas })
+        credentials: 'include',
+        body: JSON.stringify(requestBody)
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+      }
       
       const result = await response.json();
       console.log(`[STATE VALIDATION] Resultado para ${estado}:`, result);
       
-      if (result.bloqueado) {
-        console.log(`[STATE VALIDATION] ${estado} BLOQUEADO - ${result.diasRestantes} dias restantes`);
+      if (result.bloqueado && result.diasRestantes > 60) {
+        console.log(`[STATE VALIDATION] ${estado} BLOQUEADO - ${result.diasRestantes} dias > 60`);
+        if (composicao) {
+          console.log(`[STATE VALIDATION] 🚫 COMBINAÇÃO IDÊNTICA BLOQUEADA:`, result.composicao_encontrada);
+        }
+        
         setBlockedStates(prev => ({ ...prev, [estado]: result }));
         
         // Remover estado da seleção se foi bloqueado
@@ -254,14 +289,23 @@ export function LicenseForm({
           form.setValue('states', currentStates.filter(s => s !== estado));
         }
         
+        const message = composicao 
+          ? `Combinação idêntica (${composicao.cavalo} + ${composicao.carreta1} + ${composicao.carreta2}) já possui licença vigente com ${result.diasRestantes} dias restantes.`
+          : `Já existe licença vigente (${result.numero_licenca || result.numero}) com ${result.diasRestantes} dias restantes.`;
+        
         toast({
           title: `Estado ${estado} bloqueado`,
-          description: `Já existe licença vigente (${result.numero}) com ${result.diasRestantes} dias restantes. Renovação permitida apenas com ≤60 dias.`,
+          description: message + " Renovação permitida apenas com ≤60 dias.",
           variant: "destructive",
           duration: 8000,
         });
         
         return true; // bloqueado
+      }
+      
+      console.log(`[STATE VALIDATION] ${estado} LIBERADO`);
+      if (composicao && result.tipo_liberacao) {
+        console.log(`[STATE VALIDATION] ✅ Motivo: ${result.tipo_liberacao}`);
       }
       
       // Limpar dos bloqueados se estava bloqueado antes
