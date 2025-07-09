@@ -56,7 +56,7 @@ export function useLicenseValidationV2() {
         return false;
       }
 
-      // Nova lógica: se a composição completa for fornecida, usar validação específica
+      // ✅ NOVA LÓGICA: Validação por combinação específica
       let requestBody: any = {
         estado: estado,
         placas: placasArray
@@ -65,9 +65,47 @@ export function useLicenseValidationV2() {
       if (composicao && composicao.cavalo && composicao.carreta1 && composicao.carreta2) {
         console.log(`[VALIDAÇÃO COMBINAÇÃO] Usando validação por combinação específica:`, composicao);
         requestBody.composicao = composicao;
+        
+        // Usar endpoint de validação por combinação específica
+        const response = await fetch('/api/licencas-vigentes-by-combination', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            estado: estado,
+            composicao: composicao
+          })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`[VALIDAÇÃO COMBINAÇÃO] Erro na requisição ${response.status}:`, errorText);
+          return false;
+        }
+
+        const data = await response.json();
+        console.log(`[VALIDAÇÃO COMBINAÇÃO] Resposta da API para ${estado}:`, data);
+        
+        if (data.bloqueado && data.diasRestantes > 60) {
+          console.log(`[VALIDAÇÃO COMBINAÇÃO] Estado ${estado} BLOQUEADO: ${data.diasRestantes} dias > 60 - COMBINAÇÃO IDÊNTICA`);
+          setEstadosBloqueados((prev) => ({
+            ...prev,
+            [estado]: {
+              numero: data.numero_licenca,
+              validade: data.data_validade,
+              diasRestantes: data.diasRestantes
+            }
+          }));
+          return true;
+        }
+        
+        console.log(`[VALIDAÇÃO COMBINAÇÃO] Estado ${estado} LIBERADO - Combinação diferente ou dentro do prazo`);
+        return false;
       }
 
-      // VALIDAÇÃO CRÍTICA DIRETA: Consulta na tabela licencas_emitidas
+      // VALIDAÇÃO TRADICIONAL: Consulta na tabela licencas_emitidas por placas individuais
       const response = await fetch('/api/licencas-vigentes-by-state', {
         method: 'POST',
         headers: {

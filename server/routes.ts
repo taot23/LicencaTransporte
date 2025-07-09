@@ -2707,6 +2707,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ✅ ENDPOINT ESPECÍFICO PARA VALIDAÇÃO POR COMBINAÇÃO COMPLETA
+  app.post('/api/licencas-vigentes-by-combination', requireAuth, async (req, res) => {
+    try {
+      const { estado, composicao } = req.body;
+      
+      if (!estado) {
+        return res.status(400).json({ message: 'Estado é obrigatório' });
+      }
+      
+      if (!composicao || !composicao.cavalo || !composicao.carreta1 || !composicao.carreta2) {
+        return res.status(400).json({ message: 'Composição completa é obrigatória (cavalo, carreta1, carreta2)' });
+      }
+      
+      console.log(`[VALIDAÇÃO COMBINAÇÃO] Verificando composição específica no estado: ${estado}`);
+      console.log(`[VALIDAÇÃO COMBINAÇÃO] Composição: ${composicao.cavalo} + ${composicao.carreta1} + ${composicao.carreta2}`);
+      
+      // Query para verificar combinação EXATA
+      const query = `
+        SELECT 
+          le.estado,
+          le.numero_licenca,
+          le.data_validade,
+          le.placa_unidade_tratora,
+          le.placa_primeira_carreta,
+          le.placa_segunda_carreta,
+          EXTRACT(DAY FROM (le.data_validade - CURRENT_DATE)) as dias_restantes
+        FROM licencas_emitidas le
+        WHERE le.estado = $1 
+          AND le.status = 'ativa'
+          AND le.data_validade > CURRENT_DATE
+          AND UPPER(le.placa_unidade_tratora) = UPPER($2)
+          AND UPPER(le.placa_primeira_carreta) = UPPER($3)
+          AND UPPER(le.placa_segunda_carreta) = UPPER($4)
+        ORDER BY le.data_validade DESC
+        LIMIT 1
+      `;
+      
+      const result = await pool.query(query, [estado, composicao.cavalo, composicao.carreta1, composicao.carreta2]);
+      
+      if (result.rows.length > 0) {
+        const license = result.rows[0];
+        const daysUntilExpiry = parseInt(license.dias_restantes);
+        
+        console.log(`[VALIDAÇÃO COMBINAÇÃO] 🚫 COMBINAÇÃO IDÊNTICA ENCONTRADA: ${license.numero_licenca} - ${daysUntilExpiry} dias restantes`);
+        
+        if (daysUntilExpiry > 60) {
+          console.log(`[VALIDAÇÃO COMBINAÇÃO] Estado ${estado} BLOQUEADO: ${daysUntilExpiry} dias > 60 - COMBINAÇÃO IDÊNTICA`);
+          return res.json({
+            bloqueado: true,
+            estado: estado,
+            numero_licenca: license.numero_licenca,
+            data_validade: license.data_validade,
+            diasRestantes: daysUntilExpiry,
+            tipo_bloqueio: 'combinacao_identica',
+            composicao_encontrada: {
+              cavalo: license.placa_unidade_tratora,
+              carreta1: license.placa_primeira_carreta,
+              carreta2: license.placa_segunda_carreta
+            },
+            message: `Combinação idêntica encontrada na licença ${license.numero_licenca} (${daysUntilExpiry} dias restantes)`
+          });
+        } else {
+          console.log(`[VALIDAÇÃO COMBINAÇÃO] Estado ${estado} LIBERADO: ${daysUntilExpiry} dias ≤ 60 - PODE RENOVAR`);
+          return res.json({
+            bloqueado: false,
+            estado: estado,
+            numero_licenca: license.numero_licenca,
+            data_validade: license.data_validade,
+            diasRestantes: daysUntilExpiry,
+            tipo_liberacao: 'renovacao_permitida',
+            message: `Combinação idêntica encontrada mas pode renovar (${daysUntilExpiry} dias restantes ≤ 60)`
+          });
+        }
+      }
+      
+      console.log(`[VALIDAÇÃO COMBINAÇÃO] ✅ Estado ${estado} LIBERADO - Combinação específica não encontrada`);
+      return res.json({
+        bloqueado: false,
+        estado: estado,
+        tipo_liberacao: 'combinacao_diferente',
+        message: `Combinação específica não encontrada no estado ${estado} - nova configuração permitida`
+      });
+      
+    } catch (error) {
+      console.error('[VALIDAÇÃO COMBINAÇÃO] ❌ ERRO:', error);
+      return res.status(500).json({ 
+        bloqueado: false, // Em caso de erro, liberar para não bloquear o usuário
+        error: 'Erro na validação por combinação - liberando por segurança',
+        details: error.message 
+      });
+    }
+  });
+
   // ENDPOINT ESPECÍFICO POR ESTADO - VALIDAÇÃO DE COMBINAÇÃO COMPLETA
   app.post('/api/licencas-vigentes-by-state', requireAuth, async (req, res) => {
     try {
