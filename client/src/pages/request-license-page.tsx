@@ -22,6 +22,7 @@ export default function RequestLicensePage() {
   const [showForm, setShowForm] = useState(false);
   const [currentDraft, setCurrentDraft] = useState<LicenseRequest | null>(null);
   const [preSelectedTransporterId, setPreSelectedTransporterId] = useState<number | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { toast } = useToast();
   const { lastMessage } = useWebSocket();
 
@@ -46,7 +47,7 @@ export default function RequestLicensePage() {
   }, []);
 
   const { data: draftLicenses, isLoading, refetch } = useQuery<LicenseRequest[]>({
-    queryKey: ["/api/licenses/drafts", "includeRenewal"],
+    queryKey: ["/api/licenses/drafts", "includeRenewal", refreshTrigger], // Usa trigger para forçar refetch
     queryFn: async () => {
       // Adicionamos o parâmetro includeRenewal=true para incluir rascunhos de renovação
       const res = await fetch("/api/licenses/drafts?includeRenewal=true", {
@@ -69,7 +70,11 @@ export default function RequestLicensePage() {
       console.log("[DEBUG CLIENT] Após filtro de isDraft=true:", realDrafts.length, "rascunhos");
       
       return data;
-    }
+    },
+    staleTime: 0, // Sempre considera os dados como obsoletos
+    cacheTime: 0, // Não mantém cache
+    refetchOnWindowFocus: true,
+    refetchOnMount: true
   });
 
   // Escutar mudanças WebSocket e forçar refetch quando há novos rascunhos
@@ -77,14 +82,14 @@ export default function RequestLicensePage() {
     if (lastMessage && lastMessage.type === 'LICENSE_UPDATE') {
       console.log('[REQUEST LICENSE PAGE] Detectada atualização de licença via WebSocket:', lastMessage.data);
       if (lastMessage.data.action === 'DRAFT_CREATED') {
-        console.log('[REQUEST LICENSE PAGE] Novo rascunho criado, forçando refetch');
-        console.log('[REQUEST LICENSE PAGE] Antes do refetch - draftLicenses.length:', draftLicenses?.length);
-        refetch().then(() => {
-          console.log('[REQUEST LICENSE PAGE] Refetch concluído');
-        });
+        console.log('[REQUEST LICENSE PAGE] Novo rascunho criado, forçando atualização');
+        console.log('[REQUEST LICENSE PAGE] Antes da atualização - draftLicenses.length:', draftLicenses?.length);
+        // Incrementa o trigger para forçar uma nova query
+        setRefreshTrigger(prev => prev + 1);
+        console.log('[REQUEST LICENSE PAGE] Trigger incrementado para forçar refetch');
       }
     }
-  }, [lastMessage, refetch, draftLicenses]);
+  }, [lastMessage, draftLicenses]);
 
   const handleNewRequest = () => {
     setCurrentDraft(null);
