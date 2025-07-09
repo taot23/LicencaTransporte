@@ -2011,16 +2011,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: 'Tipo de conjunto é obrigatório' });
         }
         
-        if (!licenseData.requestedStates || licenseData.requestedStates.length === 0) {
+        // Verificar estados solicitados usando o campo correto do formulário
+        const statesField = licenseData.states || licenseData.requestedStates || [];
+        if (!statesField || statesField.length === 0) {
           return res.status(400).json({ message: 'Selecione pelo menos um estado' });
         }
         
         // Prepara dados para criar a licença
         const requestNumber = `AET-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
         
-        // Converte estados solicitados para o formato esperado no backend
-        licenseData.states = licenseData.requestedStates || licenseData.states || [];
-        console.log("Estados processados para envio:", licenseData.states);
+        // Garantir que os estados estão no formato correto
+        licenseData.states = statesField;
+        console.log("Estados finais processados para envio:", licenseData.states);
         
         // Define valores padrão se necessário
         if (!licenseData.mainVehiclePlate) {
@@ -2053,7 +2055,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isDraft: false
         });
         
-        // Cria a licença
+        // Cria a licença diretamente como pedido final
         const licenseRequest = await storage.createLicenseRequest(user.id, {
           ...licenseData,
           requestNumber,
@@ -2061,6 +2063,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         
         console.log("Nova licença criada com sucesso:", licenseRequest.id);
+        
+        // Enviar notificação WebSocket para nova licença
+        broadcastMessage({
+          type: 'LICENSE_UPDATE',
+          data: {
+            action: 'created',
+            license: licenseRequest,
+            userId: user.id
+          }
+        });
+        
         return res.json(licenseRequest);
       }
     } catch (error) {

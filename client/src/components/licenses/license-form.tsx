@@ -921,10 +921,13 @@ export function LicenseForm({
           });
         }
 
+        // Usar o endpoint correto de submissão
         const url = draft
           ? `/api/licenses/drafts/${draft.id}/submit`
-          : "/api/licenses";
+          : "/api/licenses/submit";
         const method = "POST";
+        console.log(`Enviando para endpoint: ${url}`);
+        console.log("Estados no payload final:", data.states);
         const res = await apiRequest(method, url, data);
         return await res.json();
       } catch (error) {
@@ -1079,6 +1082,7 @@ export function LicenseForm({
         // Debug final (prancha)
         console.log("Estados no requestData final (prancha):", requestData.states);
         console.log("Enviando dados prancha:", requestData);
+        console.log("Campo states especificamente (prancha):", requestData.states, typeof requestData.states);
         submitRequestMutation.mutate(requestData as any);
       }, 500);
     } else {
@@ -1125,9 +1129,10 @@ export function LicenseForm({
         // Remover isDraft do payload
         const { isDraft, ...requestData } = updatedData;
 
-        // Debug final
+        // Debug final  
         console.log("Estados no requestData final:", requestData.states);
         console.log("Enviando dados:", requestData);
+        console.log("Campo states especificamente:", requestData.states, typeof requestData.states);
         submitRequestMutation.mutate(requestData as any);
       }, 300);
     }
