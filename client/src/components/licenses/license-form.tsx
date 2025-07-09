@@ -928,10 +928,24 @@ export function LicenseForm({
         const method = "POST";
         console.log(`Enviando para endpoint: ${url}`);
         console.log("Estados no payload final:", data.states);
+        console.log("Payload completo:", JSON.stringify(data, null, 2));
+        
         const res = await apiRequest(method, url, data);
-        return await res.json();
+        
+        // Verificar se a resposta foi bem-sucedida
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error("Erro da resposta do servidor:", errorText);
+          throw new Error(`Erro ${res.status}: ${errorText || 'Erro desconhecido no servidor'}`);
+        }
+        
+        const result = await res.json();
+        console.log("Resposta do servidor:", result);
+        return result;
       } catch (error) {
         console.error("Erro ao enviar pedido:", error);
+        console.error("Tipo do erro:", typeof error);
+        console.error("Stack trace:", error instanceof Error ? error.stack : 'Não disponível');
         throw error;
       }
     },

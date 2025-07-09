@@ -412,14 +412,21 @@ export class TransactionalStorage implements IStorage {
     console.log("CreateLicenseRequest - dados originais:", {
       width: licenseData.width,
       height: licenseData.height,
-      cargoType: licenseData.cargoType
+      cargoType: licenseData.cargoType,
+      states: licenseData.states
     });
     
     console.log("CreateLicenseRequest - dados sanitizados:", {
       width,
       height,
-      cargoType
+      cargoType,
+      states: licenseData.states
     });
+    
+    // Log específico para estados
+    console.log("STORAGE - Estados recebidos:", licenseData.states);
+    console.log("STORAGE - Tipo dos estados:", typeof licenseData.states);
+    console.log("STORAGE - É array?", Array.isArray(licenseData.states));
     
     const [licenseRequest] = await db
       .insert(licenseRequests)
@@ -453,6 +460,9 @@ export class TransactionalStorage implements IStorage {
         validUntil: licenseData.validUntil || null
       })
       .returning();
+    
+    // Log final após inserção
+    console.log("STORAGE - Licença criada com estados:", licenseRequest.states);
     
     return licenseRequest;
   }

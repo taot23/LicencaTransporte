@@ -2250,11 +2250,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint para enviar um pedido de licença (usado no formulário frontened)
   app.post('/api/licenses/submit', requireAuth, async (req, res) => {
     try {
+      console.log('=== INÍCIO DO PROCESSAMENTO DE LICENÇA ===');
       console.log('Received submit request with data:', JSON.stringify(req.body, null, 2));
       
       const user = req.user!;
       const userId = user.id;
       const licenseData = { ...req.body };
+      
+      console.log('=== VERIFICAÇÃO DOS ESTADOS ===');
+      console.log('Estados no req.body:', req.body.states);
+      console.log('Estados no licenseData:', licenseData.states);
+      console.log('Tipo dos estados:', typeof licenseData.states);
+      console.log('É array?', Array.isArray(licenseData.states));
       
       console.log("Tipo de licença:", licenseData.type);
       console.log("Tipo de carga:", licenseData.cargoType);
@@ -2396,14 +2403,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       console.log('Creating license request with data:', JSON.stringify(sanitizedData, null, 2));
+      console.log('=== DADOS PARA O BANCO ===');
       console.log('ESTADOS SENDO ENVIADOS PARA O BANCO:', sanitizedData.states);
+      console.log('Dados sanitizados completos:', JSON.stringify(sanitizedData, null, 2));
       
       // Validação removida - será feita no frontend ao selecionar estados
 
       const licenseRequest = await storage.createLicenseRequest(userId, sanitizedData);
       
+      console.log('=== RESULTADO DO BANCO ===');
       console.log('License request saved to database:', JSON.stringify(licenseRequest, null, 2));
       console.log('ESTADOS SALVOS NO BANCO:', licenseRequest.states);
+      console.log('Comparação - Enviado vs Salvo:', {
+        enviado: sanitizedData.states,
+        salvo: licenseRequest.states,
+        iguais: JSON.stringify(sanitizedData.states) === JSON.stringify(licenseRequest.states)
+      });
       
       // Criar registros individuais para cada estado na nova tabela state_licenses
       console.log(`[NOVA ABORDAGEM] Criando registros individuais para estados: ${sanitizedData.states.join(', ')}`);
