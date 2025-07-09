@@ -2825,7 +2825,7 @@ export function LicenseForm({
                       render={({ field }) => {
                         const selectedStates = field.value || [];
                         const availableStates = brazilianStates.filter(state => 
-                          !blockedStates[state.code] && stateValidationStatus[state.code] !== 'blocked'
+                          !blockedStates[state.code]
                         );
                         const allAvailableSelected = availableStates.length > 0 && 
                           availableStates.every(state => selectedStates.includes(state.code));
