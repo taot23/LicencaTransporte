@@ -1952,135 +1952,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Novo endpoint específico para submissão de formulário de licença
-  app.post('/api/licenses/submit', requireAuth, async (req, res) => {
-    try {
-      const user = req.user!;
-      console.log("Recebendo dados do formulário:", req.body);
-      
-      const licenseData = { ...req.body };
-      console.log("Verificando estados solicitados:", licenseData.requestedStates);
-      
-      // Se tiver um ID de rascunho, usa o fluxo de submissão de rascunho
-      if (licenseData.id) {
-        const draftId = licenseData.id;
-        const existingDraft = await storage.getLicenseRequestById(draftId);
-        
-        if (!existingDraft) {
-          return res.status(404).json({ message: 'Rascunho não encontrado' });
-        }
-        
-        // Verificar se é um rascunho
-        if (!existingDraft.isDraft) {
-          return res.status(403).json({ message: 'Este item não é um rascunho ou já foi submetido' });
-        }
-        
-        // Verificar acesso - usuários staff (admin, operacional, supervisor) podem submeter qualquer rascunho
-        const isStaff = isAdminUser(user) || user.role === 'operational' || user.role === 'supervisor';
-        
-        if (!isStaff && existingDraft.userId !== user.id) {
-          console.log(`Usuário ${user.id} (${user.role}) tentou submeter rascunho ${draftId} do usuário ${existingDraft.userId}`);
-          return res.status(403).json({ message: 'Acesso negado' });
-        }
-        
-        console.log(`Usuário ${user.id} (${user.role}) autorizado a submeter rascunho ${draftId}`);
-        
-        // Generate a real request number
-        const requestNumber = `AET-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
-        
-        // Update the draft with the new data
-        await storage.updateLicenseDraft(draftId, {
-          ...licenseData,
-          isDraft: false,
-        });
-        
-        // Submit the updated draft as a real license request
-        const licenseRequest = await storage.submitLicenseDraft(draftId, requestNumber);
-        
-        console.log("Licença submetida com sucesso:", licenseRequest.id);
-        return res.json(licenseRequest);
-      } 
-      // Caso contrário, cria uma nova licença
-      else {
-        // Faz as validações básicas necessárias
-        if (!licenseData.transporterId) {
-          return res.status(400).json({ message: 'Transportador é obrigatório' });
-        }
-        
-        if (!licenseData.type) {
-          return res.status(400).json({ message: 'Tipo de conjunto é obrigatório' });
-        }
-        
-        // Verificar estados solicitados usando o campo correto do formulário
-        const statesField = licenseData.states || licenseData.requestedStates || [];
-        if (!statesField || statesField.length === 0) {
-          return res.status(400).json({ message: 'Selecione pelo menos um estado' });
-        }
-        
-        // Prepara dados para criar a licença
-        const requestNumber = `AET-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
-        
-        // Garantir que os estados estão no formato correto
-        licenseData.states = statesField;
-        console.log("Estados finais processados para envio:", licenseData.states);
-        
-        // Define valores padrão se necessário
-        if (!licenseData.mainVehiclePlate) {
-          licenseData.mainVehiclePlate = "Não especificado";
-        }
-        
-        if (!licenseData.length) {
-          licenseData.length = 2000; // 20 metros em centímetros
-        }
-        
-        // Sanitizar campos de dimensões e tipo de carga
-        if (licenseData.width === undefined || licenseData.width === null) {
-          // Valores padrão com base no tipo de licença
-          licenseData.width = licenseData.type === "flatbed" ? 320 : 260; // 3.20m ou 2.60m
-        }
-        
-        if (licenseData.height === undefined || licenseData.height === null) {
-          // Valores padrão com base no tipo de licença
-          licenseData.height = licenseData.type === "flatbed" ? 495 : 440; // 4.95m ou 4.40m
-        }
-        
-        if (licenseData.cargoType === undefined || licenseData.cargoType === null || licenseData.cargoType === "") {
-          // Valores padrão com base no tipo de licença
-          licenseData.cargoType = licenseData.type === "flatbed" ? "indivisible_cargo" : "dry_cargo";
-        }
-        
-        console.log("Dados processados para envio:", {
-          ...licenseData,
-          requestNumber,
-          isDraft: false
-        });
-        
-        // Cria a licença diretamente como pedido final
-        const licenseRequest = await storage.createLicenseRequest(user.id, {
-          ...licenseData,
-          requestNumber,
-          isDraft: false,
-        });
-        
-        console.log("Nova licença criada com sucesso:", licenseRequest.id);
-        
-        // Enviar notificação WebSocket para nova licença
-        broadcastMessage({
-          type: 'LICENSE_UPDATE',
-          data: {
-            action: 'created',
-            license: licenseRequest,
-            userId: user.id
-          }
-        });
-        
-        return res.json(licenseRequest);
-      }
-    } catch (error) {
-      console.error('Erro ao enviar solicitação de licença:', error);
-      res.status(500).json({ message: 'Erro ao enviar solicitação de licença' });
-    }
-  });
+  // Endpoint removido - duplicado abaixo
 
   // Endpoint para verificar licenças vigentes por estado e placas (nova abordagem)
   app.post('/api/licencas-vigentes', requireAuth, async (req: any, res: any) => {
@@ -2356,6 +2228,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const licenseRequest = await storage.createLicenseRequest(userId, sanitizedData);
       
+      console.log("Licença criada com sucesso! ID:", licenseRequest.id, "Estados:", licenseRequest.states);
+      
+      // Enviar notificação WebSocket para nova licença
+      broadcastMessage({
+        type: 'LICENSE_UPDATE',
+        data: {
+          action: 'created',
+          license: licenseRequest,
+          userId: userId
+        }
+      });
+      
       res.status(201).json(licenseRequest);
     } catch (error) {
       console.error('Error creating license request:', error);
@@ -2420,9 +2304,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         licenseData.status = 'pending_registration';
       }
       
+      // Garantir que os estados estão corretos - priorizar o campo states do frontend
+      console.log("Estados recebidos - states:", licenseData.states);
+      console.log("Estados recebidos - requestedStates:", licenseData.requestedStates);
+      
       if (!licenseData.states || !Array.isArray(licenseData.states)) {
         licenseData.states = licenseData.requestedStates || [];
       }
+      
+      console.log("Estados finais processados:", licenseData.states);
       
       // Preparando estado das solicitações por estado
       if (!licenseData.stateStatuses) {
@@ -2506,12 +2396,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       console.log('Creating license request with data:', JSON.stringify(sanitizedData, null, 2));
+      console.log('ESTADOS SENDO ENVIADOS PARA O BANCO:', sanitizedData.states);
       
       // Validação removida - será feita no frontend ao selecionar estados
 
       const licenseRequest = await storage.createLicenseRequest(userId, sanitizedData);
       
       console.log('License request saved to database:', JSON.stringify(licenseRequest, null, 2));
+      console.log('ESTADOS SALVOS NO BANCO:', licenseRequest.states);
       
       // Criar registros individuais para cada estado na nova tabela state_licenses
       console.log(`[NOVA ABORDAGEM] Criando registros individuais para estados: ${sanitizedData.states.join(', ')}`);
