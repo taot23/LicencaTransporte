@@ -148,9 +148,11 @@ export function LicenseForm({
   const [pendingSubmitData, setPendingSubmitData] = useState<any>(null);
   const [thirdPartyVehiclesInSubmit, setThirdPartyVehiclesInSubmit] = useState<string[]>([]);
   
-  // Estados para validação de licenças - apenas essencial
+  // Estados para validação de licenças
   const [validatingState, setValidatingState] = useState<string | null>(null);
   const [blockedStates, setBlockedStates] = useState<Record<string, any>>({});
+  const [stateValidationStatus, setStateValidationStatus] = useState<Record<string, 'loading' | 'valid' | 'blocked' | 'error'>>({});
+  const [preventiveValidationRunning, setPreventiveValidationRunning] = useState(false);
 
   // Fetch vehicles for the dropdown selectors
   const { data: vehicles, isLoading: isLoadingVehicles } = useQuery<Vehicle[]>({
@@ -432,37 +434,82 @@ export function LicenseForm({
     return placas;
   };
 
-  // ✅ VALIDAÇÃO EM TEMPO REAL: Apenas quando veículos mudam
+  // ✅ VALIDAÇÃO PREVENTIVA AUTOMÁTICA: Mostra estados bloqueados automaticamente
   useEffect(() => {
-    if (!vehicles || vehicles.length === 0) return;
+    if (!vehicles || vehicles.length === 0 || preventiveValidationRunning) return;
     
-    // Função para limpar estados bloqueados que não são mais válidos
-    const checkAndClearBlockedStates = () => {
+    const validateAllStatesPreventive = async () => {
       const watchedValues = form.watch();
       
-      // Verificar se temos combinação atual
-      const currentCombination = {
-        cavalo: watchedValues.tractorUnitId ? 
-          vehicles?.find(v => v.id === watchedValues.tractorUnitId)?.plate || watchedValues.mainVehiclePlate :
-          watchedValues.mainVehiclePlate,
-        carreta1: watchedValues.firstTrailerId ? 
-          vehicles?.find(v => v.id === watchedValues.firstTrailerId)?.plate : null,
-        carreta2: watchedValues.secondTrailerId ? 
-          vehicles?.find(v => v.id === watchedValues.secondTrailerId)?.plate : null
-      };
+      // Verificar se temos combinação completa
+      const cavalo = watchedValues.tractorUnitId ? 
+        vehicles?.find(v => v.id === watchedValues.tractorUnitId)?.plate || watchedValues.mainVehiclePlate :
+        watchedValues.mainVehiclePlate;
+      const carreta1 = watchedValues.firstTrailerId ? 
+        vehicles?.find(v => v.id === watchedValues.firstTrailerId)?.plate : null;
+      const carreta2 = watchedValues.secondTrailerId ? 
+        vehicles?.find(v => v.id === watchedValues.secondTrailerId)?.plate : null;
       
-      // Se a combinação mudou, limpar estados bloqueados
-      setBlockedStates(prev => {
-        const hasValidCombination = currentCombination.cavalo && currentCombination.carreta1 && currentCombination.carreta2;
-        if (!hasValidCombination) {
-          console.log('[REAL TIME] Combinação incompleta - limpando bloqueios');
-          return {};
-        }
-        return prev;
+      // Se não temos combinação completa, limpar validações
+      if (!cavalo || !carreta1 || !carreta2) {
+        console.log('[PREVENTIVE] Combinação incompleta - limpando validações');
+        setStateValidationStatus({});
+        setBlockedStates({});
+        return;
+      }
+      
+      const composicao = { cavalo, carreta1, carreta2 };
+      console.log('[PREVENTIVE] ✅ INICIANDO validação automática para combinação:', composicao);
+      
+      setPreventiveValidationRunning(true);
+      
+      // Marcar todos como carregando
+      const loadingStatus: Record<string, 'loading'> = {};
+      brazilianStates.forEach(state => {
+        loadingStatus[state.code] = 'loading';
       });
+      setStateValidationStatus(loadingStatus);
+      
+      // Validar cada estado
+      const newStatus: Record<string, 'valid' | 'blocked' | 'error'> = {};
+      const newBlockedStates: Record<string, any> = {};
+      
+      for (const state of brazilianStates) {
+        try {
+          const response = await fetch('/api/licencas-vigentes-by-combination', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ estado: state.code, composicao })
+          });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          
+          const result = await response.json();
+          
+          if (result.bloqueado && result.diasRestantes > 60) {
+            newStatus[state.code] = 'blocked';
+            newBlockedStates[state.code] = result;
+            console.log(`[PREVENTIVE] ${state.code} bloqueado - ${result.diasRestantes} dias`);
+          } else {
+            newStatus[state.code] = 'valid';
+          }
+        } catch (error) {
+          newStatus[state.code] = 'error';
+          console.log(`[PREVENTIVE] ${state.code} erro na validação:`, error);
+        }
+      }
+      
+      setStateValidationStatus(newStatus);
+      setBlockedStates(newBlockedStates);
+      setPreventiveValidationRunning(false);
+      
+      console.log('[PREVENTIVE] ✅ Validação preventiva concluída');
     };
     
-    // Watch apenas campos relevantes para validação
+    // Watch campos relevantes para validação
     const subscription = form.watch((value, { name }) => {
       if (name && (
         name === 'mainVehiclePlate' ||
@@ -470,18 +517,24 @@ export function LicenseForm({
         name === 'firstTrailerId' ||
         name === 'secondTrailerId'
       )) {
-        console.log(`[REAL TIME] Campo ${name} alterado - verificando bloqueios`);
+        console.log(`[PREVENTIVE] Campo ${name} alterado - executando validação preventiva`);
         // Debounce para evitar muitas chamadas
         const timeoutId = setTimeout(() => {
-          checkAndClearBlockedStates();
-        }, 500);
+          validateAllStatesPreventive();
+        }, 800);
         
         return () => clearTimeout(timeoutId);
       }
     });
     
+    // Executar validação inicial se já temos veículos selecionados
+    const initialValues = form.getValues();
+    if (initialValues.tractorUnitId && initialValues.firstTrailerId && initialValues.secondTrailerId) {
+      validateAllStatesPreventive();
+    }
+    
     return () => subscription.unsubscribe();
-  }, [vehicles, form]);
+  }, [vehicles, form, preventiveValidationRunning]);
 
   // ✅ REMOVIDO: Auto-cleanup para evitar loops - apenas validação manual ao clicar
 
@@ -2874,7 +2927,7 @@ export function LicenseForm({
                       render={({ field }) => {
                         const selectedStates = field.value || [];
                         const availableStates = brazilianStates.filter(state => 
-                          !blockedStates[state.code]
+                          !blockedStates[state.code] && stateValidationStatus[state.code] !== 'blocked'
                         );
                         const allAvailableSelected = availableStates.length > 0 && 
                           availableStates.every(state => selectedStates.includes(state.code));
@@ -2968,11 +3021,15 @@ export function LicenseForm({
                                 className={`cursor-pointer flex flex-col items-center justify-center p-2 rounded-md border ${
                                   isSelected
                                     ? "bg-blue-50 border-blue-300 text-blue-700 font-medium"
-                                    : blockedStates[state.code]
-                                      ? "bg-yellow-50 border-yellow-300 cursor-not-allowed opacity-75"
-                                      : validatingState === state.code
-                                        ? "bg-gray-50 border-gray-300 opacity-50 cursor-not-allowed"
-                                        : "border-gray-200 hover:bg-gray-50"
+                                    : stateValidationStatus[state.code] === 'blocked' || blockedStates[state.code]
+                                      ? "bg-yellow-100 border-yellow-400 cursor-not-allowed"
+                                      : stateValidationStatus[state.code] === 'loading'
+                                        ? "bg-gray-100 border-gray-300 opacity-60 cursor-not-allowed"
+                                        : validatingState === state.code
+                                          ? "bg-gray-100 border-gray-300 opacity-60 cursor-not-allowed"
+                                          : stateValidationStatus[state.code] === 'valid'
+                                            ? "bg-green-50 border-green-200 hover:bg-green-100"
+                                            : "border-gray-200 hover:bg-gray-50"
                                 }`}
                                 onClick={async () => {
                                   console.log(`[HANDLE STATE CLICK] Clicando em ${state.code}, validating: ${validatingState}`);
@@ -3031,20 +3088,30 @@ export function LicenseForm({
                                 <span className="text-xs mt-1 text-center hidden md:block text-gray-500">
                                   {state.name}
                                 </span>
-                                {/* Mostrar status da validação */}
-                                {validatingState === state.code && (
-                                  <span className="text-xs mt-1 text-center text-gray-400">
+                                {/* Mostrar status da validação como na imagem */}
+                                {stateValidationStatus[state.code] === 'loading' && (
+                                  <span className="text-xs mt-1 text-center text-gray-500">
                                     validando...
                                   </span>
                                 )}
-                                {blockedStates[state.code] && (
-                                  <span className="text-xs mt-1 text-center text-yellow-600 font-medium">
-                                    licença vigente
-                                    {blockedStates[state.code]?.validade && (
-                                      <div className="text-xs text-yellow-500 mt-1">
-                                        até {new Date(blockedStates[state.code].validade).toLocaleDateString('pt-BR')}
+                                {validatingState === state.code && (
+                                  <span className="text-xs mt-1 text-center text-gray-500">
+                                    verificando...
+                                  </span>
+                                )}
+                                {(stateValidationStatus[state.code] === 'blocked' || blockedStates[state.code]) && (
+                                  <div className="text-xs mt-1 text-center">
+                                    <div className="text-orange-600 font-medium">licença vigente</div>
+                                    {(blockedStates[state.code]?.data_validade || blockedStates[state.code]?.validade) && (
+                                      <div className="text-orange-500 text-xs">
+                                        até {new Date(blockedStates[state.code]?.data_validade || blockedStates[state.code]?.validade).toLocaleDateString('pt-BR')}
                                       </div>
                                     )}
+                                  </div>
+                                )}
+                                {stateValidationStatus[state.code] === 'valid' && !blockedStates[state.code] && (
+                                  <span className="text-xs mt-1 text-center text-green-600 font-medium">
+                                    disponível
                                   </span>
                                 )}
                               </div>
