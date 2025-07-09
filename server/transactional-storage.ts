@@ -480,6 +480,9 @@ export class TransactionalStorage implements IStorage {
       throw new Error("Rascunho não encontrado");
     }
     
+    console.log('STORAGE - updateLicenseDraft recebido:', JSON.stringify(draftData, null, 2));
+    console.log('STORAGE - Estados sendo atualizados:', draftData.states);
+    
     // Preparar os dados atualizados
     const updateData = { ...draftData };
     
@@ -508,17 +511,25 @@ export class TransactionalStorage implements IStorage {
       updateData.cargoType = licenseType === "flatbed" ? "indivisible_cargo" : "dry_cargo";
     }
     
+    // CORREÇÃO CRÍTICA: Incluir estados na atualização se fornecidos
+    if (draftData.states !== undefined) {
+      updateData.states = draftData.states;
+      console.log('STORAGE - Estados incluídos na atualização:', updateData.states);
+    }
+    
     // Log para diagnóstico
     console.log("UpdateLicenseDraft - dados originais:", {
       width: draftData.width,
       height: draftData.height,
-      cargoType: draftData.cargoType
+      cargoType: draftData.cargoType,
+      states: draftData.states
     });
     
     console.log("UpdateLicenseDraft - dados sanitizados:", {
       width: updateData.width,
       height: updateData.height,
-      cargoType: updateData.cargoType
+      cargoType: updateData.cargoType,
+      states: updateData.states
     });
     
     // Atualizar o registro
@@ -539,6 +550,8 @@ export class TransactionalStorage implements IStorage {
     if (!updatedDraft) {
       throw new Error("Rascunho de licença não encontrado");
     }
+    
+    console.log('STORAGE - Rascunho atualizado com estados:', updatedDraft.states);
     
     return updatedDraft;
   }

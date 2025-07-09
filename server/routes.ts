@@ -1888,6 +1888,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/licenses/drafts/:id/submit', requireAuth, async (req, res) => {
     try {
+      console.log('=== ENDPOINT DRAFTS SUBMIT ===');
+      console.log('Body recebido:', JSON.stringify(req.body, null, 2));
+      
       const user = req.user!;
       const draftId = parseInt(req.params.id);
       
@@ -1912,9 +1915,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Usuário ${user.id} (${user.role}) autorizado a submeter rascunho ${draftId}`);
       
+      // CORREÇÃO CRÍTICA: Usar os estados do req.body se disponíveis
+      const bodyData = req.body || {};
+      console.log('Estados do req.body:', bodyData.states);
+      console.log('Estados do rascunho existente:', existingDraft.states);
       
-      // Garantir que todos os campos obrigatórios não sejam nulos antes de submeter
-      const draftData = { ...existingDraft };
+      // Mesclar dados do rascunho com dados do body
+      const draftData = { 
+        ...existingDraft,
+        ...bodyData, // Dados do body têm prioridade
+        states: bodyData.states || existingDraft.states // USAR ESTADOS DO FRONTEND
+      };
+      
+      console.log('Estados finais após merge:', draftData.states);
       
       if (draftData.type === "flatbed") {
         // Para prancha: verifica requisitos específicos
@@ -1930,11 +1943,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!draftData.cargoType) draftData.cargoType = "dry_cargo"; // Carga seca padrão
       }
       
-      // Atualizar o rascunho com os dados sanitizados
+      // Atualizar o rascunho com TODOS os dados incluindo estados
+      console.log('Atualizando rascunho com estados:', draftData.states);
       await storage.updateLicenseDraft(draftId, {
         width: draftData.width,
         height: draftData.height,
-        cargoType: draftData.cargoType
+        cargoType: draftData.cargoType,
+        states: draftData.states, // INCLUIR ESTADOS NA ATUALIZAÇÃO
+        comments: draftData.comments
       });
       
       console.log("Rascunho sanitizado antes de submeter:", draftData);
@@ -1944,6 +1960,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Submit the draft as a real license request
       const licenseRequest = await storage.submitLicenseDraft(draftId, requestNumber);
+      
+      console.log('Licença final submetida com estados:', licenseRequest.states);
       
       res.json(licenseRequest);
     } catch (error) {
