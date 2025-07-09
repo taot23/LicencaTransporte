@@ -687,12 +687,8 @@ export function LicenseForm({
       // Marcar como validada ANTES de executar para evitar loops
       setLastValidatedCombination(combinationKey);
       
-      // Executar validação automática silenciosa com pequeno delay
-      const timeoutId = setTimeout(() => {
-        executeAutomaticValidation();
-      }, 300);
-      
-      return () => clearTimeout(timeoutId);
+      // Executar validação automática IMEDIATAMENTE (sem timeout)
+      executeAutomaticValidation();
     }
   }, [
     form.watch("tractorUnitId"),
@@ -701,7 +697,8 @@ export function LicenseForm({
     form.watch("dollyId"),
     vehicles,
     preventiveValidationRunning,
-    lastValidatedCombination
+    lastValidatedCombination,
+    executeAutomaticValidation
   ]);
 
   // ✅ LIMPEZA AUTOMÁTICA: Limpa validações quando combinação muda
