@@ -39,7 +39,20 @@ export function StateSelectionWithValidation({ selectedStates, onStatesChange, p
     // Verificar cada estado selecionado
     selectedStates.forEach(estado => {
       if (!validatedStates.has(estado)) {
-        verificarEstadoComLicencaVigente(estado, placas);
+        // ✅ NOVA LÓGICA: Criar objeto de composição para validação específica
+        let composicao = undefined;
+        if (placas.cavalo && placas.primeiraCarreta && placas.segundaCarreta) {
+          composicao = {
+            cavalo: placas.cavalo,
+            carreta1: placas.primeiraCarreta,
+            carreta2: placas.segundaCarreta
+          };
+          console.log(`[VALIDAÇÃO PREVENTIVA] Usando validação por combinação específica para ${estado}:`, composicao);
+        } else {
+          console.log(`[VALIDAÇÃO PREVENTIVA] Usando validação por placas individuais para ${estado}`);
+        }
+
+        verificarEstadoComLicencaVigente(estado, placas, composicao);
         setValidatedStates(prev => new Set([...prev, estado]));
       }
     });
@@ -64,7 +77,20 @@ export function StateSelectionWithValidation({ selectedStates, onStatesChange, p
       if (placas && Object.values(placas).some(Boolean)) {
         // Executar validação síncrona
         try {
-          const isBloqueado = await verificarEstadoComLicencaVigente(stateCode, placas);
+          // ✅ NOVA LÓGICA: Criar objeto de composição para validação específica
+          let composicao = undefined;
+          if (placas.cavalo && placas.primeiraCarreta && placas.segundaCarreta) {
+            composicao = {
+              cavalo: placas.cavalo,
+              carreta1: placas.primeiraCarreta,
+              carreta2: placas.segundaCarreta
+            };
+            console.log(`[VALIDAÇÃO COMBINAÇÃO] Usando validação por combinação específica para ${stateCode}:`, composicao);
+          } else {
+            console.log(`[VALIDAÇÃO TRADICIONAL] Usando validação por placas individuais para ${stateCode}`);
+          }
+
+          const isBloqueado = await verificarEstadoComLicencaVigente(stateCode, placas, composicao);
           
           if (isBloqueado) {
             // Estado bloqueado - buscar dados do estado bloqueado
