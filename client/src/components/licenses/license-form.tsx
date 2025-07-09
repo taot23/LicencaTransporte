@@ -432,7 +432,56 @@ export function LicenseForm({
     return placas;
   };
 
-  // ✅ REMOVIDO: Validação preventiva automática para evitar loops
+  // ✅ VALIDAÇÃO EM TEMPO REAL: Apenas quando veículos mudam
+  useEffect(() => {
+    if (!vehicles || vehicles.length === 0) return;
+    
+    // Função para limpar estados bloqueados que não são mais válidos
+    const checkAndClearBlockedStates = () => {
+      const watchedValues = form.watch();
+      
+      // Verificar se temos combinação atual
+      const currentCombination = {
+        cavalo: watchedValues.tractorUnitId ? 
+          vehicles?.find(v => v.id === watchedValues.tractorUnitId)?.plate || watchedValues.mainVehiclePlate :
+          watchedValues.mainVehiclePlate,
+        carreta1: watchedValues.firstTrailerId ? 
+          vehicles?.find(v => v.id === watchedValues.firstTrailerId)?.plate : null,
+        carreta2: watchedValues.secondTrailerId ? 
+          vehicles?.find(v => v.id === watchedValues.secondTrailerId)?.plate : null
+      };
+      
+      // Se a combinação mudou, limpar estados bloqueados
+      setBlockedStates(prev => {
+        const hasValidCombination = currentCombination.cavalo && currentCombination.carreta1 && currentCombination.carreta2;
+        if (!hasValidCombination) {
+          console.log('[REAL TIME] Combinação incompleta - limpando bloqueios');
+          return {};
+        }
+        return prev;
+      });
+    };
+    
+    // Watch apenas campos relevantes para validação
+    const subscription = form.watch((value, { name }) => {
+      if (name && (
+        name === 'mainVehiclePlate' ||
+        name === 'tractorUnitId' ||
+        name === 'firstTrailerId' ||
+        name === 'secondTrailerId'
+      )) {
+        console.log(`[REAL TIME] Campo ${name} alterado - verificando bloqueios`);
+        // Debounce para evitar muitas chamadas
+        const timeoutId = setTimeout(() => {
+          checkAndClearBlockedStates();
+        }, 500);
+        
+        return () => clearTimeout(timeoutId);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [vehicles, form]);
 
   // ✅ REMOVIDO: Auto-cleanup para evitar loops - apenas validação manual ao clicar
 

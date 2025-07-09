@@ -44,6 +44,17 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 09/07/2025 - Sistema de Validação por Combinação Específica FINALIZADO
+- ✅ **VALIDAÇÃO POR COMBINAÇÃO**: Sistema detecta automaticamente Cavalo + Carreta1 + Carreta2 para validação específica
+- ✅ **ENDPOINT DEDICADO**: `/api/licencas-vigentes-by-combination` para validação de combinação exata
+- ✅ **FALLBACK INTELIGENTE**: Usa validação tradicional por placas quando combinação incompleta
+- ✅ **LOOP CRÍTICO RESOLVIDO**: Removida validação preventiva automática que causava loops infinitos
+- ✅ **LÓGICA SIMPLIFICADA**: Validação apenas ao clicar no estado, evitando conflitos
+- ✅ **LIMPEZA EM TEMPO REAL**: Estados bloqueados limpos automaticamente quando combinação muda
+- ✅ **REGRA DOS 60 DIAS**: Bloqueia apenas quando combinação IDÊNTICA possui licença com >60 dias
+- ✅ **DIFERENTES COMBINAÇÕES**: Permite nova licença se qualquer veículo da combinação for diferente
+- ✅ **ERRO DE ACESSO CORRIGIDO**: Removidas todas as referências a `stateValidationStatus` inexistente
+
 ### 09/07/2025 - Sistema de Nomeação de Arquivos CORRIGIDO - Preservação de Nomes Originais
 - ✅ **CRLV DE VEÍCULOS**: Arquivos CRLV mantêm nome original sanitizado (caracteres especiais removidos)
 - ✅ **LICENÇAS EMITIDAS**: Arquivos de licenças mantêm nome original conforme solicitação do usuário
