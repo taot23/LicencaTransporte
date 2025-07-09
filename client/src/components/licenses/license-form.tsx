@@ -60,6 +60,7 @@ import {
   Link as LinkIcon,
   FileUp,
   Check,
+  Shield,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
@@ -434,107 +435,91 @@ export function LicenseForm({
     return placas;
   };
 
-  // ✅ VALIDAÇÃO PREVENTIVA AUTOMÁTICA: Mostra estados bloqueados automaticamente
-  useEffect(() => {
-    if (!vehicles || vehicles.length === 0 || preventiveValidationRunning) return;
+  // ✅ BOTÃO MANUAL PARA VALIDAÇÃO PREVENTIVA (resolve o loop)
+  const validateAllStatesManual = async () => {
+    if (preventiveValidationRunning) return;
     
-    const validateAllStatesPreventive = async () => {
-      const watchedValues = form.watch();
-      
-      // Verificar se temos combinação completa
-      const cavalo = watchedValues.tractorUnitId ? 
-        vehicles?.find(v => v.id === watchedValues.tractorUnitId)?.plate || watchedValues.mainVehiclePlate :
-        watchedValues.mainVehiclePlate;
-      const carreta1 = watchedValues.firstTrailerId ? 
-        vehicles?.find(v => v.id === watchedValues.firstTrailerId)?.plate : null;
-      const carreta2 = watchedValues.secondTrailerId ? 
-        vehicles?.find(v => v.id === watchedValues.secondTrailerId)?.plate : null;
-      
-      // Se não temos combinação completa, limpar validações
-      if (!cavalo || !carreta1 || !carreta2) {
-        console.log('[PREVENTIVE] Combinação incompleta - limpando validações');
-        setStateValidationStatus({});
-        setBlockedStates({});
-        return;
-      }
-      
-      const composicao = { cavalo, carreta1, carreta2 };
-      console.log('[PREVENTIVE] ✅ INICIANDO validação automática para combinação:', composicao);
-      
-      setPreventiveValidationRunning(true);
-      
-      // Marcar todos como carregando
-      const loadingStatus: Record<string, 'loading'> = {};
-      brazilianStates.forEach(state => {
-        loadingStatus[state.code] = 'loading';
+    const watchedValues = form.watch();
+    
+    // Verificar se temos combinação completa
+    const cavalo = watchedValues.tractorUnitId ? 
+      vehicles?.find(v => v.id === watchedValues.tractorUnitId)?.plate || watchedValues.mainVehiclePlate :
+      watchedValues.mainVehiclePlate;
+    const carreta1 = watchedValues.firstTrailerId ? 
+      vehicles?.find(v => v.id === watchedValues.firstTrailerId)?.plate : null;
+    const carreta2 = watchedValues.secondTrailerId ? 
+      vehicles?.find(v => v.id === watchedValues.secondTrailerId)?.plate : null;
+    
+    // Se não temos combinação completa
+    if (!cavalo || !carreta1 || !carreta2) {
+      toast({
+        title: "Combinação incompleta",
+        description: "Selecione Cavalo + Carreta 1 + Carreta 2 para validar estados",
+        variant: "destructive"
       });
-      setStateValidationStatus(loadingStatus);
-      
-      // Validar cada estado
-      const newStatus: Record<string, 'valid' | 'blocked' | 'error'> = {};
-      const newBlockedStates: Record<string, any> = {};
-      
-      for (const state of brazilianStates) {
-        try {
-          const response = await fetch('/api/licencas-vigentes-by-combination', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ estado: state.code, composicao })
-          });
-          
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
-          
-          const result = await response.json();
-          
-          if (result.bloqueado && result.diasRestantes > 60) {
-            newStatus[state.code] = 'blocked';
-            newBlockedStates[state.code] = result;
-            console.log(`[PREVENTIVE] ${state.code} bloqueado - ${result.diasRestantes} dias`);
-          } else {
-            newStatus[state.code] = 'valid';
-          }
-        } catch (error) {
-          newStatus[state.code] = 'error';
-          console.log(`[PREVENTIVE] ${state.code} erro na validação:`, error);
-        }
-      }
-      
-      setStateValidationStatus(newStatus);
-      setBlockedStates(newBlockedStates);
-      setPreventiveValidationRunning(false);
-      
-      console.log('[PREVENTIVE] ✅ Validação preventiva concluída');
-    };
-    
-    // Watch campos relevantes para validação
-    const subscription = form.watch((value, { name }) => {
-      if (name && (
-        name === 'mainVehiclePlate' ||
-        name === 'tractorUnitId' ||
-        name === 'firstTrailerId' ||
-        name === 'secondTrailerId'
-      )) {
-        console.log(`[PREVENTIVE] Campo ${name} alterado - executando validação preventiva`);
-        // Debounce para evitar muitas chamadas
-        const timeoutId = setTimeout(() => {
-          validateAllStatesPreventive();
-        }, 800);
-        
-        return () => clearTimeout(timeoutId);
-      }
-    });
-    
-    // Executar validação inicial se já temos veículos selecionados
-    const initialValues = form.getValues();
-    if (initialValues.tractorUnitId && initialValues.firstTrailerId && initialValues.secondTrailerId) {
-      validateAllStatesPreventive();
+      return;
     }
     
-    return () => subscription.unsubscribe();
-  }, [vehicles, form, preventiveValidationRunning]);
+    console.log('[MANUAL] ✅ INICIANDO validação manual para combinação:', { cavalo, carreta1, carreta2 });
+    
+    setPreventiveValidationRunning(true);
+    
+    // Marcar todos como carregando
+    const loadingStatus: Record<string, 'loading'> = {};
+    brazilianStates.forEach(state => {
+      loadingStatus[state.code] = 'loading';
+    });
+    setStateValidationStatus(loadingStatus);
+    
+    // Validar cada estado
+    const newStatus: Record<string, 'valid' | 'blocked' | 'error'> = {};
+    const newBlockedStates: Record<string, any> = {};
+    
+    for (const state of brazilianStates) {
+      try {
+        const response = await fetch('/api/licencas-vigentes-by-combination', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ estado: state.code, composicao: { cavalo, carreta1, carreta2 } })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.bloqueado && result.diasRestantes > 60) {
+          newStatus[state.code] = 'blocked';
+          newBlockedStates[state.code] = result;
+          console.log(`[MANUAL] ${state.code} bloqueado - ${result.diasRestantes} dias`);
+        } else {
+          newStatus[state.code] = 'valid';
+        }
+      } catch (error) {
+        newStatus[state.code] = 'error';
+        console.log(`[MANUAL] ${state.code} erro na validação:`, error);
+      }
+    }
+    
+    setStateValidationStatus(newStatus);
+    setBlockedStates(newBlockedStates);
+    setPreventiveValidationRunning(false);
+    
+    console.log('[MANUAL] ✅ Validação manual concluída');
+    
+    const blockedCount = Object.values(newStatus).filter(s => s === 'blocked').length;
+    const validCount = Object.values(newStatus).filter(s => s === 'valid').length;
+    
+    toast({
+      title: "Validação concluída",
+      description: `${validCount} estados disponíveis, ${blockedCount} bloqueados`
+    });
+  };
+  
+  // ✅ REMOVIDO: useEffect que causava loop infinito
+  // Validação será apenas manual através do botão
 
   // ✅ REMOVIDO: Auto-cleanup para evitar loops - apenas validação manual ao clicar
 
@@ -2921,7 +2906,28 @@ export function LicenseForm({
                     <FormLabel className="text-base font-medium">
                       Selecione os estados para emissão de licença
                     </FormLabel>
-                    <FormField
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={validateAllStatesManual}
+                        disabled={preventiveValidationRunning}
+                        className="flex items-center gap-2 h-8 text-xs"
+                      >
+                        {preventiveValidationRunning ? (
+                          <>
+                            <div className="animate-spin h-3 w-3 border-2 border-gray-300 border-t-blue-600 rounded-full"></div>
+                            Validando...
+                          </>
+                        ) : (
+                          <>
+                            <Shield className="h-3 w-3" />
+                            Verificar Estados
+                          </>
+                        )}
+                      </Button>
+                      <FormField
                       control={form.control}
                       name="states"
                       render={({ field }) => {
@@ -2999,6 +3005,7 @@ export function LicenseForm({
                         );
                       }}
                     />
+                    </div>
                   </div>
                   <div className="text-sm text-muted-foreground mt-1 mb-3">
                     Escolha um ou mais estados onde a licença será utilizada
