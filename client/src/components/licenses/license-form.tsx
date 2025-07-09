@@ -566,9 +566,15 @@ export function LicenseForm({
 
   // ✅ VALIDAÇÃO AUTOMÁTICA SILENCIOSA: Executa validação e aplica resultados automaticamente
   const executeAutomaticValidation = async () => {
-    if (!vehicles || vehicles.length === 0) return;
+    console.log('[AUTO] 🎯 INICIO executeAutomaticValidation');
+    
+    if (!vehicles || vehicles.length === 0) {
+      console.log('[AUTO] ❌ Sem veículos disponíveis');
+      return;
+    }
     
     const currentCombination = getCurrentCombination();
+    console.log('[AUTO] 📋 Combinação atual:', currentCombination);
     
     // Verificar se tem configuração mínima
     if (!currentCombination.cavalo || !currentCombination.carreta1) {
