@@ -563,6 +563,96 @@ export function LicenseForm({
       dolly: dolly?.plate || ""
     };
   };
+
+  // ✅ VALIDAÇÃO AUTOMÁTICA SILENCIOSA: Executa validação e aplica resultados automaticamente
+  const executeAutomaticValidation = async () => {
+    if (!vehicles || vehicles.length === 0) return;
+    
+    const currentCombination = getCurrentCombination();
+    
+    // Verificar se tem configuração mínima
+    if (!currentCombination.cavalo || !currentCombination.carreta1) {
+      console.log('[AUTO] ⚠️ Configuração mínima não atendida - aguardando cavalo + carreta1');
+      return;
+    }
+    
+    console.log('[AUTO] 🚀 Executando validação automática silenciosa...');
+    setPreventiveValidationRunning(true);
+    
+    // Determinar tipo de composição automaticamente
+    const hasSecondTrailer = !!currentCombination.carreta2;
+    const hasDolly = !!currentCombination.dolly;
+    
+    let tipoComposicao = "SIMPLES";
+    if (hasDolly && hasSecondTrailer) {
+      tipoComposicao = "RODOTREM";
+    } else if (hasDolly && !hasSecondTrailer) {
+      tipoComposicao = "DOLLY_ONLY";
+    } else if (!hasDolly && hasSecondTrailer) {
+      tipoComposicao = "BITREM";
+    }
+    
+    console.log(`[AUTO] Tipo de composição: ${tipoComposicao}`);
+    console.log('[AUTO] ✅ INICIANDO validação automática para combinação:', currentCombination);
+    
+    const newStatus: Record<string, string> = {};
+    const newBlockedStates: Record<string, any> = {};
+    
+    // Validar todos os estados em paralelo
+    const validationPromises = brazilianStates.map(async (state) => {
+      try {
+        const composicao = {
+          cavalo: currentCombination.cavalo,
+          carreta1: currentCombination.carreta1,
+          carreta2: currentCombination.carreta2 || undefined,
+          dolly: currentCombination.dolly || undefined
+        };
+        
+        const response = await fetch('/api/licencas-vigentes-by-combination', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            estado: state.code,
+            composicao
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.bloqueado) {
+          newStatus[state.code] = 'blocked';
+          newBlockedStates[state.code] = result;
+          console.log(`[AUTO] ${state.code} bloqueado - ${result.dias_restantes || 'N/A'} dias`);
+        } else {
+          newStatus[state.code] = 'valid';
+          console.log(`[AUTO] ${state.code} liberado`);
+        }
+      } catch (error) {
+        newStatus[state.code] = 'error';
+        console.log(`[AUTO] ${state.code} erro na validação:`, error);
+      }
+    });
+    
+    // Aguardar todas as validações
+    await Promise.all(validationPromises);
+    
+    // Aplicar resultados
+    setStateValidationStatus(newStatus);
+    setBlockedStates(newBlockedStates);
+    setPreventiveValidationRunning(false);
+    
+    console.log('[AUTO] ✅ Validação automática concluída - status atualizado');
+    
+    // Remover estados bloqueados da seleção atual
+    const currentSelectedStates = form.getValues().states || [];
+    const blockedStatesCodes = Object.keys(newBlockedStates);
+    const newSelectedStates = currentSelectedStates.filter(state => !blockedStatesCodes.includes(state));
+    
+    if (newSelectedStates.length !== currentSelectedStates.length) {
+      console.log(`[AUTO] Removendo estados bloqueados da seleção:`, blockedStatesCodes);
+      form.setValue('states', newSelectedStates);
+    }
+  };
   
   useEffect(() => {
     if (!vehicles || vehicles.length === 0) return;
@@ -577,10 +667,7 @@ export function LicenseForm({
     // 3. Não está executando validação
     const hasMinimumCombination = currentCombination.cavalo && currentCombination.carreta1;
     
-    // Aceitar qualquer configuração válida: simples, bitrem, rodotrem ou dolly apenas
-    const isValidCombination = hasMinimumCombination;
-    
-    if (isValidCombination &&
+    if (hasMinimumCombination &&
         combinationKey !== lastValidatedCombination &&
         !preventiveValidationRunning) {
       
@@ -589,9 +676,9 @@ export function LicenseForm({
       // Marcar como validada ANTES de executar para evitar loops
       setLastValidatedCombination(combinationKey);
       
-      // Executar validação com pequeno delay para evitar múltiplas chamadas
+      // Executar validação automática silenciosa com pequeno delay
       const timeoutId = setTimeout(() => {
-        validateAllStatesManual();
+        executeAutomaticValidation();
       }, 300);
       
       return () => clearTimeout(timeoutId);
