@@ -30,11 +30,17 @@ interface EstadoBloqueado {
   diasRestantes: number;
 }
 
+interface ComposicaoVeicular {
+  cavalo: string;
+  carreta1: string;
+  carreta2: string;
+}
+
 export function useLicenseValidationV2() {
   const [estadosBloqueados, setEstadosBloqueados] = useState<Record<string, EstadoBloqueado>>({});
   const [isChecking, setIsChecking] = useState(false);
 
-  const verificarEstadoComLicencaVigente = useCallback(async (estado: string, placas: Placas): Promise<boolean> => {
+  const verificarEstadoComLicencaVigente = useCallback(async (estado: string, placas: Placas, composicao?: ComposicaoVeicular): Promise<boolean> => {
     if (!estado || !placas) return false;
 
     setIsChecking(true);
@@ -50,6 +56,17 @@ export function useLicenseValidationV2() {
         return false;
       }
 
+      // Nova lógica: se a composição completa for fornecida, usar validação específica
+      let requestBody: any = {
+        estado: estado,
+        placas: placasArray
+      };
+
+      if (composicao && composicao.cavalo && composicao.carreta1 && composicao.carreta2) {
+        console.log(`[VALIDAÇÃO COMBINAÇÃO] Usando validação por combinação específica:`, composicao);
+        requestBody.composicao = composicao;
+      }
+
       // VALIDAÇÃO CRÍTICA DIRETA: Consulta na tabela licencas_emitidas
       const response = await fetch('/api/licencas-vigentes-by-state', {
         method: 'POST',
@@ -57,10 +74,7 @@ export function useLicenseValidationV2() {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({
-          estado: estado,
-          placas: placasArray
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {

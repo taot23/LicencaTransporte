@@ -53,6 +53,16 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **WEBSOCKET RENOVAÇÃO CORRIGIDO**: Adicionado `broadcastLicenseUpdate` ao endpoint de renovação
 - ✅ **PARÂMETRO INCLUDERENEWAL**: Página "Acompanhar Licença" agora usa `includeRenewal=true` para mostrar rascunhos em tempo real
 
+### 09/07/2025 - Sistema de Validação por Combinação Completa de Veículos IMPLEMENTADO
+- ✅ **NOVA LÓGICA**: Validação baseada na combinação específica (Cavalo + Carreta1 + Carreta2)
+- ✅ **ENDPOINT ATUALIZADO**: `/api/licencas-vigentes-by-state` agora aceita parâmetro `composicao`
+- ✅ **VALIDAÇÃO INTELIGENTE**: Bloqueia apenas quando a combinação EXATA já possui licença vigente
+- ✅ **DIFERENTES COMBINAÇÕES**: Permite solicitar licença se qualquer parte da composição for diferente
+- ✅ **HOOK ATUALIZADO**: `useLicenseValidationV2` modificado para suportar validação por combinação
+- ✅ **COMPATIBILIDADE**: Mantém funcionamento da validação antiga por placas individuais
+- ✅ **LOGS DETALHADOS**: Sistema identifica tipo de validação (combinação específica vs placas individuais)
+- ✅ **REGRA DOS 60 DIAS**: Continua aplicando bloqueio para licenças com mais de 60 dias restantes
+
 ### 09/07/2025 - Sistema de Tempo Real MELHORADO - Múltiplas Correções
 - ✅ **REFETCH FORÇADO**: WebSocket usa `refetchQueries` para forçar atualização imediata das páginas
 - ✅ **POLLING AUTOMÁTICO**: Páginas principais atualizam a cada 60 segundos automaticamente

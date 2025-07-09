@@ -2707,17 +2707,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ENDPOINT ESPECÍFICO POR ESTADO - VALIDAÇÃO CRÍTICA
+  // ENDPOINT ESPECÍFICO POR ESTADO - VALIDAÇÃO DE COMBINAÇÃO COMPLETA
   app.post('/api/licencas-vigentes-by-state', requireAuth, async (req, res) => {
     try {
-      const { estado, placas } = req.body;
+      const { estado, placas, composicao } = req.body;
       
       if (!estado) {
         return res.status(400).json({ message: 'Estado é obrigatório' });
       }
       
+      // Nova lógica: verificar se foi fornecida a composição completa
+      if (composicao && composicao.cavalo && composicao.carreta1 && composicao.carreta2) {
+        console.log(`[VALIDAÇÃO COMBINAÇÃO] Verificando composição específica no estado: ${estado}`);
+        console.log(`[VALIDAÇÃO COMBINAÇÃO] Cavalo: ${composicao.cavalo}, Carreta1: ${composicao.carreta1}, Carreta2: ${composicao.carreta2}`);
+        
+        // Query para verificar se a combinação EXATA já existe
+        const queryComposicao = `
+          SELECT 
+            le.estado,
+            le.numero_licenca,
+            le.data_validade,
+            le.placa_unidade_tratora,
+            le.placa_primeira_carreta,
+            le.placa_segunda_carreta,
+            EXTRACT(DAY FROM (le.data_validade - CURRENT_DATE)) as dias_restantes
+          FROM licencas_emitidas le
+          WHERE le.estado = $1 
+            AND le.status = 'ativa'
+            AND le.data_validade > CURRENT_DATE
+            AND UPPER(le.placa_unidade_tratora) = UPPER($2)
+            AND UPPER(le.placa_primeira_carreta) = UPPER($3)
+            AND UPPER(le.placa_segunda_carreta) = UPPER($4)
+          ORDER BY le.data_validade DESC
+          LIMIT 1
+        `;
+        
+        const result = await pool.query(queryComposicao, [
+          estado, 
+          composicao.cavalo, 
+          composicao.carreta1, 
+          composicao.carreta2
+        ]);
+        
+        if (result.rows.length > 0) {
+          const license = result.rows[0];
+          const daysUntilExpiry = parseInt(license.dias_restantes);
+          
+          console.log(`[VALIDAÇÃO COMBINAÇÃO] Combinação EXATA encontrada: ${license.numero_licenca} - ${daysUntilExpiry} dias restantes`);
+          
+          if (daysUntilExpiry > 60) {
+            console.log(`[VALIDAÇÃO COMBINAÇÃO] Estado ${estado} BLOQUEADO: combinação específica com ${daysUntilExpiry} dias > 60`);
+            return res.json({
+              bloqueado: true,
+              numero_licenca: license.numero_licenca,
+              data_validade: license.data_validade,
+              diasRestantes: daysUntilExpiry,
+              tipo_bloqueio: 'combinacao_exata',
+              composicao_conflitante: {
+                cavalo: license.placa_unidade_tratora,
+                carreta1: license.placa_primeira_carreta,
+                carreta2: license.placa_segunda_carreta
+              },
+              message: `Combinação específica (${composicao.cavalo} + ${composicao.carreta1} + ${composicao.carreta2}) já possui licença vigente`
+            });
+          } else {
+            console.log(`[VALIDAÇÃO COMBINAÇÃO] Estado ${estado} LIBERADO: combinação pode ser renovada (${daysUntilExpiry} dias ≤ 60)`);
+            return res.json({
+              bloqueado: false,
+              diasRestantes: daysUntilExpiry,
+              message: `Combinação pode ser renovada - restam ${daysUntilExpiry} dias`
+            });
+          }
+        } else {
+          console.log(`[VALIDAÇÃO COMBINAÇÃO] Estado ${estado} LIBERADO: combinação específica não encontrada`);
+          return res.json({
+            bloqueado: false,
+            tipo_liberacao: 'combinacao_diferente',
+            message: 'Combinação específica não possui licença vigente - pode solicitar'
+          });
+        }
+      }
+      
+      // Fallback para lógica antiga (compatibilidade)
       if (!placas || !Array.isArray(placas) || placas.length === 0) {
-        return res.status(400).json({ message: 'Placas são obrigatórias' });
+        return res.status(400).json({ message: 'Placas ou composição são obrigatórias' });
       }
       
       console.log(`[VALIDAÇÃO BY STATE] Verificando estado: ${estado} com placas: ${placas.join(', ')}`);
@@ -2793,7 +2866,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // VALIDAÇÃO DEFINITIVA - BLOQUEIA PEDIDOS DUPLICADOS E EVITA CUSTOS
   app.post('/api/licenses/check-existing', requireAuth, async (req, res) => {
     try {
-      const { states, plates } = req.body;
+      const { states, plates, composicao } = req.body;
       
       if (!states || !Array.isArray(states) || states.length === 0) {
         return res.status(400).json({ message: 'Estados são obrigatórios' });
@@ -2805,34 +2878,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`[VALIDAÇÃO DEFINITIVA] Verificando conflitos para estados: ${states.join(', ')} e placas: ${plates.join(', ')}`);
       
+      // Nova lógica: se composição for fornecida, usar validação específica
+      if (composicao && composicao.cavalo && composicao.carreta1 && composicao.carreta2) {
+        console.log(`[VALIDAÇÃO DEFINITIVA] Usando validação por combinação específica:`, composicao);
+      }
+      
       const conflicts = [];
       
       // Para cada estado, verificar licenças ativas na tabela licencas_emitidas
       for (const state of states) {
         console.log(`[VALIDAÇÃO DEFINITIVA] Verificando estado: ${state}`);
         
-        const query = `
-          SELECT 
-            le.estado,
-            le.numero_licenca,
-            le.data_validade,
-            le.placa_unidade_tratora,
-            le.placa_primeira_carreta,
-            le.placa_segunda_carreta,
-            le.pedido_id,
-            EXTRACT(DAY FROM (le.data_validade - CURRENT_DATE)) as dias_restantes
-          FROM licencas_emitidas le
-          WHERE le.estado = $1 
-            AND le.status = 'ativa'
-            AND le.data_validade > CURRENT_DATE
-            AND (
-              le.placa_unidade_tratora = ANY($2::text[]) OR
-              le.placa_primeira_carreta = ANY($2::text[]) OR
-              le.placa_segunda_carreta = ANY($2::text[])
-            )
-        `;
+        let query: string;
+        let queryParams: any[];
         
-        const result = await pool.query(query, [state, plates]);
+        // Escolher query baseada na presença de composição
+        if (composicao && composicao.cavalo && composicao.carreta1 && composicao.carreta2) {
+          // Query para combinação específica
+          query = `
+            SELECT 
+              le.estado,
+              le.numero_licenca,
+              le.data_validade,
+              le.placa_unidade_tratora,
+              le.placa_primeira_carreta,
+              le.placa_segunda_carreta,
+              le.pedido_id,
+              EXTRACT(DAY FROM (le.data_validade - CURRENT_DATE)) as dias_restantes
+            FROM licencas_emitidas le
+            WHERE le.estado = $1 
+              AND le.status = 'ativa'
+              AND le.data_validade > CURRENT_DATE
+              AND UPPER(le.placa_unidade_tratora) = UPPER($2)
+              AND UPPER(le.placa_primeira_carreta) = UPPER($3)
+              AND UPPER(le.placa_segunda_carreta) = UPPER($4)
+          `;
+          queryParams = [state, composicao.cavalo, composicao.carreta1, composicao.carreta2];
+          console.log(`[VALIDAÇÃO DEFINITIVA] Verificando combinação específica: ${composicao.cavalo} + ${composicao.carreta1} + ${composicao.carreta2}`);
+        } else {
+          // Query original para qualquer placa
+          query = `
+            SELECT 
+              le.estado,
+              le.numero_licenca,
+              le.data_validade,
+              le.placa_unidade_tratora,
+              le.placa_primeira_carreta,
+              le.placa_segunda_carreta,
+              le.pedido_id,
+              EXTRACT(DAY FROM (le.data_validade - CURRENT_DATE)) as dias_restantes
+            FROM licencas_emitidas le
+            WHERE le.estado = $1 
+              AND le.status = 'ativa'
+              AND le.data_validade > CURRENT_DATE
+              AND (
+                le.placa_unidade_tratora = ANY($2::text[]) OR
+                le.placa_primeira_carreta = ANY($2::text[]) OR
+                le.placa_segunda_carreta = ANY($2::text[])
+              )
+          `;
+          queryParams = [state, plates];
+        }
+        
+        const result = await pool.query(query, queryParams);
         
         console.log(`[VALIDAÇÃO DEFINITIVA] Estado ${state}: encontradas ${result.rows.length} licenças ativas`);
         
@@ -2842,12 +2950,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // REGRA CRÍTICA: bloquear se tiver mais de 60 dias para evitar custos
           if (daysUntilExpiry > 60) {
-            console.log(`[VALIDAÇÃO DEFINITIVA] Estado ${state} BLOQUEADO: ${daysUntilExpiry} dias > 60 - EVITANDO CUSTO DESNECESSÁRIO`);
+            const tipoValidacao = composicao ? 'combinação específica' : 'placas individuais';
+            console.log(`[VALIDAÇÃO DEFINITIVA] Estado ${state} BLOQUEADO: ${daysUntilExpiry} dias > 60 - EVITANDO CUSTO DESNECESSÁRIO (${tipoValidacao})`);
             conflicts.push({
               state: state,
               licenseNumber: license.numero_licenca,
               expiryDate: license.data_validade,
               daysUntilExpiry: daysUntilExpiry,
+              tipoValidacao: tipoValidacao,
               conflictingPlates: [
                 license.placa_unidade_tratora,
                 license.placa_primeira_carreta,
