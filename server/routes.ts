@@ -1969,6 +1969,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Licença final submetida com estados:', licenseRequest.states);
       
       // CORREÇÃO: Enviar notificações WebSocket após submissão
+      console.log('📡 Enviando broadcast para licença submetida:', licenseRequest.id);
       broadcastLicenseUpdate(licenseRequest.id, 'submitted', licenseRequest);
       broadcastDashboardUpdate();
       

@@ -59,11 +59,11 @@ export default function TrackLicensePage() {
       
       return filteredData;
     },
-    // Otimização: Mantém dados em cache por 5 minutos
-    staleTime: 5 * 60 * 1000,
-    // Recarrega os dados quando a página recebe foco para obter atualizações
+    // TEMPO REAL: Reduzir stale time e habilitar refetch automático
+    staleTime: 30 * 1000, // 30 segundos
+    refetchInterval: 60 * 1000, // Refetch a cada 60 segundos
     refetchOnWindowFocus: true,
-    // Permite uma tentativa adicional em caso de falha
+    refetchOnMount: true,
     retry: 1
   });
 

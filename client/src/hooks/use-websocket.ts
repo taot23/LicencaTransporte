@@ -24,14 +24,16 @@ export function useWebSocket() {
       case 'STATUS_UPDATE':
       case 'LICENSE_UPDATE':
         // Invalidar todas as queries relacionadas a licenças usando prefix matching
-        console.log('🔄 Invalidando queries de licenças via WebSocket');
+        console.log('🔄 [REALTIME] Processando atualização de licença via WebSocket');
         
-        // Invalidar queries principais de licenças
-        queryClient.invalidateQueries({ queryKey: ['/api/licenses'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/licenses'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/licenses/drafts'] });
+        // FORÇA INVALIDAÇÃO IMEDIATA - Usar refetch ao invés de invalidateQueries
+        const licensePromises = [
+          queryClient.refetchQueries({ queryKey: ['/api/licenses'] }),
+          queryClient.refetchQueries({ queryKey: ['/api/admin/licenses'] }),
+          queryClient.refetchQueries({ queryKey: ['/api/licenses/drafts'] })
+        ];
         
-        // Invalidar com parâmetros específicos
+        // Invalidar com parâmetros específicos E refetch
         queryClient.invalidateQueries({ 
           predicate: (query) => {
             const key = query.queryKey[0];
@@ -40,7 +42,9 @@ export function useWebSocket() {
               key.startsWith('/api/admin/licenses')
             );
             if (shouldInvalidate) {
-              console.log('🔄 Invalidando query:', query.queryKey);
+              console.log('🔄 [REALTIME] Invalidando e refetchando:', query.queryKey);
+              // Força refetch imediato
+              queryClient.refetchQueries({ queryKey: query.queryKey });
             }
             return shouldInvalidate;
           }
@@ -48,13 +52,17 @@ export function useWebSocket() {
         
         // Se tiver ID específico da licença
         if (data && data.licenseId) {
-          queryClient.invalidateQueries({ queryKey: [`/api/licenses/${data.licenseId}`] });
-          queryClient.invalidateQueries({ queryKey: [`/api/admin/licenses/${data.licenseId}`] });
+          queryClient.refetchQueries({ queryKey: [`/api/licenses/${data.licenseId}`] });
+          queryClient.refetchQueries({ queryKey: [`/api/admin/licenses/${data.licenseId}`] });
         }
         
-        // Sempre invalidar dashboard quando licenças mudam
-        queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/dashboard/stats'] });
+        // Sempre refetch dashboard quando licenças mudam
+        queryClient.refetchQueries({ queryKey: ['/api/dashboard/stats'] });
+        queryClient.refetchQueries({ queryKey: ['/api/admin/dashboard/stats'] });
+        
+        Promise.all(licensePromises).then(() => {
+          console.log('✅ [REALTIME] Todas as queries de licenças atualizadas');
+        });
         break;
         
       case 'DASHBOARD_UPDATE':

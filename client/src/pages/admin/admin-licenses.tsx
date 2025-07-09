@@ -327,6 +327,11 @@ export default function AdminLicensesPage() {
         return !(license.isDraft && license.comments?.includes('Renovação'));
       });
     },
+    // TEMPO REAL: Configurações para atualizações automáticas
+    staleTime: 30 * 1000, // 30 segundos
+    refetchInterval: 60 * 1000, // Refetch a cada 60 segundos
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
   // Buscar todos os transportadores para o filtro
