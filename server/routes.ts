@@ -478,12 +478,15 @@ async function sincronizarTodasLicencasAprovadas() {
 
 // Função para transmitir mensagens a todos os clientes conectados
 const broadcastMessage = (message: WSMessage) => {
-  console.log(`📡 Enviando atualização WebSocket: ${message.type}`);
+  let activeClients = 0;
+  let sentMessages = 0;
   
   wsClients.forEach(client => {
     try {
       if (client.readyState === WebSocket.OPEN) {
+        activeClients++;
         client.send(JSON.stringify(message));
+        sentMessages++;
       } else {
         wsClients.delete(client);
       }
@@ -492,6 +495,8 @@ const broadcastMessage = (message: WSMessage) => {
       wsClients.delete(client);
     }
   });
+  
+  console.log(`📡 WebSocket: ${message.type} enviado para ${sentMessages}/${activeClients} clientes`);
 };
 
 // Funções auxiliares para diferentes tipos de atualizações
@@ -1962,6 +1967,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const licenseRequest = await storage.submitLicenseDraft(draftId, requestNumber);
       
       console.log('Licença final submetida com estados:', licenseRequest.states);
+      
+      // CORREÇÃO: Enviar notificações WebSocket após submissão
+      broadcastLicenseUpdate(licenseRequest.id, 'submitted', licenseRequest);
+      broadcastDashboardUpdate();
       
       res.json(licenseRequest);
     } catch (error) {
