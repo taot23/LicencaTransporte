@@ -44,17 +44,21 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
-### 08/07/2025 - Sistema de Nomeação Inteligente de Arquivos IMPLEMENTADO + Correção WebSocket Renovação
+### 09/07/2025 - Sistema de Nomeação de Arquivos CORRIGIDO - Preservação de Nomes Originais
 - ✅ **CRLV DE VEÍCULOS**: Arquivos CRLV mantêm nome original sanitizado (caracteres especiais removidos)
-- ✅ **LICENÇAS LIBERADAS**: Arquivos de estado usam formato `{número_AET}_{estado}_{data_validade}.ext`
+- ✅ **LICENÇAS EMITIDAS**: Arquivos de licenças mantêm nome original conforme solicitação do usuário
+- ✅ **SANITIZAÇÃO SEGURA**: Remoção apenas de caracteres especiais problemáticos para sistema de arquivos
 - ✅ **LOGS DETALHADOS**: Sistema registra processo de nomeação para debugging
-- ✅ **SANITIZAÇÃO SEGURA**: Remoção de caracteres especiais para evitar problemas no sistema de arquivos
-- ✅ **FALLBACK INTELIGENTE**: Se informações estão incompletas, usa nomenclatura padrão
-- ✅ **MIDDLEWARE CONFIGURADO**: Endpoint `/api/admin/licenses/:id/state-status` preparado para nova nomenclatura
-- ✅ **VALIDAÇÃO ROBUSTA**: Verificação de dados obrigatórios (AET, estado, validade) antes da nomeação específica
 - ✅ **COMPATIBILIDADE**: Sistema mantém funcionamento para outros tipos de arquivos com padrão anterior
 - ✅ **WEBSOCKET RENOVAÇÃO CORRIGIDO**: Adicionado `broadcastLicenseUpdate` ao endpoint de renovação
 - ✅ **PARÂMETRO INCLUDERENEWAL**: Página "Acompanhar Licença" agora usa `includeRenewal=true` para mostrar rascunhos em tempo real
+
+### 09/07/2025 - Sistema de Tempo Real MELHORADO - Múltiplas Correções
+- ✅ **REFETCH FORÇADO**: WebSocket usa `refetchQueries` para forçar atualização imediata das páginas
+- ✅ **POLLING AUTOMÁTICO**: Páginas principais atualizam a cada 60 segundos automaticamente
+- ✅ **STALE TIME REDUZIDO**: Cache de dados reduzido para 30 segundos para informações mais atuais
+- ✅ **LOGS BROADCAST**: Sistema de logs melhorado para monitoramento de atualizações WebSocket
+- ✅ **COMBINAÇÃO WSS + POLLING**: Dupla proteção - WebSocket para tempo real + polling para fallback
 
 ### 02/07/2025 - Sistema de Busca por Veículo na Página "Transferir Veículos" IMPLEMENTADO
 - ✅ **CAMPO DE BUSCA**: Implementado campo de busca inteligente por placa, marca, modelo ou tipo de veículo

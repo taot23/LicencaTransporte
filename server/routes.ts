@@ -113,28 +113,13 @@ const storage_config = multer.diskStorage({
       return;
     }
     
-    // Para arquivos de estado de licenças liberadas - usar padrão específico
+    // Para arquivos de estado de licenças liberadas - MANTER NOME ORIGINAL
     if (file.fieldname === 'stateFile' || file.fieldname.includes('stateFile')) {
-      const stateParam = req.body?.state || req.params?.state || req.query?.state;
-      const aetNumber = req.body?.aetNumber || req.query?.aetNumber;
-      const validUntil = req.body?.validUntil || req.query?.validUntil;
-      
-      console.log(`[UPLOAD NAMING] StateFile - Estado: ${stateParam}, AET: ${aetNumber}, Validade: ${validUntil}`);
-      
-      if (aetNumber && stateParam && validUntil) {
-        try {
-          // Formatar data de validade (YYYY-MM-DD)
-          const formattedDate = new Date(validUntil).toISOString().split('T')[0];
-          const filename = `${aetNumber}_${stateParam}_${formattedDate}${ext}`;
-          console.log(`[UPLOAD NAMING] StateFile: usando nome específico: ${filename}`);
-          cb(null, filename);
-          return;
-        } catch (error) {
-          console.warn(`[UPLOAD NAMING] Erro ao processar data de validade: ${error}`);
-        }
-      }
-      
-      console.log(`[UPLOAD NAMING] StateFile: informações incompletas, usando padrão genérico`);
+      // **NOVA REGRA**: Arquivos de licenças emitidas devem manter o nome original
+      const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+      console.log(`[UPLOAD NAMING] StateFile: mantendo nome original sanitizado: ${originalName}`);
+      cb(null, originalName);
+      return;
     }
     
     // Para outros tipos de arquivos - usar padrão padrão
