@@ -1678,10 +1678,19 @@ export function LicenseForm({
                   if (!searchTerm.trim()) return transporters;
                   
                   const search = searchTerm.toLowerCase().trim();
-                  return transporters.filter(transporter => 
-                    transporter.name.toLowerCase().includes(search) ||
-                    (transporter.documentNumber && transporter.documentNumber.includes(search.replace(/\D/g, '')))
-                  );
+                  console.log('[TRANSPORTER SEARCH] Termo:', search);
+                  
+                  const filtered = transporters.filter(transporter => {
+                    const nameMatch = transporter.name.toLowerCase().includes(search);
+                    const cnpjMatch = transporter.documentNumber && transporter.documentNumber.includes(search.replace(/\D/g, ''));
+                    
+                    console.log(`[TRANSPORTER SEARCH] ${transporter.name} - nome: ${nameMatch}, cnpj: ${cnpjMatch}`);
+                    
+                    return nameMatch || cnpjMatch;
+                  });
+                  
+                  console.log('[TRANSPORTER SEARCH] Filtrados:', filtered.length, 'de', transporters.length);
+                  return filtered;
                 }, [transporters, searchTerm]);
                 
                 // Transportador selecionado atual
