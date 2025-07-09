@@ -44,16 +44,19 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
-### 09/07/2025 - Sistema de Validação por Combinação Específica FINALIZADO
-- ✅ **VALIDAÇÃO POR COMBINAÇÃO**: Sistema detecta automaticamente Cavalo + Carreta1 + Carreta2 para validação específica
+### 09/07/2025 - Sistema de Validação por Combinação Específica FINALIZADO + Suporte Completo a Todas as Configurações
+- ✅ **VALIDAÇÃO POR COMBINAÇÃO**: Sistema detecta automaticamente todos os tipos de configuração
 - ✅ **ENDPOINT DEDICADO**: `/api/licencas-vigentes-by-combination` para validação de combinação exata
-- ✅ **FALLBACK INTELIGENTE**: Usa validação tradicional por placas quando combinação incompleta
+- ✅ **SUPORTE A 4 TIPOS**: Simples (Cavalo+Carreta1), Bitrem (C+C1+C2), Rodotrem (C+C1+Dolly+C2), DollyOnly (C+C1+Dolly)
+- ✅ **QUERIES ESPECÍFICAS**: Consultas SQL distintas para cada tipo de configuração
+- ✅ **VALIDAÇÃO AUTOMÁTICA**: Funciona com qualquer configuração mínima (cavalo + carreta1)
 - ✅ **LOOP CRÍTICO RESOLVIDO**: Removida validação preventiva automática que causava loops infinitos
 - ✅ **LÓGICA SIMPLIFICADA**: Validação apenas ao clicar no estado, evitando conflitos
 - ✅ **LIMPEZA EM TEMPO REAL**: Estados bloqueados limpos automaticamente quando combinação muda
 - ✅ **REGRA DOS 60 DIAS**: Bloqueia apenas quando combinação IDÊNTICA possui licença com >60 dias
 - ✅ **DIFERENTES COMBINAÇÕES**: Permite nova licença se qualquer veículo da combinação for diferente
 - ✅ **ERRO DE ACESSO CORRIGIDO**: Removidas todas as referências a `stateValidationStatus` inexistente
+- ✅ **MENSAGENS ESPECÍFICAS**: Retorna tipo de combinação detectada (simples, bitrem, rodotrem, dolly)
 
 ### 09/07/2025 - Sistema de Nomeação de Arquivos CORRIGIDO - Preservação de Nomes Originais
 - ✅ **CRLV DE VEÍCULOS**: Arquivos CRLV mantêm nome original sanitizado (caracteres especiais removidos)

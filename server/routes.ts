@@ -2720,13 +2720,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Composição mínima é obrigatória (cavalo, carreta1)' });
       }
       
-      // Verificar se temos bitrem (carreta2) ou rodotrem (dolly)
+      // Identificar tipo de composição
       const isBitrem = composicao.carreta2 && !composicao.dolly;
       const isRodotrem = composicao.dolly && composicao.carreta2;
+      const isSimples = !composicao.carreta2 && !composicao.dolly; // Apenas cavalo + carreta1
+      const isDollyOnly = composicao.dolly && !composicao.carreta2; // Cavalo + carreta1 + dolly (sem carreta2)
       
-      if (!isBitrem && !isRodotrem) {
-        return res.status(400).json({ message: 'Composição deve ser bitrem (carreta2) ou rodotrem (carreta1 + dolly + carreta2)' });
-      }
+      console.log(`[VALIDAÇÃO COMBINAÇÃO] Tipo detectado - Bitrem: ${isBitrem}, Rodotrem: ${isRodotrem}, Simples: ${isSimples}, DollyOnly: ${isDollyOnly}`);
       
       console.log(`[VALIDAÇÃO COMBINAÇÃO] Verificando composição específica no estado: ${estado}`);
       
@@ -2736,55 +2736,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isBitrem) {
         console.log(`[VALIDAÇÃO COMBINAÇÃO] Composição BITREM: ${composicao.cavalo} + ${composicao.carreta1} + ${composicao.carreta2}`);
         
-        // Query para bitrem (cavalo + carreta1 + carreta2)
+        // Query para bitrem (cavalo + carreta1 + carreta2, SEM dolly)
         query = `
           SELECT 
-            le.estado,
-            le.numero_licenca,
-            le.data_validade,
-            le.placa_unidade_tratora,
-            le.placa_primeira_carreta,
-            le.placa_segunda_carreta,
-            le.placa_dolly,
+            le.estado, le.numero_licenca, le.data_validade,
+            le.placa_unidade_tratora, le.placa_primeira_carreta, 
+            le.placa_segunda_carreta, le.placa_dolly,
             EXTRACT(DAY FROM (le.data_validade - CURRENT_DATE)) as dias_restantes
           FROM licencas_emitidas le
-          WHERE le.estado = $1 
-            AND le.status = 'ativa'
-            AND le.data_validade > CURRENT_DATE
+          WHERE le.estado = $1 AND le.status = 'ativa' AND le.data_validade > CURRENT_DATE
             AND UPPER(le.placa_unidade_tratora) = UPPER($2)
             AND UPPER(le.placa_primeira_carreta) = UPPER($3)
             AND UPPER(le.placa_segunda_carreta) = UPPER($4)
             AND (le.placa_dolly IS NULL OR le.placa_dolly = '')
-          ORDER BY le.data_validade DESC
-          LIMIT 1
+          ORDER BY le.data_validade DESC LIMIT 1
         `;
         queryParams = [estado, composicao.cavalo, composicao.carreta1, composicao.carreta2];
-      } else {
+        
+      } else if (isRodotrem) {
         console.log(`[VALIDAÇÃO COMBINAÇÃO] Composição RODOTREM: ${composicao.cavalo} + ${composicao.carreta1} + ${composicao.dolly} + ${composicao.carreta2}`);
         
         // Query para rodotrem (cavalo + carreta1 + dolly + carreta2)
         query = `
           SELECT 
-            le.estado,
-            le.numero_licenca,
-            le.data_validade,
-            le.placa_unidade_tratora,
-            le.placa_primeira_carreta,
-            le.placa_segunda_carreta,
-            le.placa_dolly,
+            le.estado, le.numero_licenca, le.data_validade,
+            le.placa_unidade_tratora, le.placa_primeira_carreta, 
+            le.placa_segunda_carreta, le.placa_dolly,
             EXTRACT(DAY FROM (le.data_validade - CURRENT_DATE)) as dias_restantes
           FROM licencas_emitidas le
-          WHERE le.estado = $1 
-            AND le.status = 'ativa'
-            AND le.data_validade > CURRENT_DATE
+          WHERE le.estado = $1 AND le.status = 'ativa' AND le.data_validade > CURRENT_DATE
             AND UPPER(le.placa_unidade_tratora) = UPPER($2)
             AND UPPER(le.placa_primeira_carreta) = UPPER($3)
             AND UPPER(le.placa_dolly) = UPPER($4)
             AND UPPER(le.placa_segunda_carreta) = UPPER($5)
-          ORDER BY le.data_validade DESC
-          LIMIT 1
+          ORDER BY le.data_validade DESC LIMIT 1
         `;
         queryParams = [estado, composicao.cavalo, composicao.carreta1, composicao.dolly, composicao.carreta2];
+        
+      } else if (isSimples) {
+        console.log(`[VALIDAÇÃO COMBINAÇÃO] Composição SIMPLES: ${composicao.cavalo} + ${composicao.carreta1}`);
+        
+        // Query para composição simples (apenas cavalo + carreta1)
+        query = `
+          SELECT 
+            le.estado, le.numero_licenca, le.data_validade,
+            le.placa_unidade_tratora, le.placa_primeira_carreta, 
+            le.placa_segunda_carreta, le.placa_dolly,
+            EXTRACT(DAY FROM (le.data_validade - CURRENT_DATE)) as dias_restantes
+          FROM licencas_emitidas le
+          WHERE le.estado = $1 AND le.status = 'ativa' AND le.data_validade > CURRENT_DATE
+            AND UPPER(le.placa_unidade_tratora) = UPPER($2)
+            AND UPPER(le.placa_primeira_carreta) = UPPER($3)
+            AND (le.placa_segunda_carreta IS NULL OR le.placa_segunda_carreta = '')
+            AND (le.placa_dolly IS NULL OR le.placa_dolly = '')
+          ORDER BY le.data_validade DESC LIMIT 1
+        `;
+        queryParams = [estado, composicao.cavalo, composicao.carreta1];
+        
+      } else if (isDollyOnly) {
+        console.log(`[VALIDAÇÃO COMBINAÇÃO] Composição DOLLY ONLY: ${composicao.cavalo} + ${composicao.carreta1} + ${composicao.dolly}`);
+        
+        // Query para cavalo + carreta1 + dolly (sem carreta2)
+        query = `
+          SELECT 
+            le.estado, le.numero_licenca, le.data_validade,
+            le.placa_unidade_tratora, le.placa_primeira_carreta, 
+            le.placa_segunda_carreta, le.placa_dolly,
+            EXTRACT(DAY FROM (le.data_validade - CURRENT_DATE)) as dias_restantes
+          FROM licencas_emitidas le
+          WHERE le.estado = $1 AND le.status = 'ativa' AND le.data_validade > CURRENT_DATE
+            AND UPPER(le.placa_unidade_tratora) = UPPER($2)
+            AND UPPER(le.placa_primeira_carreta) = UPPER($3)
+            AND UPPER(le.placa_dolly) = UPPER($4)
+            AND (le.placa_segunda_carreta IS NULL OR le.placa_segunda_carreta = '')
+          ORDER BY le.data_validade DESC LIMIT 1
+        `;
+        queryParams = [estado, composicao.cavalo, composicao.carreta1, composicao.dolly];
+        
+      } else {
+        return res.status(400).json({ 
+          message: 'Tipo de composição não reconhecido. Use: bitrem, rodotrem, simples ou dolly apenas.' 
+        });
       }
       
       const result = await pool.query(query, queryParams);
@@ -2810,9 +2842,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               carreta2: license.placa_segunda_carreta,
               dolly: license.placa_dolly || null
             },
-            message: isRodotrem ? 
-              `Combinação rodotrem idêntica encontrada na licença ${license.numero_licenca} (${daysUntilExpiry} dias restantes)` :
-              `Combinação bitrem idêntica encontrada na licença ${license.numero_licenca} (${daysUntilExpiry} dias restantes)`
+            message: (() => {
+              if (isRodotrem) return `Combinação rodotrem idêntica encontrada na licença ${license.numero_licenca} (${daysUntilExpiry} dias restantes)`;
+              if (isBitrem) return `Combinação bitrem idêntica encontrada na licença ${license.numero_licenca} (${daysUntilExpiry} dias restantes)`;
+              if (isSimples) return `Combinação simples idêntica encontrada na licença ${license.numero_licenca} (${daysUntilExpiry} dias restantes)`;
+              if (isDollyOnly) return `Combinação com dolly idêntica encontrada na licença ${license.numero_licenca} (${daysUntilExpiry} dias restantes)`;
+              return `Combinação idêntica encontrada na licença ${license.numero_licenca} (${daysUntilExpiry} dias restantes)`;
+            })()
           });
         } else {
           console.log(`[VALIDAÇÃO COMBINAÇÃO] Estado ${estado} LIBERADO: ${daysUntilExpiry} dias ≤ 60 - PODE RENOVAR`);

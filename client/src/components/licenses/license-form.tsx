@@ -462,15 +462,24 @@ export function LicenseForm({
       return;
     }
     
-    // Verificar se temos bitrem (carreta2) ou rodotrem (dolly)
-    if (!carreta2 && !dolly) {
+    // Determinar tipo de composição
+    const isSimples = !carreta2 && !dolly;
+    const isBitrem = carreta2 && !dolly;
+    const isRodotrem = dolly && carreta2;
+    const isDollyOnly = dolly && !carreta2;
+    
+    // Aceitar qualquer configuração válida
+    if (!isSimples && !isBitrem && !isRodotrem && !isDollyOnly) {
       toast({
-        title: "Composição incompleta",
-        description: "Selecione Carreta 2 (bitrem) ou Dolly (rodotrem) para completar a combinação",
+        title: "Composição inválida",
+        description: "Configuração de veículos não reconhecida",
         variant: "destructive"
       });
       return;
     }
+    
+    const tipoComposicao = isSimples ? "SIMPLES" : isBitrem ? "BITREM" : isRodotrem ? "RODOTREM" : "DOLLY";
+    console.log(`[MANUAL] Tipo de composição: ${tipoComposicao}`);
     
     console.log('[MANUAL] ✅ INICIANDO validação manual para combinação:', { cavalo, carreta1, carreta2, dolly });
     
@@ -563,14 +572,15 @@ export function LicenseForm({
     const combinationKey = `${currentCombination.cavalo}-${currentCombination.carreta1}-${currentCombination.carreta2}-${currentCombination.dolly}`;
     
     // Só executar se:
-    // 1. Combinação completa (cavalo + pelo menos carreta1, carreta2 pode estar vazio se não for bitrem)
+    // 1. Combinação mínima (cavalo + carreta1) 
     // 2. Combinação diferente da última validada
     // 3. Não está executando validação
     const hasMinimumCombination = currentCombination.cavalo && currentCombination.carreta1;
-    const hasCompleteCombination = hasMinimumCombination && 
-      (currentCombination.carreta2 || currentCombination.dolly); // Bitrem OU rodotrem
     
-    if (hasCompleteCombination &&
+    // Aceitar qualquer configuração válida: simples, bitrem, rodotrem ou dolly apenas
+    const isValidCombination = hasMinimumCombination;
+    
+    if (isValidCombination &&
         combinationKey !== lastValidatedCombination &&
         !preventiveValidationRunning) {
       
