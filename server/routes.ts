@@ -3401,20 +3401,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const results = { inserted: 0, errors: [] as any[] };
       const validVehicles = [];
+      
+      // Análise prévia dos transportadores únicos no CSV
+      const uniqueTransporters = new Set();
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line.trim()) continue;
+        const data = line.split(';').map(col => col.trim());
+        const rowData: Record<string, string> = {};
+        header.forEach((col, index) => {
+          rowData[col] = data[index] || '';
+        });
+        if (rowData.transportador_cpf_cnpj) {
+          uniqueTransporters.add(rowData.transportador_cpf_cnpj.replace(/\D/g, ''));
+        }
+      }
+      
+      console.log(`[BULK IMPORT] 📊 Análise prévia: ${uniqueTransporters.size} transportadores únicos no CSV`);
+      
+      // Verificar quantos transportadores existem no sistema
+      const allTransporters = await storage.getAllTransporters();
+      const systemTransporterDocs = allTransporters.map(t => t.documentNumber?.replace(/\D/g, '')).filter(Boolean);
+      const foundTransporters = Array.from(uniqueTransporters).filter(doc => systemTransporterDocs.includes(doc as string));
+      
+      console.log(`[BULK IMPORT] 📊 ${allTransporters.length} transportadores no sistema, ${foundTransporters.length} encontrados no CSV`);
 
-      // Mapear tipos de veículo aceitos
+      // Mapear tipos de veículo aceitos - incluindo variações comuns
       const vehicleTypeMap: Record<string, string> = {
         'Unidade Tratora (Cavalo)': 'tractor_unit',
+        'Unidade Tratora': 'tractor_unit', // Variação comum
         'Cavalo Mecânico': 'tractor_unit',
         'Cavalo': 'tractor_unit',
+        'Trator': 'tractor_unit',
         'Primeira Carreta': 'semi_trailer',
         'Segunda Carreta': 'semi_trailer',
         'Semirreboque': 'semi_trailer',
+        'Semi-reboque': 'semi_trailer',
         'Carreta': 'semi_trailer',
         'Reboque': 'trailer',
         'Dolly': 'dolly',
         'Prancha': 'flatbed',
-        'Caminhão': 'truck'
+        'Caminhão': 'truck',
+        'Caminhao': 'truck' // Sem acento
       };
 
       for (let i = 1; i < lines.length; i++) {
@@ -3442,14 +3470,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             throw new Error("CPF/CNPJ do transportador é obrigatório");
           }
 
-          // Verificar se o transportador existe
+          // Verificar se o transportador existe (usando a lista já carregada)
           const transporterDoc = rowData.transportador_cpf_cnpj.replace(/\D/g, '');
-          const allTransporters = await storage.getAllTransporters();
           const transporter = allTransporters.find(t => 
             t.documentNumber?.replace(/\D/g, '') === transporterDoc
           );
           
           if (!transporter) {
+            // Log o transportador não encontrado mas continue processando
+            console.log(`[BULK IMPORT] ⚠️ Transportador não encontrado: ${rowData.transportador_cpf_cnpj} - linha ${i + 1}`);
             throw new Error(`Transportador não encontrado: ${rowData.transportador_cpf_cnpj}`);
           }
 

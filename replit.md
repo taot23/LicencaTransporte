@@ -44,6 +44,15 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 18/07/2025 - Correção Crítica: Importação CSV de Veículos RESOLVIDA
+- ✅ **PROBLEMA ENCODING IDENTIFICADO**: Arquivo CSV em formato ISO-8859-1 (latin1) não processado corretamente
+- ✅ **DETECÇÃO AUTOMÁTICA**: Sistema agora detecta automaticamente codificação latina para arquivos Excel brasileiros
+- ✅ **MAPEAMENTO TIPOS EXPANDIDO**: Adicionados tipos "Unidade Tratora", "Trator", "Caminhao" para compatibilidade
+- ✅ **ANÁLISE TRANSPORTADORES**: Sistema mostra quantos transportadores únicos existem no CSV vs cadastrados
+- ✅ **LOGS MELHORADOS**: Logs detalhados mostram problemas de importação linha por linha
+- ✅ **PERFORMANCE OTIMIZADA**: Busca de transportadores executada uma única vez para todo o arquivo
+- ✅ **COMPATIBILIDADE EXCEL**: Suporte completo para arquivos gerados pelo Excel com formatação brasileira
+
 ### 09/07/2025 - Sistema de Validação por Combinação Específica FINALIZADO + Suporte Completo a Todas as Configurações
 - ✅ **VALIDAÇÃO POR COMBINAÇÃO**: Sistema detecta automaticamente todos os tipos de configuração
 - ✅ **ENDPOINT DEDICADO**: `/api/licencas-vigentes-by-combination` para validação de combinação exata
