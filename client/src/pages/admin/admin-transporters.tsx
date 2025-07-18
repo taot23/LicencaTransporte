@@ -70,24 +70,54 @@ export default function AdminTransporters() {
 
     const searchTerm = searchFilter.toLowerCase().trim();
     
-    return transporters.filter((transporter: Transporter) => {
-      // Buscar por nome/razão social
-      const nameMatch = transporter.name?.toLowerCase().includes(searchTerm);
-      
-      // Buscar por nome fantasia
-      const tradeNameMatch = transporter.tradeName?.toLowerCase().includes(searchTerm);
-      
-      // Buscar por CPF/CNPJ (removendo pontuação para busca mais flexível)
-      const documentMatch = transporter.documentNumber?.replace(/[^\d]/g, '').includes(searchTerm.replace(/[^\d]/g, ''));
-      
-      // Buscar por email
-      const emailMatch = transporter.email?.toLowerCase().includes(searchTerm);
-      
-      // Buscar por cidade
-      const cityMatch = transporter.city?.toLowerCase().includes(searchTerm);
-      
-      return nameMatch || tradeNameMatch || documentMatch || emailMatch || cityMatch;
+    console.log('[SEARCH DEBUG] Termo de busca:', searchTerm);
+    console.log('[SEARCH DEBUG] Total de transportadores:', transporters.length);
+    
+    const filtered = transporters.filter((transporter: Transporter) => {
+      try {
+        // Buscar por nome/razão social
+        const nameMatch = transporter.name ? transporter.name.toLowerCase().includes(searchTerm) : false;
+        
+        // Buscar por nome fantasia
+        const tradeNameMatch = transporter.tradeName ? transporter.tradeName.toLowerCase().includes(searchTerm) : false;
+        
+        // Buscar por CPF/CNPJ (removendo pontuação para busca mais flexível)
+        const searchNumbers = searchTerm.replace(/[^\d]/g, '');
+        const documentNumbers = transporter.documentNumber ? transporter.documentNumber.replace(/[^\d]/g, '') : '';
+        const documentMatch = searchNumbers && documentNumbers ? documentNumbers.includes(searchNumbers) : false;
+        
+        // Buscar por email
+        const emailMatch = transporter.email ? transporter.email.toLowerCase().includes(searchTerm) : false;
+        
+        // Buscar por cidade
+        const cityMatch = transporter.city ? transporter.city.toLowerCase().includes(searchTerm) : false;
+        
+        // Buscar por estado
+        const stateMatch = transporter.state ? transporter.state.toLowerCase().includes(searchTerm) : false;
+        
+        // Buscar também pelo telefone
+        const phoneMatch = transporter.phone ? transporter.phone.toLowerCase().includes(searchTerm) : false;
+        
+        const isMatch = nameMatch || tradeNameMatch || documentMatch || emailMatch || cityMatch || stateMatch || phoneMatch;
+        
+        // Debug individual para identificar problemas
+        if (isMatch) {
+          console.log('[SEARCH DEBUG] Match encontrado:', {
+            name: transporter.name,
+            documentNumber: transporter.documentNumber,
+            matches: { nameMatch, tradeNameMatch, documentMatch, emailMatch, cityMatch, stateMatch, phoneMatch }
+          });
+        }
+        
+        return isMatch;
+      } catch (error) {
+        console.error('[SEARCH DEBUG] Erro ao processar transportador:', transporter, error);
+        return false;
+      }
     });
+    
+    console.log('[SEARCH DEBUG] Resultados filtrados:', filtered.length);
+    return filtered;
   }, [transporters, searchFilter]);
 
   // Mutation para exclusão de transportador
