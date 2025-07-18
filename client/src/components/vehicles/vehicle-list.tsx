@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Vehicle } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -16,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Pencil, Trash, FileText, AlertCircle } from "lucide-react";
+import { Pencil, Trash, FileText, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { 
   Dialog, 
@@ -38,6 +38,27 @@ export function VehicleList({ vehicles, isLoading, onEdit, onRefresh }: VehicleL
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Constantes de paginação
+  const ITEMS_PER_PAGE = 10;
+  
+  // Cálculos de paginação
+  const totalPages = Math.ceil(vehicles.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  
+  // Veículos paginados
+  const paginatedVehicles = useMemo(() => {
+    return vehicles.slice(startIndex, endIndex);
+  }, [vehicles, startIndex, endIndex]);
+  
+  // Reset página quando veículos mudarem (por exemplo, após filtros)
+  useMemo(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [vehicles.length, totalPages, currentPage]);
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -154,9 +175,9 @@ export function VehicleList({ vehicles, isLoading, onEdit, onRefresh }: VehicleL
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-solid border-blue-500 border-r-transparent"></div>
             <p className="mt-2 text-gray-600">Carregando veículos...</p>
           </div>
-        ) : vehicles.length > 0 ? (
+        ) : paginatedVehicles.length > 0 ? (
           <div className="space-y-4">
-            {vehicles.map((vehicle) => (
+            {paginatedVehicles.map((vehicle) => (
               <div key={vehicle.id} className="bg-white border rounded-lg p-4 shadow-sm">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex flex-col">
@@ -224,9 +245,54 @@ export function VehicleList({ vehicles, isLoading, onEdit, onRefresh }: VehicleL
               </div>
             ))}
             
-            <div className="bg-white p-4 rounded-lg border text-center text-gray-600 text-sm">
-              Mostrando <span className="font-medium">{vehicles.length}</span> veículos
-            </div>
+            {/* Controles de paginação - Mobile */}
+            {vehicles.length > ITEMS_PER_PAGE && (
+              <div className="bg-white p-4 rounded-lg border">
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-sm text-gray-600">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                  <span className="text-sm text-gray-600">
+                    {startIndex + 1}-{Math.min(endIndex, vehicles.length)} de {vehicles.length} veículos
+                  </span>
+                </div>
+                
+                <div className="flex justify-center items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="flex items-center"
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Anterior
+                  </Button>
+                  
+                  <span className="text-sm font-medium px-2">
+                    {currentPage}/{totalPages}
+                  </span>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="flex items-center"
+                  >
+                    Próxima
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {/* Info de total - Mobile */}
+            {vehicles.length <= ITEMS_PER_PAGE && (
+              <div className="bg-white p-4 rounded-lg border text-center text-gray-600 text-sm">
+                Mostrando <span className="font-medium">{vehicles.length}</span> veículos
+              </div>
+            )}
           </div>
         ) : (
           <div className="bg-white rounded-lg p-8 shadow text-center text-gray-500">
@@ -267,8 +333,8 @@ export function VehicleList({ vehicles, isLoading, onEdit, onRefresh }: VehicleL
                     Carregando veículos...
                   </TableCell>
                 </TableRow>
-              ) : vehicles.length > 0 ? (
-                vehicles.map((vehicle) => (
+              ) : paginatedVehicles.length > 0 ? (
+                paginatedVehicles.map((vehicle) => (
                   <TableRow key={vehicle.id}>
                     <TableCell className="font-medium">{vehicle.plate}</TableCell>
                     <TableCell>{getVehicleTypeLabel(vehicle.type)}</TableCell>
@@ -337,9 +403,45 @@ export function VehicleList({ vehicles, isLoading, onEdit, onRefresh }: VehicleL
 
         {vehicles.length > 0 && (
           <div className="px-6 py-4 border-t border-gray-200">
-            <p className="text-sm text-gray-600">
-              Mostrando <span className="font-medium">{vehicles.length}</span> veículos
-            </p>
+            {vehicles.length > ITEMS_PER_PAGE ? (
+              <div className="flex justify-between items-center">
+                <div className="text-sm text-gray-600">
+                  Mostrando <span className="font-medium">{startIndex + 1}-{Math.min(endIndex, vehicles.length)}</span> de <span className="font-medium">{vehicles.length}</span> veículos
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="flex items-center"
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Anterior
+                  </Button>
+                  
+                  <span className="text-sm font-medium px-3">
+                    Página {currentPage} de {totalPages}
+                  </span>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="flex items-center"
+                  >
+                    Próxima
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-600">
+                Mostrando <span className="font-medium">{vehicles.length}</span> veículos
+              </p>
+            )}
           </div>
         )}
       </div>

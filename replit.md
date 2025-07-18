@@ -44,6 +44,22 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 18/07/2025 - Sistema de Paginação de Veículos IMPLEMENTADO
+- ✅ **PAGINAÇÃO COMPLETA**: Implementada paginação de 10 veículos por página na lista de veículos
+- ✅ **VERSÃO MOBILE E DESKTOP**: Controles de paginação funcionais em ambas as versões
+- ✅ **NAVEGAÇÃO INTUITIVA**: Botões "Anterior" e "Próxima" com ícones indicativos
+- ✅ **CONTADORES INFORMATIVOS**: Exibe "Mostrando 1-10 de 25 veículos" e "Página 1 de 3"
+- ✅ **ESTADO CONSISTENTE**: Página atual resetada automaticamente quando filtros são aplicados
+- ✅ **PERFORMANCE OTIMIZADA**: Usa useMemo para calcular veículos paginados
+- ✅ **CONTROLES DESABILITADOS**: Botões desabilitados nas páginas inicial/final
+- ✅ **BUSCA CORRIGIDA**: Resolvido problema na busca inteligente de transportadores com logs de debug
+
+### 18/07/2025 - Correção da Busca Inteligente de Transportadores CORRIGIDA
+- ✅ **DEBUG IMPLEMENTADO**: Logs detalhados para identificar problemas na busca
+- ✅ **ROBUSTEZ MELHORADA**: Verificação de nulos e tratamento de erros aprimorado
+- ✅ **CAMPOS EXPANDIDOS**: Busca agora inclui estado e telefone além dos campos anteriores
+- ✅ **BUSCA FUNCIONANDO**: Confirmado funcionamento correto através dos logs de console
+
 ### 09/07/2025 - Sistema de Validação por Combinação Específica FINALIZADO + Suporte Completo a Todas as Configurações
 - ✅ **VALIDAÇÃO POR COMBINAÇÃO**: Sistema detecta automaticamente todos os tipos de configuração
 - ✅ **ENDPOINT DEDICADO**: `/api/licencas-vigentes-by-combination` para validação de combinação exata
