@@ -1,0 +1,36 @@
+    at async withTransaction (/home/runner/workspace/server/db.ts:78:20)
+    at async TransactionalStorage.deleteVehicle (/home/runner/workspace/server/transactional-storage.ts:318:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:1502:7)
+7:54:26 PM [express] DELETE /api/vehicles/53 500 in 68ms :: {"message":"Erro ao excluir veículo"}
+[AUTH DEBUG] Deserializing user ID: 1
+[AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+Usuário 1 (admin) autorizado a excluir veículo 50
+Transaction failed: Error: Não é possível excluir um veículo que está associado a licenças
+    at <anonymous> (/home/runner/workspace/server/transactional-storage.ts:334:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async withTransaction (/home/runner/workspace/server/db.ts:78:20)
+    at async TransactionalStorage.deleteVehicle (/home/runner/workspace/server/transactional-storage.ts:318:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:1502:7)
+Error deleting vehicle: Error: Não é possível excluir um veículo que está associado a licenças
+    at <anonymous> (/home/runner/workspace/server/transactional-storage.ts:334:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async withTransaction (/home/runner/workspace/server/db.ts:78:20)
+    at async TransactionalStorage.deleteVehicle (/home/runner/workspace/server/transactional-storage.ts:318:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:1502:7)
+7:54:27 PM [express] DELETE /api/vehicles/50 500 in 68ms :: {"message":"Erro ao excluir veículo"}
+[AUTH DEBUG] Deserializing user ID: 1
+[AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+Usuário 1 (admin) autorizado a excluir veículo 50
+Transaction failed: Error: Não é possível excluir um veículo que está associado a licenças
+    at <anonymous> (/home/runner/workspace/server/transactional-storage.ts:334:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async withTransaction (/home/runner/workspace/server/db.ts:78:20)
+    at async TransactionalStorage.deleteVehicle (/home/runner/workspace/server/transactional-storage.ts:318:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:1502:7)
+Error deleting vehicle: Error: Não é possível excluir um veículo que está associado a licenças
+    at <anonymous> (/home/runner/workspace/server/transactional-storage.ts:334:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async withTransaction (/home/runner/workspace/server/db.ts:78:20)
+    at async TransactionalStorage.deleteVehicle (/home/runner/workspace/server/transactional-storage.ts:318:5)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:1502:7)
+7:54:29 PM [express] DELETE /api/vehicles/50 500 in 67ms :: {"message":"Erro ao excluir veículo"}
