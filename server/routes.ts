@@ -3343,8 +3343,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const csvContent = req.file.buffer.toString('utf-8');
-      console.log('[BULK IMPORT] Conteúdo CSV (primeiros 200 chars):', csvContent.substring(0, 200));
+      // Detectar encoding automaticamente - tentar iso-8859-1 primeiro (padrão Excel Brasil)
+      let csvContent;
+      try {
+        // Primeiro tentar iso-8859-1 (latin1) que é comum em arquivos Excel brasileiros
+        csvContent = req.file.buffer.toString('latin1');
+        console.log('[BULK IMPORT] Usando encoding latin1 (iso-8859-1)');
+        
+        // Se o conteúdo não tiver caracteres acentuados suspeitos, tentar UTF-8
+        if (!csvContent.includes('ção') && !csvContent.includes('ão') && !csvContent.includes('õ')) {
+          const testUtf8 = req.file.buffer.toString('utf-8');
+          if (testUtf8.length === csvContent.length) {
+            csvContent = testUtf8;
+            console.log('[BULK IMPORT] Mudando para UTF-8');
+          }
+        }
+      } catch (error) {
+        console.log('[BULK IMPORT] Erro de encoding, usando UTF-8 como fallback');
+        csvContent = req.file.buffer.toString('utf-8');
+      }
+      
+      console.log('[BULK IMPORT] Conteúdo CSV (primeiros 300 chars):', csvContent.substring(0, 300));
+      console.log('[BULK IMPORT] Tamanho do conteúdo:', csvContent.length, 'caracteres');
       
       const lines = csvContent.split('\n').filter(line => line.trim());
       console.log('[BULK IMPORT] Número de linhas:', lines.length);
