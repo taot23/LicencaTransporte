@@ -3343,28 +3343,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Detectar encoding automaticamente - tentar iso-8859-1 primeiro (padrão Excel Brasil)
-      let csvContent;
-      try {
-        // Primeiro tentar iso-8859-1 (latin1) que é comum em arquivos Excel brasileiros
-        csvContent = req.file.buffer.toString('latin1');
-        console.log('[BULK IMPORT] Usando encoding latin1 (iso-8859-1)');
-        
-        // Se o conteúdo não tiver caracteres acentuados suspeitos, tentar UTF-8
-        if (!csvContent.includes('ção') && !csvContent.includes('ão') && !csvContent.includes('õ')) {
-          const testUtf8 = req.file.buffer.toString('utf-8');
-          if (testUtf8.length === csvContent.length) {
-            csvContent = testUtf8;
-            console.log('[BULK IMPORT] Mudando para UTF-8');
-          }
-        }
-      } catch (error) {
-        console.log('[BULK IMPORT] Erro de encoding, usando UTF-8 como fallback');
-        csvContent = req.file.buffer.toString('utf-8');
-      }
-      
-      console.log('[BULK IMPORT] Conteúdo CSV (primeiros 300 chars):', csvContent.substring(0, 300));
-      console.log('[BULK IMPORT] Tamanho do conteúdo:', csvContent.length, 'caracteres');
+      const csvContent = req.file.buffer.toString('utf-8');
+      console.log('[BULK IMPORT] Conteúdo CSV (primeiros 200 chars):', csvContent.substring(0, 200));
       
       const lines = csvContent.split('\n').filter(line => line.trim());
       console.log('[BULK IMPORT] Número de linhas:', lines.length);
@@ -3401,48 +3381,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const results = { inserted: 0, errors: [] as any[] };
       const validVehicles = [];
-      
-      // Análise prévia dos transportadores únicos no CSV
-      const uniqueTransporters = new Set();
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i];
-        if (!line.trim()) continue;
-        const data = line.split(';').map(col => col.trim());
-        const rowData: Record<string, string> = {};
-        header.forEach((col, index) => {
-          rowData[col] = data[index] || '';
-        });
-        if (rowData.transportador_cpf_cnpj) {
-          uniqueTransporters.add(rowData.transportador_cpf_cnpj.replace(/\D/g, ''));
-        }
-      }
-      
-      console.log(`[BULK IMPORT] 📊 Análise prévia: ${uniqueTransporters.size} transportadores únicos no CSV`);
-      
-      // Verificar quantos transportadores existem no sistema
-      const allTransporters = await storage.getAllTransporters();
-      const systemTransporterDocs = allTransporters.map(t => t.documentNumber?.replace(/\D/g, '')).filter(Boolean);
-      const foundTransporters = Array.from(uniqueTransporters).filter(doc => systemTransporterDocs.includes(doc as string));
-      
-      console.log(`[BULK IMPORT] 📊 ${allTransporters.length} transportadores no sistema, ${foundTransporters.length} encontrados no CSV`);
 
-      // Mapear tipos de veículo aceitos - incluindo variações comuns
+      // Mapear tipos de veículo aceitos
       const vehicleTypeMap: Record<string, string> = {
         'Unidade Tratora (Cavalo)': 'tractor_unit',
-        'Unidade Tratora': 'tractor_unit', // Variação comum
         'Cavalo Mecânico': 'tractor_unit',
         'Cavalo': 'tractor_unit',
-        'Trator': 'tractor_unit',
         'Primeira Carreta': 'semi_trailer',
         'Segunda Carreta': 'semi_trailer',
         'Semirreboque': 'semi_trailer',
-        'Semi-reboque': 'semi_trailer',
         'Carreta': 'semi_trailer',
         'Reboque': 'trailer',
         'Dolly': 'dolly',
         'Prancha': 'flatbed',
-        'Caminhão': 'truck',
-        'Caminhao': 'truck' // Sem acento
+        'Caminhão': 'truck'
       };
 
       for (let i = 1; i < lines.length; i++) {
@@ -3470,15 +3422,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             throw new Error("CPF/CNPJ do transportador é obrigatório");
           }
 
-          // Verificar se o transportador existe (usando a lista já carregada)
+          // Verificar se o transportador existe
           const transporterDoc = rowData.transportador_cpf_cnpj.replace(/\D/g, '');
+          const allTransporters = await storage.getAllTransporters();
           const transporter = allTransporters.find(t => 
             t.documentNumber?.replace(/\D/g, '') === transporterDoc
           );
           
           if (!transporter) {
-            // Log o transportador não encontrado mas continue processando
-            console.log(`[BULK IMPORT] ⚠️ Transportador não encontrado: ${rowData.transportador_cpf_cnpj} - linha ${i + 1}`);
             throw new Error(`Transportador não encontrado: ${rowData.transportador_cpf_cnpj}`);
           }
 
