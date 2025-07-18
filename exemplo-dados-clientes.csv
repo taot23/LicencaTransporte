@@ -1,0 +1,9 @@
+nome;cnpj_cpf;tipo_pessoa;cidade;estado;email;telefone;observacoes
+TRANSPORTADORA EXEMPLO LTDA;12345678000190;pj;SÃO PAULO;SP;contato@exemplo.com;(11) 99999-9999;Cliente VIP - Transporte de cargas especiais
+JOÃO SILVA TRANSPORTES;12345678901;pf;RIO DE JANEIRO;RJ;joao@silva.com;(21) 88888-8888;Transportador autônomo
+LOGÍSTICA BRASIL S/A;98765432000111;pj;BELO HORIZONTE;MG;comercial@logisticabrasil.com;(31) 77777-7777;Empresa de grande porte
+MARIA OLIVEIRA;98765432100;pf;CURITIBA;PR;maria.oliveira@email.com;(41) 66666-6666;Transportadora pessoa física
+SUPER TRANSPORTES LTDA;11122233000144;pj;SALVADOR;BA;admin@supertransportes.com;(71) 55555-5555;Especializada em combustíveis
+CARLOS SANTOS;11122233445;pf;FORTALEZA;CE;carlos.santos@gmail.com;(85) 44444-4444;Transporte regional
+MEGA LOGÍSTICA LTDA;55566677000188;pj;RECIFE;PE;contato@megalogistica.com;(81) 33333-3333;Transporte interestadual
+ANA COSTA TRANSPORTES;55566677889;pf;BRASÍLIA;DF;ana.costa@outlook.com;(61) 22222-2222;Transportadora independente
