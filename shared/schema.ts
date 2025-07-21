@@ -273,6 +273,8 @@ export const licenseRequests = pgTable("license_requests", {
   firstTrailerId: integer("first_trailer_id").references(() => vehicles.id),
   dollyId: integer("dolly_id").references(() => vehicles.id),
   secondTrailerId: integer("second_trailer_id").references(() => vehicles.id),
+  dollyManualPlate: text("dolly_manual_plate"), // Placa manual para dolly
+  secondTrailerManualPlate: text("second_trailer_manual_plate"), // Placa manual para 2ª carreta
   flatbedId: integer("flatbed_id").references(() => vehicles.id),
   length: integer("length").notNull(), // total length in cm
   width: integer("width"), // width in cm
@@ -464,6 +466,8 @@ export const insertLicenseRequestSchema = createInsertSchema(licenseRequests)
       }),
     additionalPlates: z.array(z.string()).optional().default([]),
     additionalPlatesDocuments: z.array(z.string()).optional().default([]),
+    dollyManualPlate: z.string().optional(),
+    secondTrailerManualPlate: z.string().optional(),
   });
 
 export const insertDraftLicenseSchema = insertLicenseRequestSchema.partial().extend({

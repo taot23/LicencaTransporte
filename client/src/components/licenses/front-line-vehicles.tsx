@@ -1,6 +1,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { Vehicle } from "@shared/schema";
 import { FastVehicleSelector } from './fast-vehicle-selector';
+import { EnhancedVehicleSelector } from './enhanced-vehicle-selector';
 import { Badge } from "@/components/ui/badge";
 import { Truck } from "lucide-react";
 import { VehicleTypeImage } from "@/components/ui/vehicle-type-image";
@@ -11,12 +12,18 @@ interface FrontLineVehiclesProps {
   firstTrailerId?: number | null;
   dollyId?: number | null;
   secondTrailerId?: number | null;
+  // Placas manuais para os campos que permitem entrada manual
+  dollyManualPlate?: string | null;
+  secondTrailerManualPlate?: string | null;
   vehicles: Vehicle[];
   isLoadingVehicles: boolean;
   onTractorChange: (id: number | null) => void;
   onFirstTrailerChange: (id: number | null) => void;
   onDollyChange: (id: number | null) => void;
   onSecondTrailerChange: (id: number | null) => void;
+  // Handlers para placas manuais
+  onDollyManualPlateChange?: (plate: string | null) => void;
+  onSecondTrailerManualPlateChange?: (plate: string | null) => void;
   onCreateNewVehicle?: () => void;
 }
 
@@ -26,12 +33,16 @@ export function FrontLineVehicles({
   firstTrailerId,
   dollyId,
   secondTrailerId,
+  dollyManualPlate,
+  secondTrailerManualPlate,
   vehicles,
   isLoadingVehicles,
   onTractorChange,
   onFirstTrailerChange,
   onDollyChange,
   onSecondTrailerChange,
+  onDollyManualPlateChange,
+  onSecondTrailerManualPlateChange,
   onCreateNewVehicle
 }: FrontLineVehiclesProps) {
   
@@ -163,18 +174,21 @@ export function FrontLineVehicles({
             {/* Dolly - Somente para tipos que precisam */}
             {showDolly && (
               <div className="space-y-2">
-                <FastVehicleSelector
+                <EnhancedVehicleSelector
                   title="Dolly"
                   description="Dispositivo de acoplamento"
-                  placeholder="Selecione o dolly"
+                  placeholder="Selecione o dolly ou digite a placa"
                   value={dollyId || null}
+                  manualPlate={dollyManualPlate}
                   vehicleOptions={availableVehiclesByType.dollies}
                   onChange={handleDollyChange}
+                  onManualPlateChange={onDollyManualPlateChange}
                   onAdd={onCreateNewVehicle}
                   isLoading={isLoadingVehicles}
                   vehicleType="dolly"
                   colorTheme="amber"
                   emptyMessage="Nenhum dolly cadastrado"
+                  allowManualInput={true}
                 />
               </div>
             )}
@@ -182,18 +196,21 @@ export function FrontLineVehicles({
             {/* 2ª Carreta - Somente para bitrem e rodotrem */}
             {showSecondTrailer && (
               <div className="space-y-2">
-                <FastVehicleSelector
+                <EnhancedVehicleSelector
                   title="2ª Carreta"
                   description="Segundo semirreboque da composição"
-                  placeholder="Selecione a 2ª carreta"
+                  placeholder="Selecione a 2ª carreta ou digite a placa"
                   value={secondTrailerId || null}
+                  manualPlate={secondTrailerManualPlate}
                   vehicleOptions={getSecondTrailerVehicles()}
                   onChange={handleSecondTrailerChange}
+                  onManualPlateChange={onSecondTrailerManualPlateChange}
                   onAdd={onCreateNewVehicle}
                   isLoading={isLoadingVehicles}
                   vehicleType="mixed_trailer"
                   colorTheme="purple"
                   emptyMessage="Nenhum semirreboque cadastrado"
+                  allowManualInput={true}
                 />
               </div>
             )}
@@ -220,15 +237,17 @@ export function FrontLineVehicles({
             </Badge>
           )}
           
-          {dollyId && (
+          {(dollyId || dollyManualPlate) && (
             <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-200">
-              Dolly: {vehicles?.find(v => v.id === dollyId)?.plate || dollyId}
+              Dolly: {dollyId ? (vehicles?.find(v => v.id === dollyId)?.plate || dollyId) : dollyManualPlate}
+              {dollyManualPlate && !dollyId && <span className="ml-1 text-xs">(manual)</span>}
             </Badge>
           )}
           
-          {secondTrailerId && (
+          {(secondTrailerId || secondTrailerManualPlate) && (
             <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">
-              2ª Carreta: {vehicles?.find(v => v.id === secondTrailerId)?.plate || secondTrailerId}
+              2ª Carreta: {secondTrailerId ? (vehicles?.find(v => v.id === secondTrailerId)?.plate || secondTrailerId) : secondTrailerManualPlate}
+              {secondTrailerManualPlate && !secondTrailerId && <span className="ml-1 text-xs">(manual)</span>}
             </Badge>
           )}
         </div>
