@@ -24,6 +24,8 @@ import { TransporterInfo } from "@/components/transporters/transporter-info";
 import { SortableHeader } from "@/components/ui/sortable-header";
 import { LicenseDetailsCard } from "@/components/licenses/license-details-card";
 import { exportToCSV, formatDateForCSV } from "@/lib/csv-export";
+import { usePaginatedList } from "@/hooks/use-paginated-list";
+import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
 
 export default function TrackLicensePage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -272,6 +274,19 @@ export default function TrackLicensePage() {
     return toSort;
   }, [filteredLicenses, sortColumn, sortDirection]);
 
+  // Hook de paginação aplicado às licenças ordenadas
+  const {
+    paginatedItems: paginatedLicenses,
+    pagination,
+    currentPage,
+    setCurrentPage,
+    searchTerm: paginationSearchTerm,
+    setSearchTerm: setPaginationSearchTerm
+  } = usePaginatedList<ExtendedLicenseWithId>({
+    items: sortedLicenses,
+    itemsPerPage: 10
+  });
+
   const handleViewLicense = (license: LicenseRequest) => {
     setSelectedLicense(license);
   };
@@ -319,7 +334,7 @@ export default function TrackLicensePage() {
         "Última Atualização"
       ];
 
-      const dataForExport = sortedLicenses.map(license => ({
+      const dataForExport = paginatedLicenses.map(license => ({
         "Nº Solicitação": license.requestNumber || '',
         "Tipo de Veículo": translateVehicleType(license.type) || '',
         "Placa Principal": license.mainVehiclePlate || '',
@@ -435,8 +450,15 @@ export default function TrackLicensePage() {
         </div>
       </div>
 
+      {/* Cabeçalho com contador de licenças */}
+      <div className="mb-4 flex justify-between items-center">
+        <div className="text-sm text-gray-600">
+          Mostrando {paginatedLicenses.length > 0 ? ((currentPage - 1) * 10 + 1) : 0}-{Math.min(currentPage * 10, sortedLicenses.length)} de {sortedLicenses.length} licenças
+        </div>
+      </div>
+
       <LicenseList 
-        licenses={sortedLicenses || []} 
+        licenses={paginatedLicenses || []} 
         isLoading={isLoading}
         onView={handleViewLicense}
         onRefresh={refetch}
@@ -444,6 +466,26 @@ export default function TrackLicensePage() {
         sortDirection={sortDirection}
         onSort={handleSort}
       />
+
+      {/* Controles de paginação - Versão desktop */}
+      <div className="hidden md:block mt-6">
+        <ListPagination 
+          currentPage={currentPage}
+          totalPages={pagination.totalPages}
+          totalItems={pagination.totalItems}
+          itemsPerPage={pagination.itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
+      </div>
+
+      {/* Controles de paginação - Versão mobile */}
+      <div className="block md:hidden mt-6">
+        <MobileListPagination
+          currentPage={currentPage}
+          totalPages={pagination.totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </div>
 
       {selectedLicense && (
         <Dialog open={!!selectedLicense} onOpenChange={(open) => !open && setSelectedLicense(null)}>

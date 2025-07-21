@@ -52,6 +52,8 @@ import {
 } from "@/components/ui/dialog";
 import { LicenseRequest, brazilianStates as brazilianStatesObjects, Transporter } from "@shared/schema";
 import { TransporterInfo } from "@/components/transporters/transporter-info";
+import { usePaginatedList } from "@/hooks/use-paginated-list";
+import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 // Lista simplificada de estados brasileiros para uso como strings
@@ -553,6 +555,14 @@ export default function AdminLicensesPage() {
         return (bValue as number) - (aValue as number);
       }
     });
+
+  // Hook de paginação das licenças filtradas
+  const { 
+    paginatedItems: paginatedLicenses, 
+    pagination, 
+    currentPage, 
+    setCurrentPage 
+  } = usePaginatedList({ items: filteredLicenses });
 
   // Função removida pois o status agora só será editado por estado individual
 
@@ -1096,7 +1106,7 @@ export default function AdminLicensesPage() {
                             </TableCell>
                           </TableRow>
                         ) : (
-                          filteredLicenses.map((license) => (
+                          (paginatedLicenses as LicenseRequest[]).map((license) => (
                             <TableRow key={license.id}>
                               <TableCell className="font-medium">{license.requestNumber}</TableCell>
                               <TableCell>
@@ -1183,7 +1193,7 @@ export default function AdminLicensesPage() {
                         Nenhuma licença encontrada
                       </div>
                     ) : (
-                      filteredLicenses.map((license) => (
+                      (paginatedLicenses as LicenseRequest[]).map((license) => (
                         <Card key={license.id} className="overflow-hidden">
                           <CardContent className="p-3">
                             <div className="flex flex-col gap-1.5">
@@ -1268,6 +1278,40 @@ export default function AdminLicensesPage() {
                     )}
                   </div>
                 </>
+              )}
+
+              {/* Controles de paginação - Versão desktop */}
+              {filteredLicenses.length > 0 && !isLoadingLicenses && (
+                <div className="hidden md:block mt-6">
+                  <ListPagination 
+                    currentPage={currentPage}
+                    totalPages={pagination.totalPages}
+                    totalItems={filteredLicenses.length}
+                    itemsPerPage={10}
+                    hasPrev={currentPage > 1}
+                    hasNext={currentPage < pagination.totalPages}
+                    startItem={(currentPage - 1) * 10 + 1}
+                    endItem={Math.min(currentPage * 10, filteredLicenses.length)}
+                    onPageChange={setCurrentPage}
+                  />
+                </div>
+              )}
+
+              {/* Controles de paginação - Versão mobile */}
+              {filteredLicenses.length > 0 && !isLoadingLicenses && (
+                <div className="block md:hidden mt-6">
+                  <MobileListPagination
+                    currentPage={currentPage}
+                    totalPages={pagination.totalPages}
+                    totalItems={filteredLicenses.length}
+                    itemsPerPage={10}
+                    hasPrev={currentPage > 1}
+                    hasNext={currentPage < pagination.totalPages}
+                    startItem={(currentPage - 1) * 10 + 1}
+                    endItem={Math.min(currentPage * 10, filteredLicenses.length)}
+                    onPageChange={setCurrentPage}
+                  />
+                </div>
               )}
             </CardContent>
           </Card>

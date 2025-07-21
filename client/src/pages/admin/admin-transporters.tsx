@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { exportToCSV, formatDateForCSV } from "@/lib/csv-export";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { usePaginatedList } from "@/hooks/use-paginated-list";
+import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
 import { Plus, MoreVertical, Edit, Trash, Link as LinkIcon, UserCircle2, Download, Search, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SkeletonTable } from "@/components/ui/skeleton-table";
@@ -119,6 +121,14 @@ export default function AdminTransporters() {
     console.log('[SEARCH DEBUG] Resultados filtrados:', filtered.length);
     return filtered;
   }, [transporters, searchFilter]);
+
+  // Hook de paginação dos transportadores filtrados
+  const { 
+    paginatedItems: paginatedTransporters, 
+    pagination, 
+    currentPage, 
+    setCurrentPage 
+  } = usePaginatedList({ items: filteredTransporters });
 
   // Mutation para exclusão de transportador
   const deleteTransporterMutation = useMutation({
@@ -245,7 +255,7 @@ export default function AdminTransporters() {
     if (isMobile) {
       return (
         <div className="space-y-4">
-          {filteredTransporters.map((transporter: Transporter) => (
+          {paginatedTransporters.map((transporter: Transporter) => (
             <Card key={transporter.id} className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="p-4 bg-gray-50 flex justify-between items-center">
@@ -305,7 +315,7 @@ export default function AdminTransporters() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredTransporters.map((transporter: Transporter) => (
+          {paginatedTransporters.map((transporter: Transporter) => (
             <TableRow key={transporter.id}>
               <TableCell className="font-medium">{transporter.name}</TableCell>
               <TableCell>{transporter.documentNumber}</TableCell>
@@ -424,6 +434,40 @@ export default function AdminTransporters() {
 
         {/* Lista de transportadores */}
         {renderTransportersList()}
+
+        {/* Controles de paginação - Versão desktop */}
+        {filteredTransporters.length > 0 && !isLoading && (
+          <div className="hidden md:block mt-6">
+            <ListPagination 
+              currentPage={currentPage}
+              totalPages={pagination.totalPages}
+              totalItems={filteredTransporters.length}
+              itemsPerPage={10}
+              hasPrev={currentPage > 1}
+              hasNext={currentPage < pagination.totalPages}
+              startItem={(currentPage - 1) * 10 + 1}
+              endItem={Math.min(currentPage * 10, filteredTransporters.length)}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
+
+        {/* Controles de paginação - Versão mobile */}
+        {filteredTransporters.length > 0 && !isLoading && (
+          <div className="block md:hidden mt-6">
+            <MobileListPagination
+              currentPage={currentPage}
+              totalPages={pagination.totalPages}
+              totalItems={filteredTransporters.length}
+              itemsPerPage={10}
+              hasPrev={currentPage > 1}
+              hasNext={currentPage < pagination.totalPages}
+              startItem={(currentPage - 1) * 10 + 1}
+              endItem={Math.min(currentPage * 10, filteredTransporters.length)}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
 
         {/* Modal de edição de transportador */}
         {selectedTransporter && (

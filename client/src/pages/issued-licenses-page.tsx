@@ -41,6 +41,8 @@ import { Badge } from "@/components/ui/badge";
 import { SortableHeader } from "@/components/ui/sortable-header";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { usePaginatedList } from "@/hooks/use-paginated-list";
+import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
 
 export default function IssuedLicensesPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -48,7 +50,7 @@ export default function IssuedLicensesPage() {
   const [dateTo, setDateTo] = useState("");
   const [stateFilter, setStateFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+
   const [selectedLicense, setSelectedLicense] = useState<LicenseRequest | null>(null);
   const [sortColumn, setSortColumn] = useState<string | null>("emissionDate");
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>('desc');
@@ -58,7 +60,6 @@ export default function IssuedLicensesPage() {
   const queryClient = useQueryClient();
   const { isConnected } = useWebSocketContext();
   const { toast } = useToast();
-  const itemsPerPage = 10;
 
   const { data: issuedLicenses, isLoading, refetch } = useQuery<LicenseRequest[]>({
     queryKey: ["/api/licenses/issued"],
@@ -191,6 +192,8 @@ export default function IssuedLicensesPage() {
     return result;
   }, [issuedLicenses]);
 
+
+
   // Verificar validade das licenças
   const getLicenseStatus = (validUntil: string | null): 'active' | 'expired' | 'expiring_soon' => {
     if (!validUntil) return 'active';
@@ -238,6 +241,14 @@ export default function IssuedLicensesPage() {
     
     return matchesSearch && matchesDateFrom && matchesDateTo && matchesState && matchesStatus;
   });
+
+  // Hook de paginação das licenças filtradas
+  const { 
+    paginatedItems: paginatedLicenses, 
+    pagination, 
+    currentPage, 
+    setCurrentPage 
+  } = usePaginatedList(sortedLicenses);
 
   // Função para ordenar as licenças
   const handleSort = (column: string) => {
@@ -319,12 +330,7 @@ export default function IssuedLicensesPage() {
     return toSort;
   }, [filteredLicenses, sortColumn, sortDirection]);
 
-  // Paginação
-  const totalPages = Math.ceil(sortedLicenses.length / itemsPerPage);
-  const paginatedLicenses = sortedLicenses.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+
 
   const viewLicenseDetails = (license: LicenseRequest) => {
     setSelectedLicense(license);
@@ -1046,49 +1052,32 @@ export default function IssuedLicensesPage() {
           )}
         </div>
 
-        {totalPages > 1 && (
-          <div className="px-4 sm:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-sm text-gray-600 text-center sm:text-left">
-              Mostrando <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> a <span className="font-medium">
-                {Math.min(currentPage * itemsPerPage, filteredLicenses.length)}
-              </span> de <span className="font-medium">{filteredLicenses.length}</span> licenças
-            </div>
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  />
-                </PaginationItem>
-                {Array.from({ length: Math.min(totalPages, 3) }).map((_, i) => {
-                  const pageNumber = currentPage <= 2 
-                    ? i + 1 
-                    : currentPage >= totalPages - 1 
-                      ? totalPages - 2 + i 
-                      : currentPage - 1 + i;
-                  
-                  if (pageNumber <= 0 || pageNumber > totalPages) return null;
-                  
-                  return (
-                    <PaginationItem key={pageNumber}>
-                      <PaginationLink
-                        isActive={currentPage === pageNumber}
-                        onClick={() => setCurrentPage(pageNumber)}
-                      >
-                        {pageNumber}
-                      </PaginationLink>
-                    </PaginationItem>
-                  );
-                })}
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+        {/* Cabeçalho com contador de licenças */}
+        <div className="mb-4 px-4 sm:px-6 flex justify-between items-center">
+          <div className="text-sm text-gray-600">
+            Mostrando {paginatedLicenses.length > 0 ? ((currentPage - 1) * 10 + 1) : 0}-{Math.min(currentPage * 10, sortedLicenses.length)} de {sortedLicenses.length} licenças
           </div>
-        )}
+        </div>
+
+        {/* Controles de paginação - Versão desktop */}
+        <div className="hidden md:block mt-6">
+          <ListPagination 
+            currentPage={currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.totalItems}
+            itemsPerPage={pagination.itemsPerPage}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+
+        {/* Controles de paginação - Versão mobile */}
+        <div className="block md:hidden mt-6">
+          <MobileListPagination
+            currentPage={currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
       </div>
 
       {/* Diálogo de renovação de licença */}

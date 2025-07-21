@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/table";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { exportToCSV, formatDateForCSV, formatCurrencyForCSV } from "@/lib/csv-export";
+import { usePaginatedList } from "@/hooks/use-paginated-list";
+import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
 
 // Schema de validação para o formulário de boleto
 const boletoFormSchema = z.object({
@@ -96,6 +98,14 @@ export default function BoletosPage() {
   const { data: transporters = [] } = useQuery({
     queryKey: ["/api/admin/transporters"],
   });
+
+  // Hook de paginação dos boletos
+  const { 
+    paginatedItems: paginatedBoletos, 
+    pagination, 
+    currentPage, 
+    setCurrentPage 
+  } = usePaginatedList({ items: boletos });
 
   // Estados para controlar uploads
   const [uploadedBoleto, setUploadedBoleto] = useReactState<File | null>(null);
@@ -538,7 +548,7 @@ export default function BoletosPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {boletos.map((boleto: Boleto) => (
+                {(paginatedBoletos as Boleto[]).map((boleto: Boleto) => (
                   <TableRow key={boleto.id}>
                     <TableCell className="font-medium">
                       {boleto.numeroBoleto}
@@ -609,6 +619,40 @@ export default function BoletosPage() {
                 ))}
               </TableBody>
             </Table>
+
+            {/* Controles de paginação - Versão desktop */}
+            {boletos.length > 0 && !isLoading && (
+              <div className="hidden md:block mt-6">
+                <ListPagination 
+                  currentPage={currentPage}
+                  totalPages={pagination.totalPages}
+                  totalItems={boletos.length}
+                  itemsPerPage={10}
+                  hasPrev={currentPage > 1}
+                  hasNext={currentPage < pagination.totalPages}
+                  startItem={(currentPage - 1) * 10 + 1}
+                  endItem={Math.min(currentPage * 10, boletos.length)}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
+
+            {/* Controles de paginação - Versão mobile */}
+            {boletos.length > 0 && !isLoading && (
+              <div className="block md:hidden mt-6">
+                <MobileListPagination
+                  currentPage={currentPage}
+                  totalPages={pagination.totalPages}
+                  totalItems={boletos.length}
+                  itemsPerPage={10}
+                  hasPrev={currentPage > 1}
+                  hasNext={currentPage < pagination.totalPages}
+                  startItem={(currentPage - 1) * 10 + 1}
+                  endItem={Math.min(currentPage * 10, boletos.length)}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

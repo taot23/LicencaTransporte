@@ -23,6 +23,8 @@ import { Form } from "@/components/ui/form";
 import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { getRoleColor, getRoleLabel } from "@/lib/role-utils";
+import { usePaginatedList } from "@/hooks/use-paginated-list";
+import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
 
 // Schema para validação do formulário base
 const baseUserFormSchema = {
@@ -90,6 +92,14 @@ export default function AdminUsers() {
     
     return nameMatch || emailMatch || phoneMatch || roleMatch;
   });
+
+  // Hook de paginação dos usuários filtrados
+  const { 
+    paginatedItems: paginatedUsers, 
+    pagination, 
+    currentPage, 
+    setCurrentPage 
+  } = usePaginatedList({ items: filteredUsers });
 
   // Delete user mutation
   const deleteUserMutation = useMutation({
@@ -384,7 +394,7 @@ export default function AdminUsers() {
     if (isMobile) {
       return (
         <div className="space-y-4">
-          {filteredUsers.filter((user: User) => !user.isAdmin).map((user: User) => (
+          {(paginatedUsers as User[]).filter((user: User) => !user.isAdmin).map((user: User) => (
             <Card key={user.id} className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="p-4 bg-gray-50 flex justify-between items-center">
@@ -446,7 +456,7 @@ export default function AdminUsers() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredUsers.filter((user: User) => !user.isAdmin).map((user: User) => (
+          {(paginatedUsers as User[]).filter((user: User) => !user.isAdmin).map((user: User) => (
             <TableRow key={user.id}>
               <TableCell>{user.id}</TableCell>
               <TableCell className="font-medium">{user.fullName}</TableCell>
@@ -546,6 +556,40 @@ export default function AdminUsers() {
 
         {/* Lista de usuários */}
         {renderUsersList()}
+
+        {/* Controles de paginação - Versão desktop */}
+        {filteredUsers.length > 0 && !isLoading && (
+          <div className="hidden md:block mt-6">
+            <ListPagination 
+              currentPage={currentPage}
+              totalPages={pagination.totalPages}
+              totalItems={filteredUsers.length}
+              itemsPerPage={10}
+              hasPrev={currentPage > 1}
+              hasNext={currentPage < pagination.totalPages}
+              startItem={(currentPage - 1) * 10 + 1}
+              endItem={Math.min(currentPage * 10, filteredUsers.length)}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
+
+        {/* Controles de paginação - Versão mobile */}
+        {filteredUsers.length > 0 && !isLoading && (
+          <div className="block md:hidden mt-6">
+            <MobileListPagination
+              currentPage={currentPage}
+              totalPages={pagination.totalPages}
+              totalItems={filteredUsers.length}
+              itemsPerPage={10}
+              hasPrev={currentPage > 1}
+              hasNext={currentPage < pagination.totalPages}
+              startItem={(currentPage - 1) * 10 + 1}
+              endItem={Math.min(currentPage * 10, filteredUsers.length)}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
 
         {/* Modal de edição de usuário */}
         {selectedUser && (
