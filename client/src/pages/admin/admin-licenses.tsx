@@ -1281,7 +1281,7 @@ export default function AdminLicensesPage() {
               )}
 
               {/* Controles de paginação - Versão desktop */}
-              {filteredLicenses.length > 0 && !isLoadingLicenses && (
+              {filteredLicenses.length > 0 && !isLoading && (
                 <div className="hidden md:block mt-6">
                   <ListPagination 
                     currentPage={currentPage}
@@ -1298,7 +1298,7 @@ export default function AdminLicensesPage() {
               )}
 
               {/* Controles de paginação - Versão mobile */}
-              {filteredLicenses.length > 0 && !isLoadingLicenses && (
+              {filteredLicenses.length > 0 && !isLoading && (
                 <div className="block md:hidden mt-6">
                   <MobileListPagination
                     currentPage={currentPage}
