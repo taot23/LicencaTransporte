@@ -50,14 +50,13 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { LicenseRequest, brazilianStates as brazilianStatesObjects, Transporter } from "@shared/schema";
+import { LicenseRequest, brazilianStates as brazilianStatesObjects, brazilianStates, Transporter } from "@shared/schema";
 import { TransporterInfo } from "@/components/transporters/transporter-info";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
 import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
-// Lista simplificada de estados brasileiros para uso como strings
-const brazilianStates = ["SP", "MG", "MT", "PE", "TO", "MS", "PR", "ES", "DNIT", "RS", "BA", "PA", "SC", "DF", "GO", "RJ", "CE", "AL", "SE"];
+
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -150,6 +149,7 @@ export default function AdminLicensesPage() {
   const [transporterFilter, setTransporterFilter] = useState("all");
   const [transporterSearchTerm, setTransporterSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState("all_states");
   const [selectedLicense, setSelectedLicense] = useState<LicenseRequest | null>(null);
   const [licenseDetailsOpen, setLicenseDetailsOpen] = useState(false);
   const [stateStatusDialogOpen, setStateStatusDialogOpen] = useState(false);
@@ -518,7 +518,13 @@ export default function AdminLicensesPage() {
         }
       }
       
-      return matchesSearch && matchesStatus && matchesTransporter && matchesDate;
+      // Filtro por estado
+      let matchesState = true;
+      if (stateFilter && stateFilter !== "all_states") {
+        matchesState = license.states && license.states.includes(stateFilter);
+      }
+      
+      return matchesSearch && matchesStatus && matchesTransporter && matchesDate && matchesState;
     })
     // Aplicar ordenação
     .sort((a, b) => {
@@ -905,7 +911,7 @@ export default function AdminLicensesPage() {
           <Card>
             <CardContent className="pt-4 px-3 md:pt-6 md:px-6">
               {/* Novo layout de pesquisa conforme mockup, similar ao da página "Acompanhar Licença" */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-5">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 mb-5">
                 <div>
                   <div className="flex flex-col space-y-1">
                     <Label htmlFor="license-search" className="text-sm">Pesquisar</Label>
@@ -943,6 +949,25 @@ export default function AdminLicensesPage() {
                 
                 <div>
                   <div className="flex flex-col space-y-1">
+                    <Label htmlFor="state-filter" className="text-sm">Estado</Label>
+                    <Select value={stateFilter} onValueChange={setStateFilter}>
+                      <SelectTrigger id="state-filter" className="h-9 text-sm">
+                        <SelectValue placeholder="Todos os estados" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all_states">Todos os estados</SelectItem>
+                        {brazilianStates.map((state) => (
+                          <SelectItem key={state.code} value={state.code}>
+                            {state.code} - {state.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex flex-col space-y-1">
                     <Label htmlFor="date-filter" className="text-sm">Data</Label>
                     <Input
                       id="date-filter"
@@ -954,7 +979,7 @@ export default function AdminLicensesPage() {
                   </div>
                 </div>
                 
-                <div className="md:col-span-3">
+                <div className="md:col-span-4">
                   <div className="flex flex-col space-y-1">
                     <Label htmlFor="transporter-search" className="text-sm">Transportador</Label>
                     <div className="relative">

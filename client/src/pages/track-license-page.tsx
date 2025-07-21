@@ -26,11 +26,13 @@ import { LicenseDetailsCard } from "@/components/licenses/license-details-card";
 import { exportToCSV, formatDateForCSV } from "@/lib/csv-export";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
 import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
+import { brazilianStates } from "@shared/schema";
 
 export default function TrackLicensePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState("");
   const queryClient = useQueryClient();
   const [selectedLicense, setSelectedLicense] = useState<LicenseRequest | null>(null);
   const [sortColumn, setSortColumn] = useState<string | null>("createdAt");
@@ -203,10 +205,13 @@ export default function TrackLicensePage() {
         license.createdAt && 
         format(new Date(license.createdAt), "yyyy-MM-dd") === dateFilter
       );
+
+      const matchesState = !stateFilter || stateFilter === "all_states" ||
+        license.specificState === stateFilter;
       
-      return matchesSearch && matchesStatus && matchesDate;
+      return matchesSearch && matchesStatus && matchesDate && matchesState;
     });
-  }, [expandedLicenses, searchTerm, statusFilter, dateFilter]);
+  }, [expandedLicenses, searchTerm, statusFilter, dateFilter, stateFilter]);
 
   // Ordenar licenças filtradas (sem duplicações)
   const sortedLicenses = useMemo(() => {
@@ -432,6 +437,25 @@ export default function TrackLicensePage() {
                 <SelectItem value="pending_approval">Pendente Liberação</SelectItem>
                 <SelectItem value="approved">Liberada</SelectItem>
                 <SelectItem value="canceled">Cancelado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="w-full md:w-auto">
+            <label htmlFor="state-filter" className="block text-sm font-medium text-gray-700 mb-1">
+              Estado
+            </label>
+            <Select value={stateFilter} onValueChange={setStateFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Todos os estados" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all_states">Todos os estados</SelectItem>
+                {brazilianStates.map((state) => (
+                  <SelectItem key={state.code} value={state.code}>
+                    {state.code} - {state.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

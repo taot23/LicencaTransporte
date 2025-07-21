@@ -56,6 +56,16 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **COMPATIBILIDADE**: Funciona em Rodotrem 9 eixos e Bitrem (6, 7, 9 eixos)
 - ✅ **PERFORMANCE MANTIDA**: Sistema continua otimizado com limite de 50 veículos por busca
 
+### 21/07/2025 - FILTROS POR ESTADO INDIVIDUAL IMPLEMENTADOS NAS PÁGINAS PRINCIPAIS
+- ✅ **ACOMPANHAR LICENÇA**: Filtro dropdown "Estado" adicionado aos filtros de pesquisa  
+- ✅ **GERENCIAR LICENÇAS**: Filtro por estado implementado na página administrativa
+- ✅ **INTERFACE INTUITIVA**: Dropdown mostra código e nome completo do estado (ex: "SP - São Paulo")
+- ✅ **FILTRO INTELIGENTE**: Funciona com a lógica expandida de licenças por estado específico
+- ✅ **LAYOUT RESPONSIVO**: Filtros organizados em grid responsivo (4 colunas em desktop)
+- ✅ **INTEGRAÇÃO COMPLETA**: Filtros por estado funcionam com busca, status e data simultaneamente
+- ✅ **TODOS OS ESTADOS**: Inclui todos os 19 estados disponíveis + DNIT para licenças federais
+- ✅ **MELHOR USABILIDADE**: Permite filtrar licenças por estado específico conforme solicitação do usuário
+
 ### 21/07/2025 - SISTEMA DE PAGINAÇÃO UNIVERSAL COMPLETO - IMPLEMENTAÇÃO 100% FINALIZADA
 - ✅ **TODAS AS PÁGINAS ADMINISTRATIVAS**: Paginação implementada em 100% das páginas de administração
 - ✅ **ADMIN LICENÇAS**: Página `/admin/licenses` com paginação completa de licenças (desktop + mobile)
