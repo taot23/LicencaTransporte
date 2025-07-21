@@ -138,7 +138,8 @@ export default function IssuedLicensesPage() {
           
           // Se não encontrou data de emissão específica, usar a data global da licença
           if (!stateEmissionDate && license.issuedAt) {
-            stateEmissionDate = typeof license.issuedAt === 'string' ? license.issuedAt.split('T')[0] : license.issuedAt.toISOString().split('T')[0];
+            const issuedDate = typeof license.issuedAt === 'string' ? license.issuedAt : license.issuedAt.toISOString();
+            stateEmissionDate = issuedDate.split('T')[0];
             console.log(`[DEBUG] Usando data global para ${state}: ${stateEmissionDate}`);
           }
           
@@ -163,7 +164,8 @@ export default function IssuedLicensesPage() {
           
           // Se não encontrou data de validade específica, usar a data global da licença
           if (!stateValidUntil && license.validUntil) {
-            stateValidUntil = typeof license.validUntil === 'string' ? license.validUntil.split('T')[0] : license.validUntil.toISOString().split('T')[0];
+            const validDate = typeof license.validUntil === 'string' ? license.validUntil : license.validUntil.toISOString();
+            stateValidUntil = validDate.split('T')[0];
             console.log(`[DEBUG] Usando data validade global para ${state}: ${stateValidUntil}`);
           }
           
@@ -479,8 +481,8 @@ export default function IssuedLicensesPage() {
         "Placa Principal": license.mainVehiclePlate || '',
         "Estado": license.state || '',
         "Status": translateStatus(license.status) || '',
-        "Data de Emissão": formatDateForCSV(license.emissionDate),
-        "Data de Validade": formatDateForCSV(license.validUntil),
+        "Data de Emissão": license.emissionDate ? formatDateForCSV(license.emissionDate) : '',
+        "Data de Validade": license.validUntil ? formatDateForCSV(license.validUntil) : '',
         "Número AET": license.aetNumber || ''
       }));
 
@@ -1063,9 +1065,14 @@ export default function IssuedLicensesPage() {
           <ListPagination 
             currentPage={currentPage}
             totalPages={pagination.totalPages}
-            totalItems={pagination.totalItems}
+            totalItems={pagination.total}
             itemsPerPage={pagination.itemsPerPage}
             onPageChange={setCurrentPage}
+            hasPrev={pagination.hasPrev}
+            hasNext={pagination.hasNext}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+            itemName="licença"
           />
         </div>
 
@@ -1074,7 +1081,14 @@ export default function IssuedLicensesPage() {
           <MobileListPagination
             currentPage={currentPage}
             totalPages={pagination.totalPages}
+            totalItems={pagination.total}
+            itemsPerPage={pagination.itemsPerPage}
             onPageChange={setCurrentPage}
+            hasPrev={pagination.hasPrev}
+            hasNext={pagination.hasNext}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+            itemName="licença"
           />
         </div>
       </div>
