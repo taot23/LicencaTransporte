@@ -1014,6 +1014,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Endpoint otimizado para busca de transportadores (para formulários)
+  app.get('/api/transporters/search', requireAuth, async (req, res) => {
+    try {
+      const user = req.user!;
+      const { search = '', limit = '20' } = req.query;
+      
+      console.log(`[TRANSPORTER SEARCH] Usuário ${user.email} buscando transportadores com termo: "${search}"`);
+      
+      let transporters = [];
+      const maxLimit = Math.min(parseInt(limit as string), 50); // Máximo 50 para performance
+      
+      // Buscar transportadores com base no termo de busca
+      if (typeof search === 'string' && search.trim().length > 0) {
+        const searchTerm = search.trim().toLowerCase();
+        
+        // Query para busca por nome ou documento
+        const allTransporters = await storage.getAllTransporters();
+        
+        transporters = allTransporters.filter(transporter => {
+          // Busca por nome (case insensitive)
+          const nameMatch = transporter.name.toLowerCase().includes(searchTerm);
+          
+          // Busca por CNPJ/CPF (apenas números)
+          const numericSearch = searchTerm.replace(/\D/g, '');
+          const documentMatch = numericSearch && transporter.documentNumber && 
+                               transporter.documentNumber.replace(/\D/g, '').includes(numericSearch);
+          
+          // Busca por nome fantasia
+          const tradeNameMatch = transporter.tradeName && 
+                                transporter.tradeName.toLowerCase().includes(searchTerm);
+          
+          return nameMatch || documentMatch || tradeNameMatch;
+        }).slice(0, maxLimit);
+        
+      } else {
+        // Se não há termo de busca, retornar todos (limitado)
+        const allTransporters = await storage.getAllTransporters();
+        transporters = allTransporters.slice(0, maxLimit);
+      }
+      
+      console.log(`[TRANSPORTER SEARCH] Encontrados ${transporters.length} transportadores`);
+      
+      res.json({
+        transporters,
+        total: transporters.length,
+        limit: maxLimit
+      });
+      
+    } catch (error) {
+      console.error('[TRANSPORTER SEARCH] Erro:', error);
+      res.status(500).json({ 
+        transporters: [],
+        error: 'Erro ao buscar transportadores' 
+      });
+    }
+  });
+
   // Endpoint para buscar transportadores vinculados ao usuário
   app.get('/api/user/transporters', requireAuth, async (req, res) => {
     try {

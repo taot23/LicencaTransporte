@@ -2,17 +2,20 @@ import { useState } from "react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TractorUnitSelector, SemiTrailerSelector } from "@/components/forms/optimized-vehicle-selector";
+import { OptimizedTransporterSelector } from "@/components/forms/optimized-transporter-selector";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Truck, Settings } from "lucide-react";
+import { Truck, Settings, Building2 } from "lucide-react";
 
 export default function TestOptimizedSelectorsPage() {
   const [tractorUnitId, setTractorUnitId] = useState<number | null>(null);
   const [firstTrailerId, setFirstTrailerId] = useState<number | null>(null);
   const [secondTrailerId, setSecondTrailerId] = useState<number | null>(null);
+  const [transporterId, setTransporterId] = useState<number | null>(null);
 
   const handleSubmit = () => {
-    console.log('Veículos selecionados:', {
+    console.log('Dados selecionados:', {
+      transporter: transporterId,
       tractorUnit: tractorUnitId,
       firstTrailer: firstTrailerId,
       secondTrailer: secondTrailerId
@@ -20,6 +23,7 @@ export default function TestOptimizedSelectorsPage() {
   };
 
   const handleReset = () => {
+    setTransporterId(null);
     setTractorUnitId(null);
     setFirstTrailerId(null);
     setSecondTrailerId(null);
@@ -56,6 +60,16 @@ export default function TestOptimizedSelectorsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Transportador - NOVO CAMPO OTIMIZADO */}
+              <OptimizedTransporterSelector
+                value={transporterId}
+                onValueChange={setTransporterId}
+                placeholder="Digite o nome ou CNPJ do transportador..."
+                label="Transportador"
+                description="Campo otimizado para busca de transportadores sem travamentos"
+                required
+              />
+
               {/* Unidade Tratora */}
               <TractorUnitSelector
                 value={tractorUnitId}
@@ -152,10 +166,11 @@ export default function TestOptimizedSelectorsPage() {
               </div>
 
               {/* Valores selecionados para debug */}
-              {(tractorUnitId || firstTrailerId || secondTrailerId) && (
+              {(transporterId || tractorUnitId || firstTrailerId || secondTrailerId) && (
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                   <div className="font-medium text-sm mb-2">Valores selecionados:</div>
                   <div className="space-y-1 text-sm text-gray-600">
+                    <div>Transportador ID: {transporterId || 'Não selecionado'}</div>
                     <div>Unidade Tratora ID: {tractorUnitId || 'Não selecionada'}</div>
                     <div>1ª Carreta ID: {firstTrailerId || 'Não selecionada'}</div>
                     <div>2ª Carreta ID: {secondTrailerId || 'Não selecionada'}</div>

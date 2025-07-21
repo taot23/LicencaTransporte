@@ -67,6 +67,7 @@ import { Link } from "wouter";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import { VehicleTypeImage } from "@/components/ui/vehicle-type-image";
 import { VehicleAutocomplete } from "@/components/ui/vehicle-autocomplete";
+import { OptimizedTransporterSelector } from "@/components/forms/optimized-transporter-selector";
 
 // Tipos de carga por categoria
 const NON_FLATBED_CARGO_TYPES = [
@@ -1668,116 +1669,15 @@ export function LicenseForm({
             <FormField
               control={form.control}
               name="transporterId"
-              render={({ field }) => {
-                const [searchTerm, setSearchTerm] = useState("");
-                const [isOpen, setIsOpen] = useState(false);
-                const dropdownRef = useRef<HTMLDivElement>(null);
-                
-                // Busca inteligente por nome ou CNPJ
-                const filteredTransporters = useMemo(() => {
-                  if (!searchTerm.trim()) return transporters;
-                  
-                  const search = searchTerm.toLowerCase().trim();
-                  console.log('[TRANSPORTER SEARCH] Termo:', search);
-                  
-                  const filtered = transporters.filter(transporter => {
-                    const nameMatch = transporter.name.toLowerCase().includes(search);
-                    
-                    // Só fazer busca por CNPJ se o termo contém números
-                    const numericSearch = search.replace(/\D/g, '');
-                    const cnpjMatch = numericSearch && transporter.documentNumber && 
-                                     transporter.documentNumber.replace(/\D/g, '').includes(numericSearch);
-                    
-                    console.log(`[TRANSPORTER SEARCH] ${transporter.name} - nome: ${nameMatch}, cnpj: ${cnpjMatch}, termo numérico: "${numericSearch}"`);
-                    
-                    return nameMatch || cnpjMatch;
-                  });
-                  
-                  console.log('[TRANSPORTER SEARCH] Filtrados:', filtered.length, 'de', transporters.length);
-                  return filtered;
-                }, [transporters, searchTerm]);
-                
-                // Transportador selecionado atual
-                const selectedTransporter = transporters.find(t => t.id === field.value);
-                
-                // Fechar dropdown ao clicar fora
-                useOnClickOutside(dropdownRef, () => setIsOpen(false));
-                
-                return (
-                  <FormItem>
-                    <FormLabel className="text-base font-medium">
-                      Transportador
-                    </FormLabel>
-                    <div className="relative" ref={dropdownRef}>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            placeholder="Digite o nome ou CNPJ do transportador..."
-                            value={selectedTransporter ? selectedTransporter.name : searchTerm}
-                            onChange={(e) => {
-                              setSearchTerm(e.target.value);
-                              setIsOpen(true);
-                              if (!e.target.value && field.value) {
-                                // Limpar seleção se campo foi limpo
-                                field.onChange(null);
-                              }
-                            }}
-                            onFocus={() => setIsOpen(true)}
-                            className="pr-10"
-                          />
-                          <Search className="absolute right-3 top-2.5 h-5 w-5 text-muted-foreground pointer-events-none" />
-                        </div>
-                      </FormControl>
-                      
-                      {isOpen && (
-                        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
-                          {isLoadingTransporters ? (
-                            <div className="p-3 flex items-center space-x-2 text-sm text-gray-500">
-                              <LoaderCircle className="h-4 w-4 animate-spin" />
-                              <span>Carregando transportadores...</span>
-                            </div>
-                          ) : filteredTransporters.length > 0 ? (
-                            filteredTransporters.map((transporter) => (
-                              <div
-                                key={transporter.id}
-                                className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                                onClick={() => {
-                                  field.onChange(transporter.id);
-                                  setSearchTerm("");
-                                  setIsOpen(false);
-                                }}
-                              >
-                                <div className="font-medium text-gray-900">
-                                  {transporter.name}
-                                </div>
-                                {transporter.documentNumber && (
-                                  <div className="text-xs text-gray-500 mt-1">
-                                    CNPJ: {transporter.documentNumber}
-                                  </div>
-                                )}
-                                {transporter.city && transporter.state && (
-                                  <div className="text-xs text-gray-400 mt-1">
-                                    {transporter.city} - {transporter.state}
-                                  </div>
-                                )}
-                              </div>
-                            ))
-                          ) : searchTerm ? (
-                            <div className="p-3 text-sm text-gray-500 text-center">
-                              Nenhum transportador encontrado para "{searchTerm}"
-                            </div>
-                          ) : (
-                            <div className="p-3 text-sm text-gray-500 text-center">
-                              Digite para buscar transportadores
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
+              render={({ field }) => (
+                <OptimizedTransporterSelector
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  placeholder="Digite o nome ou CNPJ do transportador..."
+                  label="Transportador"
+                  required
+                />
+              )}
             />
           </div>
         </div>
