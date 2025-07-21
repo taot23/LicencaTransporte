@@ -44,6 +44,18 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 21/07/2025 - ENTRADA MANUAL DE PLACAS PARA DOLLY E 2ª CARRETA IMPLEMENTADA
+- ✅ **FUNCIONALIDADE COMPLETA**: Sistema de entrada manual de placas para campos "dolly" e "2ª Carreta"
+- ✅ **ENHANCED VEHICLE SELECTOR**: Componente permite tanto seleção via dropdown quanto entrada manual de placas
+- ✅ **CAMPOS NO BANCO**: Adicionadas colunas `dolly_manual_plate` e `second_trailer_manual_plate` na tabela `license_requests`
+- ✅ **SCHEMA ATUALIZADO**: Campos opcionais de placas manuais integrados aos schemas de inserção e validação
+- ✅ **FORMULÁRIO INTEGRADO**: Todos os handlers e valores observados no formulário principal de licenças
+- ✅ **INTERFACE INTUITIVA**: Modo manual ativado via botão "Digite a placa" nos campos dolly e 2ª carreta
+- ✅ **VALIDAÇÃO CONSISTENTE**: Placas manuais seguem mesmo padrão de validação das placas cadastradas
+- ✅ **RESUMO VISUAL**: Placas manuais aparecem com indicador "(manual)" no resumo da composição
+- ✅ **COMPATIBILIDADE**: Funciona em Rodotrem 9 eixos e Bitrem (6, 7, 9 eixos)
+- ✅ **PERFORMANCE MANTIDA**: Sistema continua otimizado com limite de 50 veículos por busca
+
 ### 21/07/2025 - SISTEMA DE PAGINAÇÃO UNIVERSAL COMPLETO - IMPLEMENTAÇÃO FINALIZADA
 - ✅ **TODAS AS PÁGINAS ADMINISTRATIVAS**: Paginação implementada em 100% das páginas de administração
 - ✅ **ADMIN LICENÇAS**: Página `/admin/licenses` com paginação completa de licenças (desktop + mobile)
