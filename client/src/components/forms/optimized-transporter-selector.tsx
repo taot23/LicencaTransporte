@@ -156,10 +156,11 @@ export function OptimizedTransporterSelector({
         </div>
 
         <PopoverContent 
-          className="w-96 p-0 max-w-[90vw]" 
+          className="w-[var(--radix-popover-trigger-width)] min-w-96 p-0" 
           align="start"
           side="bottom"
-          sideOffset={4}
+          sideOffset={2}
+          alignOffset={0}
         >
           <Command shouldFilter={false}>
             <div className="flex items-center border-b px-3">
