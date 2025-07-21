@@ -206,30 +206,25 @@ export function OptimizedTransporterSelector({
                       key={transporter.id}
                       value={transporter.name}
                       onSelect={() => handleSelect(transporter.id)}
-                      className="cursor-pointer p-3 hover:bg-gray-50"
+                      className="cursor-pointer p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                     >
-                      <div className="w-full space-y-1">
-                        <div className="font-medium text-gray-900 truncate">
+                      <div className="w-full">
+                        <div className="font-medium text-gray-900 mb-1">
                           {transporter.name}
                         </div>
                         {transporter.tradeName && transporter.tradeName !== transporter.name && (
-                          <div className="text-sm text-gray-600 truncate">
+                          <div className="text-sm text-gray-600 mb-1">
                             {transporter.tradeName}
                           </div>
                         )}
                         {transporter.documentNumber && (
-                          <div className="text-xs text-gray-500">
-                            {transporter.personType === 'pj' ? 'CNPJ' : 'CPF'}: {transporter.documentNumber}
+                          <div className="text-xs text-gray-500 mb-1">
+                            CNPJ: {transporter.documentNumber}
                           </div>
                         )}
                         {transporter.city && transporter.state && (
                           <div className="text-xs text-gray-400">
                             {transporter.city} - {transporter.state}
-                          </div>
-                        )}
-                        {value === transporter.id && (
-                          <div className="flex justify-end">
-                            <Check className="h-4 w-4 text-primary" />
                           </div>
                         )}
                       </div>
