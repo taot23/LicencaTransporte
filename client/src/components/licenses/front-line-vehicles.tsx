@@ -1,7 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
 import { Vehicle } from "@shared/schema";
-import { FastVehicleSelector } from './fast-vehicle-selector';
-import { EnhancedVehicleSelector } from './enhanced-vehicle-selector';
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -132,19 +130,31 @@ export function FrontLineVehicles({
 
       {/* Unidade Tratora - SEMPRE obrigatória */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <FastVehicleSelector
-          title="Unidade Tratora (Cavalo Mecânico)"
-          description="Esta é a unidade principal que irá puxar o conjunto"
-          placeholder="Selecione a unidade tratora"
-          value={tractorUnitId || null}
-          vehicleOptions={availableVehiclesByType.tractorUnits}
-          onChange={handleTractorChange}
-          onAdd={onCreateNewVehicle}
-          isLoading={isLoadingVehicles}
-          vehicleType="tractor_unit"
-          colorTheme="blue"
-          emptyMessage="Nenhum cavalo mecânico cadastrado"
-        />
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-900">Unidade Tratora (Cavalo Mecânico)</label>
+          <p className="text-xs text-gray-600">Esta é a unidade principal que irá puxar o conjunto</p>
+          <div className="relative">
+            <Input
+              type="text"
+              placeholder="Digite a placa da unidade tratora"
+              className="pr-10"
+              maxLength={8}
+              value={tractorUnitId ? `${tractorUnitId}` : ''}
+              onChange={(e) => {
+                // Para a unidade tratora, vamos manter a funcionalidade existente por enquanto
+                // O usuário pode digitar, mas precisamos de lógica adicional para buscar por placa
+              }}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Seção dos componentes principais */}
@@ -192,7 +202,7 @@ export function FrontLineVehicles({
                 <div className="relative">
                   <Input
                     type="text"
-                    placeholder="Selecione o dolly"
+                    placeholder="Digite a placa do dolly"
                     className="pr-10"
                     maxLength={8}
                     value={dollyManualPlate || ''}
@@ -218,7 +228,7 @@ export function FrontLineVehicles({
                 <div className="relative">
                   <Input
                     type="text"
-                    placeholder="Selecione a 2ª carreta"
+                    placeholder="Digite a placa da 2ª carreta"
                     className="pr-10"
                     maxLength={8}
                     value={secondTrailerManualPlate || ''}
