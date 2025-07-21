@@ -5800,6 +5800,171 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       res.status(500).json({ message: 'Erro na busca global' });
     }
   });
+  
+  // Busca otimizada de veículos por tipo específico para formulários de licença
+  app.get('/api/vehicles/by-type/:type', requireAuth, async (req, res) => {
+    try {
+      const user = req.user!;
+      const { type } = req.params;
+      const {
+        search = '',
+        limit = '50'
+      } = req.query;
+      
+      const maxResults = Math.min(100, Math.max(10, parseInt(limit as string)));
+      
+      console.log(`[VEHICLE BY TYPE] Tipo: ${type}, Busca: "${search}", Limite: ${maxResults}`);
+      
+      // Query otimizada para busca por tipo de veículo
+      let vehicleQuery = sql`
+        SELECT v.id, v.plate, v.brand, v.model, v.year, v.tare, 
+               v.axle_count, v.status, t.name as transporter_name
+        FROM vehicles v
+        LEFT JOIN transporters t ON v.transporter_id = t.id
+        WHERE v.type = ${type} AND v.status = 'active'
+      `;
+      
+      // Filtro por usuário se não for admin
+      if (!isAdministrativeRole(user.role as UserRole)) {
+        vehicleQuery = sql`${vehicleQuery} AND v.user_id = ${user.id}`;
+      }
+      
+      // Filtro de busca por placa
+      if (search) {
+        const searchPattern = `%${search.toString().toUpperCase()}%`;
+        vehicleQuery = sql`${vehicleQuery} AND UPPER(v.plate) LIKE ${searchPattern}`;
+      }
+      
+      vehicleQuery = sql`${vehicleQuery} 
+        ORDER BY v.plate 
+        LIMIT ${maxResults}`;
+      
+      const result = await db.execute(vehicleQuery);
+      
+      res.json({
+        vehicles: result.rows,
+        count: result.rows.length
+      });
+    } catch (error) {
+      console.error('[VEHICLE BY TYPE] Erro:', error);
+      res.status(500).json({ message: 'Erro na busca de veículos por tipo' });
+    }
+  });
+  
+  // Busca rápida de veículos por placa (para autocomplete)
+  app.get('/api/vehicles/search-plate', requireAuth, async (req, res) => {
+    try {
+      const user = req.user!;
+      const { q: searchTerm = '', type = '' } = req.query;
+      
+      if (!searchTerm || searchTerm.toString().length < 2) {
+        return res.json({ vehicles: [] });
+      }
+      
+      const searchPattern = `%${searchTerm.toString().toUpperCase()}%`;
+      
+      console.log(`[PLATE SEARCH] Termo: "${searchTerm}", Tipo: "${type}"`);
+      
+      let vehicleQuery = sql`
+        SELECT v.id, v.plate, v.brand, v.model, v.type, v.tare,
+               v.axle_count, v.status, t.name as transporter_name
+        FROM vehicles v
+        LEFT JOIN transporters t ON v.transporter_id = t.id
+        WHERE UPPER(v.plate) LIKE ${searchPattern} AND v.status = 'active'
+      `;
+      
+      // Filtro por tipo se especificado
+      if (type && type.toString().length > 0) {
+        vehicleQuery = sql`${vehicleQuery} AND v.type = ${type.toString()}`;
+      }
+      
+      // Filtro por usuário se não for admin
+      if (!isAdministrativeRole(user.role as UserRole)) {
+        vehicleQuery = sql`${vehicleQuery} AND v.user_id = ${user.id}`;
+      }
+      
+      vehicleQuery = sql`${vehicleQuery} 
+        ORDER BY v.plate 
+        LIMIT 20`;
+      
+      const result = await db.execute(vehicleQuery);
+      
+      res.json({ vehicles: result.rows });
+    } catch (error) {
+      console.error('[PLATE SEARCH] Erro:', error);
+      res.status(500).json({ message: 'Erro na busca de placas' });
+    }
+  });
+  
+  // Busca de unidades tratoras otimizada
+  app.get('/api/vehicles/tractor-units', requireAuth, async (req, res) => {
+    try {
+      const user = req.user!;
+      const { search = '', limit = '50' } = req.query;
+      
+      const maxResults = Math.min(100, parseInt(limit as string));
+      
+      let query = sql`
+        SELECT v.id, v.plate, v.brand, v.model, v.year, v.tare,
+               t.name as transporter_name
+        FROM vehicles v
+        LEFT JOIN transporters t ON v.transporter_id = t.id
+        WHERE v.type = 'tractor_unit' AND v.status = 'active'
+      `;
+      
+      if (!isAdministrativeRole(user.role as UserRole)) {
+        query = sql`${query} AND v.user_id = ${user.id}`;
+      }
+      
+      if (search) {
+        const searchPattern = `%${search.toString().toUpperCase()}%`;
+        query = sql`${query} AND UPPER(v.plate) LIKE ${searchPattern}`;
+      }
+      
+      query = sql`${query} ORDER BY v.plate LIMIT ${maxResults}`;
+      
+      const result = await db.execute(query);
+      res.json({ vehicles: result.rows });
+    } catch (error) {
+      console.error('[TRACTOR UNITS] Erro:', error);
+      res.status(500).json({ message: 'Erro na busca de unidades tratoras' });
+    }
+  });
+  
+  // Busca de semirreboques otimizada  
+  app.get('/api/vehicles/semi-trailers', requireAuth, async (req, res) => {
+    try {
+      const user = req.user!;
+      const { search = '', limit = '50' } = req.query;
+      
+      const maxResults = Math.min(100, parseInt(limit as string));
+      
+      let query = sql`
+        SELECT v.id, v.plate, v.brand, v.model, v.year, v.tare,
+               t.name as transporter_name
+        FROM vehicles v
+        LEFT JOIN transporters t ON v.transporter_id = t.id
+        WHERE v.type = 'semi_trailer' AND v.status = 'active'
+      `;
+      
+      if (!isAdministrativeRole(user.role as UserRole)) {
+        query = sql`${query} AND v.user_id = ${user.id}`;
+      }
+      
+      if (search) {
+        const searchPattern = `%${search.toString().toUpperCase()}%`;
+        query = sql`${query} AND UPPER(v.plate) LIKE ${searchPattern}`;
+      }
+      
+      query = sql`${query} ORDER BY v.plate LIMIT ${maxResults}`;
+      
+      const result = await db.execute(query);
+      res.json({ vehicles: result.rows });
+    } catch (error) {
+      console.error('[SEMI TRAILERS] Erro:', error);
+      res.status(500).json({ message: 'Erro na busca de semirreboques' });
+    }
+  });
 
   // Servir arquivos de upload da pasta externa
   app.use('/uploads', express.static(uploadDir));

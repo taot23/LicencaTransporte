@@ -16,6 +16,7 @@ import AdminTransportersPage from "@/pages/admin/admin-transporters";
 import AdminUsersPage from "@/pages/admin/admin-users";
 import AdminVehiclesPage from "@/pages/admin/admin-vehicles";
 import AdminVehiclesOptimizedPage from "@/pages/admin/admin-vehicles-optimized";
+import TestOptimizedSelectorsPage from "@/pages/test-optimized-selectors";
 import VehicleModelsPage from "@/pages/admin/vehicle-models-page";
 import BoletosPage from "@/pages/admin/boletos-page";
 import DashboardAET from "@/pages/admin/dashboard-aet";
@@ -55,6 +56,7 @@ function Router() {
       <AdminRoute path="/admin/users" component={AdminUsersPage} />
       <StaffRoute path="/admin/vehicles" component={AdminVehiclesPage} requiredRole="operational" />
       <StaffRoute path="/admin/vehicles-optimized" component={AdminVehiclesOptimizedPage} requiredRole="operational" />
+      <AdminRoute path="/test-selectors" component={TestOptimizedSelectorsPage} />
       <AdminRoute path="/admin/vehicle-models" component={VehicleModelsPage} />
       <AdminRoute path="/admin/vehicle-transfer" component={VehicleTransferPage} />
       <StaffRoute path="/admin/boletos" component={BoletosPage} requiredRole="financial" />

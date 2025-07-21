@@ -93,6 +93,18 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **LOGS DETALHADOS**: Sistema identifica tipo de validação (combinação específica vs placas individuais)
 - ✅ **REGRA DOS 60 DIAS**: Continua aplicando bloqueio para licenças com mais de 60 dias restantes
 
+### 21/07/2025 - Campos de Seleção de Veículos Otimizados para Formulários IMPLEMENTADO
+- ✅ **ENDPOINTS ESPECÍFICOS POR TIPO**: Endpoints dedicados para unidades tratoras e semirreboques
+- ✅ **API OTIMIZADA**: `/api/vehicles/tractor-units`, `/api/vehicles/semi-trailers`, `/api/vehicles/search-plate`
+- ✅ **HOOK CUSTOMIZADO**: Hook `useOptimizedVehicleSelector` com debounce e cache inteligente
+- ✅ **COMPONENTES DEDICADOS**: `TractorUnitSelector`, `SemiTrailerSelector` com busca em tempo real
+- ✅ **BUSCA POR PLACA**: Autocomplete rápido com mínimo 2 caracteres
+- ✅ **PERFORMANCE GARANTIDA**: Máximo 50 resultados por página, debounce 500ms, cache 30s
+- ✅ **INTERFACE AVANÇADA**: Popover com Command menu, badges informativos, limpeza de seleção
+- ✅ **PÁGINA DE TESTE**: `/test-selectors` para demonstração e validação dos componentes
+- ✅ **FILTROS INTELIGENTES**: Busca por tipo específico com permissões de usuário respeitadas
+- ✅ **ESTADOS VISUAIS**: Loading, error, empty state e seleção confirmada com check visual
+
 ### 09/07/2025 - Sistema de Tempo Real MELHORADO - Múltiplas Correções
 - ✅ **REFETCH FORÇADO**: WebSocket usa `refetchQueries` para forçar atualização imediata das páginas
 - ✅ **POLLING AUTOMÁTICO**: Páginas principais atualizam a cada 60 segundos automaticamente
