@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback } from 'react';
 import { Vehicle } from "@shared/schema";
-import { OptimizedVehicleSelector } from './optimized-vehicle-selector';
+import { FastVehicleSelector } from './fast-vehicle-selector';
 import { Badge } from "@/components/ui/badge";
 import { Truck } from "lucide-react";
 import { VehicleTypeImage } from "@/components/ui/vehicle-type-image";
@@ -102,7 +102,7 @@ export function FrontLineVehicles({
     <div className="space-y-6">
       {/* Header com título e tipo de composição */}
       <div className="flex items-center gap-3 mb-4">
-        <VehicleTypeImage licenseType={licenseType} className="w-16 h-8" />
+        <VehicleTypeImage type={licenseType} className="w-16 h-8" />
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
             Composição Principal do {licenseType.includes('rodotrem') ? 'Rodotrem' : 
@@ -115,17 +115,18 @@ export function FrontLineVehicles({
 
       {/* Unidade Tratora - SEMPRE obrigatória */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <OptimizedVehicleSelector
+        <FastVehicleSelector
           title="Unidade Tratora (Cavalo Mecânico)"
           description="Esta é a unidade principal que irá puxar o conjunto"
           placeholder="Selecione a unidade tratora"
-          value={tractorUnitId}
-          vehicleType="tractor_unit"
+          value={tractorUnitId || null}
+          vehicleOptions={availableVehiclesByType.tractorUnits}
           onChange={handleTractorChange}
-          onCreateNew={onCreateNewVehicle}
-          required={true}
-          vehicles={availableVehiclesByType.tractorUnits}
+          onAdd={onCreateNewVehicle}
           isLoading={isLoadingVehicles}
+          vehicleType="tractor_unit"
+          colorTheme="blue"
+          emptyMessage="Nenhum cavalo mecânico cadastrado"
         />
       </div>
 
@@ -144,34 +145,36 @@ export function FrontLineVehicles({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* 1ª Carreta */}
             <div className="space-y-2">
-              <OptimizedVehicleSelector
+              <FastVehicleSelector
                 title="1ª Carreta"
                 description="Primeiro semirreboque da composição"
-                placeholder="Digite a placa ou selecione a 1ª carreta"
-                value={firstTrailerId}
-                vehicleType="mixed_trailer" // Aceita tanto semi_trailer quanto trailer
+                placeholder="Selecione a 1ª carreta"
+                value={firstTrailerId || null}
+                vehicleOptions={getFirstTrailerVehicles()}
                 onChange={handleFirstTrailerChange}
-                onCreateNew={onCreateNewVehicle}
-                required={true}
-                vehicles={getFirstTrailerVehicles()}
+                onAdd={onCreateNewVehicle}
                 isLoading={isLoadingVehicles}
+                vehicleType="mixed_trailer"
+                colorTheme="green"
+                emptyMessage="Nenhum semirreboque cadastrado"
               />
             </div>
 
             {/* Dolly - Somente para tipos que precisam */}
             {showDolly && (
               <div className="space-y-2">
-                <OptimizedVehicleSelector
+                <FastVehicleSelector
                   title="Dolly"
                   description="Dispositivo de acoplamento"
-                  placeholder="Digite a placa ou selecione o dolly"
-                  value={dollyId}
-                  vehicleType="dolly"
+                  placeholder="Selecione o dolly"
+                  value={dollyId || null}
+                  vehicleOptions={availableVehiclesByType.dollies}
                   onChange={handleDollyChange}
-                  onCreateNew={onCreateNewVehicle}
-                  required={showDolly}
-                  vehicles={availableVehiclesByType.dollies}
+                  onAdd={onCreateNewVehicle}
                   isLoading={isLoadingVehicles}
+                  vehicleType="dolly"
+                  colorTheme="amber"
+                  emptyMessage="Nenhum dolly cadastrado"
                 />
               </div>
             )}
@@ -179,17 +182,18 @@ export function FrontLineVehicles({
             {/* 2ª Carreta - Somente para bitrem e rodotrem */}
             {showSecondTrailer && (
               <div className="space-y-2">
-                <OptimizedVehicleSelector
+                <FastVehicleSelector
                   title="2ª Carreta"
                   description="Segundo semirreboque da composição"
-                  placeholder="Digite a placa ou selecione a 2ª carreta"
-                  value={secondTrailerId}
-                  vehicleType="mixed_trailer" // Aceita tanto semi_trailer quanto trailer
+                  placeholder="Selecione a 2ª carreta"
+                  value={secondTrailerId || null}
+                  vehicleOptions={getSecondTrailerVehicles()}
                   onChange={handleSecondTrailerChange}
-                  onCreateNew={onCreateNewVehicle}
-                  required={showSecondTrailer}
-                  vehicles={getSecondTrailerVehicles()}
+                  onAdd={onCreateNewVehicle}
                   isLoading={isLoadingVehicles}
+                  vehicleType="mixed_trailer"
+                  colorTheme="purple"
+                  emptyMessage="Nenhum semirreboque cadastrado"
                 />
               </div>
             )}
