@@ -12,7 +12,7 @@ interface FrontLineVehiclesProps {
   firstTrailerId?: number | null;
   dollyId?: number | null;
   secondTrailerId?: number | null;
-  // Placas manuais para os campos que permitem entrada manual
+  // Placas manuais para os campos que permitem entrada manual (mantidas para compatibilidade)
   dollyManualPlate?: string | null;
   secondTrailerManualPlate?: string | null;
   vehicles: Vehicle[];
@@ -21,7 +21,7 @@ interface FrontLineVehiclesProps {
   onFirstTrailerChange: (id: number | null) => void;
   onDollyChange: (id: number | null) => void;
   onSecondTrailerChange: (id: number | null) => void;
-  // Handlers para placas manuais
+  // Handlers para placas manuais (mantidos para compatibilidade)
   onDollyManualPlateChange?: (plate: string | null) => void;
   onSecondTrailerManualPlateChange?: (plate: string | null) => void;
   onCreateNewVehicle?: () => void;
@@ -174,21 +174,21 @@ export function FrontLineVehicles({
             {/* Dolly - Somente para tipos que precisam */}
             {showDolly && (
               <div className="space-y-2">
-                <EnhancedVehicleSelector
+                <FastVehicleSelector
                   title="Dolly"
                   description="Dispositivo de acoplamento"
-                  placeholder="Selecione o dolly ou digite a placa"
+                  placeholder="Digite a placa ou selecione o dolly"
                   value={dollyId || null}
-                  manualPlate={dollyManualPlate}
                   vehicleOptions={availableVehiclesByType.dollies}
                   onChange={handleDollyChange}
-                  onManualPlateChange={onDollyManualPlateChange}
                   onAdd={onCreateNewVehicle}
                   isLoading={isLoadingVehicles}
                   vehicleType="dolly"
                   colorTheme="amber"
                   emptyMessage="Nenhum dolly cadastrado"
                   allowManualInput={true}
+                  manualPlate={dollyManualPlate}
+                  onManualPlateChange={onDollyManualPlateChange}
                 />
               </div>
             )}
@@ -196,21 +196,21 @@ export function FrontLineVehicles({
             {/* 2ª Carreta - Somente para bitrem e rodotrem */}
             {showSecondTrailer && (
               <div className="space-y-2">
-                <EnhancedVehicleSelector
+                <FastVehicleSelector
                   title="2ª Carreta"
                   description="Segundo semirreboque da composição"
-                  placeholder="Selecione a 2ª carreta ou digite a placa"
+                  placeholder="Digite a placa ou selecione a 2ª carreta"
                   value={secondTrailerId || null}
-                  manualPlate={secondTrailerManualPlate}
                   vehicleOptions={getSecondTrailerVehicles()}
                   onChange={handleSecondTrailerChange}
-                  onManualPlateChange={onSecondTrailerManualPlateChange}
                   onAdd={onCreateNewVehicle}
                   isLoading={isLoadingVehicles}
                   vehicleType="mixed_trailer"
                   colorTheme="purple"
                   emptyMessage="Nenhum semirreboque cadastrado"
                   allowManualInput={true}
+                  manualPlate={secondTrailerManualPlate}
+                  onManualPlateChange={onSecondTrailerManualPlateChange}
                 />
               </div>
             )}

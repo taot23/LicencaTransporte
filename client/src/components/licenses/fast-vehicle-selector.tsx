@@ -31,6 +31,9 @@ interface FastVehicleSelectorProps {
   emptyMessage?: string;
   vehicleType?: string;
   colorTheme?: 'blue' | 'green' | 'purple' | 'amber' | 'red';
+  allowManualInput?: boolean;
+  manualPlate?: string | null;
+  onManualPlateChange?: (plate: string | null) => void;
 }
 
 export function FastVehicleSelector({
@@ -44,10 +47,14 @@ export function FastVehicleSelector({
   placeholder = "Selecione um veículo",
   emptyMessage = "Nenhum veículo encontrado",
   vehicleType,
-  colorTheme = 'blue'
+  colorTheme = 'blue',
+  allowManualInput = false,
+  manualPlate,
+  onManualPlateChange
 }: FastVehicleSelectorProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [isManualMode, setIsManualMode] = useState(false);
   
   // Filtrar e limitar veículos para performance
   const filteredVehicles = useMemo(() => {
@@ -129,6 +136,11 @@ export function FastVehicleSelector({
                   {selectedVehicle.brand} {selectedVehicle.model}
                 </span>
               </span>
+            ) : manualPlate ? (
+              <span className="flex items-center gap-2">
+                <span className="font-mono text-sm text-blue-700">{manualPlate}</span>
+                <span className="text-xs text-blue-600">(manual)</span>
+              </span>
             ) : (
               <span className="text-gray-500">{placeholder}</span>
             )}
@@ -157,21 +169,58 @@ export function FastVehicleSelector({
                   Carregando veículos...
                 </div>
               ) : filteredVehicles.length === 0 ? (
-                <CommandEmpty className="py-6 text-center text-sm">
-                  {emptyMessage}
-                </CommandEmpty>
+                <div className="py-2">
+                  {allowManualInput && search.length >= 3 && (
+                    <CommandItem
+                      onSelect={() => {
+                        if (onManualPlateChange) {
+                          onManualPlateChange(search.toUpperCase());
+                          onChange(null); // Limpar seleção de veículo
+                        }
+                        setOpen(false);
+                      }}
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    >
+                      <span className="mr-2">✏️</span>
+                      Usar placa manual: <strong>{search.toUpperCase()}</strong>
+                    </CommandItem>
+                  )}
+                  <CommandEmpty className="py-6 text-center text-sm">
+                    {allowManualInput ? 
+                      "Digite pelo menos 3 caracteres para usar entrada manual ou cadastre um veículo" : 
+                      emptyMessage
+                    }
+                  </CommandEmpty>
+                </div>
               ) : (
                 <CommandGroup>
-                  {value && (
+                  {(value || manualPlate) && (
                     <CommandItem
                       onSelect={() => {
                         onChange(null);
+                        if (onManualPlateChange) onManualPlateChange(null);
                         setOpen(false);
                       }}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
                       <X className="mr-2 h-4 w-4" />
                       Limpar seleção
+                    </CommandItem>
+                  )}
+                  
+                  {allowManualInput && search.length >= 3 && (
+                    <CommandItem
+                      onSelect={() => {
+                        if (onManualPlateChange) {
+                          onManualPlateChange(search.toUpperCase());
+                          onChange(null); // Limpar seleção de veículo
+                        }
+                        setOpen(false);
+                      }}
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    >
+                      <span className="mr-2">✏️</span>
+                      Usar placa manual: <strong>{search.toUpperCase()}</strong>
                     </CommandItem>
                   )}
                   
