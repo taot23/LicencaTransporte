@@ -156,7 +156,7 @@ export function OptimizedTransporterSelector({
         </div>
 
         <PopoverContent 
-          className="w-[var(--radix-popover-trigger-width)] p-0" 
+          className="w-96 p-0 max-w-[90vw]" 
           align="start"
           side="bottom"
           sideOffset={4}
@@ -172,7 +172,7 @@ export function OptimizedTransporterSelector({
               />
             </div>
             
-            <CommandList>
+            <CommandList className="max-h-72 overflow-y-auto">
               {isLoading && (
                 <CommandEmpty>
                   <div className="flex items-center justify-center py-6">
