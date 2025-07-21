@@ -30,17 +30,32 @@ export default function BulkVehiclesPage() {
 
   const importMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await fetch("/api/vehicles/bulk-import", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
+      // Timeout aumentado para 10 minutos para arquivos grandes
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 minutos
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: "Erro desconhecido" }));
-        throw new Error(errorData.message || "Erro ao processar arquivo CSV");
+      try {
+        const response = await fetch("/api/vehicles/bulk-import", {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: "Erro desconhecido" }));
+          throw new Error(errorData.message || "Erro ao processar arquivo CSV");
+        }
+        return response.json();
+      } catch (error: any) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+          throw new Error("Tempo limite excedido. Arquivo muito grande ou processamento demorado.");
+        }
+        throw error;
       }
-      return response.json();
     },
     onSuccess: (result) => {
       setImportResult(result);
@@ -252,8 +267,30 @@ export default function BulkVehiclesPage() {
                 disabled={!csvFile || importMutation.isPending}
                 className="w-full"
               >
-                {importMutation.isPending ? "Processando..." : "Importar Veículos"}
+                {importMutation.isPending ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-r-transparent"></div>
+                    Processando arquivo... (pode levar alguns minutos)
+                  </div>
+                ) : (
+                  "Importar Veículos"
+                )}
               </Button>
+              
+              {importMutation.isPending && csvFile && (
+                <Alert className="mt-4">
+                  <AlertDescription>
+                    <div className="space-y-2">
+                      <p><strong>Processando {csvFile.name}</strong></p>
+                      <p>Arquivo de {(csvFile.size / 1024).toFixed(2)} KB sendo processado...</p>
+                      <p className="text-sm text-muted-foreground">
+                        Arquivos grandes podem levar até 10 minutos para processar completamente.
+                        Por favor, aguarde sem fechar a página.
+                      </p>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
           </CardContent>
         </Card>
