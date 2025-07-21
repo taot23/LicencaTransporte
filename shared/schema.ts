@@ -220,6 +220,7 @@ export const insertVehicleSchema = createInsertSchema(vehicles)
 export const licenseStatusEnum = z.enum([
   "pending_registration", // Pedido em Cadastramento
   "registration_in_progress", // Cadastro em Andamento
+  "pending_documentation", // Pendente Documentação
   "rejected", // Reprovado - Pendência de Documentação
   "under_review", // Análise do Órgão
   "pending_approval", // Pendente Liberação

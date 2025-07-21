@@ -317,6 +317,7 @@ export default function TrackLicensePage() {
     const statusMap: { [key: string]: string } = {
       'pending_registration': 'Pedido em Cadastramento',
       'registration_in_progress': 'Cadastro em Andamento',
+      'pending_documentation': 'Pendente Documentação',
       'rejected': 'Reprovado',
       'under_review': 'Análise do Órgão',
       'pending_approval': 'Pendente Liberação',
@@ -432,6 +433,7 @@ export default function TrackLicensePage() {
                 <SelectItem value="all_status">Todos os status</SelectItem>
                 <SelectItem value="pending_registration">Pedido em Cadastramento</SelectItem>
                 <SelectItem value="registration_in_progress">Cadastro em Andamento</SelectItem>
+                <SelectItem value="pending_documentation">Pendente Documentação</SelectItem>
                 <SelectItem value="rejected">Reprovado</SelectItem>
                 <SelectItem value="under_review">Análise do Órgão</SelectItem>
                 <SelectItem value="pending_approval">Pendente Liberação</SelectItem>

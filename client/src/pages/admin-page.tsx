@@ -224,6 +224,7 @@ export default function AdminPage() {
                     <SelectItem value="all_status">Todos os status</SelectItem>
                     <SelectItem value="pending_registration">Pedido em Cadastramento</SelectItem>
                     <SelectItem value="registration_in_progress">Cadastro em Andamento</SelectItem>
+                    <SelectItem value="pending_documentation">Pendente Documentação</SelectItem>
                     <SelectItem value="rejected">Reprovado</SelectItem>
                     <SelectItem value="under_review">Análise do Órgão</SelectItem>
                     <SelectItem value="pending_approval">Pendente Liberação</SelectItem>
@@ -451,6 +452,7 @@ export default function AdminPage() {
                                 <SelectContent>
                                   <SelectItem value="pending_registration">Pedido em Cadastramento</SelectItem>
                                   <SelectItem value="registration_in_progress">Cadastro em Andamento</SelectItem>
+                                  <SelectItem value="pending_documentation">Pendente Documentação</SelectItem>
                                   <SelectItem value="rejected">Reprovado</SelectItem>
                                   <SelectItem value="under_review">Análise do Órgão</SelectItem>
                                   <SelectItem value="pending_approval">Pendente Liberação</SelectItem>

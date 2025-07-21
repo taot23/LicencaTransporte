@@ -819,6 +819,7 @@ export default function AdminLicensesPage() {
         "Placa Principal": license.mainVehiclePlate,
         Status: license.status === "pending_registration" ? "Pendente de Registro" :
                 license.status === "registration_in_progress" ? "Registro em Andamento" :
+                license.status === "pending_documentation" ? "Pendente Documentação" :
                 license.status === "under_review" ? "Em Análise" :
                 license.status === "pending_approval" ? "Pendente de Aprovação" :
                 license.status === "approved" ? "Aprovado" :
@@ -853,6 +854,7 @@ export default function AdminLicensesPage() {
   const statusOptions = [
     { value: "pending_registration", label: "Pedido em Cadastramento", description: "Status inicial do pedido" },
     { value: "registration_in_progress", label: "Cadastro em Andamento", description: "Em fase de edição pelo usuário" },
+    { value: "pending_documentation", label: "Pendente Documentação", description: "Aguardando documentos pendentes" },
     { value: "rejected", label: "Reprovado", description: "Com justificativa de pendências" },
     { value: "under_review", label: "Análise do Órgão", description: "Em avaliação oficial" },
     { value: "pending_approval", label: "Pendente Liberação", description: "Aguardando aprovação final" },

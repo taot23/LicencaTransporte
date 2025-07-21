@@ -56,6 +56,17 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **COMPATIBILIDADE**: Funciona em Rodotrem 9 eixos e Bitrem (6, 7, 9 eixos)
 - ✅ **PERFORMANCE MANTIDA**: Sistema continua otimizado com limite de 50 veículos por busca
 
+### 21/07/2025 - STATUS "PENDENTE DOCUMENTAÇÃO" ADICIONADO AO SISTEMA
+- ✅ **SCHEMA ATUALIZADO**: Novo status `pending_documentation` adicionado ao enum de status de licenças
+- ✅ **PÁGINA ACOMPANHAR LICENÇA**: Filtro dropdown com novo status "Pendente Documentação"
+- ✅ **PÁGINA ADMIN LICENÇAS**: Status disponível nos filtros e opções de seleção
+- ✅ **COMPONENTE STATUS BADGE**: Badge com cor laranja e ícone FileText para identificação visual
+- ✅ **EXPORTAÇÃO CSV**: Tradução do status para "Pendente Documentação" na exportação
+- ✅ **PÁGINA ADMIN-PAGE**: Status incluído em todos os dropdowns e seletores de status
+- ✅ **INTERFACE COMPLETA**: Novo status integrado em todas as páginas e componentes relevantes
+- ✅ **COR E ÍCONE ÚNICOS**: Cor laranja (orange-100/orange-800) e ícone de documento para fácil identificação
+- ✅ **ORDEM LÓGICA**: Posicionado entre "Cadastro em Andamento" e "Reprovado" no fluxo de status
+
 ### 21/07/2025 - FILTROS POR ESTADO INDIVIDUAL IMPLEMENTADOS NAS PÁGINAS PRINCIPAIS
 - ✅ **ACOMPANHAR LICENÇA**: Filtro dropdown "Estado" adicionado aos filtros de pesquisa  
 - ✅ **GERENCIAR LICENÇAS**: Filtro por estado implementado na página administrativa

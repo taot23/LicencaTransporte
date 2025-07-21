@@ -12,6 +12,7 @@ const translateStatus = (status: string): string => {
   const translations: Record<string, string> = {
     'pending_registration': 'Pendente',
     'registration_in_progress': 'Em Análise',
+    'pending_documentation': 'Pendente Documentação',
     'under_review': 'Em Análise',
     'pending_approval': 'Aguardando Aprovação',
     'approved': 'Aprovada',

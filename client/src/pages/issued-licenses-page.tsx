@@ -451,6 +451,7 @@ export default function IssuedLicensesPage() {
     const statusMap: Record<string, string> = {
       'pending_registration': 'Pendente de Registro',
       'registration_in_progress': 'Registro em Andamento',
+      'pending_documentation': 'Pendente Documentação',
       'under_review': 'Em Análise',
       'pending_approval': 'Pendente de Aprovação',
       'approved': 'Aprovado',
