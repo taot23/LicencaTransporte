@@ -93,21 +93,17 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **LOGS DETALHADOS**: Sistema identifica tipo de validação (combinação específica vs placas individuais)
 - ✅ **REGRA DOS 60 DIAS**: Continua aplicando bloqueio para licenças com mais de 60 dias restantes
 
-### 21/07/2025 - Sistema de Seleção Otimizado Completo IMPLEMENTADO
-- ✅ **PROBLEMA CRÍTICO RESOLVIDO**: Campo de seleção de transportadores não trava mais ao clicar
-- ✅ **COMPONENTE TRANSPORTADORES**: `OptimizedTransporterSelector` implementado com performance otimizada
-- ✅ **ENDPOINT TRANSPORTADORES**: `/api/transporters/search` com busca inteligente por nome/CNPJ
-- ✅ **HOOK TRANSPORTADORES**: `useOptimizedTransporterSelector` com debounce 300ms e cache 30s
-- ✅ **BUSCA INTELIGENTE**: Suporte a nome, nome fantasia e CNPJ/CPF sem travamentos
-- ✅ **SUBSTITUIÇÃO NO FORMULÁRIO**: Campo problemático no `license-form.tsx` substituído pelo otimizado
-- ✅ **ENDPOINTS VEÍCULOS**: `/api/vehicles/tractor-units`, `/api/vehicles/semi-trailers`, `/api/vehicles/search-plate`
-- ✅ **COMPONENTES VEÍCULOS**: `TractorUnitSelector`, `SemiTrailerSelector` com busca em tempo real
-- ✅ **PERFORMANCE GARANTIDA**: Máximo 50 resultados por página, debounce otimizado, cache inteligente
+### 21/07/2025 - Campos de Seleção de Veículos Otimizados para Formulários IMPLEMENTADO
+- ✅ **ENDPOINTS ESPECÍFICOS POR TIPO**: Endpoints dedicados para unidades tratoras e semirreboques
+- ✅ **API OTIMIZADA**: `/api/vehicles/tractor-units`, `/api/vehicles/semi-trailers`, `/api/vehicles/search-plate`
+- ✅ **HOOK CUSTOMIZADO**: Hook `useOptimizedVehicleSelector` com debounce e cache inteligente
+- ✅ **COMPONENTES DEDICADOS**: `TractorUnitSelector`, `SemiTrailerSelector` com busca em tempo real
+- ✅ **BUSCA POR PLACA**: Autocomplete rápido com mínimo 2 caracteres
+- ✅ **PERFORMANCE GARANTIDA**: Máximo 50 resultados por página, debounce 500ms, cache 30s
 - ✅ **INTERFACE AVANÇADA**: Popover com Command menu, badges informativos, limpeza de seleção
-- ✅ **PÁGINA DE TESTE**: `/test-selectors` para demonstração e validação de todos os componentes
+- ✅ **PÁGINA DE TESTE**: `/test-selectors` para demonstração e validação dos componentes
 - ✅ **FILTROS INTELIGENTES**: Busca por tipo específico com permissões de usuário respeitadas
 - ✅ **ESTADOS VISUAIS**: Loading, error, empty state e seleção confirmada com check visual
-- ✅ **SISTEMA COMPLETO**: Otimizado para 40.000+ veículos e 10.000+ transportadores
 
 ### 09/07/2025 - Sistema de Tempo Real MELHORADO - Múltiplas Correções
 - ✅ **REFETCH FORÇADO**: WebSocket usa `refetchQueries` para forçar atualização imediata das páginas
