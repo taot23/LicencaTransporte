@@ -2017,43 +2017,22 @@ export function LicenseForm({
 
                 <FormField
                   control={form.control}
-                  name="dollyId"
+                  name="dollyManualPlate"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-medium">Dolly</FormLabel>
-                      <Select
-                        onValueChange={(value) =>
-                          field.onChange(parseInt(value))
-                        }
-                        defaultValue={field.value?.toString()}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-10 bg-amber-50 border-amber-200">
-                            <SelectValue placeholder="Selecione o dolly" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {isLoadingVehicles ? (
-                            <SelectItem value="loading">
-                              Carregando...
-                            </SelectItem>
-                          ) : dollys.length > 0 ? (
-                            dollys.map((vehicle) => (
-                              <SelectItem
-                                key={vehicle.id}
-                                value={vehicle.id.toString()}
-                              >
-                                {vehicle.plate} - {vehicle.brand}{" "}
-                                {vehicle.model}
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <SelectItem value="no_dolly">
-                              Nenhum dolly cadastrado
-                            </SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={field.value || ""}
+                          placeholder="Digite a placa do dolly"
+                          className="h-10 bg-amber-50 border-amber-200 uppercase"
+                          onChange={(e) => {
+                            const value = e.target.value.toUpperCase();
+                            field.onChange(value);
+                          }}
+                        />
+                      </FormControl>
                       <FormDescription className="text-xs text-muted-foreground mt-1">
                         Dispositivo de acoplamento
                       </FormDescription>
@@ -2064,43 +2043,22 @@ export function LicenseForm({
 
                 <FormField
                   control={form.control}
-                  name="secondTrailerId"
+                  name="secondTrailerManualPlate"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-medium">2ª Carreta</FormLabel>
-                      <Select
-                        onValueChange={(value) =>
-                          field.onChange(parseInt(value))
-                        }
-                        defaultValue={field.value?.toString()}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="h-10 bg-purple-50 border-purple-200">
-                            <SelectValue placeholder="Selecione a 2ª carreta" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {isLoadingVehicles ? (
-                            <SelectItem value="loading">
-                              Carregando...
-                            </SelectItem>
-                          ) : semiTrailers.length > 0 ? (
-                            semiTrailers.map((vehicle) => (
-                              <SelectItem
-                                key={vehicle.id}
-                                value={vehicle.id.toString()}
-                              >
-                                {vehicle.plate} - {vehicle.brand}{" "}
-                                {vehicle.model}
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <SelectItem value="no_semi_trailer">
-                              Nenhum semirreboque cadastrado
-                            </SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={field.value || ""}
+                          placeholder="Digite a placa da 2ª carreta"
+                          className="h-10 bg-purple-50 border-purple-200 uppercase"
+                          onChange={(e) => {
+                            const value = e.target.value.toUpperCase();
+                            field.onChange(value);
+                          }}
+                        />
+                      </FormControl>
                       <FormDescription className="text-xs text-muted-foreground mt-1">
                         Segundo semirreboque da composição
                       </FormDescription>
@@ -2142,21 +2100,18 @@ export function LicenseForm({
                       )?.plate || "Selecionado"}
                     </div>
                   )}
-                  {form.watch("dollyId") && (
+                  {form.watch("dollyManualPlate") && (
                     <div className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-md flex items-center">
                       <Truck className="h-3 w-3 mr-1" />
                       <span className="font-medium">Dolly:</span>{" "}
-                      {dollys.find((v) => v.id === form.watch("dollyId"))
-                        ?.plate || "Selecionado"}
+                      {form.watch("dollyManualPlate")} (manual)
                     </div>
                   )}
-                  {form.watch("secondTrailerId") && (
+                  {form.watch("secondTrailerManualPlate") && (
                     <div className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-md flex items-center">
                       <Truck className="h-3 w-3 mr-1" />
                       <span className="font-medium">2ª Carreta:</span>{" "}
-                      {semiTrailers.find(
-                        (v) => v.id === form.watch("secondTrailerId"),
-                      )?.plate || "Selecionado"}
+                      {form.watch("secondTrailerManualPlate")} (manual)
                     </div>
                   )}
                 </div>
@@ -2193,8 +2148,8 @@ export function LicenseForm({
                   {[
                     form.watch("tractorUnitId") ? 1 : 0,
                     form.watch("firstTrailerId") ? 1 : 0,
-                    form.watch("dollyId") ? 1 : 0,
-                    form.watch("secondTrailerId") ? 1 : 0,
+                    form.watch("dollyManualPlate") ? 1 : 0,
+                    form.watch("secondTrailerManualPlate") ? 1 : 0,
                     form.watch("additionalPlates")
                       ? form.watch("additionalPlates").filter((p) => p).length
                       : 0,
@@ -2321,24 +2276,24 @@ export function LicenseForm({
 
                 <FormField
                   control={form.control}
-                  name="secondTrailerId"
+                  name="secondTrailerManualPlate"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-medium">2ª Carreta</FormLabel>
                       <FormControl>
-                        <VehicleAutocomplete
-                          vehicles={semiTrailers}
-                          value={field.value}
-                          onSelect={(vehicleId) => {
-                            field.onChange(vehicleId);
+                        <Input
+                          {...field}
+                          value={field.value || ""}
+                          placeholder="Digite a placa da 2ª carreta"
+                          className="h-10 bg-purple-50 border-purple-200 uppercase"
+                          onChange={(e) => {
+                            const value = e.target.value.toUpperCase();
+                            field.onChange(value);
                           }}
-                          placeholder="Digite a placa ou selecione a 2ª carreta"
-                          disabled={isLoadingVehicles}
-                          className="h-10 bg-purple-50 border-purple-200"
                         />
                       </FormControl>
                       <FormDescription className="text-xs text-muted-foreground mt-1">
-                        Selecione o segundo semirreboque da composição
+                        Digite a placa do segundo semirreboque da composição
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -2378,21 +2333,18 @@ export function LicenseForm({
                       )?.plate || "Selecionado"}
                     </div>
                   )}
-                  {form.watch("dollyId") && (
+                  {form.watch("dollyManualPlate") && (
                     <div className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-md flex items-center">
                       <Truck className="h-3 w-3 mr-1" />
                       <span className="font-medium">Dolly:</span>{" "}
-                      {dollys.find((v) => v.id === form.watch("dollyId"))
-                        ?.plate || "Selecionado"}
+                      {form.watch("dollyManualPlate")} (manual)
                     </div>
                   )}
-                  {form.watch("secondTrailerId") && (
+                  {form.watch("secondTrailerManualPlate") && (
                     <div className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-md flex items-center">
                       <Truck className="h-3 w-3 mr-1" />
                       <span className="font-medium">2ª Carreta:</span>{" "}
-                      {semiTrailers.find(
-                        (v) => v.id === form.watch("secondTrailerId"),
-                      )?.plate || "Selecionado"}
+                      {form.watch("secondTrailerManualPlate")} (manual)
                     </div>
                   )}
                   {form.watch("flatbedId") && (
@@ -2437,8 +2389,8 @@ export function LicenseForm({
                   {[
                     form.watch("tractorUnitId") ? 1 : 0,
                     form.watch("firstTrailerId") ? 1 : 0,
-                    form.watch("dollyId") ? 1 : 0,
-                    form.watch("secondTrailerId") ? 1 : 0,
+                    form.watch("dollyManualPlate") ? 1 : 0,
+                    form.watch("secondTrailerManualPlate") ? 1 : 0,
                     form.watch("flatbedId") ? 1 : 0,
                     form.watch("additionalPlates")
                       ? form.watch("additionalPlates").filter((p) => p).length
