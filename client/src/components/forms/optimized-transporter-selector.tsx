@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { useOptimizedTransporterSelector, TransporterOption } from "@/hooks/use-optimized-transporter-selector";
+import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 
 interface OptimizedTransporterSelectorProps {
   value?: number | null;
@@ -41,6 +42,10 @@ export function OptimizedTransporterSelector({
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fechar dropdown quando clicar fora
+  useOnClickOutside(dropdownRef, () => setOpen(false));
 
   const {
     searchTerm,
@@ -112,142 +117,125 @@ export function OptimizedTransporterSelector({
         <p className="text-sm text-gray-500">{description}</p>
       )}
 
-      <Popover open={open} onOpenChange={setOpen}>
-        <div className="relative">
-          <Input
-            ref={inputRef}
-            value={inputValue}
-            onChange={(e) => handleInputChange(e.target.value)}
-            onFocus={() => setOpen(true)}
-            placeholder={placeholder}
-            disabled={disabled}
-            className={cn(
-              "pr-20",
-              showError && "border-red-300 focus:border-red-300 focus:ring-red-200"
-            )}
-          />
+      <div className="relative" ref={dropdownRef}>
+        <Input
+          ref={inputRef}
+          value={inputValue}
+          onChange={(e) => handleInputChange(e.target.value)}
+          onFocus={() => setOpen(true)}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={cn(
+            "pr-20",
+            showError && "border-red-300 focus:border-red-300 focus:ring-red-200"
+          )}
+        />
+        
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+          {selectedTransporter && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 hover:bg-gray-100"
+              onClick={handleClear}
+              disabled={disabled}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          )}
           
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-            {selectedTransporter && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0 hover:bg-gray-100"
-                onClick={handleClear}
-                disabled={disabled}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            )}
-            
-            <PopoverTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0 hover:bg-gray-100"
-                disabled={disabled}
-              >
-                <ChevronDown className="h-3 w-3" />
-              </Button>
-            </PopoverTrigger>
-          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0 hover:bg-gray-100"
+            onClick={() => setOpen(!open)}
+            disabled={disabled}
+          >
+            <ChevronDown className="h-3 w-3" />
+          </Button>
         </div>
 
-        <PopoverContent 
-          className="w-[var(--radix-popover-trigger-width)] min-w-96 p-0" 
-          align="start"
-          side="bottom"
-          sideOffset={2}
-          alignOffset={0}
-        >
-          <Command shouldFilter={false}>
-            <div className="flex items-center border-b px-3">
-              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-              <Input
-                value={inputValue}
-                onChange={(e) => handleInputChange(e.target.value)}
-                placeholder="Buscar por nome ou CNPJ..."
-                className="border-0 outline-none focus:ring-0 h-10"
-              />
+        {/* Dropdown absoluto */}
+        {open && (
+          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-72 overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-100 p-2">
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                <Input
+                  value={inputValue}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  placeholder="Buscar por nome ou CNPJ..."
+                  className="pl-8 h-9 text-sm"
+                />
+              </div>
             </div>
             
-            <CommandList className="max-h-72 overflow-y-auto">
+            <div className="max-h-60 overflow-y-auto">
               {isLoading && (
-                <CommandEmpty>
-                  <div className="flex items-center justify-center py-6">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                    <span className="ml-2">Carregando transportadores...</span>
-                  </div>
-                </CommandEmpty>
+                <div className="flex items-center justify-center py-6">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  <span className="ml-2 text-sm">Carregando transportadores...</span>
+                </div>
               )}
               
               {!isLoading && !hasResults && inputValue.length >= 1 && (
-                <CommandEmpty>
-                  <div className="flex flex-col items-center justify-center py-6">
-                    <Building2 className="h-8 w-8 text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-500">
-                      Nenhum transportador encontrado para "{inputValue}"
-                    </p>
-                  </div>
-                </CommandEmpty>
+                <div className="flex flex-col items-center justify-center py-6">
+                  <Building2 className="h-8 w-8 text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-500">
+                    Nenhum transportador encontrado para "{inputValue}"
+                  </p>
+                </div>
               )}
               
               {!isLoading && !hasResults && inputValue.length === 0 && (
-                <CommandEmpty>
-                  <div className="flex flex-col items-center justify-center py-6">
-                    <Search className="h-8 w-8 text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-500">
-                      Digite para buscar transportadores
-                    </p>
-                  </div>
-                </CommandEmpty>
+                <div className="flex flex-col items-center justify-center py-6">
+                  <Search className="h-8 w-8 text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-500">
+                    Digite para buscar transportadores
+                  </p>
+                </div>
               )}
 
-              {hasResults && (
-                <CommandGroup>
-                  {transporters.map((transporter) => (
-                    <CommandItem
-                      key={transporter.id}
-                      value={transporter.name}
-                      onSelect={() => handleSelect(transporter.id)}
-                      className="flex items-center justify-between cursor-pointer p-3"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-gray-900 truncate">
-                          {transporter.name}
-                        </div>
-                        {transporter.tradeName && transporter.tradeName !== transporter.name && (
-                          <div className="text-sm text-gray-600 truncate">
-                            {transporter.tradeName}
-                          </div>
-                        )}
-                        {transporter.documentNumber && (
-                          <div className="text-xs text-gray-500 mt-1">
-                            {transporter.personType === 'pj' ? 'CNPJ' : 'CPF'}: {transporter.documentNumber}
-                          </div>
-                        )}
-                        {transporter.city && transporter.state && (
-                          <div className="text-xs text-gray-400 mt-1">
-                            {transporter.city} - {transporter.state}
-                          </div>
-                        )}
+              {hasResults && transporters.map((transporter) => (
+                <div
+                  key={transporter.id}
+                  className="flex items-center justify-between cursor-pointer p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                  onClick={() => handleSelect(transporter.id)}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-gray-900 truncate">
+                      {transporter.name}
+                    </div>
+                    {transporter.tradeName && transporter.tradeName !== transporter.name && (
+                      <div className="text-sm text-gray-600 truncate">
+                        {transporter.tradeName}
                       </div>
-                      
-                      <div className="flex items-center gap-2">
-                        {value === transporter.id && (
-                          <Check className="h-4 w-4 text-primary" />
-                        )}
+                    )}
+                    {transporter.documentNumber && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        {transporter.personType === 'pj' ? 'CNPJ' : 'CPF'}: {transporter.documentNumber}
                       </div>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              )}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+                    )}
+                    {transporter.city && transporter.state && (
+                      <div className="text-xs text-gray-400 mt-1">
+                        {transporter.city} - {transporter.state}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {value === transporter.id && (
+                      <Check className="h-4 w-4 text-primary" />
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       {showError && (
         <p className="text-sm text-red-600 flex items-center gap-1">
