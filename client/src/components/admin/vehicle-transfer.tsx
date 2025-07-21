@@ -13,13 +13,14 @@ import { Vehicle, User } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Truck, Search, X } from "lucide-react";
+import { usePaginatedList } from "@/hooks/use-paginated-list";
+import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
 
 export function VehicleTransfer() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedVehicleIds, setSelectedVehicleIds] = useState<number[]>([]);
   const [targetUserId, setTargetUserId] = useState<number | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
 
   // Função para obter nome traduzido do tipo de veículo
   const getVehicleTypeName = (type: string) => {
@@ -44,18 +45,21 @@ export function VehicleTransfer() {
     queryKey: ["/api/admin/users"],
   });
 
-  // Filtrar veículos com base na busca
-  const filteredVehicles = useMemo(() => {
-    if (!searchTerm.trim()) return vehicles;
-    
-    const search = searchTerm.toLowerCase().trim();
-    return vehicles.filter(vehicle => 
-      vehicle.plate?.toLowerCase().includes(search) ||
-      vehicle.brand?.toLowerCase().includes(search) ||
-      vehicle.model?.toLowerCase().includes(search) ||
-      getVehicleTypeName(vehicle.type).toLowerCase().includes(search)
-    );
-  }, [vehicles, searchTerm]);
+
+
+  // Hook de paginação
+  const {
+    paginatedItems: paginatedVehicles,
+    pagination,
+    currentPage,
+    setCurrentPage,
+    searchTerm,
+    setSearchTerm,
+    filteredItems: filteredVehicles
+  } = usePaginatedList({
+    items: vehicles,
+    itemsPerPage: 10
+  });
 
   // Mutação para transferir veículos
   const transferMutation = useMutation({
@@ -101,10 +105,6 @@ export function VehicleTransfer() {
     }
   };
 
-  const clearSearch = () => {
-    setSearchTerm("");
-  };
-
   const getUserName = (userId: number | null) => {
     if (userId === null) return "Usuário undefined";
     const user = users.find(u => u.id === userId);
@@ -144,7 +144,7 @@ export function VehicleTransfer() {
                 variant="ghost"
                 size="sm"
                 className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100"
-                onClick={clearSearch}
+                onClick={() => setSearchTerm("")}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -170,68 +170,139 @@ export function VehicleTransfer() {
         {/* Lista de veículos */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Veículos Disponíveis ({vehicles.length})</h3>
+            <h3 className="text-lg font-semibold">
+              Veículos Disponíveis 
+              {filteredVehicles.length > 0 
+                ? ` (${pagination.startItem}-${pagination.endItem} de ${pagination.total})`
+                : ` (${vehicles.length})`
+              }
+            </h3>
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="select-all"
-                checked={selectedVehicleIds.length === vehicles.length}
+                checked={filteredVehicles.length > 0 && selectedVehicleIds.length === filteredVehicles.length}
                 onCheckedChange={handleSelectAll}
               />
               <label htmlFor="select-all" className="text-sm">
-                Selecionar todos
+                Selecionar todos {searchTerm ? 'filtrados' : ''}
               </label>
             </div>
           </div>
 
-          <div className="border rounded-lg">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">Sel.</TableHead>
-                  <TableHead>Placa</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Marca/Modelo</TableHead>
-                  <TableHead>Usuário Atual</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredVehicles.length === 0 ? (
+          {/* Versão Desktop */}
+          <div className="hidden md:block">
+            <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                      {searchTerm ? 
-                        `Nenhum veículo encontrado para "${searchTerm}"` : 
-                        "Nenhum veículo disponível"
-                      }
-                    </TableCell>
+                    <TableHead className="w-12">Sel.</TableHead>
+                    <TableHead>Placa</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Marca/Modelo</TableHead>
+                    <TableHead>Usuário Atual</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
-                ) : (
-                  filteredVehicles.map((vehicle) => (
-                    <TableRow key={vehicle.id}>
-                      <TableCell>
+                </TableHeader>
+                <TableBody>
+                  {filteredVehicles.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                        {searchTerm ? 
+                          `Nenhum veículo encontrado para "${searchTerm}"` : 
+                          "Nenhum veículo disponível"
+                        }
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedVehicles.map((vehicle) => (
+                      <TableRow key={vehicle.id}>
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedVehicleIds.includes(vehicle.id)}
+                            onCheckedChange={(checked) => 
+                              handleSelectVehicle(vehicle.id, checked as boolean)
+                            }
+                          />
+                        </TableCell>
+                        <TableCell className="font-mono font-semibold">
+                          {vehicle.plate}
+                        </TableCell>
+                        <TableCell>{getVehicleTypeName(vehicle.type)}</TableCell>
+                        <TableCell>{vehicle.brand} {vehicle.model}</TableCell>
+                        <TableCell>{getUserName(vehicle.userId)}</TableCell>
+                        <TableCell>
+                          <Badge variant={vehicle.status === 'active' ? 'default' : 'secondary'}>
+                            {vehicle.status === 'active' ? 'Ativo' : 'Inativo'}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Paginação Desktop */}
+            {filteredVehicles.length > 0 && (
+              <ListPagination
+                currentPage={currentPage}
+                totalPages={pagination.totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={pagination.total}
+                itemsPerPage={pagination.itemsPerPage}
+                itemName="veículo"
+              />
+            )}
+          </div>
+
+          {/* Versão Mobile */}
+          <div className="md:hidden space-y-3">
+            {filteredVehicles.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                {searchTerm ? 
+                  `Nenhum veículo encontrado para "${searchTerm}"` : 
+                  "Nenhum veículo disponível"
+                }
+              </div>
+            ) : (
+              paginatedVehicles.map((vehicle) => (
+                <Card key={vehicle.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-3">
                         <Checkbox
                           checked={selectedVehicleIds.includes(vehicle.id)}
                           onCheckedChange={(checked) => 
                             handleSelectVehicle(vehicle.id, checked as boolean)
                           }
+                          className="mt-1"
                         />
-                      </TableCell>
-                      <TableCell className="font-mono font-semibold">
-                        {vehicle.plate}
-                      </TableCell>
-                      <TableCell>{getVehicleTypeName(vehicle.type)}</TableCell>
-                      <TableCell>{vehicle.brand} {vehicle.model}</TableCell>
-                      <TableCell>{getUserName(vehicle.userId)}</TableCell>
-                      <TableCell>
-                        <Badge variant={vehicle.status === 'active' ? 'default' : 'secondary'}>
-                          {vehicle.status === 'active' ? 'Ativo' : 'Inativo'}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                        <div className="space-y-1">
+                          <p className="font-mono font-semibold">{vehicle.plate}</p>
+                          <p className="text-sm text-gray-600">{getVehicleTypeName(vehicle.type)}</p>
+                          <p className="text-sm">{vehicle.brand} {vehicle.model}</p>
+                          <p className="text-xs text-gray-500">{getUserName(vehicle.userId)}</p>
+                        </div>
+                      </div>
+                      <Badge variant={vehicle.status === 'active' ? 'default' : 'secondary'}>
+                        {vehicle.status === 'active' ? 'Ativo' : 'Inativo'}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+
+            {/* Paginação Mobile */}
+            {filteredVehicles.length > 0 && (
+              <MobileListPagination
+                currentPage={currentPage}
+                totalPages={pagination.totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={pagination.total}
+                itemName="veículo"
+              />
+            )}
           </div>
         </div>
 

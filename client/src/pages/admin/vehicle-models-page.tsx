@@ -13,14 +13,14 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { VehicleModel, InsertVehicleModel } from "@shared/schema";
 import { VehicleModelForm } from "@/components/admin/vehicle-model-form";
 import { AdminLayout } from "@/components/layout/admin-layout";
+import { usePaginatedList } from "@/hooks/use-paginated-list";
+import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
 
 export default function VehicleModelsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingModel, setEditingModel] = useState<VehicleModel | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [modelToDelete, setModelToDelete] = useState<number | null>(null);
-  const [brandFilter, setBrandFilter] = useState("");
-  const [modelFilter, setModelFilter] = useState("");
   const { toast } = useToast();
 
   const {
@@ -29,6 +29,22 @@ export default function VehicleModelsPage() {
     refetch,
   } = useQuery<VehicleModel[]>({
     queryKey: ["/api/admin/vehicle-models"],
+  });
+
+
+
+  // Hook de paginação
+  const {
+    paginatedItems: paginatedModels,
+    pagination,
+    currentPage,
+    setCurrentPage,
+    searchTerm,
+    setSearchTerm,
+    filteredItems
+  } = usePaginatedList({
+    items: vehicleModels,
+    itemsPerPage: 10
   });
 
   const createMutation = useMutation({
@@ -153,12 +169,7 @@ export default function VehicleModelsPage() {
     );
   }
 
-  // Filtrar modelos com base nos filtros aplicados
-  const filteredModels = vehicleModels.filter((model) => {
-    const matchesBrand = brandFilter === "" || model.brand.toLowerCase().includes(brandFilter.toLowerCase());
-    const matchesModel = modelFilter === "" || model.model.toLowerCase().includes(modelFilter.toLowerCase());
-    return matchesBrand && matchesModel;
-  });
+
 
   return (
     <AdminLayout contentKey="vehicle-models">
@@ -207,23 +218,18 @@ export default function VehicleModelsPage() {
           <CardTitle>Consulta de Modelos</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Input
-                placeholder="Marca"
-                value={brandFilter}
-                onChange={(e) => setBrandFilter(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <div className="space-y-2">
-              <Input
-                placeholder="Modelo"
-                value={modelFilter}
-                onChange={(e) => setModelFilter(e.target.value)}
-                className="w-full"
-              />
-            </div>
+          <div className="space-y-4">
+            <Input
+              placeholder="Buscar por marca ou modelo..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full"
+            />
+            {searchTerm && (
+              <p className="text-sm text-gray-600">
+                Encontrados {filteredItems.length} modelo(s) de {vehicleModels.length} total
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -232,11 +238,14 @@ export default function VehicleModelsPage() {
         <CardHeader>
           <CardTitle>Lista de Modelos</CardTitle>
           <CardDescription>
-            Total de {vehicleModels.length} modelo(s) cadastrado(s)
+            {filteredItems.length > 0 
+              ? `Mostrando ${pagination.startItem}-${pagination.endItem} de ${pagination.total} modelo(s)`
+              : `Total de ${vehicleModels.length} modelo(s) cadastrado(s)`
+            }
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {filteredModels.length === 0 ? (
+          {vehicleModels.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">Nenhum modelo de veículo cadastrado</p>
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -258,30 +267,102 @@ export default function VehicleModelsPage() {
                 </DialogContent>
               </Dialog>
             </div>
+          ) : filteredItems.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Nenhum resultado encontrado para "{searchTerm}"</p>
+            </div>
           ) : (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Resultados</h3>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Marca</TableHead>
-                    <TableHead>Modelo</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredModels
-                    .sort((a, b) => {
-                      const brandCompare = a.brand.localeCompare(b.brand);
-                      if (brandCompare !== 0) return brandCompare;
-                      return a.model.localeCompare(b.model);
-                    })
-                    .map((model) => (
-                      <TableRow key={model.id}>
-                        <TableCell className="font-medium">{model.brand}</TableCell>
-                        <TableCell>{model.model}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+              {/* Versão Desktop */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Marca</TableHead>
+                      <TableHead>Modelo</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedModels
+                      .sort((a, b) => {
+                        const brandCompare = a.brand.localeCompare(b.brand);
+                        if (brandCompare !== 0) return brandCompare;
+                        return a.model.localeCompare(b.model);
+                      })
+                      .map((model) => (
+                        <TableRow key={model.id}>
+                          <TableCell className="font-medium">{model.brand}</TableCell>
+                          <TableCell>{model.model}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Dialog
+                                open={editingModel?.id === model.id}
+                                onOpenChange={(open) => {
+                                  if (!open) setEditingModel(null);
+                                  else setEditingModel(model);
+                                }}
+                              >
+                                <DialogTrigger asChild>
+                                  <Button variant="outline" size="sm">
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-md">
+                                  <DialogHeader>
+                                    <DialogTitle>Editar Modelo</DialogTitle>
+                                  </DialogHeader>
+                                  <VehicleModelForm
+                                    initialData={model}
+                                    onSubmit={handleUpdate}
+                                    onCancel={() => setEditingModel(null)}
+                                    isSubmitting={updateMutation.isPending}
+                                  />
+                                </DialogContent>
+                              </Dialog>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDelete(model.id)}
+                                disabled={deleteMutation.isPending}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+                
+                {/* Paginação Desktop */}
+                <ListPagination
+                  currentPage={currentPage}
+                  totalPages={pagination.totalPages}
+                  onPageChange={setCurrentPage}
+                  totalItems={pagination.total}
+                  itemsPerPage={pagination.itemsPerPage}
+                  itemName="modelo"
+                />
+              </div>
+
+              {/* Versão Mobile */}
+              <div className="md:hidden space-y-3">
+                {paginatedModels
+                  .sort((a, b) => {
+                    const brandCompare = a.brand.localeCompare(b.brand);
+                    if (brandCompare !== 0) return brandCompare;
+                    return a.model.localeCompare(b.model);
+                  })
+                  .map((model) => (
+                    <Card key={model.id}>
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-1">
+                            <p className="font-medium">{model.brand}</p>
+                            <p className="text-sm text-gray-600">{model.model}</p>
+                          </div>
+                          <div className="flex gap-2">
                             <Dialog
                               open={editingModel?.id === model.id}
                               onOpenChange={(open) => {
@@ -315,11 +396,20 @@ export default function VehicleModelsPage() {
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+
+                {/* Paginação Mobile */}
+                <MobileListPagination
+                  currentPage={currentPage}
+                  totalPages={pagination.totalPages}
+                  onPageChange={setCurrentPage}
+                  totalItems={pagination.total}
+                  itemName="modelo"
+                />
+              </div>
             </div>
           )}
         </CardContent>
