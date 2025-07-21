@@ -242,32 +242,6 @@ export default function IssuedLicensesPage() {
     return matchesSearch && matchesDateFrom && matchesDateTo && matchesState && matchesStatus;
   });
 
-  // Hook de paginação das licenças filtradas
-  const { 
-    paginatedItems: paginatedLicenses, 
-    pagination, 
-    currentPage, 
-    setCurrentPage 
-  } = usePaginatedList(sortedLicenses);
-
-  // Função para ordenar as licenças
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      // Se já está ordenando por esta coluna, alterna a direção
-      if (sortDirection === 'asc') {
-        setSortDirection('desc');
-      } else if (sortDirection === 'desc') {
-        setSortDirection('asc');
-      } else {
-        setSortDirection('asc');
-      }
-    } else {
-      // Nova coluna selecionada, começa com ascendente
-      setSortColumn(column);
-      setSortDirection('asc');
-    }
-  };
-
   // Ordenar licenças filtradas
   const sortedLicenses = useMemo(() => {
     if (!sortColumn || !sortDirection) {
@@ -330,6 +304,31 @@ export default function IssuedLicensesPage() {
     return toSort;
   }, [filteredLicenses, sortColumn, sortDirection]);
 
+  // Função para ordenar as licenças
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      // Se já está ordenando por esta coluna, alterna a direção
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else if (sortDirection === 'desc') {
+        setSortDirection('asc');
+      } else {
+        setSortDirection('asc');
+      }
+    } else {
+      // Nova coluna selecionada, começa com ascendente
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  // Hook de paginação das licenças filtradas
+  const { 
+    paginatedItems: paginatedLicenses, 
+    pagination, 
+    currentPage, 
+    setCurrentPage 
+  } = usePaginatedList({ items: sortedLicenses });
 
 
   const viewLicenseDetails = (license: LicenseRequest) => {
