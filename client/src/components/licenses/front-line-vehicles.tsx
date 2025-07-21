@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React from 'react';
 import { Vehicle } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -31,87 +31,17 @@ interface FrontLineVehiclesProps {
 
 export function FrontLineVehicles({
   licenseType,
-  tractorUnitId,
-  firstTrailerId,
-  dollyId,
-  secondTrailerId,
   firstTrailerManualPlate,
   dollyManualPlate,
   secondTrailerManualPlate,
-  vehicles,
-  isLoadingVehicles,
-  onTractorChange,
-  onFirstTrailerChange,
-  onDollyChange,
-  onSecondTrailerChange,
   onFirstTrailerManualPlateChange,
   onDollyManualPlateChange,
   onSecondTrailerManualPlateChange,
-  onCreateNewVehicle
 }: FrontLineVehiclesProps) {
   
-  // Memoizar veículos por tipo para evitar recomputação
-  const vehiclesByType = useMemo(() => {
-    if (!vehicles) return { tractorUnits: [], semiTrailers: [], trailers: [], dollies: [] };
-    
-    return {
-      tractorUnits: vehicles.filter(v => v.type === 'tractor_unit'),
-      semiTrailers: vehicles.filter(v => v.type === 'semi_trailer'),
-      trailers: vehicles.filter(v => v.type === 'trailer'),
-      dollies: vehicles.filter(v => v.type === 'dolly')
-    };
-  }, [vehicles]);
-
-  // Verificar quais veículos já foram selecionados para evitar duplicação
-  const selectedVehicleIds = useMemo(() => {
-    const ids = new Set<number>();
-    if (tractorUnitId) ids.add(tractorUnitId);
-    if (firstTrailerId) ids.add(firstTrailerId);
-    if (dollyId) ids.add(dollyId);
-    if (secondTrailerId) ids.add(secondTrailerId);
-    return ids;
-  }, [tractorUnitId, firstTrailerId, dollyId, secondTrailerId]);
-
-  // Filtrar veículos disponíveis (excluindo os já selecionados)
-  const availableVehiclesByType = useMemo(() => ({
-    tractorUnits: vehiclesByType.tractorUnits,
-    semiTrailers: vehiclesByType.semiTrailers.filter(v => !selectedVehicleIds.has(v.id) || v.id === firstTrailerId),
-    trailers: vehiclesByType.trailers.filter(v => !selectedVehicleIds.has(v.id) || v.id === firstTrailerId),
-    dollies: vehiclesByType.dollies.filter(v => !selectedVehicleIds.has(v.id) || v.id === dollyId)
-  }), [vehiclesByType, selectedVehicleIds, firstTrailerId, dollyId]);
-
-  // Handlers otimizados
-  const handleTractorChange = useCallback((id: number | null) => {
-    onTractorChange(id);
-  }, [onTractorChange]);
-
-  const handleFirstTrailerChange = useCallback((id: number | null) => {
-    onFirstTrailerChange(id);
-  }, [onFirstTrailerChange]);
-
-  const handleDollyChange = useCallback((id: number | null) => {
-    onDollyChange(id);
-  }, [onDollyChange]);
-
-  const handleSecondTrailerChange = useCallback((id: number | null) => {
-    onSecondTrailerChange(id);
-  }, [onSecondTrailerChange]);
-
-  // Determinar se precisa mostrar dolly e 2ª carreta baseado no tipo de licença
-  const showDolly = licenseType.includes('dolly') || licenseType.includes('rodotrem');
-  const showSecondTrailer = licenseType.includes('bitrem') || licenseType.includes('rodotrem');
-
-  // Função para obter semirreboques/trailers para 1ª carreta
-  const getFirstTrailerVehicles = () => {
-    return [...availableVehiclesByType.semiTrailers, ...availableVehiclesByType.trailers];
-  };
-
-  // Função para obter semirreboques/trailers para 2ª carreta (mesma lógica da 1ª)
-  const getSecondTrailerVehicles = () => {
-    return vehiclesByType.semiTrailers
-      .concat(vehiclesByType.trailers)
-      .filter(v => !selectedVehicleIds.has(v.id) || v.id === secondTrailerId);
-  };
+  // Definir quais campos devem ser mostrados baseado no tipo de licença
+  const showDolly = ['roadtrain_9_axles', 'dolly_only'].includes(licenseType);
+  const showSecondTrailer = ['bitrain_6_axles', 'bitrain_7_axles', 'bitrain_9_axles', 'roadtrain_9_axles'].includes(licenseType);
 
   return (
     <div className="space-y-6">
@@ -139,11 +69,6 @@ export function FrontLineVehicles({
               placeholder="Digite a placa da unidade tratora"
               className="pr-10"
               maxLength={8}
-              value={tractorUnitId ? `${tractorUnitId}` : ''}
-              onChange={(e) => {
-                // Para a unidade tratora, vamos manter a funcionalidade existente por enquanto
-                // O usuário pode digitar, mas precisamos de lógica adicional para buscar por placa
-              }}
             />
             <Button
               type="button"
@@ -170,14 +95,14 @@ export function FrontLineVehicles({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* 1ª Carreta */}
+            {/* 1ª Carreta - SEMPRE MOSTRAR COMO INPUT DE TEXTO */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-900">1ª Carreta</label>
               <p className="text-xs text-gray-600">Primeiro semirreboque da composição</p>
               <div className="relative">
                 <Input
                   type="text"
-                  placeholder="Digite a placa ou selecione a 1ª carreta"
+                  placeholder="Digite a placa da 1ª carreta"
                   className="pr-10"
                   maxLength={8}
                   value={firstTrailerManualPlate || ''}
@@ -194,7 +119,7 @@ export function FrontLineVehicles({
               </div>
             </div>
 
-            {/* Dolly - Somente para tipos que precisam */}
+            {/* Dolly - SEMPRE MOSTRAR COMO INPUT DE TEXTO quando necessário */}
             {showDolly && (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-900">Dolly</label>
@@ -220,7 +145,7 @@ export function FrontLineVehicles({
               </div>
             )}
 
-            {/* 2ª Carreta - Somente para bitrem e rodotrem */}
+            {/* 2ª Carreta - SEMPRE MOSTRAR COMO INPUT DE TEXTO quando necessário */}
             {showSecondTrailer && (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-900">2ª Carreta</label>
@@ -253,39 +178,26 @@ export function FrontLineVehicles({
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
         <h4 className="font-medium text-gray-900 mb-2">Composição selecionada:</h4>
         <div className="flex flex-wrap gap-2">
-          <span className="text-sm text-gray-700">Veículos principais:</span>
+          <span className="text-sm text-gray-700">Placas digitadas:</span>
           
-          {tractorUnitId && (
-            <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
-              <Truck className="h-3 w-3 mr-1" />
-              Unidade Principal: {vehicles?.find(v => v.id === tractorUnitId)?.plate || tractorUnitId}
-            </Badge>
-          )}
-          
-          {firstTrailerId && (
+          {firstTrailerManualPlate && (
             <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
-              1ª Carreta: {vehicles?.find(v => v.id === firstTrailerId)?.plate || firstTrailerId}
+              1ª Carreta: {firstTrailerManualPlate} (manual)
             </Badge>
           )}
           
-          {(dollyId || dollyManualPlate) && (
+          {dollyManualPlate && (
             <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-200">
-              Dolly: {dollyId ? (vehicles?.find(v => v.id === dollyId)?.plate || dollyId) : dollyManualPlate}
-              {dollyManualPlate && !dollyId && <span className="ml-1 text-xs">(manual)</span>}
+              Dolly: {dollyManualPlate} (manual)
             </Badge>
           )}
           
-          {(secondTrailerId || secondTrailerManualPlate) && (
+          {secondTrailerManualPlate && (
             <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">
-              2ª Carreta: {secondTrailerId ? (vehicles?.find(v => v.id === secondTrailerId)?.plate || secondTrailerId) : secondTrailerManualPlate}
-              {secondTrailerManualPlate && !secondTrailerId && <span className="ml-1 text-xs">(manual)</span>}
+              2ª Carreta: {secondTrailerManualPlate} (manual)
             </Badge>
           )}
         </div>
-        
-        <p className="text-xs text-gray-600 mt-2">
-          Total: {[tractorUnitId, firstTrailerId, dollyId, secondTrailerId].filter(Boolean).length} veículos
-        </p>
       </div>
     </div>
   );
