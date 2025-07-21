@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Vehicle, vehicleTypeOptions } from "@shared/schema";
+import { OptimizedVehicleList } from "@/components/vehicles/optimized-vehicle-list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -224,171 +225,11 @@ export default function AdminVehiclesPage() {
         </div>
       </div>
 
-      <Card className="mb-6">
-        <CardHeader className="pb-3">
-          <CardTitle>Filtros</CardTitle>
-          <CardDescription>
-            Utilize os filtros abaixo para encontrar veículos específicos
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-4">
-            <div className="w-full md:w-80">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-                <Input
-                  type="text"
-                  placeholder="Buscar por placa..."
-                  className="pl-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {isLoading ? (
-        <div className="flex justify-center my-10">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2 text-lg">Carregando veículos...</span>
-        </div>
-      ) : error ? (
-        <Card className="bg-red-50 border-red-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center text-red-600">
-              <AlertCircle className="h-5 w-5 mr-2" />
-              <span>Erro ao carregar veículos. Por favor, tente novamente.</span>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          {/* Visualização para desktop */}
-          <div className="hidden md:block">
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Placa</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Tara (kg)</TableHead>
-                      <TableHead>Ano CRLV</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredVehicles && filteredVehicles.length > 0 ? (
-                      filteredVehicles.map((vehicle) => (
-                        <TableRow key={vehicle.id}>
-                          <TableCell className="font-medium">{vehicle.plate}</TableCell>
-                          <TableCell>{getVehicleTypeLabel(vehicle.type)}</TableCell>
-                          <TableCell>{vehicle.tare}</TableCell>
-                          <TableCell>{vehicle.crlvYear}</TableCell>
-                          <TableCell>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              vehicle.status === "active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                            }`}>
-                              {vehicle.status === "active" ? "Ativo" : "Inativo"}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleViewDetails(vehicle)}
-                              >
-                                Ver Detalhes
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleEditVehicle(vehicle)}
-                              >
-                                <Pencil className="h-4 w-4 mr-1" />
-                                Editar
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-6 text-gray-500">
-                          Nenhum veículo encontrado
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Visualização para mobile (cards) */}
-          <div className="md:hidden space-y-4">
-            {filteredVehicles && filteredVehicles.length > 0 ? (
-              filteredVehicles.map((vehicle) => (
-                <Card key={vehicle.id} className="overflow-hidden">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="text-lg">{vehicle.plate}</CardTitle>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        vehicle.status === "active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                      }`}>
-                        {vehicle.status === "active" ? "Ativo" : "Inativo"}
-                      </span>
-                    </div>
-                    <CardDescription>{getVehicleTypeLabel(vehicle.type)}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="pb-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm font-medium text-gray-500">Tara:</span>
-                        <span className="text-sm">{vehicle.tare} kg</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm font-medium text-gray-500">Ano CRLV:</span>
-                        <span className="text-sm">{vehicle.crlvYear}</span>
-                      </div>
-                      <div className="mt-4 space-y-2">
-                        <Button 
-                          variant="outline"
-                          className="w-full" 
-                          size="sm"
-                          onClick={() => handleViewDetails(vehicle)}
-                        >
-                          Ver Detalhes
-                        </Button>
-                        <Button 
-                          variant="outline"
-                          className="w-full" 
-                          size="sm"
-                          onClick={() => handleEditVehicle(vehicle)}
-                        >
-                          <Pencil className="h-4 w-4 mr-1" />
-                          Editar
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-8">
-                  <Truck className="h-12 w-12 text-gray-400 mb-2" />
-                  <p className="text-gray-500 text-center">Nenhum veículo encontrado</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </>
-      )}
+      {/* Lista de veículos otimizada para grandes volumes de dados */}
+      <OptimizedVehicleList 
+        onEdit={handleEditVehicle}
+        onRefresh={() => queryClient.invalidateQueries({ queryKey: ["/api/admin/vehicles"] })}
+      />
 
       {/* Modal de Detalhes do Veículo */}
       {selectedVehicle && (

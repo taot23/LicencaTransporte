@@ -5551,6 +5551,256 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     }
   });
 
+  // ==========================================
+  // ENDPOINTS OTIMIZADOS PARA GRANDES VOLUMES DE DADOS
+  // ==========================================
+  
+  // Busca otimizada de veículos com paginação e filtros
+  app.get('/api/vehicles/search', requireAuth, async (req, res) => {
+    try {
+      const user = req.user!;
+      const {
+        search = '',
+        page = '1',
+        limit = '20',
+        sortBy = 'created_at',
+        sortOrder = 'desc'
+      } = req.query;
+      
+      const pageNum = Math.max(1, parseInt(page as string));
+      const limitNum = Math.min(50, Math.max(10, parseInt(limit as string))); // Máximo 50 por página
+      const offset = (pageNum - 1) * limitNum;
+      
+      console.log(`[SEARCH VEHICLES] Busca: "${search}", Página: ${pageNum}, Limite: ${limitNum}`);
+      
+      // Construir consulta otimizada com índices
+      let baseQuery = sql`
+        SELECT v.*, u.email as user_email, u.full_name as user_name,
+               COUNT(*) OVER() as total_count
+        FROM vehicles v
+        LEFT JOIN users u ON v.user_id = u.id
+      `;
+      
+      const conditions = [];
+      const params = [];
+      
+      // Filtro por usuário (apenas próprios veículos se não for admin)
+      if (!isAdministrativeRole(user.role as UserRole)) {
+        conditions.push(sql`v.user_id = ${user.id}`);
+      }
+      
+      // Filtro de busca otimizado com índices
+      if (search) {
+        const searchTerm = `%${search.toString().toUpperCase()}%`;
+        conditions.push(sql`(
+          UPPER(v.plate) LIKE ${searchTerm} OR 
+          UPPER(v.brand) LIKE ${searchTerm} OR 
+          UPPER(v.model) LIKE ${searchTerm} OR 
+          UPPER(v.type) LIKE ${searchTerm}
+        )`);
+      }
+      
+      // Construir WHERE clause
+      if (conditions.length > 0) {
+        baseQuery = sql`${baseQuery} WHERE ${sql.join(conditions, sql` AND `)}`;
+      }
+      
+      // Ordenação segura
+      const validSortFields = ['plate', 'brand', 'model', 'type', 'created_at', 'updated_at'];
+      const sortField = validSortFields.includes(sortBy as string) ? sortBy as string : 'created_at';
+      const order = sortOrder === 'asc' ? sql`ASC` : sql`DESC`;
+      
+      baseQuery = sql`${baseQuery} ORDER BY v.${sql.identifier(sortField)} ${order}`;
+      
+      // Paginação
+      baseQuery = sql`${baseQuery} LIMIT ${limitNum} OFFSET ${offset}`;
+      
+      const result = await db.execute(baseQuery);
+      const totalCount = result.rows.length > 0 ? parseInt(result.rows[0].total_count as string) : 0;
+      
+      res.json({
+        vehicles: result.rows,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: totalCount,
+          totalPages: Math.ceil(totalCount / limitNum),
+          hasNext: pageNum * limitNum < totalCount,
+          hasPrev: pageNum > 1
+        }
+      });
+    } catch (error) {
+      console.error('[SEARCH VEHICLES] Erro:', error);
+      res.status(500).json({ message: 'Erro na busca de veículos' });
+    }
+  });
+  
+  // Busca otimizada de transportadores com paginação
+  app.get('/api/transporters/search', requireAuth, async (req, res) => {
+    try {
+      const user = req.user!;
+      const {
+        search = '',
+        page = '1',
+        limit = '20',
+        sortBy = 'name',
+        sortOrder = 'asc'
+      } = req.query;
+      
+      const pageNum = Math.max(1, parseInt(page as string));
+      const limitNum = Math.min(50, Math.max(10, parseInt(limit as string)));
+      const offset = (pageNum - 1) * limitNum;
+      
+      console.log(`[SEARCH TRANSPORTERS] Busca: "${search}", Página: ${pageNum}, Limite: ${limitNum}`);
+      
+      // Construir consulta otimizada
+      let baseQuery = sql`
+        SELECT t.*, 
+               COUNT(*) OVER() as total_count,
+               COUNT(DISTINCT v.id) as vehicle_count,
+               COUNT(DISTINCT l.id) as license_count
+        FROM transporters t
+        LEFT JOIN vehicles v ON t.id = v.transporter_id
+        LEFT JOIN license_requests l ON t.id = l.transporter_id AND l.is_draft = false
+      `;
+      
+      const conditions = [];
+      
+      // Filtro de busca otimizado com múltiplos campos
+      if (search) {
+        const searchTerm = `%${search.toString().toUpperCase()}%`;
+        conditions.push(sql`(
+          UPPER(t.name) LIKE ${searchTerm} OR 
+          UPPER(t.trade_name) LIKE ${searchTerm} OR 
+          t.document_number LIKE ${searchTerm.replace('%', '').replace('%', '')} OR
+          UPPER(t.city) LIKE ${searchTerm} OR 
+          UPPER(t.state) LIKE ${searchTerm} OR
+          t.phone LIKE ${searchTerm.replace('%', '').replace('%', '')}
+        )`);
+      }
+      
+      // Verificar permissões - usuários comuns só veem transportadores vinculados
+      if (!isAdministrativeRole(user.role as UserRole)) {
+        conditions.push(sql`t.user_id = ${user.id}`);
+      }
+      
+      if (conditions.length > 0) {
+        baseQuery = sql`${baseQuery} WHERE ${sql.join(conditions, sql` AND `)}`;
+      }
+      
+      // Agrupar por transportador
+      baseQuery = sql`${baseQuery} GROUP BY t.id`;
+      
+      // Ordenação
+      const validSortFields = ['name', 'trade_name', 'document_number', 'city', 'state', 'created_at'];
+      const sortField = validSortFields.includes(sortBy as string) ? sortBy as string : 'name';
+      const order = sortOrder === 'asc' ? sql`ASC` : sql`DESC`;
+      
+      baseQuery = sql`${baseQuery} ORDER BY t.${sql.identifier(sortField)} ${order}`;
+      
+      // Paginação
+      baseQuery = sql`${baseQuery} LIMIT ${limitNum} OFFSET ${offset}`;
+      
+      const result = await db.execute(baseQuery);
+      const totalCount = result.rows.length > 0 ? parseInt(result.rows[0].total_count as string) : 0;
+      
+      res.json({
+        transporters: result.rows,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: totalCount,
+          totalPages: Math.ceil(totalCount / limitNum),
+          hasNext: pageNum * limitNum < totalCount,
+          hasPrev: pageNum > 1
+        }
+      });
+    } catch (error) {
+      console.error('[SEARCH TRANSPORTERS] Erro:', error);
+      res.status(500).json({ message: 'Erro na busca de transportadores' });
+    }
+  });
+  
+  // Busca global otimizada com limites por tipo
+  app.get('/api/search/global', requireAuth, async (req, res) => {
+    try {
+      const user = req.user!;
+      const { q: searchTerm = '', limit = '10' } = req.query;
+      
+      if (!searchTerm || searchTerm.toString().length < 2) {
+        return res.json({ results: [] });
+      }
+      
+      const maxResults = Math.min(20, Math.max(5, parseInt(limit as string)));
+      const pattern = `%${searchTerm.toString().toUpperCase()}%`;
+      
+      console.log(`[GLOBAL SEARCH] Termo: "${searchTerm}", Limite: ${maxResults}`);
+      
+      // Busca otimizada em paralelo com índices
+      const promises = [];
+      
+      // 1. Busca de veículos (limitada por permissão)
+      let vehicleQuery = sql`
+        SELECT 'vehicle' as type, v.id, v.plate as title, 
+               CONCAT(COALESCE(v.brand, ''), ' ', COALESCE(v.model, '')) as subtitle,
+               NULL as transporter_name
+        FROM vehicles v
+        WHERE UPPER(v.plate) LIKE ${pattern}
+      `;
+      
+      if (!isAdministrativeRole(user.role as UserRole)) {
+        vehicleQuery = sql`${vehicleQuery} AND v.user_id = ${user.id}`;
+      }
+      
+      vehicleQuery = sql`${vehicleQuery} ORDER BY v.plate LIMIT ${Math.floor(maxResults / 3)}`;
+      promises.push(db.execute(vehicleQuery));
+      
+      // 2. Busca de transportadores (limitada por permissão)
+      let transporterQuery = sql`
+        SELECT 'transporter' as type, t.id, t.name as title, 
+               t.document_number as subtitle, t.name as transporter_name
+        FROM transporters t
+        WHERE UPPER(t.name) LIKE ${pattern} OR t.document_number LIKE ${pattern.replace('%', '').replace('%', '')}
+      `;
+      
+      if (!isAdministrativeRole(user.role as UserRole)) {
+        transporterQuery = sql`${transporterQuery} AND t.user_id = ${user.id}`;
+      }
+      
+      transporterQuery = sql`${transporterQuery} ORDER BY t.name LIMIT ${Math.floor(maxResults / 3)}`;
+      promises.push(db.execute(transporterQuery));
+      
+      // 3. Busca de licenças
+      let licenseQuery = sql`
+        SELECT 'license' as type, l.id, l.request_number as title, 
+               l.status as subtitle, t.name as transporter_name
+        FROM license_requests l
+        LEFT JOIN transporters t ON l.transporter_id = t.id
+        WHERE l.request_number LIKE ${pattern} OR UPPER(l.main_vehicle_plate) LIKE ${pattern}
+      `;
+      
+      if (!isAdministrativeRole(user.role as UserRole)) {
+        licenseQuery = sql`${licenseQuery} AND l.user_id = ${user.id}`;
+      }
+      
+      licenseQuery = sql`${licenseQuery} ORDER BY l.created_at DESC LIMIT ${Math.floor(maxResults / 3)}`;
+      promises.push(db.execute(licenseQuery));
+      
+      const [vehicleResults, transporterResults, licenseResults] = await Promise.all(promises);
+      
+      const results = [
+        ...vehicleResults.rows,
+        ...transporterResults.rows,
+        ...licenseResults.rows
+      ].slice(0, maxResults);
+      
+      res.json({ results });
+    } catch (error) {
+      console.error('[GLOBAL SEARCH] Erro:', error);
+      res.status(500).json({ message: 'Erro na busca global' });
+    }
+  });
+
   // Servir arquivos de upload da pasta externa
   app.use('/uploads', express.static(uploadDir));
   
