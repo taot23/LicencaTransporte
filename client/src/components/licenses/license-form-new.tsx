@@ -199,6 +199,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
       firstTrailerId: draft.firstTrailerId || undefined,
       dollyId: draft.dollyId || undefined,
       secondTrailerId: draft.secondTrailerId || undefined,
+      firstTrailerManualPlate: draft.firstTrailerManualPlate || undefined,
       dollyManualPlate: draft.dollyManualPlate || undefined,
       secondTrailerManualPlate: draft.secondTrailerManualPlate || undefined,
       flatbedId: draft.flatbedId || undefined,
@@ -219,6 +220,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
       firstTrailerId: undefined,
       dollyId: undefined,
       secondTrailerId: undefined,
+      firstTrailerManualPlate: undefined,
       dollyManualPlate: undefined,
       secondTrailerManualPlate: undefined,
       flatbedId: undefined,
@@ -914,6 +916,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               firstTrailerId={form.watch("firstTrailerId")}
               dollyId={form.watch("dollyId")}
               secondTrailerId={form.watch("secondTrailerId")}
+              firstTrailerManualPlate={form.watch("firstTrailerManualPlate")}
               dollyManualPlate={form.watch("dollyManualPlate")}
               secondTrailerManualPlate={form.watch("secondTrailerManualPlate")}
               vehicles={vehicles || []}
@@ -922,6 +925,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               onFirstTrailerChange={(id) => form.setValue("firstTrailerId", id)}
               onDollyChange={(id) => form.setValue("dollyId", id)}
               onSecondTrailerChange={(id) => form.setValue("secondTrailerId", id)}
+              onFirstTrailerManualPlateChange={(plate) => form.setValue("firstTrailerManualPlate", plate || undefined)}
               onDollyManualPlateChange={(plate) => form.setValue("dollyManualPlate", plate || undefined)}
               onSecondTrailerManualPlateChange={(plate) => form.setValue("secondTrailerManualPlate", plate || undefined)}
               onCreateNewVehicle={() => setShowVehicleDialog(true)}
@@ -938,6 +942,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               firstTrailerId={form.watch("firstTrailerId")}
               dollyId={form.watch("dollyId")}
               secondTrailerId={form.watch("secondTrailerId")}
+              firstTrailerManualPlate={form.watch("firstTrailerManualPlate")}
               dollyManualPlate={form.watch("dollyManualPlate")}
               secondTrailerManualPlate={form.watch("secondTrailerManualPlate")}
               vehicles={vehicles || []}
@@ -946,6 +951,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               onFirstTrailerChange={(id) => form.setValue("firstTrailerId", id)}
               onDollyChange={(id) => form.setValue("dollyId", id)}
               onSecondTrailerChange={(id) => form.setValue("secondTrailerId", id)}
+              onFirstTrailerManualPlateChange={(plate) => form.setValue("firstTrailerManualPlate", plate || undefined)}
               onDollyManualPlateChange={(plate) => form.setValue("dollyManualPlate", plate || undefined)}
               onSecondTrailerManualPlateChange={(plate) => form.setValue("secondTrailerManualPlate", plate || undefined)}
               onCreateNewVehicle={() => setShowVehicleDialog(true)}
@@ -962,6 +968,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               firstTrailerId={form.watch("flatbedId")}
               dollyId={null}
               secondTrailerId={null}
+              firstTrailerManualPlate={undefined}
               dollyManualPlate={undefined}
               secondTrailerManualPlate={undefined}
               vehicles={vehicles || []}
@@ -970,6 +977,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               onFirstTrailerChange={(id) => form.setValue("flatbedId", id)}
               onDollyChange={() => {}}
               onSecondTrailerChange={() => {}}
+              onFirstTrailerManualPlateChange={() => {}}
               onDollyManualPlateChange={() => {}}
               onSecondTrailerManualPlateChange={() => {}}
               onCreateNewVehicle={() => setShowVehicleDialog(true)}
@@ -986,6 +994,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               firstTrailerId={form.watch("firstTrailerId")}
               dollyId={null}
               secondTrailerId={null}
+              firstTrailerManualPlate={form.watch("firstTrailerManualPlate")}
               dollyManualPlate={undefined}
               secondTrailerManualPlate={undefined}
               vehicles={vehicles || []}
@@ -994,6 +1003,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               onFirstTrailerChange={(id) => form.setValue("firstTrailerId", id)}
               onDollyChange={() => {}}
               onSecondTrailerChange={() => {}}
+              onFirstTrailerManualPlateChange={(plate) => form.setValue("firstTrailerManualPlate", plate || undefined)}
               onDollyManualPlateChange={() => {}}
               onSecondTrailerManualPlateChange={() => {}}
               onCreateNewVehicle={() => setShowVehicleDialog(true)}

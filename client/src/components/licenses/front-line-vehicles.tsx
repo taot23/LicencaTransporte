@@ -3,7 +3,9 @@ import { Vehicle } from "@shared/schema";
 import { FastVehicleSelector } from './fast-vehicle-selector';
 import { EnhancedVehicleSelector } from './enhanced-vehicle-selector';
 import { Badge } from "@/components/ui/badge";
-import { Truck } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Truck, Search } from "lucide-react";
 import { VehicleTypeImage } from "@/components/ui/vehicle-type-image";
 
 interface FrontLineVehiclesProps {
@@ -12,7 +14,8 @@ interface FrontLineVehiclesProps {
   firstTrailerId?: number | null;
   dollyId?: number | null;
   secondTrailerId?: number | null;
-  // Placas manuais para os campos que permitem entrada manual (mantidas para compatibilidade)
+  // Placas manuais para os campos que permitem entrada manual
+  firstTrailerManualPlate?: string | null;
   dollyManualPlate?: string | null;
   secondTrailerManualPlate?: string | null;
   vehicles: Vehicle[];
@@ -21,7 +24,8 @@ interface FrontLineVehiclesProps {
   onFirstTrailerChange: (id: number | null) => void;
   onDollyChange: (id: number | null) => void;
   onSecondTrailerChange: (id: number | null) => void;
-  // Handlers para placas manuais (mantidos para compatibilidade)
+  // Handlers para placas manuais
+  onFirstTrailerManualPlateChange?: (plate: string | null) => void;
   onDollyManualPlateChange?: (plate: string | null) => void;
   onSecondTrailerManualPlateChange?: (plate: string | null) => void;
   onCreateNewVehicle?: () => void;
@@ -33,6 +37,7 @@ export function FrontLineVehicles({
   firstTrailerId,
   dollyId,
   secondTrailerId,
+  firstTrailerManualPlate,
   dollyManualPlate,
   secondTrailerManualPlate,
   vehicles,
@@ -41,6 +46,7 @@ export function FrontLineVehicles({
   onFirstTrailerChange,
   onDollyChange,
   onSecondTrailerChange,
+  onFirstTrailerManualPlateChange,
   onDollyManualPlateChange,
   onSecondTrailerManualPlateChange,
   onCreateNewVehicle
@@ -156,62 +162,77 @@ export function FrontLineVehicles({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* 1ª Carreta */}
             <div className="space-y-2">
-              <FastVehicleSelector
-                title="1ª Carreta"
-                description="Primeiro semirreboque da composição"
-                placeholder="Selecione a 1ª carreta"
-                value={firstTrailerId || null}
-                vehicleOptions={getFirstTrailerVehicles()}
-                onChange={handleFirstTrailerChange}
-                onAdd={onCreateNewVehicle}
-                isLoading={isLoadingVehicles}
-                vehicleType="mixed_trailer"
-                colorTheme="green"
-                emptyMessage="Nenhum semirreboque cadastrado"
-              />
+              <label className="text-sm font-medium text-gray-900">1ª Carreta</label>
+              <p className="text-xs text-gray-600">Primeiro semirreboque da composição</p>
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Digite a placa ou selecione a 1ª carreta"
+                  className="pr-10"
+                  maxLength={8}
+                  value={firstTrailerManualPlate || ''}
+                  onChange={(e) => onFirstTrailerManualPlateChange?.(e.target.value || null)}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
 
             {/* Dolly - Somente para tipos que precisam */}
             {showDolly && (
               <div className="space-y-2">
-                <FastVehicleSelector
-                  title="Dolly"
-                  description="Dispositivo de acoplamento"
-                  placeholder="Digite a placa ou selecione o dolly"
-                  value={dollyId || null}
-                  vehicleOptions={availableVehiclesByType.dollies}
-                  onChange={handleDollyChange}
-                  onAdd={onCreateNewVehicle}
-                  isLoading={isLoadingVehicles}
-                  vehicleType="dolly"
-                  colorTheme="amber"
-                  emptyMessage="Nenhum dolly cadastrado"
-                  allowManualInput={true}
-                  manualPlate={dollyManualPlate}
-                  onManualPlateChange={onDollyManualPlateChange}
-                />
+                <label className="text-sm font-medium text-gray-900">Dolly</label>
+                <p className="text-xs text-gray-600">Dispositivo de acoplamento</p>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="Selecione o dolly"
+                    className="pr-10"
+                    maxLength={8}
+                    value={dollyManualPlate || ''}
+                    onChange={(e) => onDollyManualPlateChange?.(e.target.value || null)}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             )}
 
             {/* 2ª Carreta - Somente para bitrem e rodotrem */}
             {showSecondTrailer && (
               <div className="space-y-2">
-                <FastVehicleSelector
-                  title="2ª Carreta"
-                  description="Segundo semirreboque da composição"
-                  placeholder="Digite a placa ou selecione a 2ª carreta"
-                  value={secondTrailerId || null}
-                  vehicleOptions={getSecondTrailerVehicles()}
-                  onChange={handleSecondTrailerChange}
-                  onAdd={onCreateNewVehicle}
-                  isLoading={isLoadingVehicles}
-                  vehicleType="mixed_trailer"
-                  colorTheme="purple"
-                  emptyMessage="Nenhum semirreboque cadastrado"
-                  allowManualInput={true}
-                  manualPlate={secondTrailerManualPlate}
-                  onManualPlateChange={onSecondTrailerManualPlateChange}
-                />
+                <label className="text-sm font-medium text-gray-900">2ª Carreta</label>
+                <p className="text-xs text-gray-600">Segundo semirreboque da composição</p>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="Selecione a 2ª carreta"
+                    className="pr-10"
+                    maxLength={8}
+                    value={secondTrailerManualPlate || ''}
+                    onChange={(e) => onSecondTrailerManualPlateChange?.(e.target.value || null)}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             )}
           </div>
