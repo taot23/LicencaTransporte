@@ -17,6 +17,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useOptimizedTransporterSelector, TransporterOption } from "@/hooks/use-optimized-transporter-selector";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
+import { usePaginatedSelector } from "@/hooks/use-paginated-selector";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 
 interface OptimizedTransporterSelectorProps {
   value?: number | null;
@@ -58,10 +60,27 @@ export function OptimizedTransporterSelector({
     getTransporterById
   } = useOptimizedTransporterSelector();
 
-  // Sincronizar busca com input
+  // Paginação dos transportadores
+  const {
+    currentItems: paginatedTransporters,
+    currentPage,
+    totalPages,
+    totalItems,
+    hasNextPage,
+    hasPreviousPage,
+    goToNextPage,
+    goToPreviousPage,
+    resetPagination
+  } = usePaginatedSelector({
+    items: transporters,
+    itemsPerPage: 10
+  });
+
+  // Sincronizar busca com input e resetar paginação
   useEffect(() => {
     setSearchTerm(inputValue);
-  }, [inputValue, setSearchTerm]);
+    resetPagination();
+  }, [inputValue, setSearchTerm, resetPagination]);
 
   // Obter transportador selecionado
   const selectedTransporter = value ? getTransporterById(value) : null;
@@ -198,7 +217,7 @@ export function OptimizedTransporterSelector({
                 </div>
               )}
 
-              {hasResults && transporters.map((transporter) => (
+              {hasResults && paginatedTransporters.map((transporter) => (
                 <div
                   key={transporter.id}
                   className="flex items-center justify-between cursor-pointer p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
@@ -233,6 +252,25 @@ export function OptimizedTransporterSelector({
                 </div>
               ))}
             </div>
+            
+            {/* Controles de paginação */}
+            {hasResults && totalPages > 1 && (
+              <div className="sticky bottom-0 bg-white border-t border-gray-100 px-2 py-1">
+                <PaginationControls
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  itemsPerPage={10}
+                  onPreviousPage={goToPreviousPage}
+                  onNextPage={goToNextPage}
+                  hasPreviousPage={hasPreviousPage}
+                  hasNextPage={hasNextPage}
+                  size="sm"
+                  showItemCount={true}
+                  className="text-xs"
+                />
+              </div>
+            )}
           </div>
         )}
       </div>

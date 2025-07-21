@@ -8,6 +8,8 @@ import { User } from "@shared/schema";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { UserCircle2, AlertCircle } from "lucide-react";
+import { usePaginatedSelector } from "@/hooks/use-paginated-selector";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 
 // Definindo uma extensão do tipo User para incluir os campos adicionados pelo backend
 interface EnhancedUser extends User {

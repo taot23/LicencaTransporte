@@ -17,6 +17,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useOptimizedVehicleSelector, VehicleOption } from "@/hooks/use-optimized-vehicle-selector";
+import { usePaginatedSelector } from "@/hooks/use-paginated-selector";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 
 interface OptimizedVehicleSelectorProps {
   value?: number | null;
@@ -61,10 +63,27 @@ export function OptimizedVehicleSelector({
     autoFocus: false
   });
 
-  // Sincronizar busca com input
+  // Paginação dos veículos
+  const {
+    currentItems: paginatedVehicles,
+    currentPage,
+    totalPages,
+    totalItems,
+    hasNextPage,
+    hasPreviousPage,
+    goToNextPage,
+    goToPreviousPage,
+    resetPagination
+  } = usePaginatedSelector({
+    items: vehicles,
+    itemsPerPage: 10
+  });
+
+  // Sincronizar busca com input e resetar paginação
   useEffect(() => {
     setSearchTerm(inputValue);
-  }, [inputValue, setSearchTerm]);
+    resetPagination();
+  }, [inputValue, setSearchTerm, resetPagination]);
 
   // Obter veículo selecionado
   const selectedVehicle = value ? getVehicleById(value) : null;
@@ -220,7 +239,7 @@ export function OptimizedVehicleSelector({
 
               {hasResults && (
                 <CommandGroup>
-                  {vehicles.map((vehicle) => (
+                  {paginatedVehicles.map((vehicle) => (
                     <CommandItem
                       key={vehicle.id}
                       value={vehicle.plate}
@@ -254,6 +273,25 @@ export function OptimizedVehicleSelector({
                     </CommandItem>
                   ))}
                 </CommandGroup>
+              )}
+              
+              {/* Controles de paginação */}
+              {hasResults && totalPages > 1 && (
+                <div className="border-t p-2">
+                  <PaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={totalItems}
+                    itemsPerPage={10}
+                    onPreviousPage={goToPreviousPage}
+                    onNextPage={goToNextPage}
+                    hasPreviousPage={hasPreviousPage}
+                    hasNextPage={hasNextPage}
+                    size="sm"
+                    showItemCount={true}
+                    className="text-xs"
+                  />
+                </div>
               )}
             </CommandList>
           </Command>

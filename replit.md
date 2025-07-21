@@ -93,6 +93,18 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 - ✅ **LOGS DETALHADOS**: Sistema identifica tipo de validação (combinação específica vs placas individuais)
 - ✅ **REGRA DOS 60 DIAS**: Continua aplicando bloqueio para licenças com mais de 60 dias restantes
 
+### 21/07/2025 - Sistema de Paginação Universal para Dropdowns IMPLEMENTADO
+- ✅ **HOOK DE PAGINAÇÃO UNIVERSAL**: Criado `usePaginatedSelector` para paginação reutilizável de listas
+- ✅ **COMPONENTE DE CONTROLES**: `PaginationControls` padronizado para todos os dropdowns
+- ✅ **TRANSPORTADORES PAGINADOS**: `OptimizedTransporterSelector` agora com paginação de 10 itens por página
+- ✅ **VEÍCULOS PAGINADOS**: `OptimizedVehicleSelector` com paginação integrada nos dropdowns
+- ✅ **USUÁRIOS PAGINADOS**: Novo `PaginatedUserSelect` com busca e paginação para seleção de usuários
+- ✅ **CONTROLES VISUAIS**: Botões "Anterior/Próxima" com estados desabilitados nas bordas
+- ✅ **CONTADOR DE ITENS**: Mostra "Mostrando X-Y de Z itens" e "Página A de B"
+- ✅ **RESET AUTOMÁTICO**: Paginação resetada automaticamente quando busca muda
+- ✅ **CLICK OUTSIDE**: Dropdown fecha quando clica fora da área de seleção
+- ✅ **PÁGINA DE TESTE**: `/test-selectors` atualizada com todos os componentes paginados
+
 ### 21/07/2025 - Campos de Seleção de Veículos Otimizados para Formulários IMPLEMENTADO
 - ✅ **ENDPOINTS ESPECÍFICOS POR TIPO**: Endpoints dedicados para unidades tratoras e semirreboques
 - ✅ **API OTIMIZADA**: `/api/vehicles/tractor-units`, `/api/vehicles/semi-trailers`, `/api/vehicles/search-plate`

@@ -3,6 +3,7 @@ import { AdminLayout } from "@/components/layout/admin-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TractorUnitSelector, SemiTrailerSelector } from "@/components/forms/optimized-vehicle-selector";
 import { OptimizedTransporterSelector } from "@/components/forms/optimized-transporter-selector";
+import { PaginatedUserSelect } from "@/components/admin/paginated-user-select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Truck, Settings, Building2 } from "lucide-react";
@@ -12,9 +13,11 @@ export default function TestOptimizedSelectorsPage() {
   const [firstTrailerId, setFirstTrailerId] = useState<number | null>(null);
   const [secondTrailerId, setSecondTrailerId] = useState<number | null>(null);
   const [transporterId, setTransporterId] = useState<number | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
 
   const handleSubmit = () => {
     console.log('Dados selecionados:', {
+      user: userId,
       transporter: transporterId,
       tractorUnit: tractorUnitId,
       firstTrailer: firstTrailerId,
@@ -23,6 +26,7 @@ export default function TestOptimizedSelectorsPage() {
   };
 
   const handleReset = () => {
+    setUserId(null);
     setTransporterId(null);
     setTractorUnitId(null);
     setFirstTrailerId(null);
@@ -60,6 +64,14 @@ export default function TestOptimizedSelectorsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Usuário - NOVO CAMPO PAGINADO */}
+              <PaginatedUserSelect
+                selectedUserId={userId}
+                onChange={setUserId}
+                label="Usuário Responsável"
+                description="Seletor de usuários com busca paginada para melhor performance"
+              />
+
               {/* Transportador - NOVO CAMPO OTIMIZADO */}
               <OptimizedTransporterSelector
                 value={transporterId}
