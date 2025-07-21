@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { LicenseRequest, InsertLicenseRequest } from "@shared/schema";
-import { LicenseForm } from "@/components/licenses/license-form-new";
+import { LicenseForm } from "@/components/licenses/license-form";
 import { LicenseList } from "@/components/licenses/license-list";
 import { useToast } from "@/hooks/use-toast";
 import { useWebSocket } from "@/hooks/use-websocket";
