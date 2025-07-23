@@ -76,6 +76,19 @@ export function OptimizedTransporterSelector({
     itemsPerPage: 10
   });
 
+  // Debug para paginação
+  useEffect(() => {
+    console.log('[TRANSPORTER PAGINATION DEBUG]', {
+      totalTransporters: transporters.length,
+      currentPage,
+      totalPages,
+      hasNextPage,
+      hasPreviousPage,
+      paginatedCount: paginatedTransporters.length,
+      searchTerm: inputValue
+    });
+  }, [transporters, currentPage, totalPages, hasNextPage, hasPreviousPage, paginatedTransporters, inputValue]);
+
   // Sincronizar busca com input e resetar paginação
   useEffect(() => {
     setSearchTerm(inputValue);
@@ -261,8 +274,14 @@ export function OptimizedTransporterSelector({
                   totalPages={totalPages}
                   totalItems={totalItems}
                   itemsPerPage={10}
-                  onPreviousPage={goToPreviousPage}
-                  onNextPage={goToNextPage}
+                  onPreviousPage={() => {
+                    console.log('[TRANSPORTER PAGINATION] Botão Anterior clicado');
+                    goToPreviousPage();
+                  }}
+                  onNextPage={() => {
+                    console.log('[TRANSPORTER PAGINATION] Botão Próxima clicado');
+                    goToNextPage();
+                  }}
                   hasPreviousPage={hasPreviousPage}
                   hasNextPage={hasNextPage}
                   size="sm"
