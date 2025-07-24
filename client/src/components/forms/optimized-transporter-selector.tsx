@@ -92,14 +92,17 @@ export function OptimizedTransporterSelector({
     });
   }, [transporters, currentPage, totalPages, hasNextPage, hasPreviousPage, paginatedTransporters, inputValue, hasResults, open]);
 
-  // Sincronizar busca com input e resetar paginação apenas quando muda o termo de busca
+  // Sincronizar busca com input 
   useEffect(() => {
     setSearchTerm(inputValue);
   }, [inputValue, setSearchTerm]);
 
-  // Resetar paginação apenas quando o termo de busca muda realmente
+  // Resetar paginação apenas quando o termo de busca muda E não está vazio (primeira busca)
   useEffect(() => {
-    resetPagination();
+    if (searchTerm.length > 0) {
+      console.log('[TRANSPORTER PAGINATION] Resetando paginação devido a mudança no searchTerm:', searchTerm);
+      resetPagination();
+    }
   }, [searchTerm, resetPagination]);
 
   // Obter transportador selecionado
