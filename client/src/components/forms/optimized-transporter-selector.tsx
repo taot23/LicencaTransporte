@@ -92,11 +92,15 @@ export function OptimizedTransporterSelector({
     });
   }, [transporters, currentPage, totalPages, hasNextPage, hasPreviousPage, paginatedTransporters, inputValue, hasResults, open]);
 
-  // Sincronizar busca com input e resetar paginação
+  // Sincronizar busca com input e resetar paginação apenas quando muda o termo de busca
   useEffect(() => {
     setSearchTerm(inputValue);
+  }, [inputValue, setSearchTerm]);
+
+  // Resetar paginação apenas quando o termo de busca muda realmente
+  useEffect(() => {
     resetPagination();
-  }, [inputValue, setSearchTerm, resetPagination]);
+  }, [searchTerm, resetPagination]);
 
   // Obter transportador selecionado
   const selectedTransporter = value ? getTransporterById(value) : null;
@@ -278,12 +282,14 @@ export function OptimizedTransporterSelector({
                   totalItems={totalItems}
                   itemsPerPage={3}
                   onPreviousPage={() => {
-                    console.log('[TRANSPORTER PAGINATION] Botão Anterior clicado');
+                    console.log('[TRANSPORTER PAGINATION] Botão Anterior clicado - Página atual:', currentPage);
                     goToPreviousPage();
+                    console.log('[TRANSPORTER PAGINATION] Após goToPreviousPage - Nova página:', currentPage);
                   }}
                   onNextPage={() => {
-                    console.log('[TRANSPORTER PAGINATION] Botão Próxima clicado');
+                    console.log('[TRANSPORTER PAGINATION] Botão Próxima clicado - Página atual:', currentPage);
                     goToNextPage();
+                    console.log('[TRANSPORTER PAGINATION] Após goToNextPage - Nova página:', currentPage);
                   }}
                   hasPreviousPage={hasPreviousPage}
                   hasNextPage={hasNextPage}

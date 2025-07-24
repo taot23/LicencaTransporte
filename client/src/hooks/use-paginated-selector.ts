@@ -37,14 +37,24 @@ export function usePaginatedSelector<T>({
   const hasPreviousPage = currentPage > 1;
 
   const goToNextPage = () => {
+    console.log('[HOOK] goToNextPage chamado - hasNextPage:', hasNextPage, 'currentPage:', currentPage, 'totalPages:', totalPages);
     if (hasNextPage) {
-      setCurrentPage(prev => prev + 1);
+      setCurrentPage(prev => {
+        const newPage = prev + 1;
+        console.log('[HOOK] Mudando de página', prev, 'para', newPage);
+        return newPage;
+      });
     }
   };
 
   const goToPreviousPage = () => {
+    console.log('[HOOK] goToPreviousPage chamado - hasPreviousPage:', hasPreviousPage, 'currentPage:', currentPage);
     if (hasPreviousPage) {
-      setCurrentPage(prev => prev - 1);
+      setCurrentPage(prev => {
+        const newPage = prev - 1;
+        console.log('[HOOK] Mudando de página', prev, 'para', newPage);
+        return newPage;
+      });
     }
   };
 
