@@ -138,6 +138,11 @@ export class TransactionalStorage implements IStorage {
       .from(transporters)
       .where(eq(transporters.userId, userId));
   }
+
+  // Alias para compatibilidade com outros métodos
+  async getUserTransporters(userId: number): Promise<Transporter[]> {
+    return this.getTransportersByUserId(userId);
+  }
   
   async createTransporter(transporterData: InsertTransporter): Promise<Transporter> {
     const [transporter] = await db
