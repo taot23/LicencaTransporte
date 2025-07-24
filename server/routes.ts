@@ -1025,14 +1025,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let transporters = [];
       const maxLimit = Math.min(parseInt(limit as string), 50); // Máximo 50 para performance
       
+      // Obter transportadores vinculados ao usuário (não todos do sistema)
+      let userTransporters = [];
+      if (isAdministrativeRole(user.role)) {
+        // Usuários administrativos veem todos os transportadores
+        userTransporters = await storage.getAllTransporters();
+      } else {
+        // Usuários comuns veem apenas transportadores vinculados
+        userTransporters = await storage.getUserTransporters(user.id);
+      }
+      
       // Buscar transportadores com base no termo de busca
       if (typeof search === 'string' && search.trim().length > 0) {
         const searchTerm = search.trim().toLowerCase();
         
-        // Query para busca por nome ou documento
-        const allTransporters = await storage.getAllTransporters();
-        
-        transporters = allTransporters.filter(transporter => {
+        transporters = userTransporters.filter(transporter => {
           // Busca por nome (case insensitive)
           const nameMatch = transporter.name.toLowerCase().includes(searchTerm);
           
@@ -1049,12 +1056,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }).slice(0, maxLimit);
         
       } else {
-        // Se não há termo de busca, retornar todos (limitado)
-        const allTransporters = await storage.getAllTransporters();
-        transporters = allTransporters.slice(0, maxLimit);
+        // Se não há termo de busca, retornar os transportadores do usuário (limitado)
+        transporters = userTransporters.slice(0, maxLimit);
       }
       
-      console.log(`[TRANSPORTER SEARCH] Encontrados ${transporters.length} transportadores`);
+      console.log(`[TRANSPORTER SEARCH] Encontrados ${transporters.length} transportadores para usuário ${user.role}`);
       
       res.json({
         transporters,
@@ -5691,92 +5697,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       res.status(500).json({ message: 'Erro na busca de veículos' });
     }
   });
-  
-  // Busca otimizada de transportadores com paginação
-  app.get('/api/transporters/search', requireAuth, async (req, res) => {
-    try {
-      const user = req.user!;
-      const {
-        search = '',
-        page = '1',
-        limit = '20',
-        sortBy = 'name',
-        sortOrder = 'asc'
-      } = req.query;
-      
-      const pageNum = Math.max(1, parseInt(page as string));
-      const limitNum = Math.min(50, Math.max(10, parseInt(limit as string)));
-      const offset = (pageNum - 1) * limitNum;
-      
-      console.log(`[SEARCH TRANSPORTERS] Busca: "${search}", Página: ${pageNum}, Limite: ${limitNum}`);
-      
-      // Construir consulta otimizada
-      let baseQuery = sql`
-        SELECT t.*, 
-               COUNT(*) OVER() as total_count,
-               COUNT(DISTINCT v.id) as vehicle_count,
-               COUNT(DISTINCT l.id) as license_count
-        FROM transporters t
-        LEFT JOIN vehicles v ON t.id = v.transporter_id
-        LEFT JOIN license_requests l ON t.id = l.transporter_id AND l.is_draft = false
-      `;
-      
-      const conditions = [];
-      
-      // Filtro de busca otimizado com múltiplos campos
-      if (search) {
-        const searchTerm = `%${search.toString().toUpperCase()}%`;
-        conditions.push(sql`(
-          UPPER(t.name) LIKE ${searchTerm} OR 
-          UPPER(t.trade_name) LIKE ${searchTerm} OR 
-          t.document_number LIKE ${searchTerm.replace('%', '').replace('%', '')} OR
-          UPPER(t.city) LIKE ${searchTerm} OR 
-          UPPER(t.state) LIKE ${searchTerm} OR
-          t.phone LIKE ${searchTerm.replace('%', '').replace('%', '')}
-        )`);
-      }
-      
-      // Verificar permissões - usuários comuns só veem transportadores vinculados
-      if (!isAdministrativeRole(user.role as UserRole)) {
-        conditions.push(sql`t.user_id = ${user.id}`);
-      }
-      
-      if (conditions.length > 0) {
-        baseQuery = sql`${baseQuery} WHERE ${sql.join(conditions, sql` AND `)}`;
-      }
-      
-      // Agrupar por transportador
-      baseQuery = sql`${baseQuery} GROUP BY t.id`;
-      
-      // Ordenação
-      const validSortFields = ['name', 'trade_name', 'document_number', 'city', 'state', 'created_at'];
-      const sortField = validSortFields.includes(sortBy as string) ? sortBy as string : 'name';
-      const order = sortOrder === 'asc' ? sql`ASC` : sql`DESC`;
-      
-      baseQuery = sql`${baseQuery} ORDER BY t.${sql.identifier(sortField)} ${order}`;
-      
-      // Paginação
-      baseQuery = sql`${baseQuery} LIMIT ${limitNum} OFFSET ${offset}`;
-      
-      const result = await db.execute(baseQuery);
-      const totalCount = result.rows.length > 0 ? parseInt(result.rows[0].total_count as string) : 0;
-      
-      res.json({
-        transporters: result.rows,
-        pagination: {
-          page: pageNum,
-          limit: limitNum,
-          total: totalCount,
-          totalPages: Math.ceil(totalCount / limitNum),
-          hasNext: pageNum * limitNum < totalCount,
-          hasPrev: pageNum > 1
-        }
-      });
-    } catch (error) {
-      console.error('[SEARCH TRANSPORTERS] Erro:', error);
-      res.status(500).json({ message: 'Erro na busca de transportadores' });
-    }
-  });
+
   
   // Busca global otimizada com limites por tipo
   app.get('/api/search/global', requireAuth, async (req, res) => {
