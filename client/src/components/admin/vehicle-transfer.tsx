@@ -250,6 +250,10 @@ export function VehicleTransfer() {
                 onPageChange={setCurrentPage}
                 totalItems={pagination.total}
                 itemsPerPage={pagination.itemsPerPage}
+                hasPrev={pagination.hasPrev}
+                hasNext={pagination.hasNext}
+                startItem={pagination.startItem}
+                endItem={pagination.endItem}
                 itemName="veículo"
               />
             )}
@@ -300,6 +304,11 @@ export function VehicleTransfer() {
                 totalPages={pagination.totalPages}
                 onPageChange={setCurrentPage}
                 totalItems={pagination.total}
+                itemsPerPage={pagination.itemsPerPage}
+                hasPrev={pagination.hasPrev}
+                hasNext={pagination.hasNext}
+                startItem={pagination.startItem}
+                endItem={pagination.endItem}
                 itemName="veículo"
               />
             )}
