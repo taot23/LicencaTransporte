@@ -73,6 +73,7 @@ export interface IStorage {
     documentNumber: string,
   ): Promise<Transporter | undefined>;
   getAllTransporters(): Promise<Transporter[]>;
+  getUserTransporters(userId: number): Promise<Transporter[]>;
   createTransporter(transporter: InsertTransporter): Promise<Transporter>;
   updateTransporter(
     id: number,
@@ -379,6 +380,12 @@ export class MemStorage implements IStorage {
 
   async getAllTransporters(): Promise<Transporter[]> {
     return Array.from(this.transporters.values());
+  }
+
+  async getUserTransporters(userId: number): Promise<Transporter[]> {
+    return Array.from(this.transporters.values()).filter(
+      (transporter) => transporter.userId === userId
+    );
   }
 
   async createTransporter(
@@ -1237,6 +1244,10 @@ export class DatabaseStorage implements IStorage {
 
   async getAllTransporters(): Promise<Transporter[]> {
     return db.select().from(transporters);
+  }
+
+  async getUserTransporters(userId: number): Promise<Transporter[]> {
+    return db.select().from(transporters).where(eq(transporters.userId, userId));
   }
 
   async createTransporter(
