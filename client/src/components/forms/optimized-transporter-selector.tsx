@@ -60,7 +60,7 @@ export function OptimizedTransporterSelector({
     getTransporterById
   } = useOptimizedTransporterSelector();
 
-  // Paginação dos transportadores (3 por página para demonstrar)
+  // Paginação dos transportadores
   const {
     currentItems: paginatedTransporters,
     currentPage,
@@ -73,24 +73,10 @@ export function OptimizedTransporterSelector({
     resetPagination
   } = usePaginatedSelector({
     items: transporters,
-    itemsPerPage: 3
+    itemsPerPage: 10
   });
 
-  // Debug para paginação
-  useEffect(() => {
-    console.log('[TRANSPORTER PAGINATION DEBUG]', {
-      totalTransporters: transporters.length,
-      currentPage,
-      totalPages,
-      hasNextPage,
-      hasPreviousPage,
-      paginatedCount: paginatedTransporters.length,
-      searchTerm: inputValue,
-      hasResults: hasResults,
-      shouldShowPagination: hasResults && totalPages > 1,
-      open: open
-    });
-  }, [transporters, currentPage, totalPages, hasNextPage, hasPreviousPage, paginatedTransporters, inputValue, hasResults, open]);
+
 
   // Sincronizar busca com input 
   useEffect(() => {
@@ -100,7 +86,6 @@ export function OptimizedTransporterSelector({
   // Resetar paginação apenas quando o termo de busca muda E não está vazio (primeira busca)
   useEffect(() => {
     if (searchTerm.length > 0) {
-      console.log('[TRANSPORTER PAGINATION] Resetando paginação devido a mudança no searchTerm:', searchTerm);
       resetPagination();
     }
   }, [searchTerm, resetPagination]);

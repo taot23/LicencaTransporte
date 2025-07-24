@@ -44,6 +44,16 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 24/07/2025 - CORREÇÃO CRÍTICA DA PAGINAÇÃO DE TRANSPORTADORES RESOLVIDA
+- ✅ **PROBLEMA IDENTIFICADO**: useEffect estava resetando paginação constantemente causando loop infinito
+- ✅ **SOLUÇÃO IMPLEMENTADA**: Modificado reset para ocorrer apenas quando há busca ativa (searchTerm.length > 0)
+- ✅ **PAGINAÇÃO FUNCIONAL**: Botões "Anterior/Próxima" agora funcionam corretamente no dropdown de transportadores
+- ✅ **CONFIGURAÇÃO PRODUÇÃO**: Alterado de 3 para 10 registros por página conforme padrão do sistema
+- ✅ **NAVEGAÇÃO LIVRE**: Permitida navegação entre páginas quando não há termo de busca
+- ✅ **LOGS REMOVIDOS**: Limpeza dos logs de debug após confirmação do funcionamento
+- ✅ **TESTE CONFIRMADO**: Paginação testada e validada pelo usuário em ambiente real
+- ✅ **OptimizedTransporterSelector**: Componente completamente funcional com paginação robusta
+
 ### 21/07/2025 - ENTRADA MANUAL DE PLACAS PARA DOLLY E 2ª CARRETA IMPLEMENTADA
 - ✅ **FUNCIONALIDADE COMPLETA**: Sistema de entrada manual de placas para campos "dolly" e "2ª Carreta"
 - ✅ **ENHANCED VEHICLE SELECTOR**: Componente permite tanto seleção via dropdown quanto entrada manual de placas
