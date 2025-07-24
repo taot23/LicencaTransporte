@@ -60,7 +60,7 @@ export function OptimizedTransporterSelector({
     getTransporterById
   } = useOptimizedTransporterSelector();
 
-  // Paginação dos transportadores
+  // Paginação dos transportadores (3 por página para demonstrar)
   const {
     currentItems: paginatedTransporters,
     currentPage,
@@ -73,7 +73,7 @@ export function OptimizedTransporterSelector({
     resetPagination
   } = usePaginatedSelector({
     items: transporters,
-    itemsPerPage: 10
+    itemsPerPage: 3
   });
 
   // Debug para paginação
@@ -85,9 +85,12 @@ export function OptimizedTransporterSelector({
       hasNextPage,
       hasPreviousPage,
       paginatedCount: paginatedTransporters.length,
-      searchTerm: inputValue
+      searchTerm: inputValue,
+      hasResults: hasResults,
+      shouldShowPagination: hasResults && totalPages > 1,
+      open: open
     });
-  }, [transporters, currentPage, totalPages, hasNextPage, hasPreviousPage, paginatedTransporters, inputValue]);
+  }, [transporters, currentPage, totalPages, hasNextPage, hasPreviousPage, paginatedTransporters, inputValue, hasResults, open]);
 
   // Sincronizar busca com input e resetar paginação
   useEffect(() => {
@@ -273,7 +276,7 @@ export function OptimizedTransporterSelector({
                   currentPage={currentPage}
                   totalPages={totalPages}
                   totalItems={totalItems}
-                  itemsPerPage={10}
+                  itemsPerPage={3}
                   onPreviousPage={() => {
                     console.log('[TRANSPORTER PAGINATION] Botão Anterior clicado');
                     goToPreviousPage();
