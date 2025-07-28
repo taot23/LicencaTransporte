@@ -35,9 +35,22 @@ const getBodyTypeLabel = (type?: VehicleBodyType) => {
   const types: Record<string, string> = {
     open: "Aberta",
     dump: "Basculante",
-    container: "Porta-Container",
+    cattle: "Boiadeiro",
+    sugar_cane: "Cana de Açúcar",
+    container: "Container",
     closed: "Fechada",
+    mechanical_operational: "Mecânico operacional",
+    platform: "Plataforma",
+    flatbed: "Prancha",
+    car_carrier: "Prancha - Cegonha",
+    extendable_flatbed: "Prancha Extensiva",
+    dump_truck: "Rodo Caçamba",
+    roll_on_roll_off: "Rollon Rollof",
+    silo: "SILO",
+    mobile_substation: "Subestação Móvel",
     tank: "Tanque",
+    log_carrier: "Tran Toras",
+    vtav: "VTAV",
   };
   return types[type] || type;
 };

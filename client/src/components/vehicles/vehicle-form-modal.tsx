@@ -44,11 +44,24 @@ const VEHICLE_TYPES = {
 
 // Constante para tipos de carroceria
 const BODY_TYPES = {
-  open: "ABERTA",
-  dump: "BASCULANTE",
-  container: "PORTA-CONTÊINER",
-  closed: "FECHADA",
-  tank: "TANQUE"
+  open: "Aberta",
+  dump: "Basculante",
+  cattle: "Boiadeiro",
+  sugar_cane: "Cana de Açúcar",
+  container: "Container",
+  closed: "Fechada",
+  mechanical_operational: "Mecânico operacional",
+  platform: "Plataforma",
+  flatbed: "Prancha",
+  car_carrier: "Prancha - Cegonha",
+  extendable_flatbed: "Prancha Extensiva",
+  dump_truck: "Rodo Caçamba",
+  roll_on_roll_off: "Rollon Rollof",
+  silo: "SILO",
+  mobile_substation: "Subestação Móvel",
+  tank: "Tanque",
+  log_carrier: "Tran Toras",
+  vtav: "VTAV"
 };
 
 // Esquema estendido para validação do formulário

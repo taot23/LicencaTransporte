@@ -99,13 +99,24 @@ const vehicleTypeOptions = [
 
 // Opções de tipos de carroceria
 const bodyTypeOptions = [
-  { value: "container", label: "Container" },
-  { value: "flatbed", label: "Prancha" },
-  { value: "tanker", label: "Tanque" },
-  { value: "refrigerated", label: "Frigorífico" },
-  { value: "covered", label: "Baú" },
   { value: "open", label: "Aberta" },
-  { value: "other", label: "Outros" },
+  { value: "dump", label: "Basculante" },
+  { value: "cattle", label: "Boiadeiro" },
+  { value: "sugar_cane", label: "Cana de Açúcar" },
+  { value: "container", label: "Container" },
+  { value: "closed", label: "Fechada" },
+  { value: "mechanical_operational", label: "Mecânico operacional" },
+  { value: "platform", label: "Plataforma" },
+  { value: "flatbed", label: "Prancha" },
+  { value: "car_carrier", label: "Prancha - Cegonha" },
+  { value: "extendable_flatbed", label: "Prancha Extensiva" },
+  { value: "dump_truck", label: "Rodo Caçamba" },
+  { value: "roll_on_roll_off", label: "Rollon Rollof" },
+  { value: "silo", label: "SILO" },
+  { value: "mobile_substation", label: "Subestação Móvel" },
+  { value: "tank", label: "Tanque" },
+  { value: "log_carrier", label: "Tran Toras" },
+  { value: "vtav", label: "VTAV" },
 ];
 
 export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) {

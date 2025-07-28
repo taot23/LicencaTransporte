@@ -477,11 +477,24 @@ export const vehicleTypeOptions = [
 
 // Enum para tipos de carroceria
 export const vehicleBodyTypeEnum = z.enum([
-  "open", // ABERTA
-  "dump", // BASCULANTE
-  "container", // PORTA-CONTÊINER
-  "closed", // FECHADA
-  "tank", // TANQUE
+  "open", // Aberta
+  "dump", // Basculante
+  "cattle", // Boiadeiro
+  "sugar_cane", // Cana de Açúcar
+  "container", // Container
+  "closed", // Fechada
+  "mechanical_operational", // Mecânico operacional
+  "platform", // Plataforma
+  "flatbed", // Prancha
+  "car_carrier", // Prancha - Cegonha
+  "extendable_flatbed", // Prancha Extensiva
+  "dump_truck", // Rodo Caçamba
+  "roll_on_roll_off", // Rollon Rollof
+  "silo", // SILO
+  "mobile_substation", // Subestação Móvel
+  "tank", // Tanque
+  "log_carrier", // Tran Toras
+  "vtav", // VTAV
 ]);
 
 export type VehicleBodyType = z.infer<typeof vehicleBodyTypeEnum>;
@@ -512,11 +525,24 @@ export type StatusHistory = typeof statusHistories.$inferSelect;
 export type InsertStatusHistory = z.infer<typeof insertStatusHistorySchema>;
 
 export const bodyTypeOptions = [
-  { value: "open", label: "ABERTA" },
-  { value: "dump", label: "BASCULANTE" },
-  { value: "container", label: "PORTA-CONTÊINER" },
-  { value: "closed", label: "FECHADA" },
-  { value: "tank", label: "TANQUE" },
+  { value: "open", label: "Aberta" },
+  { value: "dump", label: "Basculante" },
+  { value: "cattle", label: "Boiadeiro" },
+  { value: "sugar_cane", label: "Cana de Açúcar" },
+  { value: "container", label: "Container" },
+  { value: "closed", label: "Fechada" },
+  { value: "mechanical_operational", label: "Mecânico operacional" },
+  { value: "platform", label: "Plataforma" },
+  { value: "flatbed", label: "Prancha" },
+  { value: "car_carrier", label: "Prancha - Cegonha" },
+  { value: "extendable_flatbed", label: "Prancha Extensiva" },
+  { value: "dump_truck", label: "Rodo Caçamba" },
+  { value: "roll_on_roll_off", label: "Rollon Rollof" },
+  { value: "silo", label: "SILO" },
+  { value: "mobile_substation", label: "Subestação Móvel" },
+  { value: "tank", label: "Tanque" },
+  { value: "log_carrier", label: "Tran Toras" },
+  { value: "vtav", label: "VTAV" },
 ];
 
 // Vehicle Models - Cadastro de Modelos de Veículos

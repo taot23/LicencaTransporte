@@ -44,6 +44,18 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 28/07/2025 - ATUALIZAÇÃO COMPLETA DOS TIPOS DE CARROCERIA CONFORME ESPECIFICAÇÃO
+- ✅ **LISTA OFICIAL IMPLEMENTADA**: Atualizada para 18 tipos de carroceria conforme solicitação do usuário
+- ✅ **SCHEMA PRINCIPAL**: vehicleBodyTypeEnum atualizado em shared/schema.ts com todos os novos tipos
+- ✅ **OPÇÕES DE INTERFACE**: bodyTypeOptions expandido com labels corretos em português
+- ✅ **COMPONENTES ATUALIZADOS**: 
+  - vehicle-form.tsx: bodyTypeOptions atualizado com lista completa
+  - vehicle-form-modal.tsx: BODY_TYPES atualizado com 18 tipos
+  - mobile-vehicles.tsx: getBodyTypeLabel expandido para todos os tipos
+- ✅ **TIPOS INCLUÍDOS**: Aberta, Basculante, Boiadeiro, Cana de Açúcar, Container, Fechada, Mecânico operacional, Plataforma, Prancha, Prancha - Cegonha, Prancha Extensiva, Rodo Caçamba, Rollon Rollof, SILO, Subestação Móvel, Tanque, Tran Toras, VTAV
+- ✅ **MAPEAMENTOS CONSISTENTES**: Todos os mapeamentos de tipos atualizados em componentes de formulário e exibição
+- ✅ **RETROCOMPATIBILIDADE**: Mantida compatibilidade com dados existentes no banco
+
 ### 24/07/2025 - CORREÇÃO CRÍTICA DA PAGINAÇÃO DE TRANSPORTADORES RESOLVIDA
 - ✅ **PROBLEMA IDENTIFICADO**: useEffect estava resetando paginação constantemente causando loop infinito
 - ✅ **SOLUÇÃO IMPLEMENTADA**: Modificado reset para ocorrer apenas quando há busca ativa (searchTerm.length > 0)
