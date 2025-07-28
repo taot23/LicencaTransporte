@@ -44,6 +44,16 @@ Sistema robusto de gestão de licenças AET (Autorização Especial de Trânsito
 
 ## Mudanças Recentes
 
+### 28/07/2025 - CORREÇÃO CRÍTICA BULK IMPORT: TIPOS DE CARROCERIA DINÂMICOS IMPLEMENTADOS
+- ✅ **PROBLEMA RESOLVIDO**: Sistema de importação em massa não processava tipos de carroceria corretamente (todos como 'flatbed')
+- ✅ **MAPEAMENTO BACKEND CRIADO**: Adicionado bodyTypeMapping completo no server/routes.ts para traduzir labels em português
+- ✅ **TEMPLATE CSV ATUALIZADO**: Incluída coluna 'tipo_carroceria' no modelo de importação com exemplos corretos
+- ✅ **VALIDAÇÃO APRIMORADA**: Campo tipo_carroceria incluído como coluna opcional na validação CSV
+- ✅ **LÓGICA INTELIGENTE**: Sistema usa tipo especificado ou aplica padrão baseado no tipo do veículo
+- ✅ **LOGS DETALHADOS**: Adicionados logs de debug para rastreamento do processamento de tipos
+- ✅ **PADRÕES AUTOMÁTICOS**: Unidade tratora=null, Semirreboque/Reboque=container, Prancha=flatbed, Outros=closed
+- ✅ **INTEGRAÇÃO COMPLETA**: Funciona com todos os 18 tipos de carroceria já implementados no sistema
+
 ### 28/07/2025 - ATUALIZAÇÃO COMPLETA DOS TIPOS DE CARROCERIA CONFORME ESPECIFICAÇÃO
 - ✅ **LISTA OFICIAL IMPLEMENTADA**: Atualizada para 18 tipos de carroceria conforme solicitação do usuário
 - ✅ **SCHEMA PRINCIPAL**: vehicleBodyTypeEnum atualizado em shared/schema.ts com todos os novos tipos

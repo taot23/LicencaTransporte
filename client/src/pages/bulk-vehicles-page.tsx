@@ -133,9 +133,10 @@ export default function BulkVehiclesPage() {
 
   const downloadTemplate = () => {
     const template = [
-      'placa;tipo_veiculo;marca;modelo;ano_fabricacao;ano_crlv;renavam;cmt;tara;eixo;transportador_cpf_cnpj',
-      'ABC1D23;Unidade Tratora (Cavalo);Scania;R440;2018;2024;12345678901;45000;10500;5;12345678000199',
-      'DEF4E56;Primeira Carreta;Randon;RK-430SR;2019;2024;12345678902;25000;8500;3;12345678000199'
+      'placa;tipo_veiculo;tipo_carroceria;marca;modelo;ano_fabricacao;ano_crlv;renavam;cmt;tara;eixo;transportador_cpf_cnpj',
+      'ABC1D23;Unidade Tratora (Cavalo);;Scania;R440;2018;2024;12345678901;45000;10500;5;12345678000199',
+      'DEF4E56;Semirreboque;Container;Randon;RK-430SR;2019;2024;12345678902;25000;8500;3;12345678000199',
+      'GHI7J89;Reboque;Prancha;Facchini;FB-2SR;2020;2024;12345678903;30000;9000;3;12345678000199'
     ].join('\n');
 
     const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });

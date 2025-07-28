@@ -1,0 +1,6 @@
+placa;tipo_veiculo;tipo_carroceria;marca;modelo;ano_fabricacao;ano_crlv;renavam;cmt;tara;eixo;transportador_cpf_cnpj
+TEST001;Unidade Tratora (Cavalo);;Scania;R440;2020;2024;11111111111;45000;10500;5;12345678000199
+TEST002;Semirreboque;Container;Randon;RK-430SR;2019;2024;22222222222;25000;8500;3;12345678000199
+TEST003;Semirreboque;Tanque;Facchini;TB-2SR;2021;2024;33333333333;30000;9000;3;12345678000199
+TEST004;Reboque;Prancha;Facchini;FB-2SR;2020;2024;44444444444;28000;8000;3;12345678000199
+TEST005;Semirreboque;Fechada;Guerra;GF-2SR;2022;2024;55555555555;26000;8200;3;12345678000199

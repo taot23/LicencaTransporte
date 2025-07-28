@@ -3427,7 +3427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'placa', 'tipo_veiculo', 'marca', 'modelo', 'ano_fabricacao',
         'ano_crlv', 'renavam', 'cmt', 'tara', 'transportador_cpf_cnpj'
       ];
-      const optionalColumns = ['eixo']; // Eixo é opcional, padrão 2
+      const optionalColumns = ['eixo', 'tipo_carroceria']; // Eixo é opcional (padrão 2), tipo_carroceria é opcional
 
       // Validar se todas as colunas obrigatórias estão presentes
       const missingColumns = requiredColumns.filter(col => !header.includes(col));
@@ -3438,7 +3438,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('[BULK IMPORT] Erro: Colunas faltando');
         return res.status(400).json({
           success: false,
-          message: `Colunas obrigatórias faltando: ${missingColumns.join(', ')}. Formato esperado: placa;tipo_veiculo;marca;modelo;ano_fabricacao;ano_crlv;renavam;cmt;tara;eixo;transportador_cpf_cnpj`
+          message: `Colunas obrigatórias faltando: ${missingColumns.join(', ')}. Formato esperado: placa;tipo_veiculo;tipo_carroceria;marca;modelo;ano_fabricacao;ano_crlv;renavam;cmt;tara;eixo;transportador_cpf_cnpj`
         });
       }
 
@@ -3458,6 +3458,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Dolly': 'dolly',
         'Prancha': 'flatbed',
         'Caminhão': 'truck'
+      };
+
+      // Mapear tipos de carroceria aceitos (opcional)
+      const bodyTypeMap: Record<string, string> = {
+        'Aberta': 'open',
+        'Basculante': 'dump',
+        'Boiadeiro': 'cattle',
+        'Cana de Açúcar': 'sugar_cane',
+        'Container': 'container',
+        'Fechada': 'closed',
+        'Mecânico operacional': 'mechanical_operational',
+        'Plataforma': 'platform',
+        'Prancha': 'flatbed',
+        'Prancha - Cegonha': 'car_carrier',
+        'Prancha Extensiva': 'extendable_flatbed',
+        'Rodo Caçamba': 'dump_truck',
+        'Rollon Rollof': 'roll_on_roll_off',
+        'SILO': 'silo',
+        'Subestação Móvel': 'mobile_substation',
+        'Tanque': 'tank',
+        'Tran Toras': 'log_carrier',
+        'VTAV': 'vtav'
       };
 
       for (let i = 1; i < lines.length; i++) {
@@ -3525,6 +3547,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Preparar dados do veículo (conforme schema do banco)
           // Usar o userId do transportador ou fallback para o usuário da importação
+          
+          // Determinar bodyType baseado no tipo_carroceria ou usar valor padrão baseado no tipo do veículo
+          let bodyType = null;
+          
+          console.log(`[BULK IMPORT] Processando tipo_carroceria para ${rowData.placa}: "${rowData.tipo_carroceria}"`);
+          
+          if (rowData.tipo_carroceria && bodyTypeMap[rowData.tipo_carroceria]) {
+            bodyType = bodyTypeMap[rowData.tipo_carroceria];
+            console.log(`[BULK IMPORT] Tipo carroceria mapeado: "${rowData.tipo_carroceria}" -> "${bodyType}"`);
+          } else {
+            // Valores padrão baseados no tipo do veículo se não especificado
+            const vehicleType = vehicleTypeMap[rowData.tipo_veiculo];
+            if (vehicleType === 'tractor_unit') {
+              bodyType = null; // Unidade tratora não tem carroceria
+            } else if (vehicleType === 'semi_trailer' || vehicleType === 'trailer') {
+              bodyType = 'container'; // Padrão para semirreboques/reboques
+            } else if (vehicleType === 'flatbed') {
+              bodyType = 'flatbed'; // Prancha
+            } else {
+              bodyType = 'closed'; // Padrão geral
+            }
+            console.log(`[BULK IMPORT] Tipo carroceria não especificado/inválido, usando padrão baseado no veículo "${vehicleType}": "${bodyType}"`);
+          }
+          
           const vehicleData = {
             plate: rowData.placa.toUpperCase(),
             type: vehicleTypeMap[rowData.tipo_veiculo],
@@ -3536,7 +3582,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             cmt: parseFloat(rowData.cmt) || 0,
             tare: parseFloat(rowData.tara) || 0,
             axleCount: parseInt(rowData.eixo) || 2, // Valor padrão 2 se não informado
-            bodyType: 'flatbed' as any,
+            bodyType: bodyType,
             status: 'pending_documents' as any,
             ownershipType: 'proprio' as any,
             transporterUserId: targetUserId // Usar o userId do transportador ou fallback para o usuário da importação
