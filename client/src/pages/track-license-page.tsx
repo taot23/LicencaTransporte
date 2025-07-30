@@ -498,9 +498,14 @@ export default function TrackLicensePage() {
         <ListPagination 
           currentPage={currentPage}
           totalPages={pagination.totalPages}
-          totalItems={pagination.totalItems}
+          totalItems={pagination.total}
           itemsPerPage={pagination.itemsPerPage}
+          hasPrev={pagination.hasPrev}
+          hasNext={pagination.hasNext}
+          startItem={pagination.startItem}
+          endItem={pagination.endItem}
           onPageChange={setCurrentPage}
+          itemName="licenças"
         />
       </div>
 
@@ -509,7 +514,14 @@ export default function TrackLicensePage() {
         <MobileListPagination
           currentPage={currentPage}
           totalPages={pagination.totalPages}
+          totalItems={pagination.total}
+          itemsPerPage={pagination.itemsPerPage}
+          hasPrev={pagination.hasPrev}
+          hasNext={pagination.hasNext}
+          startItem={pagination.startItem}
+          endItem={pagination.endItem}
           onPageChange={setCurrentPage}
+          itemName="licenças"
         />
       </div>
 
