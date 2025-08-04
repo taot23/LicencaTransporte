@@ -149,13 +149,18 @@ const processVehicleData = (req: any, res: any, next: any) => {
   // Caso 1: Dados no formato FormData com campo vehicleData (abordagem antiga)
   if (req.body && req.body.vehicleData) {
     try {
-      req.body = {
-        ...req.body,
-        ...JSON.parse(req.body.vehicleData)
-      };
-      console.log('Processed vehicle data from vehicleData field:', req.body);
+      if (typeof req.body.vehicleData === 'string' && req.body.vehicleData.trim().length > 0) {
+        req.body = {
+          ...req.body,
+          ...JSON.parse(req.body.vehicleData)
+        };
+        console.log('Processed vehicle data from vehicleData field:', req.body);
+      } else {
+        console.error('Campo vehicleData está vazio ou não é uma string válida:', req.body.vehicleData);
+      }
     } catch (error) {
       console.error('Error parsing vehicleData JSON:', error);
+      console.error('Conteúdo do campo vehicleData:', req.body.vehicleData);
     }
   } 
   // Caso 2: FormData com campos individuais (nossa nova abordagem)
@@ -3983,10 +3988,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Se os dados vierem como campo JSON
       if (req.body.vehicleData) {
         try {
-          vehicleData = JSON.parse(req.body.vehicleData);
+          if (typeof req.body.vehicleData === 'string' && req.body.vehicleData.trim().length > 0) {
+            vehicleData = JSON.parse(req.body.vehicleData);
+          } else {
+            console.error("Campo vehicleData está vazio ou não é uma string válida:", req.body.vehicleData);
+            return res.status(400).json({ message: "Dados do veículo estão vazios ou inválidos" });
+          }
         } catch (err) {
           console.error("Erro ao processar JSON de dados do veículo:", err);
-          return res.status(400).json({ message: "Dados do veículo inválidos" });
+          console.error("Conteúdo do campo vehicleData:", req.body.vehicleData);
+          return res.status(400).json({ message: "Dados do veículo inválidos - JSON malformado" });
         }
       } else {
         // Caso contrário, usar campos individuais
@@ -4478,11 +4489,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Tentar carregar documentos existentes
       try {
-        if (transporter.documents) {
-          existingDocuments = JSON.parse(transporter.documents as string);
+        if (transporter.documents && typeof transporter.documents === 'string' && transporter.documents.trim().length > 0) {
+          existingDocuments = JSON.parse(transporter.documents);
         }
       } catch (e) {
         console.error("Erro ao processar documentos existentes:", e);
+        console.error("Conteúdo do campo documents:", transporter.documents);
+        existingDocuments = []; // Inicializar como array vazio em caso de erro
       }
       
       // Adicionar novos documentos
@@ -4506,12 +4519,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Processar subsidiárias se for PJ
       if (transporterData.personType === "pj" && transporterData.subsidiaries) {
         try {
-          const parsedSubsidiaries = JSON.parse(transporterData.subsidiaries);
-          transporterData.subsidiaries = JSON.stringify(parsedSubsidiaries);
+          if (typeof transporterData.subsidiaries === 'string' && transporterData.subsidiaries.trim().length > 0) {
+            const parsedSubsidiaries = JSON.parse(transporterData.subsidiaries);
+            transporterData.subsidiaries = JSON.stringify(parsedSubsidiaries);
+          } else {
+            transporterData.subsidiaries = '[]';
+          }
         } catch (e) {
           console.error("Erro ao processar subsidiárias:", e);
+          console.error("Conteúdo do campo subsidiaries:", transporterData.subsidiaries);
           // Manter as subsidiárias existentes se houver erro
-          if (transporter.subsidiaries) {
+          if (transporter.subsidiaries && typeof transporter.subsidiaries === 'string' && transporter.subsidiaries.trim().length > 0) {
             transporterData.subsidiaries = transporter.subsidiaries;
           } else {
             transporterData.subsidiaries = '[]';
