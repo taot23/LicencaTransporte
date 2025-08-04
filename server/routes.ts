@@ -1023,7 +1023,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[TRANSPORTER SEARCH] Usuário ${user.email} buscando transportadores com termo: "${search}"`);
       
       let transporters = [];
-      const maxLimit = Math.min(parseInt(limit as string), 50); // Máximo 50 para performance
+      const maxLimit = Math.min(parseInt(limit as string), 200); // Máximo 200 para melhor cobertura de resultados
       
       // Obter transportadores vinculados ao usuário (não todos do sistema)
       let userTransporters = [];

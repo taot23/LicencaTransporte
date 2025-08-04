@@ -268,7 +268,7 @@ export function OptimizedTransporterSelector({
                   currentPage={currentPage}
                   totalPages={totalPages}
                   totalItems={totalItems}
-                  itemsPerPage={3}
+                  itemsPerPage={10}
                   onPreviousPage={() => {
                     console.log('[TRANSPORTER PAGINATION] Botão Anterior clicado - Página atual:', currentPage);
                     goToPreviousPage();

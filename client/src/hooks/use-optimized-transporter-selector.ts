@@ -25,7 +25,7 @@ export function useOptimizedTransporterSelector() {
     queryFn: async () => {
       const params = new URLSearchParams({
         search: debouncedSearch,
-        limit: '20' // Reduzido para 20 para melhor performance
+        limit: '100' // Aumentado para 100 para melhor cobertura de resultados
       });
       
       const response = await fetch(`/api/transporters/search?${params}`);
