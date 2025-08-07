@@ -290,6 +290,21 @@ export default function AdminLicensesPage() {
         console.log(`StatusUpdate em tempo real: Licença ${selectedLicense.id} => ${lastMessage.data.license.status}`);
       }
     }
+
+    // ATUALIZAÇÃO EM TEMPO REAL PARA A LISTA PRINCIPAL
+    // Atualizar também a lista principal de licenças quando houver mudanças de status
+    if (
+      lastMessage?.type === 'STATUS_UPDATE' && 
+      lastMessage.data && 
+      lastMessage.data.licenseId && 
+      lastMessage.data.state && 
+      lastMessage.data.status
+    ) {
+      // Invalidar a query da lista de licenças para recarregar com os dados atualizados
+      queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
+      
+      console.log(`[TEMPO REAL] Lista atualizada: Licença ${lastMessage.data.licenseId}, Estado ${lastMessage.data.state} => ${lastMessage.data.status}`);
+    }
   }, [lastMessage, selectedLicense]);
 
   // Form removido para atualização de status geral
@@ -487,25 +502,14 @@ export default function AdminLicensesPage() {
       if (statusFilter && statusFilter !== "all") {
         // Verificar se algum estado da licença tem o status selecionado
         if (license.stateStatuses && license.stateStatuses.length > 0) {
-          console.log(`[FILTRO DEBUG] Licença ${license.requestNumber}:`, {
-            statusFilter,
-            stateStatuses: license.stateStatuses,
-            statusGeral: license.status
-          });
-          
           matchesStatus = license.stateStatuses.some(stateStatus => {
             const parts = stateStatus.split(':');
-            const stateStatusValue = parts[1];
-            const matches = stateStatusValue === statusFilter;
-            console.log(`[FILTRO DEBUG] Estado: ${parts[0]}, Status: ${stateStatusValue}, Filtro: ${statusFilter}, Match: ${matches}`);
-            return matches;
+            // O status está na segunda posição: "ESTADO:STATUS:..."
+            return parts[1] === statusFilter;
           });
-          
-          console.log(`[FILTRO DEBUG] Resultado final para ${license.requestNumber}: ${matchesStatus}`);
         } else {
           // Se não há status por estado, verificar o status geral (fallback)
           matchesStatus = license.status === statusFilter;
-          console.log(`[FILTRO DEBUG] Usando status geral para ${license.requestNumber}: ${license.status} === ${statusFilter} = ${matchesStatus}`);
         }
       }
       
@@ -1190,18 +1194,39 @@ export default function AdminLicensesPage() {
                                       }
                                     }
                                     
-                                    // Definir cores baseadas no status
-                                    let badgeClass = "bg-gray-100 border-gray-200 text-gray-800";
-                                    if (stateStatus === "approved") {
-                                      badgeClass = "bg-green-50 border-green-200 text-green-800";
-                                    } else if (stateStatus === "rejected") {
-                                      badgeClass = "bg-red-50 border-red-200 text-red-800";
-                                    } else if (stateStatus === "pending_approval") {
-                                      badgeClass = "bg-yellow-50 border-yellow-200 text-yellow-800";
-                                    } else if (stateStatus === "registration_in_progress") {
-                                      badgeClass = "bg-orange-50 border-orange-200 text-orange-800";
-                                    } else if (stateStatus === "under_review") {
-                                      badgeClass = "bg-blue-50 border-blue-200 text-blue-800";
+                                    // Definir cores baseadas no status - seguindo o padrão do StatusBadge
+                                    let badgeClass = "bg-gray-100 border-gray-200 text-gray-800"; // default/pending
+                                    switch (stateStatus) {
+                                      case "approved":
+                                      case "released":
+                                        badgeClass = "bg-green-100 border-green-200 text-green-800";
+                                        break;
+                                      case "rejected":
+                                        badgeClass = "bg-red-100 border-red-200 text-red-800";
+                                        break;
+                                      case "pending_approval":
+                                      case "pending_release":
+                                        badgeClass = "bg-purple-100 border-purple-200 text-purple-800";
+                                        break;
+                                      case "in_progress":
+                                      case "registration_in_progress":
+                                        badgeClass = "bg-blue-100 border-blue-200 text-blue-800";
+                                        break;
+                                      case "pending_documentation":
+                                        badgeClass = "bg-orange-100 border-orange-200 text-orange-800";
+                                        break;
+                                      case "analyzing":
+                                      case "under_review":
+                                        badgeClass = "bg-yellow-100 border-yellow-200 text-yellow-800";
+                                        break;
+                                      case "canceled":
+                                        badgeClass = "bg-[#FFEDED] border-[#B22222] text-[#B22222]";
+                                        break;
+                                      case "pending":
+                                      case "pending_registration":
+                                      default:
+                                        badgeClass = "bg-gray-100 border-gray-200 text-gray-800";
+                                        break;
                                     }
                                     
                                     return (
