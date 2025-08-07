@@ -487,14 +487,25 @@ export default function AdminLicensesPage() {
       if (statusFilter && statusFilter !== "all") {
         // Verificar se algum estado da licença tem o status selecionado
         if (license.stateStatuses && license.stateStatuses.length > 0) {
+          console.log(`[FILTRO DEBUG] Licença ${license.requestNumber}:`, {
+            statusFilter,
+            stateStatuses: license.stateStatuses,
+            statusGeral: license.status
+          });
+          
           matchesStatus = license.stateStatuses.some(stateStatus => {
             const parts = stateStatus.split(':');
-            // O status está na segunda posição: "ESTADO:STATUS:..."
-            return parts[1] === statusFilter;
+            const stateStatusValue = parts[1];
+            const matches = stateStatusValue === statusFilter;
+            console.log(`[FILTRO DEBUG] Estado: ${parts[0]}, Status: ${stateStatusValue}, Filtro: ${statusFilter}, Match: ${matches}`);
+            return matches;
           });
+          
+          console.log(`[FILTRO DEBUG] Resultado final para ${license.requestNumber}: ${matchesStatus}`);
         } else {
           // Se não há status por estado, verificar o status geral (fallback)
           matchesStatus = license.status === statusFilter;
+          console.log(`[FILTRO DEBUG] Usando status geral para ${license.requestNumber}: ${license.status} === ${statusFilter} = ${matchesStatus}`);
         }
       }
       
