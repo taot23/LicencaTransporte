@@ -72,9 +72,9 @@ export default function AdminVehiclesPage() {
 
   // Buscar todos os veículos
   const { data: vehicles, isLoading, error } = useQuery<Vehicle[]>({
-    queryKey: ["/api/admin/vehicles"],
+    queryKey: ["/api/vehicles"],
     queryFn: async () => {
-      const response = await fetch("/api/admin/vehicles", {
+      const response = await fetch("/api/vehicles", {
         credentials: "include"
       });
       if (!response.ok) {
@@ -172,7 +172,7 @@ export default function AdminVehiclesPage() {
     },
     onSuccess: () => {
       // Invalidar cache para recarregar a lista
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/vehicles'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/vehicles'] });
       toast({
         title: 'Veículo atualizado',
         description: 'As informações do veículo foram atualizadas com sucesso.',
@@ -201,7 +201,7 @@ export default function AdminVehiclesPage() {
     form.reset({
       plate: vehicle.plate,
       type: vehicle.type,
-      tare: vehicle.tare,
+      tare: parseFloat(vehicle.tare.toString()),
       crlvYear: vehicle.crlvYear,
       status: vehicle.status as "active" | "inactive"
     });
@@ -228,7 +228,7 @@ export default function AdminVehiclesPage() {
       {/* Lista de veículos otimizada para grandes volumes de dados */}
       <OptimizedVehicleList 
         onEdit={handleEditVehicle}
-        onRefresh={() => queryClient.invalidateQueries({ queryKey: ["/api/admin/vehicles"] })}
+        onRefresh={() => queryClient.invalidateQueries({ queryKey: ["/api/vehicles"] })}
       />
 
       {/* Modal de Detalhes do Veículo */}
