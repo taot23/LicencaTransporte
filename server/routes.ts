@@ -302,11 +302,11 @@ async function sincronizarLicencaEmitida(licenca: any, estado: string, numeroAet
   try {
     // Buscar informações dos veículos associados
     let placaTratora = licenca.mainVehiclePlate || null;
-    let placaPrimeiraCarreta = null;
-    let placaSegundaCarreta = null;
-    let placaDolly = null;
-    let placaPrancha = null;
-    let placaReboque = null;
+    let placaPrimeiraCarreta: string | null = null;
+    let placaSegundaCarreta: string | null = null;
+    let placaDolly: string | null = null;
+    let placaPrancha: string | null = null;
+    let placaReboque: string | null = null;
 
     // Obter placas dos veículos por ID se existirem
     if (licenca.tractorUnitId) {
@@ -321,7 +321,7 @@ async function sincronizarLicencaEmitida(licenca: any, estado: string, numeroAet
       const firstTrailerQuery = 'SELECT plate FROM vehicles WHERE id = $1';
       const firstTrailerResult = await pool.query(firstTrailerQuery, [licenca.firstTrailerId]);
       if (firstTrailerResult.rows.length > 0) {
-        placaPrimeiraCarreta = firstTrailerResult.rows[0].plate;
+        placaPrimeiraCarreta = firstTrailerResult.rows[0].plate as string;
       }
     }
 
@@ -329,7 +329,7 @@ async function sincronizarLicencaEmitida(licenca: any, estado: string, numeroAet
       const secondTrailerQuery = 'SELECT plate FROM vehicles WHERE id = $1';
       const secondTrailerResult = await pool.query(secondTrailerQuery, [licenca.secondTrailerId]);
       if (secondTrailerResult.rows.length > 0) {
-        placaSegundaCarreta = secondTrailerResult.rows[0].plate;
+        placaSegundaCarreta = secondTrailerResult.rows[0].plate as string;
       }
     }
 
@@ -337,7 +337,7 @@ async function sincronizarLicencaEmitida(licenca: any, estado: string, numeroAet
       const dollyQuery = 'SELECT plate FROM vehicles WHERE id = $1';
       const dollyResult = await pool.query(dollyQuery, [licenca.dollyId]);
       if (dollyResult.rows.length > 0) {
-        placaDolly = dollyResult.rows[0].plate;
+        placaDolly = dollyResult.rows[0].plate as string;
       }
     }
 
@@ -345,7 +345,7 @@ async function sincronizarLicencaEmitida(licenca: any, estado: string, numeroAet
       const flatbedQuery = 'SELECT plate FROM vehicles WHERE id = $1';
       const flatbedResult = await pool.query(flatbedQuery, [licenca.flatbedId]);
       if (flatbedResult.rows.length > 0) {
-        placaPrancha = flatbedResult.rows[0].plate;
+        placaPrancha = flatbedResult.rows[0].plate as string;
       }
     }
 
@@ -1032,7 +1032,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Obter transportadores vinculados ao usuário (não todos do sistema)
       let userTransporters = [];
-      if (isAdministrativeRole(user.role)) {
+      if (isAdministrativeRole(user.role as UserRole)) {
         // Usuários administrativos veem todos os transportadores
         userTransporters = await storage.getAllTransporters();
       } else {
@@ -2764,13 +2764,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error) {
       console.error('[VALIDAÇÃO CRÍTICA] ❌ ERRO CRÍTICO:', error);
-      console.error('[VALIDAÇÃO CRÍTICA] Stack trace:', error.stack);
+      console.error('[VALIDAÇÃO CRÍTICA] Stack trace:', (error as Error).stack);
       
       return res.status(500).json({ 
         bloqueado: false, // Em caso de erro, liberar para não bloquear o usuário
         error: 'Erro interno na validação - liberando por segurança',
         timestamp: new Date().toISOString(),
-        details: error.message 
+        details: (error as Error).message 
       });
     }
   });
@@ -3350,11 +3350,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (transporterIds.length > 0) {
           licencasNoBanco = await db.select()
             .from(licenseRequests)
-            .where(eq(licenseRequests.isDraft, false))
             .where(
-              or(
-                eq(licenseRequests.userId, user.id),
-                inArray(licenseRequests.transporterId, transporterIds)
+              and(
+                eq(licenseRequests.isDraft, false),
+                or(
+                  eq(licenseRequests.userId, user.id),
+                  inArray(licenseRequests.transporterId, transporterIds)
+                )
               )
             );
             
@@ -3363,18 +3365,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Se não houver transportadores, buscar apenas por userId
           licencasNoBanco = await db.select()
             .from(licenseRequests)
-            .where(eq(licenseRequests.isDraft, false))
-            .where(eq(licenseRequests.userId, user.id));
+            .where(
+              and(
+                eq(licenseRequests.isDraft, false),
+                eq(licenseRequests.userId, user.id)
+              )
+            );
             
           console.log(`[DEBUG LICENÇAS EMITIDAS] Encontradas ${licencasNoBanco.length} licenças para usuário ${user.id} sem transportadores associados`);
         }
         
         // Filtrar licenças com estado aprovado manualmente
-        issuedLicenses = licencasNoBanco.filter(lic => {
+        issuedLicenses = licencasNoBanco.filter((lic: any) => {
           // Verificar estados aprovados
           return lic.stateStatuses && 
                  Array.isArray(lic.stateStatuses) && 
-                 lic.stateStatuses.some(ss => ss.includes(':approved'));
+                 lic.stateStatuses.some((ss: string) => ss.includes(':approved'));
         });
         
         console.log(`[DEBUG LICENÇAS EMITIDAS] Total de licenças emitidas para o usuário ${user.id}: ${issuedLicenses.length}`);
@@ -3382,7 +3388,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Log das licenças que serão retornadas
       console.log(`[DEBUG LICENÇAS EMITIDAS] Retornando ${issuedLicenses.length} licenças emitidas`);
-      console.log(`[DEBUG LICENÇAS EMITIDAS] IDs: ${issuedLicenses.map(l => l.id).join(', ')}`);
+      console.log(`[DEBUG LICENÇAS EMITIDAS] IDs: ${issuedLicenses.map((l: any) => l.id).join(', ')}`);
       
       res.json(issuedLicenses);
     } catch (error) {
@@ -5732,9 +5738,9 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         baseQuery = sql`${baseQuery} WHERE ${sql.join(conditions, sql` AND `)}`;
       }
       
-      // Ordenação segura
-      const validSortFields = ['plate', 'brand', 'model', 'type', 'created_at', 'updated_at'];
-      const sortField = validSortFields.includes(sortBy as string) ? sortBy as string : 'created_at';
+      // Ordenação segura com colunas que existem na tabela vehicles
+      const validSortFields = ['plate', 'brand', 'model', 'type', 'year', 'id'];
+      const sortField = validSortFields.includes(sortBy as string) ? sortBy as string : 'plate';
       const order = sortOrder === 'asc' ? sql`ASC` : sql`DESC`;
       
       baseQuery = sql`${baseQuery} ORDER BY v.${sql.identifier(sortField)} ${order}`;
