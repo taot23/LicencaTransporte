@@ -69,9 +69,14 @@ export const transporters = pgTable("transporters", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => {
   return {
+    // Índices básicos mantidos
     documentNumberIdx: uniqueIndex("idx_transporter_document").on(table.documentNumber),
     userIdIdx: index("idx_transporter_user_id").on(table.userId),
-    nameIdx: index("idx_transporter_name").on(table.name)
+    nameIdx: index("idx_transporter_name").on(table.name),
+    
+    // Índices compostos para otimização de buscas
+    searchOptimizedIdx: index("idx_transporter_search").on(table.name, table.documentNumber, table.tradeName),
+    personTypeNameIdx: index("idx_transporter_type_name").on(table.personType, table.name)
   };
 });
 
@@ -187,10 +192,17 @@ export const vehicles = pgTable("vehicles", {
   status: text("status").default("active").notNull(),
 }, (table) => {
   return {
+    // Índices básicos mantidos
     plateIdx: index("idx_vehicle_plate").on(table.plate),
     userIdIdx: index("idx_vehicle_user_id").on(table.userId),
     statusIdx: index("idx_vehicle_status").on(table.status),
-    typeIdx: index("idx_vehicle_type").on(table.type)
+    typeIdx: index("idx_vehicle_type").on(table.type),
+    
+    // Índices compostos para otimização de consultas frequentes
+    userStatusIdx: index("idx_vehicle_user_status").on(table.userId, table.status),
+    plateUserIdx: index("idx_vehicle_plate_user").on(table.plate, table.userId),
+    searchOptimizedIdx: index("idx_vehicle_search").on(table.plate, table.brand, table.model, table.type),
+    typeStatusIdx: index("idx_vehicle_type_status").on(table.type, table.status)
   };
 });
 

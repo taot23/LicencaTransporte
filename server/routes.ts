@@ -39,6 +39,7 @@ import path from "path";
 import * as fs from "fs";
 import { promisify } from "util";
 import { WebSocketServer, WebSocket } from "ws";
+import { withCache, invalidateCache, appCache } from "./cache";
 
 // Set up file storage for uploads - configuração robusta para produção
 const getUploadDir = () => {
@@ -1000,7 +1001,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/dashboard/vehicle-stats', requireAuth, async (req, res) => {
     try {
       const userId = req.user!.id;
-      const stats = await storage.getVehicleStats(userId);
+      const role = req.user!.role;
+      
+      // Cache otimizado para estatísticas de veículos
+      const cacheKey = `dashboard:vehicle-stats:${userId}:${role}`;
+      
+      const stats = await withCache(cacheKey, async () => {
+        return await storage.getVehicleStats(userId);
+      }, 3); // Cache por 3 minutos
+      
       res.json(stats);
     } catch (error) {
       console.error('Error fetching vehicle stats:', error);
@@ -1011,7 +1020,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/dashboard/state-stats', requireAuth, async (req, res) => {
     try {
       const userId = req.user!.id;
-      const stats = await storage.getStateStats(userId);
+      const role = req.user!.role;
+      
+      // Cache otimizado para estatísticas por estado
+      const cacheKey = `dashboard:state-stats:${userId}:${role}`;
+      
+      const stats = await withCache(cacheKey, async () => {
+        return await storage.getStateStats(userId);
+      }, 5); // Cache por 5 minutos (dados menos voláteis)
+      
       res.json(stats);
     } catch (error) {
       console.error('Error fetching state stats:', error);
@@ -1028,7 +1045,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[TRANSPORTER SEARCH] Usuário ${user.email} buscando transportadores com termo: "${search}"`);
       
       let transporters = [];
-      const maxLimit = Math.min(parseInt(limit as string), 200); // Máximo 200 para melhor cobertura de resultados
+      const maxLimit = Math.min(parseInt(limit as string), 50); // Otimizado: máximo 50 para melhor performance
       
       // Obter transportadores vinculados ao usuário (não todos do sistema)
       let userTransporters = [];
@@ -1425,6 +1442,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         crlvUrl
       });
       
+      // Invalidar cache relacionado a veículos
+      invalidateCache('vehicles', vehicle.userId || undefined);
+      
       // Enviar notificação WebSocket para novo veículo criado
       broadcastMessage({
         type: 'LICENSE_UPDATE',
@@ -1532,6 +1552,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedVehicle = await storage.updateVehicle(vehicleId, storageData);
       console.log('Veículo atualizado com sucesso:', updatedVehicle);
       
+      // Invalidar cache relacionado a veículos
+      invalidateCache('vehicles', existingVehicle.userId || undefined);
+      
       // Enviar notificação WebSocket para veículo atualizado
       broadcastVehicleUpdate(updatedVehicle.id, 'updated', updatedVehicle);
       
@@ -1568,6 +1591,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       
       await storage.deleteVehicle(vehicleId);
+      
+      // Invalidar cache relacionado a veículos
+      invalidateCache('vehicles', existingVehicle.userId || undefined);
       
       res.status(204).send();
     } catch (error) {
@@ -5701,7 +5727,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       } = req.query;
       
       const pageNum = Math.max(1, parseInt(page as string));
-      const limitNum = Math.min(50, Math.max(10, parseInt(limit as string))); // Máximo 50 por página
+      const limitNum = Math.min(25, Math.max(5, parseInt(limit as string))); // Otimizado: máximo 25 por página para melhor performance
       const offset = (pageNum - 1) * limitNum;
       
       console.log(`[SEARCH VEHICLES] Busca: "${search}", Página: ${pageNum}, Limite: ${limitNum}`);
