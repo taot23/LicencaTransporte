@@ -50,7 +50,7 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { LicenseRequest, brazilianStates as brazilianStatesObjects, brazilianStates, Transporter } from "@shared/schema";
+import { LicenseRequest, brazilianStates, Transporter } from "@shared/schema";
 import { TransporterInfo } from "@/components/transporters/transporter-info";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
 import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
@@ -248,7 +248,7 @@ export default function AdminLicensesPage() {
               // Determinar o CNPJ específico para este estado
               let currentStateCnpj = "";
               if (updatedLicense.stateCnpjs && updatedLicense.stateCnpjs.length > 0) {
-                const stateCnpjEntry = updatedLicense.stateCnpjs.find(entry => entry.startsWith(`${lastMessage.data.state}:`));
+                const stateCnpjEntry = updatedLicense.stateCnpjs.find((entry: string) => entry.startsWith(`${lastMessage.data.state}:`));
                 if (stateCnpjEntry) {
                   const [_, cnpj] = stateCnpjEntry.split(':');
                   if (cnpj) {
@@ -1426,8 +1426,8 @@ export default function AdminLicensesPage() {
                         </FormControl>
                         <SelectContent>
                           {brazilianStates.map((state) => (
-                            <SelectItem key={state} value={state}>
-                              {state}
+                            <SelectItem key={state.code} value={state.code}>
+                              {state.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
