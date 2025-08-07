@@ -481,8 +481,22 @@ export default function AdminLicensesPage() {
         license.requestNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         license.mainVehiclePlate?.toLowerCase().includes(searchTerm.toLowerCase());
       
-      // Filtro de status
-      const matchesStatus = !statusFilter || statusFilter === "all" || license.status === statusFilter;
+      // Filtro de status - buscar nos estados individuais, não no status geral
+      let matchesStatus = !statusFilter || statusFilter === "all";
+      
+      if (statusFilter && statusFilter !== "all") {
+        // Verificar se algum estado da licença tem o status selecionado
+        if (license.stateStatuses && license.stateStatuses.length > 0) {
+          matchesStatus = license.stateStatuses.some(stateStatus => {
+            const parts = stateStatus.split(':');
+            // O status está na segunda posição: "ESTADO:STATUS:..."
+            return parts[1] === statusFilter;
+          });
+        } else {
+          // Se não há status por estado, verificar o status geral (fallback)
+          matchesStatus = license.status === statusFilter;
+        }
+      }
       
       // Filtro de transportador por busca de texto (nome, CNPJ, CPF)
       let matchesTransporter = true;
