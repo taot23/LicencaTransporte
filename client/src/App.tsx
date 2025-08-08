@@ -22,6 +22,7 @@ import BoletosPage from "@/pages/admin/boletos-page";
 import DashboardAET from "@/pages/admin/dashboard-aet";
 import VehicleTransferPage from "@/pages/admin/vehicle-transfer-page";
 import MeusBoletos from "@/pages/meus-boletos";
+import AdminPlateSearchPage from "@/pages/admin/admin-plate-search";
 import BulkVehiclesPage from "@/pages/bulk-vehicles-page";
 import RedirectPage from "@/pages/redirect-page";
 import { ProtectedRoute, AdminRoute, StaffRoute } from "./lib/protected-route";
@@ -61,6 +62,7 @@ function Router() {
       <AdminRoute path="/admin/vehicle-transfer" component={VehicleTransferPage} />
       <StaffRoute path="/admin/boletos" component={BoletosPage} requiredRole="financial" />
       <AdminRoute path="/admin/dashboard-aet" component={DashboardAET} />
+      <AdminRoute path="/admin/plate-search" component={AdminPlateSearchPage} />
       
       {/* Sistema de Controle de Licenças - Rotas do usuário (versão desktop ou mobile) */}
       <ProtectedRoute 

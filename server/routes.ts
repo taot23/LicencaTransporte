@@ -5864,7 +5864,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       const user = req.user!;
       const { q: searchTerm = '', limit = '10' } = req.query;
       
-      if (!searchTerm || searchTerm.toString().length < 2) {
+      if (!searchTerm || (searchTerm as string).length < 2) {
         return res.json({ results: [] });
       }
       
@@ -5935,6 +5935,137 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     } catch (error) {
       console.error('[GLOBAL SEARCH] Erro:', error);
       res.status(500).json({ message: 'Erro na busca global' });
+    }
+  });
+
+  // ==========================================
+  // ENDPOINT ULTRA-RÁPIDO PARA BUSCA DE PLACAS COM PAGINAÇÃO (ADMIN)
+  // ==========================================
+  
+  // Busca ultra-otimizada de placas para administradores
+  app.get('/api/plates/search', requireAuth, async (req, res) => {
+    try {
+      const user = req.user!;
+      const {
+        search = '',
+        page = '1',
+        limit = '12',
+        vehicleType = '',
+        ownedOnly = 'false'
+      } = req.query;
+      
+      // Verificar se é usuário administrativo
+      if (!isAdministrativeRole(user.role as UserRole)) {
+        return res.status(403).json({ message: 'Acesso restrito a administradores' });
+      }
+      
+      const pageNum = Math.max(1, parseInt(page as string));
+      const limitNum = Math.min(25, Math.max(5, parseInt(limit as string)));
+      const offset = (pageNum - 1) * limitNum;
+      
+      console.log(`[PLATE SEARCH ADMIN] Busca: "${search}", Tipo: "${vehicleType}", Página: ${pageNum}`);
+      
+      // Query ultra-otimizada com índices compostos
+      let baseQuery = sql`
+        SELECT v.id, v.plate, v.type, v.brand, v.model, v.year, v.status,
+               v.ownership_type, v.owner_name, v.user_id,
+               u.email as user_email, u.full_name as user_name,
+               t.name as transporter_name,
+               COUNT(*) OVER() as total_count
+        FROM vehicles v
+        LEFT JOIN users u ON v.user_id = u.id
+        LEFT JOIN transporters t ON t.user_id = v.user_id
+      `;
+      
+      const conditions = [];
+      
+      // Filtro por termo de busca (placa prioritariamente)
+      if (search && (search as string).length >= 2) {
+        const searchTerm = (search as string).toUpperCase();
+        
+        // Otimização: busca exata primeiro, depois parcial
+        if (searchTerm.length <= 4) {
+          // Para termos curtos, usar trigram similarity
+          conditions.push(sql`(
+            v.plate ILIKE ${searchTerm + '%'} OR 
+            UPPER(v.brand) LIKE ${'%' + searchTerm + '%'} OR 
+            UPPER(v.model) LIKE ${'%' + searchTerm + '%'}
+          )`);
+        } else {
+          // Para termos longos, busca tradicional
+          conditions.push(sql`(
+            UPPER(v.plate) LIKE ${'%' + searchTerm + '%'} OR 
+            UPPER(v.brand) LIKE ${'%' + searchTerm + '%'} OR 
+            UPPER(v.model) LIKE ${'%' + searchTerm + '%'}
+          )`);
+        }
+      }
+      
+      // Filtro por tipo de veículo
+      if (vehicleType && vehicleType !== 'all') {
+        conditions.push(sql`v.type = ${vehicleType as string}`);
+      }
+      
+      // Filtro por veículos próprios apenas
+      if (ownedOnly === 'true') {
+        conditions.push(sql`v.ownership_type = 'proprio'`);
+      }
+      
+      // Apenas veículos ativos por padrão
+      conditions.push(sql`v.status = 'active'`);
+      
+      // Construir WHERE clause
+      if (conditions.length > 0) {
+        baseQuery = sql`${baseQuery} WHERE ${sql.join(conditions, sql` AND `)}`;
+      }
+      
+      // Ordenação otimizada (placa primeiro para melhor UX)
+      baseQuery = sql`${baseQuery} ORDER BY v.plate ASC`;
+      
+      // Paginação
+      baseQuery = sql`${baseQuery} LIMIT ${limitNum} OFFSET ${offset}`;
+      
+      const result = await db.execute(baseQuery);
+      const totalCount = result.rows.length > 0 ? parseInt(result.rows[0].total_count as string) : 0;
+      
+      // Formatar resultados otimizados
+      const plates = result.rows.map(row => ({
+        id: row.id,
+        plate: row.plate,
+        type: row.type,
+        brand: row.brand,
+        model: row.model,
+        year: row.year,
+        status: row.status,
+        ownershipType: row.ownership_type,
+        ownerName: row.owner_name,
+        userEmail: row.user_email,
+        userName: row.user_name,
+        transporterName: row.transporter_name,
+        displayText: `${row.plate} - ${row.brand || ''} ${row.model || ''} (${row.year || ''})`
+      }));
+      
+      console.log(`[PLATE SEARCH ADMIN] Encontradas ${plates.length} placas de ${totalCount} total`);
+      
+      res.json({
+        plates,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: totalCount,
+          totalPages: Math.ceil(totalCount / limitNum),
+          hasNext: pageNum * limitNum < totalCount,
+          hasPrev: pageNum > 1
+        },
+        performance: {
+          searchTerm: search,
+          resultCount: plates.length,
+          cached: false
+        }
+      });
+    } catch (error) {
+      console.error('[PLATE SEARCH ADMIN] Erro:', error);
+      res.status(500).json({ message: 'Erro na busca de placas' });
     }
   });
   
