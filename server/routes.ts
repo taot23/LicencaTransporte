@@ -1269,8 +1269,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`[DEBUG VEHICLES] Usuário comum encontrou ${vehicles.length} veículos`);
       }
+
+      // Enriquecer veículos com dados do transportador para exportações CSV
+      const allTransporters = await storage.getAllTransporters();
+      const vehiclesWithTransporter = vehicles.map(vehicle => {
+        const transporter = allTransporters.find(t => t.id === vehicle.transporterId);
+        return {
+          ...vehicle,
+          transporter: transporter ? {
+            id: transporter.id,
+            name: transporter.name,
+            tradeName: transporter.tradeName,
+            documentNumber: transporter.documentNumber
+          } : null
+        };
+      });
       
-      res.json(vehicles);
+      res.json(vehiclesWithTransporter);
     } catch (error) {
       console.error('Error fetching vehicles:', error);
       res.status(500).json({ message: 'Erro ao buscar veículos' });
@@ -3412,11 +3427,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[DEBUG LICENÇAS EMITIDAS] Total de licenças emitidas para o usuário ${user.id}: ${issuedLicenses.length}`);
       }
       
+      // Enriquecer licenças com dados do transportador para exportações CSV
+      const allTransporters = await storage.getAllTransporters();
+      const licensesWithTransporter = issuedLicenses.map(license => {
+        const transporter = allTransporters.find(t => t.id === license.transporterId);
+        return {
+          ...license,
+          transporter: transporter ? {
+            id: transporter.id,
+            name: transporter.name,
+            tradeName: transporter.tradeName,
+            documentNumber: transporter.documentNumber
+          } : null
+        };
+      });
+
       // Log das licenças que serão retornadas
-      console.log(`[DEBUG LICENÇAS EMITIDAS] Retornando ${issuedLicenses.length} licenças emitidas`);
-      console.log(`[DEBUG LICENÇAS EMITIDAS] IDs: ${issuedLicenses.map((l: any) => l.id).join(', ')}`);
+      console.log(`[DEBUG LICENÇAS EMITIDAS] Retornando ${licensesWithTransporter.length} licenças emitidas`);
+      console.log(`[DEBUG LICENÇAS EMITIDAS] IDs: ${licensesWithTransporter.map((l: any) => l.id).join(', ')}`);
       
-      res.json(issuedLicenses);
+      res.json(licensesWithTransporter);
     } catch (error) {
       console.error('Error fetching issued licenses:', error);
       res.status(500).json({ message: 'Erro ao buscar licenças emitidas' });
@@ -3789,9 +3819,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Mesma licença diretamente do banco de dados:", JSON.stringify(dbResult[0], null, 2));
       }
       
-      console.log(`Total de licenças admin: ${allLicenses.length}, filtradas: ${licenses.length}, incluindo renovação: ${shouldIncludeRenewalDrafts}`);
+      // Enriquecer licenças com dados do transportador para exportações CSV
+      const allTransporters = await storage.getAllTransporters();
+      const licensesWithTransporter = licenses.map(license => {
+        const transporter = allTransporters.find(t => t.id === license.transporterId);
+        return {
+          ...license,
+          transporter: transporter ? {
+            id: transporter.id,
+            name: transporter.name,
+            tradeName: transporter.tradeName,
+            documentNumber: transporter.documentNumber
+          } : null
+        };
+      });
+
+      console.log(`Total de licenças admin: ${allLicenses.length}, filtradas: ${licensesWithTransporter.length}, incluindo renovação: ${shouldIncludeRenewalDrafts}`);
       
-      res.json(licenses);
+      res.json(licensesWithTransporter);
     } catch (error) {
       console.error('Error fetching all license requests:', error);
       res.status(500).json({ message: 'Erro ao buscar todas as solicitações de licenças' });
