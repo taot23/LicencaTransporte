@@ -66,7 +66,7 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import { VehicleTypeImage } from "@/components/ui/vehicle-type-image";
-import { VehicleAutocomplete } from "@/components/ui/vehicle-autocomplete";
+import { PaginatedVehicleSelector } from "@/components/ui/paginated-vehicle-selector";
 import { OptimizedTransporterSelector } from "@/components/forms/optimized-transporter-selector";
 
 // Tipos de carga por categoria
@@ -1942,8 +1942,8 @@ export function LicenseForm({
                       Unidade Tratora (Cavalo Mecânico)
                     </FormLabel>
                     <FormControl>
-                      <VehicleAutocomplete
-                        vehicles={tractorUnits}
+                      <PaginatedVehicleSelector
+                        vehicleType="tractor_unit"
                         value={field.value}
                         onSelect={(vehicleId) => {
                           field.onChange(vehicleId);
@@ -1996,8 +1996,8 @@ export function LicenseForm({
                     <FormItem>
                       <FormLabel className="font-medium">1ª Carreta</FormLabel>
                       <FormControl>
-                        <VehicleAutocomplete
-                          vehicles={semiTrailers}
+                        <PaginatedVehicleSelector
+                          vehicleType="semi_trailer"
                           value={field.value}
                           onSelect={(vehicleId) => {
                             field.onChange(vehicleId);
@@ -2022,8 +2022,8 @@ export function LicenseForm({
                     <FormItem>
                       <FormLabel className="font-medium">Dolly</FormLabel>
                       <FormControl>
-                        <VehicleAutocomplete
-                          vehicles={dollys}
+                        <PaginatedVehicleSelector
+                          vehicleType="dolly"
                           value={field.value}
                           onSelect={(vehicleId) => {
                             field.onChange(vehicleId);
@@ -2048,8 +2048,8 @@ export function LicenseForm({
                     <FormItem>
                       <FormLabel className="font-medium">2ª Carreta</FormLabel>
                       <FormControl>
-                        <VehicleAutocomplete
-                          vehicles={semiTrailers}
+                        <PaginatedVehicleSelector
+                          vehicleType="semi_trailer"
                           value={field.value}
                           onSelect={(vehicleId) => {
                             field.onChange(vehicleId);
@@ -2205,8 +2205,8 @@ export function LicenseForm({
                       Unidade Tratora (Cavalo Mecânico)
                     </FormLabel>
                     <FormControl>
-                      <VehicleAutocomplete
-                        vehicles={tractorUnits}
+                      <PaginatedVehicleSelector
+                        vehicleType="tractor_unit"
                         value={field.value}
                         onSelect={(vehicleId) => {
                           field.onChange(vehicleId);
@@ -2258,8 +2258,8 @@ export function LicenseForm({
                     <FormItem>
                       <FormLabel className="font-medium">1ª Carreta</FormLabel>
                       <FormControl>
-                        <VehicleAutocomplete
-                          vehicles={semiTrailers}
+                        <PaginatedVehicleSelector
+                          vehicleType="semi_trailer"
                           value={field.value}
                           onSelect={(vehicleId) => {
                             field.onChange(vehicleId);
@@ -2284,8 +2284,8 @@ export function LicenseForm({
                     <FormItem>
                       <FormLabel className="font-medium">2ª Carreta</FormLabel>
                       <FormControl>
-                        <VehicleAutocomplete
-                          vehicles={semiTrailers}
+                        <PaginatedVehicleSelector
+                          vehicleType="semi_trailer"
                           value={field.value}
                           onSelect={(vehicleId) => {
                             field.onChange(vehicleId);
@@ -2428,8 +2428,8 @@ export function LicenseForm({
                       Unidade Tratora (Cavalo Mecânico)
                     </FormLabel>
                     <FormControl>
-                      <VehicleAutocomplete
-                        vehicles={tractorUnits}
+                      <PaginatedVehicleSelector
+                        vehicleType="tractor_unit"
                         value={field.value}
                         onSelect={(vehicleId) => {
                           field.onChange(vehicleId);
@@ -2480,8 +2480,8 @@ export function LicenseForm({
                   <FormItem>
                     <FormLabel className="font-medium">Prancha</FormLabel>
                     <FormControl>
-                      <VehicleAutocomplete
-                        vehicles={flatbeds}
+                      <PaginatedVehicleSelector
+                        vehicleType="flatbed"
                         value={field.value}
                         onSelect={(vehicleId) => {
                           field.onChange(vehicleId);
@@ -2604,8 +2604,8 @@ export function LicenseForm({
                   <FormItem>
                     <FormLabel className="font-medium">Caminhão</FormLabel>
                     <FormControl>
-                      <VehicleAutocomplete
-                        vehicles={trucks}
+                      <PaginatedVehicleSelector
+                        vehicleType="truck"
                         value={field.value}
                         onSelect={(vehicleId) => {
                           field.onChange(vehicleId);
@@ -2653,8 +2653,8 @@ export function LicenseForm({
                   <FormItem>
                     <FormLabel className="font-medium">Reboque</FormLabel>
                     <FormControl>
-                      <VehicleAutocomplete
-                        vehicles={trailers}
+                      <PaginatedVehicleSelector
+                        vehicleType="trailer"
                         value={field.value}
                         onSelect={(vehicleId) => {
                           field.onChange(vehicleId);

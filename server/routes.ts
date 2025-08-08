@@ -1291,6 +1291,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: 'Erro ao buscar veículos' });
     }
   });
+
+  // Endpoint para busca paginada de veículos (otimizado para formulários)
+  app.get('/api/vehicles/search-paginated', requireAuth, async (req, res) => {
+    try {
+      const user = req.user!;
+      const search = (req.query.search as string) || '';
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = Math.min(parseInt(req.query.limit as string) || 10, 50); // Max 50 por página
+      const vehicleType = req.query.type as string;
+      const offset = (page - 1) * limit;
+      
+      console.log(`[VEHICLE SEARCH PAGINATED] Usuário ${user.email} - busca: "${search}", página: ${page}, tipo: ${vehicleType || 'todos'}`);
+      
+      let allVehicles;
+      
+      // Determinar quais veículos o usuário pode acessar
+      if (isAdminUser(user)) {
+        allVehicles = await storage.getAllVehicles();
+      } else {
+        allVehicles = await storage.getVehiclesByUserId(user.id);
+      }
+      
+      // Filtrar por busca de texto (placa, marca, modelo)
+      let filteredVehicles = allVehicles;
+      if (search.trim()) {
+        const searchLower = search.toLowerCase();
+        filteredVehicles = allVehicles.filter(vehicle =>
+          vehicle.plate.toLowerCase().includes(searchLower) ||
+          (vehicle.brand && vehicle.brand.toLowerCase().includes(searchLower)) ||
+          (vehicle.model && vehicle.model.toLowerCase().includes(searchLower))
+        );
+      }
+      
+      // Filtrar por tipo de veículo se especificado
+      if (vehicleType) {
+        filteredVehicles = filteredVehicles.filter(vehicle => 
+          vehicle.type === vehicleType
+        );
+      }
+      
+      // Ordenar por placa
+      filteredVehicles.sort((a, b) => a.plate.localeCompare(b.plate));
+      
+      const total = filteredVehicles.length;
+      const paginatedVehicles = filteredVehicles.slice(offset, offset + limit);
+      const hasMore = offset + limit < total;
+      
+      console.log(`[VEHICLE SEARCH PAGINATED] Encontrados ${total} veículos, retornando ${paginatedVehicles.length} (página ${page})`);
+      
+      res.json({
+        vehicles: paginatedVehicles,
+        total,
+        hasMore,
+        page,
+        limit
+      });
+    } catch (error) {
+      console.error('Error in paginated vehicle search:', error);
+      res.status(500).json({ message: 'Erro ao buscar veículos' });
+    }
+  });
   
   // Buscar veículo por ID
   app.get('/api/vehicles/:id([0-9]+)', async (req, res) => {
