@@ -146,7 +146,8 @@ export default function VehiclesPage() {
         "Ano",
         "Tara (kg)",
         "Eixos",
-        "Status"
+        "Status",
+        "Transportador"
       ];
 
       const getVehicleTypeLabel = (type: string) => {
@@ -171,7 +172,8 @@ export default function VehiclesPage() {
         Eixos: vehicle.axleCount || "-",
         Status: vehicle.status === "active" ? "Ativo" : 
                 vehicle.status === "inactive" ? "Inativo" : 
-                vehicle.status === "maintenance" ? "Manutenção" : vehicle.status
+                vehicle.status === "maintenance" ? "Manutenção" : vehicle.status,
+        Transportador: vehicle.transporter?.name || vehicle.transporter?.tradeName || "-"
       }));
 
       exportToCSV({

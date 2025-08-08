@@ -473,7 +473,8 @@ export default function IssuedLicensesPage() {
         "Status",
         "Data de Emissão",
         "Data de Validade",
-        "Número AET"
+        "Número AET",
+        "Transportador"
       ];
 
       const dataForExport = filteredLicenses.map(license => ({
@@ -484,7 +485,8 @@ export default function IssuedLicensesPage() {
         "Status": translateStatus(license.status) || '',
         "Data de Emissão": license.emissionDate ? formatDateForCSV(license.emissionDate) : '',
         "Data de Validade": license.validUntil ? formatDateForCSV(license.validUntil) : '',
-        "Número AET": license.aetNumber || ''
+        "Número AET": license.aetNumber || '',
+        "Transportador": license.transporter?.name || license.transporter?.tradeName || ''
       }));
 
       exportToCSV({

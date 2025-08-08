@@ -337,7 +337,8 @@ export default function TrackLicensePage() {
         "Estado",
         "Status",
         "Data de Solicitação",
-        "Última Atualização"
+        "Última Atualização",
+        "Transportador"
       ];
 
       const dataForExport = paginatedLicenses.map(license => ({
@@ -347,7 +348,8 @@ export default function TrackLicensePage() {
         "Estado": license.specificState || (license.states?.join(', ')) || '',
         "Status": translateStatus(license.specificStateStatus || license.status) || '',
         "Data de Solicitação": formatDateForCSV(license.createdAt),
-        "Última Atualização": formatDateForCSV(license.updatedAt)
+        "Última Atualização": formatDateForCSV(license.updatedAt),
+        "Transportador": license.transporter?.name || license.transporter?.tradeName || ''
       }));
 
       exportToCSV({

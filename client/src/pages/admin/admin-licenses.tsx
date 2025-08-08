@@ -855,7 +855,7 @@ export default function AdminLicensesPage() {
                 license.status === "rejected" ? "Rejeitado" :
                 license.status === "canceled" ? "Cancelado" : license.status,
         Estados: license.states.join(", "),
-        Transportador: `ID: ${license.transporterId}`,
+        Transportador: license.transporter?.name || license.transporter?.tradeName || `ID: ${license.transporterId}`,
         "Data de Criação": formatDateForCSV(license.createdAt),
         "Última Atualização": formatDateForCSV(license.updatedAt)
       }));
