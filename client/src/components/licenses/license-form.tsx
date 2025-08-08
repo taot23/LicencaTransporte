@@ -156,10 +156,9 @@ export function LicenseForm({
   const [stateValidationStatus, setStateValidationStatus] = useState<Record<string, 'loading' | 'valid' | 'blocked' | 'error'>>({});
   const [preventiveValidationRunning, setPreventiveValidationRunning] = useState(false);
 
-  // Fetch vehicles for the dropdown selectors
-  const { data: vehicles, isLoading: isLoadingVehicles } = useQuery<Vehicle[]>({
-    queryKey: ["/api/vehicles"],
-  });
+  // Use empty array - now using VehicleSelectorPaginated components instead of massive query
+  const vehicles: Vehicle[] = [];
+  const isLoadingVehicles = false;
 
   // Fetch transporters linked to the user
   const { data: transporters = [], isLoading: isLoadingTransporters } =
