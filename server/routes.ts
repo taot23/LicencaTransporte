@@ -5949,7 +5949,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       const {
         search = '',
         page = '1',
-        limit = '12',
+        limit = '10',
         vehicleType = '',
         ownedOnly = 'false'
       } = req.query;
@@ -5980,7 +5980,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       const conditions = [];
       
       // Filtro por termo de busca (placa prioritariamente)
-      if (search && (search as string).length >= 2) {
+      if (search && (search as string).length >= 1) {
         const searchTerm = (search as string).toUpperCase();
         
         // Otimização: busca exata primeiro, depois parcial
