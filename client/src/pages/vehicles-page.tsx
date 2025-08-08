@@ -43,17 +43,28 @@ export default function VehiclesPage() {
     }
   });
 
-  // Use optimized search instead of loading all vehicles
-  const vehicles: Vehicle[] = []; // Removed massive query - page shows user vehicles via optimized components
-  const isLoading = false; // Always false since not loading massive dataset
-  const refetch = async () => {}; // No-op since using optimized components
+  const { data: vehicles, isLoading, refetch } = useQuery<Vehicle[]>({
+    queryKey: ["/api/vehicles"],
+    queryFn: async () => {
+      const res = await fetch("/api/vehicles", {
+        credentials: "include"
+      });
+      if (!res.ok) {
+        throw new Error("Erro ao buscar veículos");
+      }
+      return res.json();
+    }
+  });
 
   // Função de atualização melhorada
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      // Invalidate optimized queries
-      await queryClient.invalidateQueries({ queryKey: ["/api/vehicles/search"] });
+      // Invalidar cache primeiro
+      await queryClient.invalidateQueries({ queryKey: ["/api/vehicles"] });
+      
+      // Forçar nova busca
+      await refetch();
       
       toast({
         title: "Lista atualizada",
@@ -96,7 +107,7 @@ export default function VehiclesPage() {
   const handleFormSuccess = async () => {
     try {
       // Invalidar cache e atualizar dados
-      await queryClient.invalidateQueries({ queryKey: ["/api/vehicles/search"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/vehicles"] });
       await refetch();
       
       toast({

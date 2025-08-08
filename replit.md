@@ -21,9 +21,6 @@ The system is built with a React.js frontend using TypeScript, a Node.js/Express
 - **Volume-Optimized Queries**: Trigram similarity search for short terms, traditional LIKE for longer patterns
 - **Scalability Features**: Limited result sets (12-25 items), specialized indices reducing search space by 80%
 - **Performance Results**: 50K+ records - First search ~150ms, cached searches ~70ms (sub-1-second guaranteed)
-- **MASSIVE QUERY ELIMINATION (August 8, 2025)**: Removed ALL queries that loaded 11,793 vehicles at once from license forms, vehicle pages, and admin panels
-- **Intelligent Paginated Selectors**: All vehicle selectors in license forms now use optimized pagination for cavalos, carretas, dollys, and pranchas - loading only 10 vehicles per page like transporter selector
-- **ALL VEHICLES INCLUSION (August 8, 2025)**: Modified vehicle search to include ALL vehicles regardless of status (active, pending_documents, inactive, etc.) per user requirement
 
 **Key Architectural Decisions:**
 - **External Uploads System**: Files are stored in an external, configurable directory to prevent data loss during reinstalls. The system automatically detects write permissions and prioritizes `UPLOAD_DIR` (environment variable), `/var/uploads`, `/tmp/uploads`, `../uploads`, and `./uploads` in that order. Subfolders for `vehicles/` and `transporter/` ensure organization.
@@ -32,7 +29,7 @@ The system is built with a React.js frontend using TypeScript, a Node.js/Express
 - **Intelligent License Validation**: A robust validation system checks for existing licenses based on specific vehicle combinations (tractor + 1st trailer + 2nd trailer/dolly) across 27 Brazilian states and federal bodies (DNIT, ANTT, PRF). It blocks new requests if an identical combination has a license with more than 60 days remaining validity.
 - **Real-time Updates**: WebSocket integration coupled with automatic polling (every 60 seconds) ensures that critical data (e.g., license status, dashboard statistics) is always up-to-date across the application.
 - **Granular Access Control**: A detailed permission matrix defines access levels for various user roles (Operacional, Supervisor, Financeiro, Gerente, Administrador), controlling visibility of menus and access to backend endpoints.
-- **Optimized Vehicle and Transporter Selectors**: Forms utilize optimized selectors with debounce, caching, and pagination for efficient searching of vehicles and transporters. Manual plate entry is also supported for dolly and second trailer fields. All vehicle type selectors (cavalos, carretas, dollys, pranchas) now use intelligent pagination with real-time search and performance indicators.
+- **Optimized Vehicle and Transporter Selectors**: Forms utilize optimized selectors with debounce, caching, and pagination for efficient searching of vehicles and transporters. Manual plate entry is also supported for dolly and second trailer fields.
 - **Bulk Import System**: Allows mass import of vehicles via CSV, linking them to transporters using CNPJ/CPF from the spreadsheet. Includes robust validation and duplicate prevention.
 - **Mobile Responsiveness**: The entire system is designed to be fully responsive, with a functional bottom navigation bar and optimized layouts for mobile devices across all main pages.
 - **Custom Modals**: Native `confirm()` notifications are replaced with custom `AlertDialog` components for all critical confirmations, improving user experience and consistency.

@@ -149,9 +149,9 @@ export function LicenseForm({
   const [thirdPartyVehiclesInSubmit, setThirdPartyVehiclesInSubmit] = useState<string[]>([]);
 
   // Fetch vehicles for the dropdown selectors
-  // Removed massive vehicle query - using VehicleSelectorPaginated components instead
-  const vehicles: Vehicle[] = [];
-  const isLoadingVehicles = false;
+  const { data: vehicles, isLoading: isLoadingVehicles } = useQuery<Vehicle[]>({
+    queryKey: ["/api/vehicles"],
+  });
 
   // Fetch transporters linked to the user
   const { data: transporters = [], isLoading: isLoadingTransporters } =
@@ -852,9 +852,9 @@ export function LicenseForm({
         description: "O veículo foi cadastrado com sucesso",
       });
 
-      // Invalidate optimized vehicle queries
+      // Atualizar a lista de veículos
       queryClient.invalidateQueries({
-        queryKey: ["/api/vehicles/search"],
+        queryKey: ["/api/vehicles"],
       });
 
       setShowVehicleDialog(false);

@@ -68,7 +68,6 @@ import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import { VehicleTypeImage } from "@/components/ui/vehicle-type-image";
 import { VehicleAutocomplete } from "@/components/ui/vehicle-autocomplete";
 import { OptimizedTransporterSelector } from "@/components/forms/optimized-transporter-selector";
-import { FrontLineVehicles } from "./front-line-vehicles";
 
 // Tipos de carga por categoria
 const NON_FLATBED_CARGO_TYPES = [
@@ -157,9 +156,10 @@ export function LicenseForm({
   const [stateValidationStatus, setStateValidationStatus] = useState<Record<string, 'loading' | 'valid' | 'blocked' | 'error'>>({});
   const [preventiveValidationRunning, setPreventiveValidationRunning] = useState(false);
 
-  // Use empty array - now using VehicleSelectorPaginated components instead of massive query
-  const vehicles: Vehicle[] = [];
-  const isLoadingVehicles = false;
+  // Fetch vehicles for the dropdown selectors
+  const { data: vehicles, isLoading: isLoadingVehicles } = useQuery<Vehicle[]>({
+    queryKey: ["/api/vehicles"],
+  });
 
   // Fetch transporters linked to the user
   const { data: transporters = [], isLoading: isLoadingTransporters } =
@@ -2744,28 +2744,6 @@ export function LicenseForm({
               </div>
             </div>
           </div>
-        )}
-
-        {/* ✅ COMPONENTE PRINCIPAL: FrontLineVehicles com paginação otimizada */}
-        {licenseType && licenseType !== "romeo_and_juliet" && (
-          <FrontLineVehicles 
-            licenseType={licenseType}
-            tractorUnitId={form.watch("tractorUnitId")}
-            firstTrailerId={form.watch("firstTrailerId")}
-            dollyId={form.watch("dollyId")}
-            secondTrailerId={form.watch("secondTrailerId")}
-            firstTrailerManualPlate={form.watch("firstTrailerManualPlate")}
-            dollyManualPlate={form.watch("dollyManualPlate")}
-            secondTrailerManualPlate={form.watch("secondTrailerManualPlate")}
-            onTractorChange={(id) => form.setValue("tractorUnitId", id)}
-            onFirstTrailerChange={(id) => form.setValue("firstTrailerId", id)}
-            onDollyChange={(id) => form.setValue("dollyId", id)}
-            onSecondTrailerChange={(id) => form.setValue("secondTrailerId", id)}
-            onFirstTrailerManualPlateChange={(plate) => form.setValue("firstTrailerManualPlate", plate)}
-            onDollyManualPlateChange={(plate) => form.setValue("dollyManualPlate", plate)}
-            onSecondTrailerManualPlateChange={(plate) => form.setValue("secondTrailerManualPlate", plate)}
-            onCreateNewVehicle={() => setShowVehicleDialog(true)}
-          />
         )}
 
         <div className="border border-gray-200 rounded-lg p-5 shadow-sm">

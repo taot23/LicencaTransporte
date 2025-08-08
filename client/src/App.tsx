@@ -22,7 +22,6 @@ import BoletosPage from "@/pages/admin/boletos-page";
 import DashboardAET from "@/pages/admin/dashboard-aet";
 import VehicleTransferPage from "@/pages/admin/vehicle-transfer-page";
 import MeusBoletos from "@/pages/meus-boletos";
-import AdminPlateSearchPage from "@/pages/admin/admin-plate-search";
 import BulkVehiclesPage from "@/pages/bulk-vehicles-page";
 import RedirectPage from "@/pages/redirect-page";
 import { ProtectedRoute, AdminRoute, StaffRoute } from "./lib/protected-route";
@@ -55,14 +54,13 @@ function Router() {
       <StaffRoute path="/admin/licenses" component={AdminLicensesPage} requiredRole="operational" />
       <StaffRoute path="/admin/transporters" component={AdminTransportersPage} requiredRole="operational" />
       <AdminRoute path="/admin/users" component={AdminUsersPage} />
-      <StaffRoute path="/admin/vehicles" component={AdminVehiclesOptimizedPage} requiredRole="operational" />
+      <StaffRoute path="/admin/vehicles" component={AdminVehiclesPage} requiredRole="operational" />
       <StaffRoute path="/admin/vehicles-optimized" component={AdminVehiclesOptimizedPage} requiredRole="operational" />
       <AdminRoute path="/test-selectors" component={TestOptimizedSelectorsPage} />
       <AdminRoute path="/admin/vehicle-models" component={VehicleModelsPage} />
       <AdminRoute path="/admin/vehicle-transfer" component={VehicleTransferPage} />
       <StaffRoute path="/admin/boletos" component={BoletosPage} requiredRole="financial" />
       <AdminRoute path="/admin/dashboard-aet" component={DashboardAET} />
-      <AdminRoute path="/admin/plate-search" component={AdminPlateSearchPage} />
       
       {/* Sistema de Controle de Licenças - Rotas do usuário (versão desktop ou mobile) */}
       <ProtectedRoute 

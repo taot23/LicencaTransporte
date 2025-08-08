@@ -47,9 +47,10 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
   const { toast } = useToast();
   const [licenseType, setLicenseType] = useState<string>(draft?.type || "");
 
-  // Removed massive vehicle query - using VehicleSelectorPaginated components instead
-  const vehicles: Vehicle[] = []; // Empty array since we use paginated selectors
-  const isLoadingVehicles = false; // Always false since using optimized components
+  // Fetch vehicles for the dropdown selectors
+  const { data: vehicles, isLoading: isLoadingVehicles } = useQuery<Vehicle[]>({
+    queryKey: ["/api/vehicles"],
+  });
   
   // Fetch transporters linked to the user
   const { data: transporters = [], isLoading: isLoadingTransporters } = useQuery<Transporter[]>({

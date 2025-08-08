@@ -70,22 +70,19 @@ export default function AdminVehiclesPage() {
     }
   });
 
-  // Buscar todos os veículos paginados
-  const { data: vehiclesData, isLoading: vehiclesLoading, refetch: refetchVehicles } = useQuery({
-    queryKey: ['/api/vehicles/search'],
+  // Buscar todos os veículos
+  const { data: vehicles, isLoading, error } = useQuery<Vehicle[]>({
+    queryKey: ["/api/vehicles"],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        search: searchTerm,
-        page: '1',
-        limit: '50'
+      const response = await fetch("/api/vehicles", {
+        credentials: "include"
       });
-      const response = await fetch(`/api/vehicles/search?${params}`);
-      if (!response.ok) throw new Error('Erro ao buscar veículos');
+      if (!response.ok) {
+        throw new Error("Falha ao buscar veículos");
+      }
       return response.json();
-    },
+    }
   });
-
-  const vehicles = vehiclesData?.vehicles || [];
 
   // Filtrar veículos pela placa
   const filteredVehicles = vehicles?.filter(

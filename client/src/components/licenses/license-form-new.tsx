@@ -42,7 +42,6 @@ import { CampoPlacaAdicional } from "./placas-adicionais";
 import { VehicleSelectCard } from "./vehicle-select-card";
 import { StateValidationSimple } from "./state-validation-simple";
 import { FrontLineVehicles } from "./front-line-vehicles";
-import { VehicleSelectorPaginated } from "@/components/ui/vehicle-selector-paginated";
 import { 
   LoaderCircle,
   X, 
@@ -166,10 +165,23 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
     }
   };
 
-  // Fetch only transporters - vehicles will be loaded via paginated search
+  // Fetch vehicles for the dropdown selectors
+  const { data: vehicles, isLoading: isLoadingVehicles } = useQuery<Vehicle[]>({
+    queryKey: ["/api/vehicles"],
+  });
+  
+  // Fetch transporters linked to the user
   const { data: transporters = [], isLoading: isLoadingTransporters } = useQuery<Transporter[]>({
     queryKey: ["/api/user/transporters"],
   });
+
+  // Define filtered vehicle lists based on type
+  const tractorUnits = vehicles?.filter(v => v.type === "tractor_unit") || [];
+  const trucks = vehicles?.filter(v => v.type === "truck") || [];
+  const semiTrailers = vehicles?.filter(v => v.type === "semi_trailer") || [];
+  const trailers = vehicles?.filter(v => v.type === "trailer") || [];
+  const dollys = vehicles?.filter(v => v.type === "dolly") || [];
+  const flatbeds = vehicles?.filter(v => v.type === "flatbed") || [];
 
   // Define a schema that can be validated partially (for drafts)
   const formSchema = draft?.isDraft 
@@ -254,7 +266,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
       
       // Set main vehicle plate based on tractor unit selection
       if (name === "tractorUnitId" && value.tractorUnitId) {
-        // Vehicle data will be loaded via paginated search in VehicleSelectorPaginated
+        const selectedVehicle = vehicles?.find(v => v.id === value.tractorUnitId);
         if (selectedVehicle) {
           form.setValue("mainVehiclePlate", selectedVehicle.plate);
         }
@@ -907,7 +919,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               firstTrailerManualPlate={form.watch("firstTrailerManualPlate")}
               dollyManualPlate={form.watch("dollyManualPlate")}
               secondTrailerManualPlate={form.watch("secondTrailerManualPlate")}
-              isLoadingVehicles={false}
+              vehicles={vehicles || []}
+              isLoadingVehicles={isLoadingVehicles}
               onTractorChange={(id) => form.setValue("tractorUnitId", id)}
               onFirstTrailerChange={(id) => form.setValue("firstTrailerId", id)}
               onDollyChange={(id) => form.setValue("dollyId", id)}
@@ -932,7 +945,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               firstTrailerManualPlate={form.watch("firstTrailerManualPlate")}
               dollyManualPlate={form.watch("dollyManualPlate")}
               secondTrailerManualPlate={form.watch("secondTrailerManualPlate")}
-              isLoadingVehicles={false}
+              vehicles={vehicles || []}
+              isLoadingVehicles={isLoadingVehicles}
               onTractorChange={(id) => form.setValue("tractorUnitId", id)}
               onFirstTrailerChange={(id) => form.setValue("firstTrailerId", id)}
               onDollyChange={(id) => form.setValue("dollyId", id)}
@@ -957,7 +971,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               firstTrailerManualPlate={undefined}
               dollyManualPlate={undefined}
               secondTrailerManualPlate={undefined}
-              isLoadingVehicles={false}
+              vehicles={vehicles || []}
+              isLoadingVehicles={isLoadingVehicles}
               onTractorChange={(id) => form.setValue("tractorUnitId", id)}
               onFirstTrailerChange={(id) => form.setValue("flatbedId", id)}
               onDollyChange={() => {}}
@@ -982,7 +997,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               firstTrailerManualPlate={form.watch("firstTrailerManualPlate")}
               dollyManualPlate={undefined}
               secondTrailerManualPlate={undefined}
-              isLoadingVehicles={false}
+              vehicles={vehicles || []}
+              isLoadingVehicles={isLoadingVehicles}
               onTractorChange={(id) => form.setValue("tractorUnitId", id)}
               onFirstTrailerChange={(id) => form.setValue("firstTrailerId", id)}
               onDollyChange={() => {}}
@@ -1025,7 +1041,9 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               {form.watch("tractorUnitId") && (
                 <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-md flex items-center">
                   <Truck className="h-3 w-3 mr-1" />
-                  Unidade tratora selecionada
+                  Linha de frente já inclui: {
+                    tractorUnits.find(v => v.id === form.watch("tractorUnitId"))?.plate || "Unidade tratora"
+                  }
                 </div>
               )}
               {form.watch("firstTrailerId") && (
@@ -1065,7 +1083,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
           <div className="border-dashed border-2 border-gray-300 rounded-md p-4 bg-gray-50">
             <CampoPlacaAdicional 
               form={form} 
-              isLoadingVehicles={false}
+              vehicles={vehicles} 
+              isLoadingVehicles={isLoadingVehicles}
               licenseType={licenseType}
             />
           </div>
@@ -1183,7 +1202,14 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               const tractorId = form.watch("tractorUnitId");
               console.log('[PLACAS-VALIDACAO] TractorId:', tractorId);
               
-              // Vehicle plates will be set via VehicleSelectorPaginated onSelect callbacks else {
+              if (tractorId && vehicles) {
+                const tractor = vehicles.find(v => v.id === tractorId);
+                console.log('[PLACAS-VALIDACAO] Tractor encontrado:', tractor);
+                if (tractor?.plate) {
+                  placas.cavalo = tractor.plate;
+                  console.log('[PLACAS-VALIDACAO] Placa do cavalo:', tractor.plate);
+                }
+              } else {
                 const mainPlate = form.watch("mainVehiclePlate");
                 console.log('[PLACAS-VALIDACAO] MainPlate fallback:', mainPlate);
                 if (mainPlate) {
@@ -1196,31 +1222,66 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               const firstTrailerId = form.watch("firstTrailerId");
               console.log('[PLACAS-VALIDACAO] FirstTrailerId:', firstTrailerId);
               
-              // First trailer plate will be set via VehicleSelectorPaginated
+              if (firstTrailerId && vehicles) {
+                const firstTrailer = vehicles.find(v => v.id === firstTrailerId);
+                console.log('[PLACAS-VALIDACAO] FirstTrailer encontrado:', firstTrailer);
+                if (firstTrailer?.plate) {
+                  placas.primeiraCarreta = firstTrailer.plate;
+                  console.log('[PLACAS-VALIDACAO] Placa da primeira carreta:', firstTrailer.plate);
+                }
+              }
               
               // Segunda carreta
               const secondTrailerId = form.watch("secondTrailerId");
               console.log('[PLACAS-VALIDACAO] SecondTrailerId:', secondTrailerId);
               
-              // Second trailer plate will be set via VehicleSelectorPaginated
+              if (secondTrailerId && vehicles) {
+                const secondTrailer = vehicles.find(v => v.id === secondTrailerId);
+                console.log('[PLACAS-VALIDACAO] SecondTrailer encontrado:', secondTrailer);
+                if (secondTrailer?.plate) {
+                  placas.segundaCarreta = secondTrailer.plate;
+                  console.log('[PLACAS-VALIDACAO] Placa da segunda carreta:', secondTrailer.plate);
+                }
+              }
               
               // Dolly
               const dollyId = form.watch("dollyId");
               console.log('[PLACAS-VALIDACAO] DollyId:', dollyId);
               
-              // Dolly plate will be set via VehicleSelectorPaginated
+              if (dollyId && vehicles) {
+                const dolly = vehicles.find(v => v.id === dollyId);
+                console.log('[PLACAS-VALIDACAO] Dolly encontrado:', dolly);
+                if (dolly?.plate) {
+                  placas.dolly = dolly.plate;
+                  console.log('[PLACAS-VALIDACAO] Placa do dolly:', dolly.plate);
+                }
+              }
               
               // Prancha
               const flatbedId = form.watch("flatbedId");
               console.log('[PLACAS-VALIDACAO] FlatbedId:', flatbedId);
               
-              // Flatbed plate will be set via VehicleSelectorPaginated
+              if (flatbedId && vehicles) {
+                const flatbed = vehicles.find(v => v.id === flatbedId);
+                console.log('[PLACAS-VALIDACAO] Flatbed encontrado:', flatbed);
+                if (flatbed?.plate) {
+                  placas.prancha = flatbed.plate;
+                  console.log('[PLACAS-VALIDACAO] Placa da prancha:', flatbed.plate);
+                }
+              }
               
               // Reboque (usando firstTrailerId para romeu_julieta)
               const licenseType = form.watch("type");
               console.log('[PLACAS-VALIDACAO] LicenseType:', licenseType);
               
-              // Romeo and Juliet trailer plate will be set via VehicleSelectorPaginated
+              if (licenseType === "romeu_julieta" && firstTrailerId && vehicles) {
+                const reboque = vehicles.find(v => v.id === firstTrailerId);
+                console.log('[PLACAS-VALIDACAO] Reboque encontrado:', reboque);
+                if (reboque?.plate) {
+                  placas.reboque = reboque.plate;
+                  console.log('[PLACAS-VALIDACAO] Placa do reboque:', reboque.plate);
+                }
+              }
               
               console.log('[PLACAS-VALIDACAO] Placas coletadas final:', placas);
               return placas;

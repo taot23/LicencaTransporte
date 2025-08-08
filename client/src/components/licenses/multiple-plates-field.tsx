@@ -77,9 +77,32 @@ export function MultiplePlatesField({
     refetchOnWindowFocus: true
   });
   
-  // Vehicle validation will be done via individual plate lookup to avoid loading 11k+ vehicles
-  const vehicles: Vehicle[] = []; // Removed massive query - using plate suggestions instead
-  const vehiclesLoaded = true; // Always true since we use plate suggestions
+  // Buscar veículos para validação - usando API pública para garantir acesso
+  const { data: vehicles = [], isSuccess: vehiclesLoaded } = useQuery<Vehicle[]>({
+    queryKey: ['/api/vehicles'],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/vehicles', {
+          method: 'GET',
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          console.error('Erro ao buscar veículos:', response.status);
+          return [];
+        }
+        
+        const result = await response.json();
+        console.log("Veículos carregados da API:", result);
+        return result;
+      } catch (error) {
+        console.error('Erro ao buscar veículos:', error);
+        return [];
+      }
+    },
+    refetchOnMount: true,
+    staleTime: 30000
+  });
   
   // Função para verificar se a placa pertence a um veículo cadastrado
   const isRegisteredVehicle = (plate: string): boolean => {
