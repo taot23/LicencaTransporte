@@ -496,7 +496,7 @@ export default function IssuedLicensesPage() {
         "Data de Emissão": license.emissionDate ? formatDateForCSV(license.emissionDate) : '',
         "Data de Validade": license.validUntil ? formatDateForCSV(license.validUntil) : '',
         "Número AET": license.aetNumber || '',
-        "Transportador": license.transporter?.name || license.transporter?.tradeName || ''
+        "Transportador": license.transporter?.name || license.transporter?.tradeName || `ID: ${license.transporterId}`
       }));
 
       exportToCSV({
@@ -756,8 +756,7 @@ export default function IssuedLicensesPage() {
                         <TableCell className="font-medium">{license.requestNumber}</TableCell>
                         <TableCell>{license.mainVehiclePlate}</TableCell>
                         <TableCell>
-                          {license.transporter?.name || license.transporter?.tradeName || 
-                           <TransporterInfo transporterId={license.transporterId} />}
+                          {license.transporter?.name || license.transporter?.tradeName || '-'}
                         </TableCell>
                         <TableCell>
                           {license.aetNumber ? (
