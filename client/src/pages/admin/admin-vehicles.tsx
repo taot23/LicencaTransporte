@@ -71,10 +71,10 @@ export default function AdminVehiclesPage() {
   });
 
   // Buscar todos os veículos
-  // Removed massive vehicle query - redirect to optimized page
-  const vehicles: Vehicle[] = [];
-  const isLoading = false;
-  const error = null;
+  // Redirect to optimized page immediately
+  useEffect(() => {
+    window.location.href = '/admin/vehicles-optimized';
+  }, []);
 
   // Filtrar veículos pela placa
   const filteredVehicles = vehicles?.filter(
