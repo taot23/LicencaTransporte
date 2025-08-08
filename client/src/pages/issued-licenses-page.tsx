@@ -44,6 +44,16 @@ import { useLocation } from "wouter";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
 import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
 
+// Extensão do tipo LicenseRequest para incluir dados do transportador
+interface LicenseRequestWithTransporter extends LicenseRequest {
+  transporter?: {
+    id: number;
+    name: string;
+    tradeName: string;
+    documentNumber: string;
+  } | null;
+}
+
 export default function IssuedLicensesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -51,7 +61,7 @@ export default function IssuedLicensesPage() {
   const [stateFilter, setStateFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
-  const [selectedLicense, setSelectedLicense] = useState<LicenseRequest | null>(null);
+  const [selectedLicense, setSelectedLicense] = useState<LicenseRequestWithTransporter | null>(null);
   const [sortColumn, setSortColumn] = useState<string | null>("emissionDate");
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>('desc');
   const [renewDialogOpen, setRenewDialogOpen] = useState(false);
@@ -61,7 +71,7 @@ export default function IssuedLicensesPage() {
   const { isConnected } = useWebSocketContext();
   const { toast } = useToast();
 
-  const { data: issuedLicenses, isLoading, refetch } = useQuery<LicenseRequest[]>({
+  const { data: issuedLicenses, isLoading, refetch } = useQuery<LicenseRequestWithTransporter[]>({
     queryKey: ["/api/licenses/issued"],
     queryFn: async () => {
       const res = await fetch("/api/licenses/issued", {
@@ -746,7 +756,8 @@ export default function IssuedLicensesPage() {
                         <TableCell className="font-medium">{license.requestNumber}</TableCell>
                         <TableCell>{license.mainVehiclePlate}</TableCell>
                         <TableCell>
-                          <TransporterInfo transporterId={license.transporterId} />
+                          {license.transporter?.name || license.transporter?.tradeName || 
+                           <TransporterInfo transporterId={license.transporterId} />}
                         </TableCell>
                         <TableCell>
                           {license.aetNumber ? (
