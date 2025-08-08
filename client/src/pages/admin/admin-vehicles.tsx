@@ -70,11 +70,22 @@ export default function AdminVehiclesPage() {
     }
   });
 
-  // Buscar todos os veículos
-  // Redirect to optimized page immediately
-  useEffect(() => {
-    window.location.href = '/admin/vehicles-optimized';
-  }, []);
+  // Buscar todos os veículos paginados
+  const { data: vehiclesData, isLoading: vehiclesLoading, refetch: refetchVehicles } = useQuery({
+    queryKey: ['/api/vehicles/search'],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        search: searchTerm,
+        page: '1',
+        limit: '50'
+      });
+      const response = await fetch(`/api/vehicles/search?${params}`);
+      if (!response.ok) throw new Error('Erro ao buscar veículos');
+      return response.json();
+    },
+  });
+
+  const vehicles = vehiclesData?.vehicles || [];
 
   // Filtrar veículos pela placa
   const filteredVehicles = vehicles?.filter(

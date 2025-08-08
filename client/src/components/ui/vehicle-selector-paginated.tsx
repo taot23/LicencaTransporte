@@ -84,12 +84,15 @@ export function VehicleSelectorPaginated({
 
       const response = await fetch(`/api/plates/search?${params}`);
       if (!response.ok) {
-        throw new Error('Erro na busca de veículos');
+        throw new Error(`Erro na busca de veículos: ${response.status}`);
       }
-      return response.json();
+      const result = await response.json();
+      console.log(`[DEBUG] Busca veículos tipo ${vehicleType}: ${result.plates?.length || 0} de ${result.pagination?.total || 0} encontrados`);
+      return result;
     },
     enabled: isOpen, // Carrega quando o dropdown está aberto
     staleTime: 2 * 60 * 1000, // Cache por 2 minutos
+    retry: 2,
   });
 
   // Carregar veículo selecionado se value mudou
