@@ -23,6 +23,7 @@ The system is built with a React.js frontend using TypeScript, a Node.js/Express
 - **Performance Results**: 50K+ records - First search ~150ms, cached searches ~70ms (sub-1-second guaranteed)
 - **MASSIVE QUERY ELIMINATION (August 8, 2025)**: Removed ALL queries that loaded 11,793 vehicles at once from license forms, vehicle pages, and admin panels
 - **Intelligent Paginated Selectors**: All vehicle selectors in license forms now use optimized pagination for cavalos, carretas, dollys, and pranchas - loading only 10 vehicles per page like transporter selector
+- **ALL VEHICLES INCLUSION (August 8, 2025)**: Modified vehicle search to include ALL vehicles regardless of status (active, pending_documents, inactive, etc.) per user requirement
 
 **Key Architectural Decisions:**
 - **External Uploads System**: Files are stored in an external, configurable directory to prevent data loss during reinstalls. The system automatically detects write permissions and prioritizes `UPLOAD_DIR` (environment variable), `/var/uploads`, `/tmp/uploads`, `../uploads`, and `./uploads` in that order. Subfolders for `vehicles/` and `transporter/` ensure organization.
