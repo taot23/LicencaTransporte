@@ -55,7 +55,7 @@ function Router() {
       <StaffRoute path="/admin/licenses" component={AdminLicensesPage} requiredRole="operational" />
       <StaffRoute path="/admin/transporters" component={AdminTransportersPage} requiredRole="operational" />
       <AdminRoute path="/admin/users" component={AdminUsersPage} />
-      <StaffRoute path="/admin/vehicles" component={AdminVehiclesPage} requiredRole="operational" />
+      <StaffRoute path="/admin/vehicles" component={AdminVehiclesOptimizedPage} requiredRole="operational" />
       <StaffRoute path="/admin/vehicles-optimized" component={AdminVehiclesOptimizedPage} requiredRole="operational" />
       <AdminRoute path="/test-selectors" component={TestOptimizedSelectorsPage} />
       <AdminRoute path="/admin/vehicle-models" component={VehicleModelsPage} />
