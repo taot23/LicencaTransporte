@@ -1,10 +1,7 @@
 import React from 'react';
 import { Vehicle } from "@shared/schema";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Truck, Search } from "lucide-react";
 import { VehicleTypeImage } from "@/components/ui/vehicle-type-image";
+import { VehicleSelectorPaginated } from "@/components/ui/vehicle-selector-paginated";
 
 interface FrontLineVehiclesProps {
   licenseType: string;
@@ -31,12 +28,21 @@ interface FrontLineVehiclesProps {
 
 export function FrontLineVehicles({
   licenseType,
+  tractorUnitId,
+  firstTrailerId,
+  dollyId,
+  secondTrailerId,
   firstTrailerManualPlate,
   dollyManualPlate,
   secondTrailerManualPlate,
+  onTractorChange,
+  onFirstTrailerChange,
+  onDollyChange,
+  onSecondTrailerChange,
   onFirstTrailerManualPlateChange,
   onDollyManualPlateChange,
   onSecondTrailerManualPlateChange,
+  onCreateNewVehicle,
 }: FrontLineVehiclesProps) {
   
   // Definir quais campos devem ser mostrados baseado no tipo de licença
@@ -52,153 +58,90 @@ export function FrontLineVehicles({
           <h3 className="text-lg font-semibold text-gray-900">
             Composição Principal do {licenseType.includes('rodotrem') ? 'Rodotrem' : 
                                    licenseType.includes('bitrem') ? 'Bitrem' : 
-                                   licenseType.includes('dolly') ? 'Conjunto com Dolly' : 'Conjunto'}
+                                   licenseType.includes('dolly') ? 'Conjunto com Dolly' : 
+                                   licenseType.includes('flatbed') ? 'Conjunto com Prancha' : 'Conjunto'}
           </h3>
-          <p className="text-sm text-gray-600">Esta é a unidade principal que irá puxar o conjunto</p>
+          <p className="text-sm text-gray-600">Configure os veículos que farão parte desta composição</p>
         </div>
       </div>
 
       {/* Unidade Tratora - SEMPRE obrigatória */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-900">Unidade Tratora (Cavalo Mecânico)</label>
-          <p className="text-xs text-gray-600">Esta é a unidade principal que irá puxar o conjunto</p>
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Digite a placa da unidade tratora"
-              className="pr-10"
-              maxLength={8}
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-            >
-              <Search className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <VehicleSelectorPaginated
+          vehicleType="tractor_unit"
+          value={tractorUnitId || undefined}
+          onSelect={(vehicleId) => onTractorChange(vehicleId || null)}
+          label="Unidade Tratora (Cavalo Mecânico)"
+          placeholder="Digite a placa ou busque o cavalo mecânico..."
+          onCreateNew={onCreateNewVehicle}
+        />
+        <p className="text-xs text-gray-600 mt-2">Esta é a unidade principal que irá puxar o conjunto</p>
       </div>
 
-      {/* Seção dos componentes principais */}
-      {(licenseType !== "simple") && (
-        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 space-y-4">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-4 h-4 rounded bg-orange-600 flex items-center justify-center">
-              <span className="text-white text-xs font-bold">!</span>
-            </div>
-            <span className="text-sm font-medium text-orange-800">
-              Linha de Frente (Componentes Principais)
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* 1ª Carreta - SEMPRE MOSTRAR COMO INPUT DE TEXTO */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-900">1ª Carreta</label>
-              <p className="text-xs text-gray-600">Primeiro semirreboque da composição</p>
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Digite a placa da 1ª carreta"
-                  className="pr-10"
-                  maxLength={8}
-                  value={firstTrailerManualPlate || ''}
-                  onChange={(e) => onFirstTrailerManualPlateChange?.(e.target.value || null)}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Dolly - SEMPRE MOSTRAR COMO INPUT DE TEXTO quando necessário */}
-            {showDolly && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-900">Dolly</label>
-                <p className="text-xs text-gray-600">Dispositivo de acoplamento</p>
-                <div className="relative">
-                  <Input
-                    type="text"
-                    placeholder="Digite a placa do dolly"
-                    className="pr-10"
-                    maxLength={8}
-                    value={dollyManualPlate || ''}
-                    onChange={(e) => onDollyManualPlateChange?.(e.target.value || null)}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-                  >
-                    <Search className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* 2ª Carreta - SEMPRE MOSTRAR COMO INPUT DE TEXTO quando necessário */}
-            {showSecondTrailer && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-900">2ª Carreta</label>
-                <p className="text-xs text-gray-600">Segundo semirreboque da composição</p>
-                <div className="relative">
-                  <Input
-                    type="text"
-                    placeholder="Digite a placa da 2ª carreta"
-                    className="pr-10"
-                    maxLength={8}
-                    value={secondTrailerManualPlate || ''}
-                    onChange={(e) => onSecondTrailerManualPlateChange?.(e.target.value || null)}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-                  >
-                    <Search className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
+      {/* 1ª Carreta - Aparece em todos os tipos exceto dolly_only */}
+      {!['dolly_only'].includes(licenseType) && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <VehicleSelectorPaginated
+            vehicleType={licenseType === 'flatbed' ? 'flatbed' : 'semi_trailer'}
+            value={firstTrailerId || undefined}
+            onSelect={(vehicleId, manualPlate) => {
+              onFirstTrailerChange(vehicleId || null);
+              if (onFirstTrailerManualPlateChange) {
+                onFirstTrailerManualPlateChange(manualPlate || null);
+              }
+            }}
+            label={licenseType === 'flatbed' ? 'Prancha' : '1ª Carreta'}
+            placeholder={licenseType === 'flatbed' ? 'Digite a placa ou busque a prancha...' : 'Digite a placa ou busque a 1ª carreta...'}
+            allowManualEntry={!licenseType.includes('flatbed')}
+            onCreateNew={onCreateNewVehicle}
+          />
+          <p className="text-xs text-gray-600 mt-2">
+            {licenseType === 'flatbed' ? 'Prancha que transportará a carga' : 'Primeiro semirreboque da composição'}
+          </p>
         </div>
       )}
 
-      {/* Resumo da composição selecionada */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <h4 className="font-medium text-gray-900 mb-2">Composição selecionada:</h4>
-        <div className="flex flex-wrap gap-2">
-          <span className="text-sm text-gray-700">Placas digitadas:</span>
-          
-          {firstTrailerManualPlate && (
-            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
-              1ª Carreta: {firstTrailerManualPlate} (manual)
-            </Badge>
-          )}
-          
-          {dollyManualPlate && (
-            <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-200">
-              Dolly: {dollyManualPlate} (manual)
-            </Badge>
-          )}
-          
-          {secondTrailerManualPlate && (
-            <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200">
-              2ª Carreta: {secondTrailerManualPlate} (manual)
-            </Badge>
-          )}
+      {/* Dolly - Aparece apenas quando necessário */}
+      {showDolly && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <VehicleSelectorPaginated
+            vehicleType="dolly"
+            value={dollyId || undefined}
+            onSelect={(vehicleId, manualPlate) => {
+              onDollyChange(vehicleId || null);
+              if (onDollyManualPlateChange) {
+                onDollyManualPlateChange(manualPlate || null);
+              }
+            }}
+            label="Dolly"
+            placeholder="Digite a placa ou busque o dolly..."
+            allowManualEntry={true}
+            onCreateNew={onCreateNewVehicle}
+          />
+          <p className="text-xs text-gray-600 mt-2">Equipamento de ligação entre carretas</p>
         </div>
-      </div>
+      )}
+
+      {/* 2ª Carreta - Aparece quando necessário */}
+      {showSecondTrailer && (
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          <VehicleSelectorPaginated
+            vehicleType="trailer"
+            value={secondTrailerId || undefined}
+            onSelect={(vehicleId, manualPlate) => {
+              onSecondTrailerChange(vehicleId || null);
+              if (onSecondTrailerManualPlateChange) {
+                onSecondTrailerManualPlateChange(manualPlate || null);
+              }
+            }}
+            label="2ª Carreta"
+            placeholder="Digite a placa ou busque a 2ª carreta..."
+            allowManualEntry={true}
+            onCreateNew={onCreateNewVehicle}
+          />
+          <p className="text-xs text-gray-600 mt-2">Segunda carreta da composição</p>
+        </div>
+      )}
     </div>
   );
 }

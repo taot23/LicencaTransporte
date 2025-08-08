@@ -42,6 +42,7 @@ import { CampoPlacaAdicional } from "./placas-adicionais";
 import { VehicleSelectCard } from "./vehicle-select-card";
 import { StateValidationSimple } from "./state-validation-simple";
 import { FrontLineVehicles } from "./front-line-vehicles";
+import { VehicleSelectorPaginated } from "@/components/ui/vehicle-selector-paginated";
 import { 
   LoaderCircle,
   X, 
