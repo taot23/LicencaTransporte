@@ -3444,8 +3444,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Enriquecer licenças com dados do transportador para exportações CSV
       const allTransporters = await storage.getAllTransporters();
+      console.log(`[DEBUG LICENÇAS EMITIDAS] Total transportadores carregados: ${allTransporters.length}`);
+      
       const licensesWithTransporter = issuedLicenses.map(license => {
         const transporter = allTransporters.find(t => t.id === license.transporterId);
+        console.log(`[DEBUG LICENÇAS EMITIDAS] Licença ${license.id} - transporterId: ${license.transporterId}, encontrado: ${transporter ? transporter.name : 'NÃO ENCONTRADO'}`);
         return {
           ...license,
           transporter: transporter ? {
