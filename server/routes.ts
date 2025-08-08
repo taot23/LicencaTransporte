@@ -6011,8 +6011,8 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         conditions.push(sql`v.ownership_type = 'proprio'`);
       }
       
-      // Apenas veículos ativos por padrão
-      conditions.push(sql`v.status = 'active'`);
+      // Incluir veículos ativos e com documentos pendentes (disponíveis para uso)
+      conditions.push(sql`v.status IN ('active', 'pending_documents')`);
       
       // Construir WHERE clause
       if (conditions.length > 0) {
