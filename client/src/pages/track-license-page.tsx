@@ -334,22 +334,22 @@ export default function TrackLicensePage() {
         "Nº Solicitação",
         "Tipo de Veículo",
         "Placa Principal",
+        "Transportador",
         "Estado",
         "Status",
         "Data de Solicitação",
-        "Última Atualização",
-        "Transportador"
+        "Última Atualização"
       ];
 
       const dataForExport = paginatedLicenses.map(license => ({
         "Nº Solicitação": license.requestNumber || '',
         "Tipo de Veículo": translateVehicleType(license.type) || '',
         "Placa Principal": license.mainVehiclePlate || '',
+        "Transportador": license.transporter?.name || license.transporter?.tradeName || `ID: ${license.transporterId}`,
         "Estado": license.specificState || (license.states?.join(', ')) || '',
         "Status": translateStatus(license.specificStateStatus || license.status) || '',
         "Data de Solicitação": formatDateForCSV(license.createdAt),
-        "Última Atualização": formatDateForCSV(license.updatedAt),
-        "Transportador": license.transporter?.name || license.transporter?.tradeName || ''
+        "Última Atualização": formatDateForCSV(license.updatedAt)
       }));
 
       exportToCSV({

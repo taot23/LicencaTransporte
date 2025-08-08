@@ -2248,9 +2248,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return true; // manter todos os outros
           });
       
-      console.log(`Total de licenças: ${allLicenses.length}, filtradas: ${licenses.length}, incluindo renovação: ${shouldIncludeRenewalDrafts}`);
+      // Enriquecer licenças com dados do transportador para exportações CSV
+      const allTransporters = await storage.getAllTransporters();
+      const licensesWithTransporter = licenses.map(license => {
+        const transporter = allTransporters.find(t => t.id === license.transporterId);
+        return {
+          ...license,
+          transporter: transporter ? {
+            id: transporter.id,
+            name: transporter.name,
+            tradeName: transporter.tradeName,
+            documentNumber: transporter.documentNumber
+          } : null
+        };
+      });
+
+      console.log(`Total de licenças: ${allLicenses.length}, filtradas: ${licensesWithTransporter.length}, incluindo renovação: ${shouldIncludeRenewalDrafts}`);
       
-      res.json(licenses);
+      res.json(licensesWithTransporter);
     } catch (error) {
       console.error('Error fetching license requests:', error);
       res.status(500).json({ message: 'Erro ao buscar solicitações de licenças' });
