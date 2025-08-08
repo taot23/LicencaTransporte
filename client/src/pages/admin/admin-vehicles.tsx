@@ -71,18 +71,10 @@ export default function AdminVehiclesPage() {
   });
 
   // Buscar todos os veículos
-  const { data: vehicles, isLoading, error } = useQuery<Vehicle[]>({
-    queryKey: ["/api/vehicles"],
-    queryFn: async () => {
-      const response = await fetch("/api/vehicles", {
-        credentials: "include"
-      });
-      if (!response.ok) {
-        throw new Error("Falha ao buscar veículos");
-      }
-      return response.json();
-    }
-  });
+  // Removed massive vehicle query - redirect to optimized page
+  const vehicles: Vehicle[] = [];
+  const isLoading = false;
+  const error = null;
 
   // Filtrar veículos pela placa
   const filteredVehicles = vehicles?.filter(

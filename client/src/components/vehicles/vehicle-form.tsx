@@ -273,7 +273,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
     onSuccess: (data) => {
       console.log('Veículo cadastrado com sucesso:', data);
       toast({ title: "Veículo cadastrado com sucesso!" });
-      queryClient.invalidateQueries({ queryKey: ["/api/vehicles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/vehicles/search"] });
       onSuccess();
     },
     onError: (error: Error) => {
@@ -303,7 +303,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
     onSuccess: (data) => {
       console.log('Veículo atualizado com sucesso:', data);
       toast({ title: "Veículo atualizado com sucesso!" });
-      queryClient.invalidateQueries({ queryKey: ["/api/vehicles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/vehicles/search"] });
       onSuccess();
     },
     onError: (error: Error) => {
