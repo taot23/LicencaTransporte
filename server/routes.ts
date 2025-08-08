@@ -5889,12 +5889,11 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       
       console.log(`[VEHICLE BY TYPE] Tipo: ${type}, Busca: "${search}", Limite: ${maxResults}`);
       
-      // Query otimizada para busca por tipo de veículo
+      // Query otimizada para busca por tipo de veículo (sem JOIN desnecessário)
       let vehicleQuery = sql`
-        SELECT v.id, v.plate, v.brand, v.model, v.year, v.tare, 
-               v.axle_count, v.status, t.name as transporter_name
+        SELECT v.id, v.plate, v.brand, v.model, v.year, v.tare::text, 
+               v.axle_count, v.status
         FROM vehicles v
-        LEFT JOIN transporters t ON v.transporter_id = t.id
         WHERE v.type = ${type} AND v.status = 'active'
       `;
       
@@ -5925,7 +5924,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     }
   });
   
-  // Busca rápida de veículos por placa (para autocomplete)
+  // Busca rápida de veículos por placa (para autocomplete) - ULTRA OTIMIZADA
   app.get('/api/vehicles/search-plate', requireAuth, async (req, res) => {
     try {
       const user = req.user!;
@@ -5936,53 +5935,88 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       }
       
       const searchPattern = `%${searchTerm.toString().toUpperCase()}%`;
+      const typeFilter = type ? type.toString() : '';
       
-      console.log(`[PLATE SEARCH] Termo: "${searchTerm}", Tipo: "${type}"`);
+      // Cache key única para cada busca
+      const cacheKey = `vehicle-search:${user.id}:${searchTerm}:${typeFilter}:${user.role}`;
       
-      let vehicleQuery = sql`
-        SELECT v.id, v.plate, v.brand, v.model, v.type, v.tare,
-               v.axle_count, v.status, t.name as transporter_name
-        FROM vehicles v
-        LEFT JOIN transporters t ON v.transporter_id = t.id
-        WHERE UPPER(v.plate) LIKE ${searchPattern} AND v.status = 'active'
-      `;
-      
-      // Filtro por tipo se especificado
-      if (type && type.toString().length > 0) {
-        vehicleQuery = sql`${vehicleQuery} AND v.type = ${type.toString()}`;
+      // Verificar cache primeiro
+      const cached = appCache.get(cacheKey);
+      if (cached) {
+        console.log(`[PLATE SEARCH CACHE HIT] Termo: "${searchTerm}", Tipo: "${typeFilter}"`);
+        return res.json(cached);
       }
       
-      // Filtro por usuário se não for admin
+      console.log(`[PLATE SEARCH CACHE MISS] Termo: "${searchTerm}", Tipo: "${typeFilter}"`);
+      
+      // Consulta otimizada com índices específicos
+      let vehicleQuery = sql`
+        SELECT v.id, v.plate, v.brand, v.model, v.type, v.tare::text,
+               v.axle_count, v.status
+        FROM vehicles v
+        WHERE v.status = 'active' AND UPPER(v.plate) LIKE ${searchPattern}
+      `;
+      
+      // Filtro por tipo se especificado (mais eficiente primeiro)
+      if (typeFilter) {
+        vehicleQuery = sql`${vehicleQuery} AND v.type = ${typeFilter}`;
+      }
+      
+      // Filtro por usuário se não for admin (aplicado por último para usar índices)
       if (!isAdministrativeRole(user.role as UserRole)) {
         vehicleQuery = sql`${vehicleQuery} AND v.user_id = ${user.id}`;
       }
       
+      // Ordenação e limite otimizados
       vehicleQuery = sql`${vehicleQuery} 
-        ORDER BY v.plate 
-        LIMIT 20`;
+        ORDER BY 
+          CASE WHEN UPPER(v.plate) = ${searchTerm.toString().toUpperCase()} THEN 1 ELSE 2 END,
+          v.plate
+        LIMIT 15`;
       
+      const startTime = Date.now();
       const result = await db.execute(vehicleQuery);
+      const queryTime = Date.now() - startTime;
       
-      res.json({ vehicles: result.rows });
+      console.log(`[PLATE SEARCH] Consulta executada em ${queryTime}ms - ${result.rows.length} resultados`);
+      
+      const response = { vehicles: result.rows };
+      
+      // Cache por 30 segundos para consultas rápidas
+      appCache.set(cacheKey, response, 0.5);
+      
+      res.json(response);
     } catch (error) {
       console.error('[PLATE SEARCH] Erro:', error);
       res.status(500).json({ message: 'Erro na busca de placas' });
     }
   });
   
-  // Busca de unidades tratoras otimizada
+  // Busca de unidades tratoras otimizada com cache
   app.get('/api/vehicles/tractor-units', requireAuth, async (req, res) => {
     try {
       const user = req.user!;
       const { search = '', limit = '50' } = req.query;
       
-      const maxResults = Math.min(100, parseInt(limit as string));
+      const maxResults = Math.min(50, parseInt(limit as string)); // Reduzido para performance
+      const searchTerm = search.toString().toUpperCase();
       
+      // Cache key para tractors
+      const cacheKey = `tractor-units:${user.id}:${searchTerm}:${user.role}`;
+      
+      // Verificar cache
+      const cached = appCache.get(cacheKey);
+      if (cached) {
+        console.log(`[TRACTOR CACHE HIT] Termo: "${searchTerm}"`);
+        return res.json(cached);
+      }
+      
+      console.log(`[TRACTOR CACHE MISS] Termo: "${searchTerm}"`);
+      
+      // Query ultra otimizada sem JOINs desnecessários
       let query = sql`
-        SELECT v.id, v.plate, v.brand, v.model, v.year, v.tare,
-               t.name as transporter_name
+        SELECT v.id, v.plate, v.brand, v.model, v.year, v.tare::text
         FROM vehicles v
-        LEFT JOIN transporters t ON v.transporter_id = t.id
         WHERE v.type = 'tractor_unit' AND v.status = 'active'
       `;
       
@@ -5990,15 +6024,25 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         query = sql`${query} AND v.user_id = ${user.id}`;
       }
       
-      if (search) {
-        const searchPattern = `%${search.toString().toUpperCase()}%`;
+      if (searchTerm) {
+        const searchPattern = `%${searchTerm}%`;
         query = sql`${query} AND UPPER(v.plate) LIKE ${searchPattern}`;
       }
       
       query = sql`${query} ORDER BY v.plate LIMIT ${maxResults}`;
       
+      const startTime = Date.now();
       const result = await db.execute(query);
-      res.json({ vehicles: result.rows });
+      const queryTime = Date.now() - startTime;
+      
+      console.log(`[TRACTOR UNITS] Consulta executada em ${queryTime}ms - ${result.rows.length} resultados`);
+      
+      const response = { vehicles: result.rows };
+      
+      // Cache por 1 minuto
+      appCache.set(cacheKey, response, 1);
+      
+      res.json(response);
     } catch (error) {
       console.error('[TRACTOR UNITS] Erro:', error);
       res.status(500).json({ message: 'Erro na busca de unidades tratoras' });
