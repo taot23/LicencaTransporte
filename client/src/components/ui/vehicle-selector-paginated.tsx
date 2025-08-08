@@ -74,10 +74,8 @@ export function VehicleSelectorPaginated({
   const { data, isLoading, error } = useQuery({
     queryKey: ['vehicles-paginated', vehicleType, debouncedSearch, currentPage],
     queryFn: async () => {
-      if (!debouncedSearch || debouncedSearch.length < 2) return null;
-      
       const params = new URLSearchParams({
-        search: debouncedSearch,
+        search: debouncedSearch || '',
         page: currentPage.toString(),
         limit: '10',
         vehicleType: vehicleType,
@@ -90,7 +88,7 @@ export function VehicleSelectorPaginated({
       }
       return response.json();
     },
-    enabled: debouncedSearch.length >= 2,
+    enabled: isOpen, // Carrega quando o dropdown está aberto
     staleTime: 2 * 60 * 1000, // Cache por 2 minutos
   });
 
@@ -209,7 +207,7 @@ export function VehicleSelectorPaginated({
       )}
 
       {/* Dropdown de resultados com paginação */}
-      {isOpen && debouncedSearch.length >= 2 && (
+      {isOpen && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-96 overflow-hidden">
           {isLoading && (
             <div className="p-4 text-center text-gray-500">
@@ -231,9 +229,12 @@ export function VehicleSelectorPaginated({
                 {data.plates.length === 0 ? (
                   <div className="p-4 text-center">
                     <div className="text-gray-500 mb-2">
-                      Nenhum {vehicleTypeLabels[vehicleType].toLowerCase()} encontrado para "{debouncedSearch}"
+                      {debouncedSearch ? 
+                        `Nenhum ${vehicleTypeLabels[vehicleType].toLowerCase()} encontrado para "${debouncedSearch}"` :
+                        `Nenhum ${vehicleTypeLabels[vehicleType].toLowerCase()} disponível`
+                      }
                     </div>
-                    {allowManualEntry && (
+                    {allowManualEntry && debouncedSearch && (
                       <div className="text-sm text-blue-600">
                         Pressione Enter para usar placa manual
                       </div>
