@@ -54,6 +54,30 @@ interface LicenseRequestWithTransporter extends LicenseRequest {
   } | null;
 }
 
+// Tipo para as licenças expandidas (uma linha por estado)
+interface ExpandedLicenseRequest {
+  id: number;
+  licenseId: number;
+  requestNumber: string;
+  type: string;
+  mainVehiclePlate: string;
+  state: string;
+  status: string;
+  stateStatus: string;
+  emissionDate: string | null;
+  validUntil: string | null;
+  licenseFileUrl: string | null;
+  stateFileUrl: string | null;
+  transporterId: number;
+  transporter?: {
+    id: number;
+    name: string;
+    tradeName: string;
+    documentNumber: string;
+  } | null;
+  aetNumber: string | null;
+}
+
 export default function IssuedLicensesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -89,28 +113,12 @@ export default function IssuedLicensesPage() {
   });
 
   // Interface para as licenças expandidas por estado
-  interface ExpandedLicense {
-    id: number;
-    licenseId: number;
-    requestNumber: string;
-    type: string;
-    mainVehiclePlate: string;
-    transporterId: number;
-    state: string;
-    status: string;
-    stateStatus: string;
-    emissionDate: string | null;
-    validUntil: string | null;
-    licenseFileUrl: string | null;
-    stateFileUrl: string | null;
-    aetNumber: string | null; // Número da AET
-  }
   
   // Obter licenças com status aprovado por estado
   const expandedLicenses = useMemo(() => {
     if (!issuedLicenses) return [];
     
-    const result: ExpandedLicense[] = [];
+    const result: ExpandedLicenseRequest[] = [];
     
     issuedLicenses.forEach(license => {
       // Para cada licença, expandir para uma linha por estado que tenha sido aprovado
@@ -195,6 +203,7 @@ export default function IssuedLicensesPage() {
             licenseFileUrl: license.licenseFileUrl,
             stateFileUrl,
             transporterId: license.transporterId || 0,
+            transporter: license.transporter, // Passar dados do transportador para a linha expandida
             aetNumber: stateAETNumber // Usar o número AET específico do estado
           });
         }
@@ -264,7 +273,7 @@ export default function IssuedLicensesPage() {
     const toSort = [...filteredLicenses];
     
     // Definir uma função de ordenação personalizada com base na coluna e direção
-    const getSortValue = (license: ExpandedLicense, column: string): any => {
+    const getSortValue = (license: ExpandedLicenseRequest, column: string): any => {
       if (column === 'state') {
         return license.state;
       } else if (column === 'mainVehiclePlate') {
@@ -756,7 +765,7 @@ export default function IssuedLicensesPage() {
                         <TableCell className="font-medium">{license.requestNumber}</TableCell>
                         <TableCell>{license.mainVehiclePlate}</TableCell>
                         <TableCell>
-                          {license.transporter?.name || license.transporter?.tradeName || '-'}
+                          {license.transporter?.name || license.transporter?.tradeName || `ID: ${license.transporterId}`}
                         </TableCell>
                         <TableCell>
                           {license.aetNumber ? (
