@@ -166,23 +166,10 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
     }
   };
 
-  // Fetch vehicles for the dropdown selectors
-  const { data: vehicles, isLoading: isLoadingVehicles } = useQuery<Vehicle[]>({
-    queryKey: ["/api/vehicles"],
-  });
-  
-  // Fetch transporters linked to the user
+  // Fetch only transporters - vehicles will be loaded via paginated search
   const { data: transporters = [], isLoading: isLoadingTransporters } = useQuery<Transporter[]>({
     queryKey: ["/api/user/transporters"],
   });
-
-  // Define filtered vehicle lists based on type
-  const tractorUnits = vehicles?.filter(v => v.type === "tractor_unit") || [];
-  const trucks = vehicles?.filter(v => v.type === "truck") || [];
-  const semiTrailers = vehicles?.filter(v => v.type === "semi_trailer") || [];
-  const trailers = vehicles?.filter(v => v.type === "trailer") || [];
-  const dollys = vehicles?.filter(v => v.type === "dolly") || [];
-  const flatbeds = vehicles?.filter(v => v.type === "flatbed") || [];
 
   // Define a schema that can be validated partially (for drafts)
   const formSchema = draft?.isDraft 
@@ -920,8 +907,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               firstTrailerManualPlate={form.watch("firstTrailerManualPlate")}
               dollyManualPlate={form.watch("dollyManualPlate")}
               secondTrailerManualPlate={form.watch("secondTrailerManualPlate")}
-              vehicles={vehicles || []}
-              isLoadingVehicles={isLoadingVehicles}
+              vehicles={[]}
+              isLoadingVehicles={false}
               onTractorChange={(id) => form.setValue("tractorUnitId", id)}
               onFirstTrailerChange={(id) => form.setValue("firstTrailerId", id)}
               onDollyChange={(id) => form.setValue("dollyId", id)}
@@ -946,8 +933,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               firstTrailerManualPlate={form.watch("firstTrailerManualPlate")}
               dollyManualPlate={form.watch("dollyManualPlate")}
               secondTrailerManualPlate={form.watch("secondTrailerManualPlate")}
-              vehicles={vehicles || []}
-              isLoadingVehicles={isLoadingVehicles}
+              vehicles={[]}
+              isLoadingVehicles={false}
               onTractorChange={(id) => form.setValue("tractorUnitId", id)}
               onFirstTrailerChange={(id) => form.setValue("firstTrailerId", id)}
               onDollyChange={(id) => form.setValue("dollyId", id)}
@@ -972,8 +959,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               firstTrailerManualPlate={undefined}
               dollyManualPlate={undefined}
               secondTrailerManualPlate={undefined}
-              vehicles={vehicles || []}
-              isLoadingVehicles={isLoadingVehicles}
+              vehicles={[]}
+              isLoadingVehicles={false}
               onTractorChange={(id) => form.setValue("tractorUnitId", id)}
               onFirstTrailerChange={(id) => form.setValue("flatbedId", id)}
               onDollyChange={() => {}}
@@ -998,8 +985,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               firstTrailerManualPlate={form.watch("firstTrailerManualPlate")}
               dollyManualPlate={undefined}
               secondTrailerManualPlate={undefined}
-              vehicles={vehicles || []}
-              isLoadingVehicles={isLoadingVehicles}
+              vehicles={[]}
+              isLoadingVehicles={false}
               onTractorChange={(id) => form.setValue("tractorUnitId", id)}
               onFirstTrailerChange={(id) => form.setValue("firstTrailerId", id)}
               onDollyChange={() => {}}
@@ -1042,9 +1029,7 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
               {form.watch("tractorUnitId") && (
                 <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-md flex items-center">
                   <Truck className="h-3 w-3 mr-1" />
-                  Linha de frente já inclui: {
-                    tractorUnits.find(v => v.id === form.watch("tractorUnitId"))?.plate || "Unidade tratora"
-                  }
+                  Unidade tratora selecionada
                 </div>
               )}
               {form.watch("firstTrailerId") && (
@@ -1084,8 +1069,8 @@ export function LicenseForm({ draft, onComplete, onCancel, preSelectedTransporte
           <div className="border-dashed border-2 border-gray-300 rounded-md p-4 bg-gray-50">
             <CampoPlacaAdicional 
               form={form} 
-              vehicles={vehicles} 
-              isLoadingVehicles={isLoadingVehicles}
+              vehicles={[]} 
+              isLoadingVehicles={false}
               licenseType={licenseType}
             />
           </div>
