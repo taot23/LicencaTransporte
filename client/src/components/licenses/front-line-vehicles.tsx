@@ -13,7 +13,6 @@ interface FrontLineVehiclesProps {
   firstTrailerManualPlate?: string | null;
   dollyManualPlate?: string | null;
   secondTrailerManualPlate?: string | null;
-  vehicles: Vehicle[];
   isLoadingVehicles: boolean;
   onTractorChange: (id: number | null) => void;
   onFirstTrailerChange: (id: number | null) => void;
