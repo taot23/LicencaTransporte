@@ -5949,30 +5949,52 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       
       console.log(`[PLATE SEARCH CACHE MISS] Termo: "${searchTerm}", Tipo: "${typeFilter}"`);
       
-      // Consulta otimizada com índices específicos
-      let vehicleQuery = sql`
-        SELECT v.id, v.plate, v.brand, v.model, v.type, v.tare::text,
-               v.axle_count, v.status
-        FROM vehicles v
-        WHERE v.status = 'active' AND UPPER(v.plate) LIKE ${searchPattern}
-      `;
+      // Consulta ULTRA otimizada para 50K+ registros com trigram
+      let vehicleQuery;
       
-      // Filtro por tipo se especificado (mais eficiente primeiro)
+      // Para buscas curtas (2-3 chars), usar trigram que é mais rápido em volumes grandes
+      if (searchTerm.length <= 3) {
+        vehicleQuery = sql`
+          SELECT v.id, v.plate, v.brand, v.model, v.type, v.tare::text,
+                 v.axle_count, v.status,
+                 similarity(v.plate, ${searchTerm.toString().toUpperCase()}) as sim
+          FROM vehicles v
+          WHERE v.status = 'active' 
+            AND v.plate % ${searchTerm.toString().toUpperCase()}
+        `;
+      } else {
+        // Para buscas longas, usar índice UPPER otimizado
+        vehicleQuery = sql`
+          SELECT v.id, v.plate, v.brand, v.model, v.type, v.tare::text,
+                 v.axle_count, v.status, 1.0 as sim
+          FROM vehicles v
+          WHERE v.status = 'active' 
+            AND UPPER(v.plate) LIKE ${searchPattern}
+        `;
+      }
+      
+      // Filtro por tipo (aplicado cedo para usar índice combinado)
       if (typeFilter) {
         vehicleQuery = sql`${vehicleQuery} AND v.type = ${typeFilter}`;
       }
       
-      // Filtro por usuário se não for admin (aplicado por último para usar índices)
+      // Filtro por usuário se não for admin
       if (!isAdministrativeRole(user.role as UserRole)) {
         vehicleQuery = sql`${vehicleQuery} AND v.user_id = ${user.id}`;
       }
       
-      // Ordenação e limite otimizados
-      vehicleQuery = sql`${vehicleQuery} 
-        ORDER BY 
-          CASE WHEN UPPER(v.plate) = ${searchTerm.toString().toUpperCase()} THEN 1 ELSE 2 END,
-          v.plate
-        LIMIT 15`;
+      // Ordenação otimizada para grandes volumes
+      if (searchTerm.length <= 3) {
+        vehicleQuery = sql`${vehicleQuery} 
+          ORDER BY sim DESC, v.plate
+          LIMIT 12`;
+      } else {
+        vehicleQuery = sql`${vehicleQuery} 
+          ORDER BY 
+            CASE WHEN UPPER(v.plate) = ${searchTerm.toString().toUpperCase()} THEN 1 ELSE 2 END,
+            v.plate
+          LIMIT 12`;
+      }
       
       const startTime = Date.now();
       const result = await db.execute(vehicleQuery);
@@ -5982,8 +6004,8 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       
       const response = { vehicles: result.rows };
       
-      // Cache por 30 segundos para consultas rápidas
-      appCache.set(cacheKey, response, 0.5);
+      // Cache agressivo para volumes grandes: 2 minutos
+      appCache.set(cacheKey, response, 2);
       
       res.json(response);
     } catch (error) {
@@ -6013,23 +6035,43 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       
       console.log(`[TRACTOR CACHE MISS] Termo: "${searchTerm}"`);
       
-      // Query ultra otimizada sem JOINs desnecessários
-      let query = sql`
-        SELECT v.id, v.plate, v.brand, v.model, v.year, v.tare::text
-        FROM vehicles v
-        WHERE v.type = 'tractor_unit' AND v.status = 'active'
-      `;
+      // Query especializada para tractors em volumes extremos
+      let query;
       
+      if (searchTerm && searchTerm.length <= 3) {
+        // Usar trigram para buscas curtas em volumes grandes
+        query = sql`
+          SELECT v.id, v.plate, v.brand, v.model, v.year, v.tare::text,
+                 similarity(v.plate, ${searchTerm}) as sim
+          FROM vehicles v
+          WHERE v.type = 'tractor_unit' AND v.status = 'active'
+            AND v.plate % ${searchTerm}
+        `;
+      } else {
+        // Query tradicional otimizada
+        query = sql`
+          SELECT v.id, v.plate, v.brand, v.model, v.year, v.tare::text
+          FROM vehicles v
+          WHERE v.type = 'tractor_unit' AND v.status = 'active'
+        `;
+        
+        if (searchTerm) {
+          const searchPattern = `%${searchTerm}%`;
+          query = sql`${query} AND UPPER(v.plate) LIKE ${searchPattern}`;
+        }
+      }
+      
+      // Filtro de usuário
       if (!isAdministrativeRole(user.role as UserRole)) {
         query = sql`${query} AND v.user_id = ${user.id}`;
       }
       
-      if (searchTerm) {
-        const searchPattern = `%${searchTerm}%`;
-        query = sql`${query} AND UPPER(v.plate) LIKE ${searchPattern}`;
+      // Ordenação e limite
+      if (searchTerm && searchTerm.length <= 3) {
+        query = sql`${query} ORDER BY sim DESC, v.plate LIMIT ${Math.min(25, maxResults)}`;
+      } else {
+        query = sql`${query} ORDER BY v.plate LIMIT ${Math.min(25, maxResults)}`;
       }
-      
-      query = sql`${query} ORDER BY v.plate LIMIT ${maxResults}`;
       
       const startTime = Date.now();
       const result = await db.execute(query);
