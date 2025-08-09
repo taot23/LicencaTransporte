@@ -5846,6 +5846,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         search = '',
         page = '1',
         limit = '20',
+        type = '',
         sortBy = 'created_at',
         sortOrder = 'desc'
       } = req.query;
@@ -5854,7 +5855,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       const limitNum = Math.min(25, Math.max(5, parseInt(limit as string))); // Otimizado: máximo 25 por página para melhor performance
       const offset = (pageNum - 1) * limitNum;
       
-      console.log(`[SEARCH VEHICLES] Busca: "${search}", Página: ${pageNum}, Limite: ${limitNum}`);
+      console.log(`[SEARCH VEHICLES] Busca: "${search}", Página: ${pageNum}, Limite: ${limitNum}, Tipo: "${type}"`);
       
       // Construir consulta otimizada com índices
       let baseQuery = sql`
@@ -5872,14 +5873,18 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         conditions.push(sql`v.user_id = ${user.id}`);
       }
       
+      // Filtro por tipo de veículo
+      if (type) {
+        conditions.push(sql`v.type = ${type.toString()}`);
+      }
+      
       // Filtro de busca otimizado com índices
       if (search) {
         const searchTerm = `%${search.toString().toUpperCase()}%`;
         conditions.push(sql`(
           UPPER(v.plate) LIKE ${searchTerm} OR 
           UPPER(v.brand) LIKE ${searchTerm} OR 
-          UPPER(v.model) LIKE ${searchTerm} OR 
-          UPPER(v.type) LIKE ${searchTerm}
+          UPPER(v.model) LIKE ${searchTerm}
         )`);
       }
       
