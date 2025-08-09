@@ -21,8 +21,14 @@ interface PaginatedVehicleSelectorProps {
 
 interface VehicleSearchResponse {
   vehicles: Vehicle[];
-  total: number;
-  hasMore: boolean;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
 }
 
 const PAGE_SIZE = 10;
@@ -74,7 +80,8 @@ export function PaginatedVehicleSelector({
       }
       
       const data = await res.json();
-      console.log(`[PAGINATED VEHICLE] Recebidos ${data.vehicles?.length || 0} veículos`);
+      console.log(`[PAGINATED VEHICLE] Recebidos ${data.vehicles?.length || 0} veículos, hasNext: ${data.pagination?.hasNext}`);
+      console.log(`[PAGINATED VEHICLE] Total no servidor: ${data.pagination?.total}, página atual: ${data.pagination?.page}`);
       
       return data;
     },
@@ -165,7 +172,7 @@ export function PaginatedVehicleSelector({
   };
 
   const handleLoadMore = () => {
-    if (vehicleData?.hasMore && !isLoading) {
+    if (vehicleData?.pagination?.hasNext && !isLoading) {
       setCurrentPage(prev => prev + 1);
     }
   };
@@ -208,11 +215,17 @@ export function PaginatedVehicleSelector({
     }
   };
 
-  const handleBlur = () => {
+  const handleBlur = (e: React.FocusEvent) => {
+    // Se o foco está indo para um elemento dentro do dropdown, não fechar
+    const relatedTarget = e.relatedTarget as HTMLElement;
+    if (relatedTarget && relatedTarget.closest('.paginated-dropdown-content')) {
+      return;
+    }
+    
     setTimeout(() => {
       setIsOpen(false);
       setHighlightedIndex(-1);
-    }, 200);
+    }, 300);
   };
 
   const handleFocus = () => {
@@ -268,7 +281,10 @@ export function PaginatedVehicleSelector({
       </div>
 
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-hidden">
+        <div 
+          className="paginated-dropdown-content absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-hidden"
+          onMouseDown={(e) => e.preventDefault()} // Previne que o clique feche o dropdown
+        >
           {isLoading && currentPage === 1 ? (
             <div className="p-2 space-y-2">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -304,58 +320,60 @@ export function PaginatedVehicleSelector({
               )}
             </div>
           ) : (
-            <ul ref={listRef} className="overflow-y-auto max-h-52">
-              {allVehicles.map((vehicle, index) => (
-                <li
-                  key={vehicle.id}
-                  onClick={() => handleVehicleSelect(vehicle)}
-                  className={cn(
-                    "px-4 py-2 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0",
-                    highlightedIndex === index && "bg-blue-50",
-                    value === vehicle.id && "bg-blue-100 font-medium"
-                  )}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900">
-                        {vehicle.plate}
-                      </div>
-                      {(vehicle.brand || vehicle.model) && (
-                        <div className="text-sm text-gray-500">
-                          {[vehicle.brand, vehicle.model].filter(Boolean).join(' ')}
+            <div className="flex flex-col max-h-60">
+              <ul ref={listRef} className="overflow-y-auto flex-1">
+                {allVehicles.map((vehicle, index) => (
+                  <li
+                    key={vehicle.id}
+                    onClick={() => handleVehicleSelect(vehicle)}
+                    className={cn(
+                      "px-4 py-2 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0",
+                      highlightedIndex === index && "bg-blue-50",
+                      value === vehicle.id && "bg-blue-100 font-medium"
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">
+                          {vehicle.plate}
                         </div>
+                        {(vehicle.brand || vehicle.model) && (
+                          <div className="text-sm text-gray-500">
+                            {[vehicle.brand, vehicle.model].filter(Boolean).join(' ')}
+                          </div>
+                        )}
+                      </div>
+                      {value === vehicle.id && (
+                        <Check className="h-4 w-4 text-blue-600" />
                       )}
                     </div>
-                    {value === vehicle.id && (
-                      <Check className="h-4 w-4 text-blue-600" />
-                    )}
-                  </div>
-                </li>
-              ))}
+                  </li>
+                ))}
+              </ul>
               
-              {vehicleData?.hasMore && (
-                <li className="p-2 border-t">
+              {vehicleData?.pagination?.hasNext && (
+                <div className="p-2 border-t bg-gray-50">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleLoadMore}
                     disabled={isLoading}
-                    className="w-full"
+                    className="w-full text-xs"
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="h-3 w-3 mr-2 animate-spin" />
                         Carregando...
                       </>
                     ) : (
                       <>
-                        Carregar mais ({vehicleData.total - allVehicles.length} restantes)
+                        Carregar mais ({vehicleData.pagination.total - allVehicles.length} restantes)
                       </>
                     )}
                   </Button>
-                </li>
+                </div>
               )}
-            </ul>
+            </div>
           )}
         </div>
       )}
