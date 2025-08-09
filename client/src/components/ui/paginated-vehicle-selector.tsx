@@ -61,15 +61,22 @@ export function PaginatedVehicleSelector({
         ...(vehicleType && { type: vehicleType })
       });
       
+      console.log(`[PAGINATED VEHICLE] Buscando veículos - tipo: ${vehicleType}, busca: "${searchTerm}", página: ${currentPage}`);
+      console.log(`[PAGINATED VEHICLE] URL completa: /api/vehicles/search?${params.toString()}`);
+      
       const res = await fetch(`/api/vehicles/search?${params}`, {
         credentials: "include"
       });
       
       if (!res.ok) {
+        console.error(`[PAGINATED VEHICLE] Erro na requisição: ${res.status} ${res.statusText}`);
         throw new Error("Erro ao buscar veículos");
       }
       
-      return res.json();
+      const data = await res.json();
+      console.log(`[PAGINATED VEHICLE] Recebidos ${data.vehicles?.length || 0} veículos`);
+      
+      return data;
     },
     enabled: isOpen || hasSearched,
     staleTime: 2 * 60 * 1000, // 2 minutos
