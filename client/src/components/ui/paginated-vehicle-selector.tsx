@@ -115,15 +115,16 @@ export function PaginatedVehicleSelector({
     if (vehicleData?.vehicles && Array.isArray(vehicleData.vehicles)) {
       console.log(`[PAGINATED VEHICLE] Atualizando allVehicles - página: ${currentPage}, veículos recebidos: ${vehicleData.vehicles.length}`);
       
+      // Force uma nova referência para garantir re-renderização
       if (currentPage === 1) {
         console.log(`[PAGINATED VEHICLE] Primeira página - definindo ${vehicleData.vehicles.length} veículos`);
-        setAllVehicles(vehicleData.vehicles);
+        setAllVehicles([...vehicleData.vehicles]);
       } else {
         console.log(`[PAGINATED VEHICLE] Página ${currentPage} - adicionando ${vehicleData.vehicles.length} veículos`);
         setAllVehicles(prev => [...prev, ...vehicleData.vehicles]);
       }
     }
-  }, [vehicleData?.vehicles, currentPage]);
+  }, [vehicleData, currentPage]);
 
   // Sincronizar input com valor selecionado
   useEffect(() => {
@@ -309,12 +310,12 @@ export function PaginatedVehicleSelector({
                 Tentar novamente
               </Button>
             </div>
-          ) : allVehicles.length === 0 ? (
+          ) : (isLoading && currentPage === 1) || allVehicles.length === 0 ? (
             <div className="p-4 text-center text-gray-500">
               <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p>Nenhuma placa encontrada</p>
               <div className="text-xs mt-2 text-gray-400">
-                Debug: allVehicles={allVehicles.length}, hasSearched={hasSearched}
+                Debug: allVehicles={allVehicles.length}, isLoading={isLoading}, hasSearched={hasSearched}
               </div>
               {onCreateNew && (
                 <Button 
