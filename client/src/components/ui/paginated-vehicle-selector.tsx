@@ -160,6 +160,11 @@ export function PaginatedVehicleSelector({
     setIsOpen(true);
     setHighlightedIndex(-1);
     
+    // Se o campo está sendo limpo, limpar também a seleção
+    if (newValue === "" && onSelect) {
+      onSelect(null);
+    }
+    
     debouncedSearch(newValue);
 
     // Se permitir entrada manual e não há veículo correspondente
@@ -288,9 +293,18 @@ export function PaginatedVehicleSelector({
       </div>
 
       {isOpen && (
+        console.log(`[PAGINATED VEHICLE] RENDERIZANDO DROPDOWN:`, {
+          isOpen,
+          allVehicles: allVehicles.length,
+          isLoading: isLoading && currentPage === 1,
+          hasError: !!error,
+          isEmpty: allVehicles.length === 0,
+          shouldShowList: allVehicles.length > 0
+        }),
         <div 
-          className="paginated-dropdown-content absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-hidden"
+          className="absolute z-[9999] w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-hidden"
           onMouseDown={(e) => e.preventDefault()} // Previne que o clique feche o dropdown
+          style={{ zIndex: 9999 }}
         >
           {isLoading && currentPage === 1 ? (
             <div className="p-2 space-y-2">
@@ -330,6 +344,7 @@ export function PaginatedVehicleSelector({
               )}
             </div>
           ) : (
+            console.log(`[PAGINATED VEHICLE] RENDERIZANDO LISTA COM ${allVehicles.length} VEÍCULOS`),
             <div className="flex flex-col max-h-60">
               <ul ref={listRef} className="overflow-y-auto flex-1">
                 {allVehicles.map((vehicle, index) => (
