@@ -110,21 +110,16 @@ export function PaginatedVehicleSelector({
 
   // Atualizar lista de veículos quando nova página carrega
   useEffect(() => {
-    console.log(`[PAGINATED VEHICLE] useEffect executado - vehicleData:`, !!vehicleData, vehicleData?.vehicles?.length);
+    if (!vehicleData?.vehicles) return;
     
-    if (vehicleData?.vehicles && Array.isArray(vehicleData.vehicles)) {
-      console.log(`[PAGINATED VEHICLE] Atualizando allVehicles - página: ${currentPage}, veículos recebidos: ${vehicleData.vehicles.length}`);
-      
-      // Force uma nova referência para garantir re-renderização
-      if (currentPage === 1) {
-        console.log(`[PAGINATED VEHICLE] Primeira página - definindo ${vehicleData.vehicles.length} veículos`);
-        setAllVehicles([...vehicleData.vehicles]);
-      } else {
-        console.log(`[PAGINATED VEHICLE] Página ${currentPage} - adicionando ${vehicleData.vehicles.length} veículos`);
-        setAllVehicles(prev => [...prev, ...vehicleData.vehicles]);
-      }
+    console.log(`[PAGINATED VEHICLE] Página ${currentPage} recebeu ${vehicleData.vehicles.length} veículos`);
+    
+    if (currentPage === 1) {
+      setAllVehicles(vehicleData.vehicles);
+    } else {
+      setAllVehicles(prev => [...prev, ...vehicleData.vehicles]);
     }
-  }, [vehicleData, currentPage]);
+  }, [vehicleData?.vehicles, currentPage]);
 
   // Sincronizar input com valor selecionado
   useEffect(() => {
@@ -149,8 +144,8 @@ export function PaginatedVehicleSelector({
     debounceTimeout.current = setTimeout(() => {
       setSearchTerm(term);
       setCurrentPage(1);
-      setAllVehicles([]);
       setHasSearched(true);
+      // NÃO limpar allVehicles aqui - isso causa o bug da lista vazia
     }, 300);
   }, []);
 
@@ -293,14 +288,6 @@ export function PaginatedVehicleSelector({
       </div>
 
       {isOpen && (
-        console.log(`[PAGINATED VEHICLE] RENDERIZANDO DROPDOWN:`, {
-          isOpen,
-          allVehicles: allVehicles.length,
-          isLoading: isLoading && currentPage === 1,
-          hasError: !!error,
-          isEmpty: allVehicles.length === 0,
-          shouldShowList: allVehicles.length > 0
-        }),
         <div 
           className="absolute z-[9999] w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-hidden"
           onMouseDown={(e) => e.preventDefault()} // Previne que o clique feche o dropdown
@@ -324,12 +311,12 @@ export function PaginatedVehicleSelector({
                 Tentar novamente
               </Button>
             </div>
-          ) : (isLoading && currentPage === 1) || allVehicles.length === 0 ? (
+          ) : !vehicleData && allVehicles.length === 0 ? (
             <div className="p-4 text-center text-gray-500">
               <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p>Nenhuma placa encontrada</p>
               <div className="text-xs mt-2 text-gray-400">
-                Debug: allVehicles={allVehicles.length}, isLoading={isLoading}, hasSearched={hasSearched}
+                Debug: allVehicles={allVehicles.length}, searchTerm="{searchTerm}"
               </div>
               {onCreateNew && (
                 <Button 
@@ -344,7 +331,6 @@ export function PaginatedVehicleSelector({
               )}
             </div>
           ) : (
-            console.log(`[PAGINATED VEHICLE] RENDERIZANDO LISTA COM ${allVehicles.length} VEÍCULOS`),
             <div className="flex flex-col max-h-60">
               <ul ref={listRef} className="overflow-y-auto flex-1">
                 {allVehicles.map((vehicle, index) => (
