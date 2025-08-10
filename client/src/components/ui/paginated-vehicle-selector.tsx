@@ -309,12 +309,12 @@ export function PaginatedVehicleSelector({
                 Tentar novamente
               </Button>
             </div>
-          ) : !vehicleData || allVehicles.length === 0 ? (
+          ) : allVehicles.length === 0 ? (
             <div className="p-4 text-center text-gray-500">
               <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p>Nenhuma placa encontrada</p>
               <div className="text-xs mt-2 text-gray-400">
-                Debug: allVehicles={allVehicles.length}, vehicleData={vehicleData ? `${vehicleData.vehicles?.length} veículos` : 'null'}, isLoading={isLoading ? 'true' : 'false'}
+                Debug: allVehicles={allVehicles.length}, hasSearched={hasSearched}
               </div>
               {onCreateNew && (
                 <Button 
