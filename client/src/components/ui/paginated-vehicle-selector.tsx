@@ -48,10 +48,8 @@ export function PaginatedVehicleSelector({
   const [inputValue, setInputValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [allVehicles, setAllVehicles] = useState<Vehicle[]>([]);
-  const [hasSearched, setHasSearched] = useState(false);
   
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
@@ -123,28 +121,23 @@ export function PaginatedVehicleSelector({
     }
   }, [vehicleData?.vehicles, currentPage]);
 
-  // Sincronizar input com valor selecionado
+  // Sincronizar input apenas quando veículo é selecionado (não durante digitação)
   useEffect(() => {
-    if (selectedVehicle) {
+    if (selectedVehicle && !isOpen) {
       setInputValue(selectedVehicle.plate);
-    } else if (value) {
-      const vehicle = allVehicles.find(v => v.id === value);
-      if (vehicle) {
-        setInputValue(vehicle.plate);
-      }
-    } else {
-      setInputValue("");
     }
-  }, [value, selectedVehicle, allVehicles]);
+  }, [selectedVehicle, isOpen]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value.toUpperCase();
     setInputValue(newValue);
-    setIsOpen(true);
+    if (!isOpen) {
+      setIsOpen(true);
+    }
     setHighlightedIndex(-1);
     
-    // Se o campo está sendo limpo, limpar também a seleção
-    if (newValue === "" && onSelect) {
+    // Limpar seleção se o input foi limpo
+    if (!newValue && value) {
       onSelect(null);
     }
 
@@ -158,10 +151,10 @@ export function PaginatedVehicleSelector({
   };
 
   const handleVehicleSelect = (vehicle: Vehicle) => {
+    onSelect(vehicle.id);
     setInputValue(vehicle.plate);
     setIsOpen(false);
     setHighlightedIndex(-1);
-    onSelect(vehicle.id);
   };
 
   const handleLoadMore = () => {
@@ -219,12 +212,7 @@ export function PaginatedVehicleSelector({
     }, 300);
   };
 
-  const handleFocus = () => {
-    if (!hasSearched) {
-      // Não precisa mais buscar manualmente - useQuery faz automaticamente
-    }
-    setIsOpen(true);
-  };
+  // Função handleFocus não é mais necessária
 
   // Scroll para item destacado
   useEffect(() => {
@@ -253,7 +241,7 @@ export function PaginatedVehicleSelector({
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
-          onFocus={handleFocus}
+          onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
