@@ -221,7 +221,7 @@ export function PaginatedVehicleSelector({
 
   const handleFocus = () => {
     if (!hasSearched) {
-      debouncedSearch("");
+      // Não precisa mais buscar manualmente - useQuery faz automaticamente
     }
     setIsOpen(true);
   };
