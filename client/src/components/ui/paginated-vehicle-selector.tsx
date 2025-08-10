@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Vehicle } from "@shared/schema";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Check, ChevronDown, Search, Plus, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDebounce } from "@/hooks/use-debounce";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -54,20 +55,20 @@ export function PaginatedVehicleSelector({
   
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
-  const debounceTimeout = useRef<NodeJS.Timeout>();
+  // Removido debounceTimeout - agora usa useDebounce hook
 
   // Query para buscar veículos com paginação
   const { data: vehicleData, isLoading, error } = useQuery<VehicleSearchResponse>({
-    queryKey: ['/api/vehicles/search', searchTerm, currentPage, vehicleType],
+    queryKey: ['/api/vehicles/search', debouncedSearchTerm, currentPage, vehicleType],
     queryFn: async () => {
       const params = new URLSearchParams({
-        search: searchTerm,
+        search: debouncedSearchTerm,
         page: currentPage.toString(),
         limit: PAGE_SIZE.toString(),
         ...(vehicleType && { type: vehicleType })
       });
       
-      console.log(`[PAGINATED VEHICLE] Buscando veículos - tipo: ${vehicleType}, busca: "${searchTerm}", página: ${currentPage}`);
+      console.log(`[PAGINATED VEHICLE] Buscando veículos - tipo: ${vehicleType}, busca: "${debouncedSearchTerm}", página: ${currentPage}`);
       console.log(`[PAGINATED VEHICLE] URL completa: /api/vehicles/search?${params.toString()}`);
       
       const res = await fetch(`/api/vehicles/search?${params}`, {
@@ -85,7 +86,7 @@ export function PaginatedVehicleSelector({
       
       return data;
     },
-    enabled: isOpen || hasSearched,
+    enabled: isOpen,
     staleTime: 2 * 60 * 1000, // 2 minutos
     cacheTime: 5 * 60 * 1000, // 5 minutos
   });
@@ -135,19 +136,8 @@ export function PaginatedVehicleSelector({
     }
   }, [value, selectedVehicle, allVehicles]);
 
-  // Debounced search
-  const debouncedSearch = useCallback((term: string) => {
-    if (debounceTimeout.current) {
-      clearTimeout(debounceTimeout.current);
-    }
-    
-    debounceTimeout.current = setTimeout(() => {
-      setSearchTerm(term);
-      setCurrentPage(1);
-      setHasSearched(true);
-      // NÃO limpar allVehicles aqui - isso causa o bug da lista vazia
-    }, 300);
-  }, []);
+  // Usar debounce hook como o transportador
+  const debouncedSearchTerm = useDebounce(inputValue, 300);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value.toUpperCase();
@@ -159,8 +149,6 @@ export function PaginatedVehicleSelector({
     if (newValue === "" && onSelect) {
       onSelect(null);
     }
-    
-    debouncedSearch(newValue);
 
     // Se permitir entrada manual e não há veículo correspondente
     if (allowManualEntry && newValue.length >= 3) {
@@ -188,9 +176,7 @@ export function PaginatedVehicleSelector({
     if (!isOpen) {
       if (e.key === "ArrowDown" || e.key === "Enter") {
         setIsOpen(true);
-        if (!hasSearched) {
-          debouncedSearch("");
-        }
+        // Abrir dropdown automaticamente
         return;
       }
       return;
@@ -305,7 +291,7 @@ export function PaginatedVehicleSelector({
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => debouncedSearch(searchTerm)}
+                onClick={() => window.location.reload()}
                 className="mt-2"
               >
                 Tentar novamente
@@ -316,7 +302,7 @@ export function PaginatedVehicleSelector({
               <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p>Nenhuma placa encontrada</p>
               <div className="text-xs mt-2 text-gray-400">
-                Debug: allVehicles={allVehicles.length}, searchTerm="{searchTerm}"
+                Debug: allVehicles={allVehicles.length}, busca="{debouncedSearchTerm}"
               </div>
               {onCreateNew && (
                 <Button 
