@@ -113,8 +113,8 @@ export function PaginatedVehicleSelector({
     if (vehicleData && vehicleData.vehicles) {
       console.log(`[PAGINATED VEHICLE] Atualizando allVehicles - página: ${currentPage}, veículos recebidos: ${vehicleData.vehicles.length}`);
       if (currentPage === 1) {
-        setAllVehicles(vehicleData.vehicles);
         console.log(`[PAGINATED VEHICLE] Primeira página - definindo ${vehicleData.vehicles.length} veículos`);
+        setAllVehicles([...vehicleData.vehicles]); // Force new array reference
       } else {
         setAllVehicles(prev => {
           const newList = [...prev, ...vehicleData.vehicles];
@@ -123,7 +123,7 @@ export function PaginatedVehicleSelector({
         });
       }
     }
-  }, [vehicleData]);
+  }, [vehicleData, currentPage]);
 
   // Sincronizar input com valor selecionado
   useEffect(() => {
@@ -309,7 +309,7 @@ export function PaginatedVehicleSelector({
                 Tentar novamente
               </Button>
             </div>
-          ) : allVehicles.length === 0 ? (
+          ) : !vehicleData || allVehicles.length === 0 ? (
             <div className="p-4 text-center text-gray-500">
               <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p>Nenhuma placa encontrada</p>
