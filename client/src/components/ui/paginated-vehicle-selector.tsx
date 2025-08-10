@@ -110,20 +110,20 @@ export function PaginatedVehicleSelector({
 
   // Atualizar lista de veículos quando nova página carrega
   useEffect(() => {
-    if (vehicleData && vehicleData.vehicles) {
+    console.log(`[PAGINATED VEHICLE] useEffect executado - vehicleData:`, !!vehicleData, vehicleData?.vehicles?.length);
+    
+    if (vehicleData?.vehicles && Array.isArray(vehicleData.vehicles)) {
       console.log(`[PAGINATED VEHICLE] Atualizando allVehicles - página: ${currentPage}, veículos recebidos: ${vehicleData.vehicles.length}`);
+      
       if (currentPage === 1) {
         console.log(`[PAGINATED VEHICLE] Primeira página - definindo ${vehicleData.vehicles.length} veículos`);
-        setAllVehicles([...vehicleData.vehicles]); // Force new array reference
+        setAllVehicles(vehicleData.vehicles);
       } else {
-        setAllVehicles(prev => {
-          const newList = [...prev, ...vehicleData.vehicles];
-          console.log(`[PAGINATED VEHICLE] Adicionando à lista - total agora: ${newList.length}`);
-          return newList;
-        });
+        console.log(`[PAGINATED VEHICLE] Página ${currentPage} - adicionando ${vehicleData.vehicles.length} veículos`);
+        setAllVehicles(prev => [...prev, ...vehicleData.vehicles]);
       }
     }
-  }, [vehicleData, currentPage]);
+  }, [vehicleData?.vehicles, currentPage]);
 
   // Sincronizar input com valor selecionado
   useEffect(() => {
@@ -314,7 +314,7 @@ export function PaginatedVehicleSelector({
               <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p>Nenhuma placa encontrada</p>
               <div className="text-xs mt-2 text-gray-400">
-                Debug: allVehicles={allVehicles.length}, vehicleData={vehicleData ? `${vehicleData.vehicles?.length} veículos` : 'null'}
+                Debug: allVehicles={allVehicles.length}, vehicleData={vehicleData ? `${vehicleData.vehicles?.length} veículos` : 'null'}, isLoading={isLoading ? 'true' : 'false'}
               </div>
               {onCreateNew && (
                 <Button 
