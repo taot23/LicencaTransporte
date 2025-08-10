@@ -110,11 +110,11 @@ export function PaginatedVehicleSelector({
 
   // Atualizar lista de veículos quando nova página carrega
   useEffect(() => {
-    if (vehicleData) {
-      console.log(`[PAGINATED VEHICLE] Atualizando allVehicles - página: ${currentPage}, veículos recebidos: ${vehicleData.vehicles?.length}`);
+    if (vehicleData && vehicleData.vehicles) {
+      console.log(`[PAGINATED VEHICLE] Atualizando allVehicles - página: ${currentPage}, veículos recebidos: ${vehicleData.vehicles.length}`);
       if (currentPage === 1) {
         setAllVehicles(vehicleData.vehicles);
-        console.log(`[PAGINATED VEHICLE] Primeira página - definindo ${vehicleData.vehicles?.length} veículos`);
+        console.log(`[PAGINATED VEHICLE] Primeira página - definindo ${vehicleData.vehicles.length} veículos`);
       } else {
         setAllVehicles(prev => {
           const newList = [...prev, ...vehicleData.vehicles];
@@ -123,7 +123,7 @@ export function PaginatedVehicleSelector({
         });
       }
     }
-  }, [vehicleData, currentPage]);
+  }, [vehicleData]);
 
   // Sincronizar input com valor selecionado
   useEffect(() => {
@@ -314,7 +314,7 @@ export function PaginatedVehicleSelector({
               <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p>Nenhuma placa encontrada</p>
               <div className="text-xs mt-2 text-gray-400">
-                Debug: {vehicleData ? `vehicleData existe, ${vehicleData.vehicles?.length} veículos` : 'vehicleData é null'}
+                Debug: allVehicles={allVehicles.length}, vehicleData={vehicleData ? `${vehicleData.vehicles?.length} veículos` : 'null'}
               </div>
               {onCreateNew && (
                 <Button 
