@@ -55,7 +55,8 @@ export function PaginatedVehicleSelector({
   
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
-  // Removido debounceTimeout - agora usa useDebounce hook
+  // Usar debounce hook como o transportador
+  const debouncedSearchTerm = useDebounce(inputValue, 300);
 
   // Query para buscar veículos com paginação
   const { data: vehicleData, isLoading, error } = useQuery<VehicleSearchResponse>({
@@ -135,9 +136,6 @@ export function PaginatedVehicleSelector({
       setInputValue("");
     }
   }, [value, selectedVehicle, allVehicles]);
-
-  // Usar debounce hook como o transportador
-  const debouncedSearchTerm = useDebounce(inputValue, 300);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value.toUpperCase();
