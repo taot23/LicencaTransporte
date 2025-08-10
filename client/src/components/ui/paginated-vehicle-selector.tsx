@@ -111,10 +111,16 @@ export function PaginatedVehicleSelector({
   // Atualizar lista de veículos quando nova página carrega
   useEffect(() => {
     if (vehicleData) {
+      console.log(`[PAGINATED VEHICLE] Atualizando allVehicles - página: ${currentPage}, veículos recebidos: ${vehicleData.vehicles?.length}`);
       if (currentPage === 1) {
         setAllVehicles(vehicleData.vehicles);
+        console.log(`[PAGINATED VEHICLE] Primeira página - definindo ${vehicleData.vehicles?.length} veículos`);
       } else {
-        setAllVehicles(prev => [...prev, ...vehicleData.vehicles]);
+        setAllVehicles(prev => {
+          const newList = [...prev, ...vehicleData.vehicles];
+          console.log(`[PAGINATED VEHICLE] Adicionando à lista - total agora: ${newList.length}`);
+          return newList;
+        });
       }
     }
   }, [vehicleData, currentPage]);
@@ -307,6 +313,9 @@ export function PaginatedVehicleSelector({
             <div className="p-4 text-center text-gray-500">
               <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p>Nenhuma placa encontrada</p>
+              <div className="text-xs mt-2 text-gray-400">
+                Debug: {vehicleData ? `vehicleData existe, ${vehicleData.vehicles?.length} veículos` : 'vehicleData é null'}
+              </div>
               {onCreateNew && (
                 <Button 
                   variant="ghost" 
