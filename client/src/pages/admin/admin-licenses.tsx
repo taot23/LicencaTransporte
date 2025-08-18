@@ -713,22 +713,11 @@ export default function AdminLicensesPage() {
       }
     }
     
-    // Verificar se já existem licenças aprovadas no mesmo pedido
-    const hasOtherApprovedStates = license.stateStatuses?.some(status => 
-      status.includes(':approved:') && !status.startsWith(`${state}:`)
-    );
-    
-    // Se há outros estados aprovados, não pré-preencher o número AET
-    // Apenas usar o número existente se for para o mesmo estado
-    if (hasOtherApprovedStates && currentStateStatus !== 'approved') {
-      currentStateAetNumber = ''; // Limpar para evitar pré-preenchimento
-    } else if (!currentStateAetNumber && license.aetNumber && !hasOtherApprovedStates) {
-      // Fallback para o número AET global apenas se não houver outros estados aprovados
-      currentStateAetNumber = license.aetNumber;
-    }
+    // NÃO usar fallback para número AET global - cada estado deve ter seu próprio número
+    // Apenas usar o número AET se for específico para este estado
+    // currentStateAetNumber já foi extraído corretamente acima ou está vazio se não existir
     
     console.log('[Form Reset] Estado selecionado:', state);
-    console.log('[Form Reset] Tem outros estados aprovados:', hasOtherApprovedStates);
     console.log('[Form Reset] CNPJ atual do estado:', currentStateCnpj);
     console.log('[Form Reset] stateCnpjs disponíveis:', license.stateCnpjs);
     console.log('[Form Reset] stateStatuses disponíveis:', license.stateStatuses);
