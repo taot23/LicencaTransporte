@@ -333,6 +333,20 @@ export function Sidebar({ className }: SidebarProps) {
               </Button>
             )}
             
+            {/* Tipos de Conjunto - apenas admin */}
+            {user?.role === 'admin' && (
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start text-white hover:bg-gray-700",
+                  location === "/admin/vehicle-set-types" ? "bg-gray-700" : "bg-transparent"
+                )}
+                onClick={() => handleNavigate("/admin/vehicle-set-types")}
+              >
+                <Settings className="mr-3 h-5 w-5" />
+                Tipos de Conjunto
+              </Button>
+            )}
 
             
             {/* Módulo Financeiro - apenas para perfis financeiro, manager e admin */}
