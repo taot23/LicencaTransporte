@@ -148,7 +148,7 @@ export function IntelligentVehicleSelector({
         label={label}
         onCreateNew={onCreateNew}
         vehicleType={expectedSpecs.type as any}
-        axleFilter={expectedSpecs.axles} // FILTRO CRÍTICO: Apenas veículos com eixos corretos
+        axleFilter={expectedSpecs.axles > 0 ? expectedSpecs.axles : undefined} // FILTRO: Apenas se houver restrição específica de eixos
       />
 
       {/* Mensagem de ajuda */}

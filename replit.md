@@ -21,6 +21,8 @@ The system is built with a React.js frontend using TypeScript, a Node.js/Express
 - **Volume-Optimized Queries**: Trigram similarity search for short terms, traditional LIKE for longer patterns
 - **Scalability Features**: Limited result sets (12-25 items), specialized indices reducing search space by 80%
 - **Performance Results**: 50K+ records - First search ~150ms, cached searches ~70ms (sub-1-second guaranteed)
+- **Intelligent Axle Validation**: Sistema rigoroso de validação de eixos por tipo de licença com filtros automáticos no frontend e backend
+- **Flexible License Types**: Prancha e Romeu e Julieta têm validação flexível (sem restrições específicas de eixos)
 
 **Key Architectural Decisions:**
 - **External Uploads System**: Files are stored in an external, configurable directory to prevent data loss during reinstalls. The system automatically detects write permissions and prioritizes `UPLOAD_DIR` (environment variable), `/var/uploads`, `/tmp/uploads`, `../uploads`, and `./uploads` in that order. Subfolders for `vehicles/` and `transporter/` ensure organization.

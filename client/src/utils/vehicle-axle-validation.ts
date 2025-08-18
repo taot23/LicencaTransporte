@@ -41,17 +41,17 @@ export const AXLE_CONFIGURATIONS: Record<LicenseType, AxleConfiguration> = {
     requiresDolly: false
   },
   "flatbed": {
-    tractorAxles: 3,
-    firstTrailerAxles: 3,
+    tractorAxles: 0, // Flexível - qualquer cavalo
+    firstTrailerAxles: 0, // Flexível - qualquer prancha
     secondTrailerAxles: 0,
-    totalAxles: 6,
+    totalAxles: 0, // Sem restrição específica
     requiresDolly: false
   },
   "romeo_and_juliet": {
-    tractorAxles: 3,
-    firstTrailerAxles: 3,
+    tractorAxles: 0, // Flexível - qualquer cavalo
+    firstTrailerAxles: 0, // Flexível - qualquer semirreboque
     secondTrailerAxles: 0,
-    totalAxles: 6,
+    totalAxles: 0, // Sem restrição específica
     requiresDolly: false
   }
 };
@@ -111,6 +111,12 @@ export function validateVehicleForPosition(
 
   // REGRAS ESPECÍFICAS CRÍTICAS POR TIPO DE LICENÇA
   
+  // PRANCHA e ROMEU E JULIETA: SEM restrições de eixos (flexível)
+  if (licenseType === 'flatbed' || licenseType === 'romeo_and_juliet') {
+    // Para prancha e romeu e julieta, apenas verificar o tipo de veículo, não os eixos
+    return { isValid: true };
+  }
+  
   // BITREM 7 EIXOS: Apenas semirreboques de 2 eixos
   if (licenseType === 'bitrain_7_axles' && (position === 'firstTrailer' || position === 'secondTrailer')) {
     if (vehicle.axleCount !== 2) {
@@ -151,8 +157,8 @@ export function validateVehicleForPosition(
     }
   }
   
-  // Verificar quantidade de eixos (regra geral)
-  if (vehicle.axleCount !== expectedAxles) {
+  // Verificar quantidade de eixos (regra geral) - pular se for 0 (flexível)
+  if (expectedAxles > 0 && vehicle.axleCount !== expectedAxles) {
     return {
       isValid: false,
       error: `Este veículo possui ${vehicle.axleCount} eixos, mas para ${getLicenseTypeLabel(licenseType)} é necessário ${expectedAxles} eixos nesta posição`
