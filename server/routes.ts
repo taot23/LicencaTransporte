@@ -31,7 +31,7 @@ import {
   isAdministrativeRole,
   type UserRole 
 } from "@shared/permissions";
-import { eq, sql, or, inArray, and, desc, gt } from "drizzle-orm";
+import { eq, sql, or, inArray, and, desc, gt, ne, isNotNull } from "drizzle-orm";
 import { fromZodError } from "zod-validation-error";
 import { ZodError } from "zod";
 import multer from "multer";
@@ -5114,6 +5114,84 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       // Verificar se o estado está incluído na lista de estados da licença
       if (!existingLicense.states.includes(stateStatusData.state)) {
         return res.status(400).json({ message: 'Estado não incluído na solicitação da licença' });
+      }
+
+      // Validação de unicidade e proteção do número AET
+      if (stateStatusData.aetNumber) {
+        console.log(`[VALIDAÇÃO AET] Validando número "${stateStatusData.aetNumber}" para estado ${stateStatusData.state}`);
+        
+        // 1. Verificar se já existe o número em outro estado da mesma licença
+        if (existingLicense.stateAETNumbers) {
+          const duplicateInSameLicense = existingLicense.stateAETNumbers.find((entry: string) => {
+            const [state, number] = entry.split(':');
+            return state !== stateStatusData.state && number === stateStatusData.aetNumber;
+          });
+          
+          if (duplicateInSameLicense) {
+            const [duplicateState] = duplicateInSameLicense.split(':');
+            console.log(`[VALIDAÇÃO AET] ❌ Número já usado no estado ${duplicateState} da mesma licença`);
+            return res.status(400).json({ 
+              message: `O número "${stateStatusData.aetNumber}" já está sendo usado no estado ${duplicateState} desta licença` 
+            });
+          }
+        }
+
+        // 2. Verificar se já existe o número em outras licenças (busca global)
+        const allLicenses = await db.select({
+          id: licenseRequests.id,
+          requestNumber: licenseRequests.requestNumber,
+          stateAETNumbers: licenseRequests.stateAETNumbers
+        }).from(licenseRequests)
+        .where(and(
+          ne(licenseRequests.id, licenseId),
+          isNotNull(licenseRequests.stateAETNumbers)
+        ));
+        
+        for (const license of allLicenses) {
+          if (license.stateAETNumbers && Array.isArray(license.stateAETNumbers)) {
+            const duplicate = license.stateAETNumbers.find((entry: string) => {
+              const [, number] = entry.split(':');
+              return number === stateStatusData.aetNumber;
+            });
+            
+            if (duplicate) {
+              console.log(`[VALIDAÇÃO AET] ❌ Número já usado na licença ${license.requestNumber}`);
+              return res.status(400).json({ 
+                message: `O número "${stateStatusData.aetNumber}" já está sendo usado na licença ${license.requestNumber}` 
+              });
+            }
+          }
+        }
+
+        // 3. Verificar se é tentativa de alterar número já tratado (status aprovado/under_review)
+        if (existingLicense.stateAETNumbers) {
+          const existingAetEntry = existingLicense.stateAETNumbers.find((entry: string) => 
+            entry.startsWith(`${stateStatusData.state}:`)
+          );
+          
+          if (existingAetEntry) {
+            const [, existingNumber] = existingAetEntry.split(':');
+            
+            // Verificar se o estado já foi tratado (tem status aprovado ou em análise)
+            const currentStateStatus = existingLicense.stateStatuses?.find((status: string) => 
+              status.startsWith(`${stateStatusData.state}:`)
+            );
+            
+            if (currentStateStatus) {
+              const [, currentStatus] = currentStateStatus.split(':');
+              const isAlreadyProcessed = ['approved', 'under_review', 'pending_approval'].includes(currentStatus);
+              
+              if (isAlreadyProcessed && existingNumber !== stateStatusData.aetNumber) {
+                console.log(`[VALIDAÇÃO AET] ❌ Tentativa de alterar número já tratado: ${existingNumber} → ${stateStatusData.aetNumber}`);
+                return res.status(400).json({ 
+                  message: `Não é possível alterar o número AET "${existingNumber}" pois o estado ${stateStatusData.state} já foi tratado` 
+                });
+              }
+            }
+          }
+        }
+        
+        console.log(`[VALIDAÇÃO AET] ✅ Número "${stateStatusData.aetNumber}" válido para estado ${stateStatusData.state}`);
       }
       
       // Adicionar arquivo se fornecido

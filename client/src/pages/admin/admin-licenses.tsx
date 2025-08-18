@@ -104,7 +104,7 @@ const updateStateStatusSchema = z.object({
         message: "Apenas arquivos PDF são permitidos para a licença",
       }
     ),
-}).superRefine((data, ctx) => {
+}).superRefine(async (data, ctx) => {
   // Se o status for "approved", validade e data de emissão são obrigatórias
   if (data.status === "approved") {
     if (!data.validUntil) {
@@ -165,6 +165,41 @@ export default function AdminLicensesPage() {
   
   // Estados para controle do botão de atualização
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [aetNumberValidationError, setAetNumberValidationError] = useState<string>("");
+
+  // Função para validar unicidade do número AET
+  const validateAetNumberUniqueness = useCallback((aetNumber: string, currentState: string, currentLicense: LicenseRequest) => {
+    if (!aetNumber || !currentLicense) return null;
+
+    // Verificar se o número já existe em outros estados da mesma licença
+    if (currentLicense.stateAETNumbers) {
+      const duplicateInSameLicense = currentLicense.stateAETNumbers.find(entry => {
+        const [state, number] = entry.split(':');
+        return state !== currentState && number === aetNumber;
+      });
+      
+      if (duplicateInSameLicense) {
+        const [duplicateState] = duplicateInSameLicense.split(':');
+        return `O número "${aetNumber}" já está sendo usado no estado ${duplicateState} desta licença`;
+      }
+    }
+
+    // Verificar se o número já existe em outras licenças (busca global)
+    const duplicateInOtherLicense = licenses.find(license => {
+      if (license.id === currentLicense.id) return false; // Pular a licença atual
+      
+      return license.stateAETNumbers?.some(entry => {
+        const [, number] = entry.split(':');
+        return number === aetNumber;
+      });
+    });
+
+    if (duplicateInOtherLicense) {
+      return `O número "${aetNumber}" já está sendo usado na licença ${duplicateInOtherLicense.requestNumber}`;
+    }
+
+    return null; // Número é único
+  }, [licenses]);
 
   // Effect para invalidar cache quando houver atualizações via WebSocket
   useEffect(() => {
@@ -1553,8 +1588,23 @@ export default function AdminLicensesPage() {
                               placeholder={`Digite o número da AET para ${selectedState}`}
                               {...field}
                               className="w-full"
+                              onChange={(e) => {
+                                field.onChange(e);
+                                // Validar unicidade em tempo real
+                                if (selectedLicense && e.target.value) {
+                                  const error = validateAetNumberUniqueness(e.target.value, selectedState, selectedLicense);
+                                  setAetNumberValidationError(error || "");
+                                } else {
+                                  setAetNumberValidationError("");
+                                }
+                              }}
                             />
                           </FormControl>
+                          {aetNumberValidationError && (
+                            <p className="text-xs text-red-600 mt-1">
+                              ⚠️ {aetNumberValidationError}
+                            </p>
+                          )}
                           <p className="text-xs text-muted-foreground mt-1">
                             Número único para este estado específico
                           </p>
@@ -1789,7 +1839,11 @@ export default function AdminLicensesPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setStateStatusDialogOpen(false)}
+                  onClick={() => {
+                    setStateStatusDialogOpen(false);
+                    setAetNumberValidationError("");
+                    stateStatusForm.reset();
+                  }}
                   disabled={updateStateStatusMutation.isPending}
                   className="w-full sm:w-auto"
                 >
@@ -1799,12 +1853,13 @@ export default function AdminLicensesPage() {
                   type="submit" 
                   disabled={
                     updateStateStatusMutation.isPending || 
+                    !!aetNumberValidationError ||
                     ((stateStatusForm.watch("status") === "under_review" || 
                       stateStatusForm.watch("status") === "pending_approval" || 
                       stateStatusForm.watch("status") === "approved") && 
                      !stateStatusForm.watch("aetNumber"))
                   }
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium text-sm w-full sm:w-auto flex items-center justify-center"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium text-sm w-full sm:w-auto flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={(e) => {
                     e.preventDefault();
                     stateStatusForm.handleSubmit(onSubmitStateStatus)();
