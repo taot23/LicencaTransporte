@@ -739,3 +739,30 @@ export type InsertLicencaEmitida = z.infer<typeof insertLicencaEmitidaSchema>;
 
 export type StateLicense = typeof stateLicenses.$inferSelect;
 export type InsertStateLicense = z.infer<typeof insertStateLicenseSchema>;
+
+// Tabela para tipos de conjunto personalizados
+export const vehicleSetTypes = pgTable("vehicle_set_types", {
+  id: text("id").primaryKey(), // UUID ou string única
+  name: text("name").notNull(),
+  label: text("label").notNull(),
+  description: text("description"),
+  axleConfiguration: json("axle_configuration").notNull(), // JSON com configuração de eixos
+  dimensionLimits: json("dimension_limits").notNull(), // JSON com limites de dimensões
+  vehicleTypes: json("vehicle_types").notNull(), // JSON com tipos de veículos permitidos
+  iconPath: text("icon_path"),
+  imageUrl: text("image_url"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    nameIdx: index("idx_vehicle_set_types_name").on(table.name),
+    isActiveIdx: index("idx_vehicle_set_types_is_active").on(table.isActive),
+  };
+});
+
+export const insertVehicleSetTypeSchema = createInsertSchema(vehicleSetTypes)
+  .omit({ createdAt: true, updatedAt: true });
+
+export type InsertVehicleSetType = z.infer<typeof insertVehicleSetTypeSchema>;
+export type VehicleSetTypeDB = typeof vehicleSetTypes.$inferSelect;

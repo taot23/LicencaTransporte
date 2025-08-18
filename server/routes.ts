@@ -6404,10 +6404,27 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   app.get('/api/admin/vehicle-set-types', requireAuth, async (req, res) => {
     try {
       const { DEFAULT_VEHICLE_SET_TYPES } = await import('../shared/vehicle-set-types');
+      const { vehicleSetTypes } = await import('../shared/schema');
+      const { eq } = await import('drizzle-orm');
       
-      // Por enquanto retornamos os tipos padrão
-      // Futuramente isso virá do banco de dados
-      res.json(DEFAULT_VEHICLE_SET_TYPES);
+      // Buscar tipos personalizados do banco de dados
+      const customTypes = await db.select().from(vehicleSetTypes).where(eq(vehicleSetTypes.isActive, true));
+      
+      // Combinar tipos padrão com tipos personalizados
+      const allTypes = [
+        ...DEFAULT_VEHICLE_SET_TYPES,
+        ...customTypes.map(type => ({
+          ...type,
+          axleConfiguration: type.axleConfiguration as any,
+          dimensionLimits: type.dimensionLimits as any,
+          vehicleTypes: type.vehicleTypes as any,
+          createdAt: new Date(type.createdAt),
+          updatedAt: new Date(type.updatedAt),
+        }))
+      ];
+      
+      console.log(`[VEHICLE SET TYPES] Retornando ${allTypes.length} tipos (${DEFAULT_VEHICLE_SET_TYPES.length} padrão + ${customTypes.length} personalizados)`);
+      res.json(allTypes);
     } catch (error) {
       console.error('[VEHICLE SET TYPES] Erro ao buscar tipos:', error);
       res.status(500).json({ message: 'Erro ao buscar tipos de conjunto' });
@@ -6425,12 +6442,45 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         return res.status(403).json({ message: 'Acesso negado. Apenas administradores podem criar tipos de conjunto.' });
       }
       
-      // Por enquanto apenas retornamos sucesso
-      // Futuramente isso salvará no banco de dados
+      const { vehicleSetTypes } = await import('../shared/schema');
+      const { randomUUID } = await import('crypto');
+      const { eq } = await import('drizzle-orm');
+      
+      // Gerar ID único
+      const newId = randomUUID();
+      
+      // Calcular total de eixos automaticamente
+      const totalAxles = (req.body.axleConfiguration.tractorAxles || 0) + 
+                        (req.body.axleConfiguration.firstTrailerAxles || 0) + 
+                        (req.body.axleConfiguration.secondTrailerAxles || 0);
+      
+      const vehicleSetTypeData = {
+        id: newId,
+        name: req.body.name,
+        label: req.body.label,
+        description: req.body.description || null,
+        axleConfiguration: {
+          ...req.body.axleConfiguration,
+          totalAxles
+        },
+        dimensionLimits: req.body.dimensionLimits,
+        vehicleTypes: req.body.vehicleTypes,
+        iconPath: req.body.iconPath || null,
+        imageUrl: req.body.imageUrl || null,
+        isActive: req.body.isActive !== false, // Default true
+      };
+      
+      // Inserir no banco de dados
+      const [newType] = await db.insert(vehicleSetTypes)
+        .values(vehicleSetTypeData)
+        .returning();
+      
+      console.log('[VEHICLE SET TYPES] Tipo criado com sucesso:', newType.id);
+      
       res.json({ 
         success: true, 
         message: 'Tipo de conjunto criado com sucesso',
-        data: req.body 
+        data: newType 
       });
     } catch (error) {
       console.error('[VEHICLE SET TYPES] Erro ao criar tipo:', error);
@@ -6441,9 +6491,53 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   // Atualizar tipo de conjunto
   app.put('/api/admin/vehicle-set-types/:id', requireAuth, async (req, res) => {
     try {
-      // Por enquanto apenas retornamos sucesso
-      // Futuramente isso atualizará no banco de dados
-      res.json({ success: true, message: 'Tipo de conjunto atualizado com sucesso' });
+      const user = req.user as any;
+      if (user.role !== 'admin') {
+        return res.status(403).json({ message: 'Acesso negado. Apenas administradores podem atualizar tipos de conjunto.' });
+      }
+      
+      const { vehicleSetTypes } = await import('../shared/schema');
+      const { eq } = await import('drizzle-orm');
+      const typeId = req.params.id;
+      
+      // Calcular total de eixos automaticamente
+      const totalAxles = (req.body.axleConfiguration.tractorAxles || 0) + 
+                        (req.body.axleConfiguration.firstTrailerAxles || 0) + 
+                        (req.body.axleConfiguration.secondTrailerAxles || 0);
+      
+      const updateData = {
+        name: req.body.name,
+        label: req.body.label,
+        description: req.body.description || null,
+        axleConfiguration: {
+          ...req.body.axleConfiguration,
+          totalAxles
+        },
+        dimensionLimits: req.body.dimensionLimits,
+        vehicleTypes: req.body.vehicleTypes,
+        iconPath: req.body.iconPath || null,
+        imageUrl: req.body.imageUrl || null,
+        isActive: req.body.isActive !== false,
+        updatedAt: new Date(),
+      };
+      
+      // Atualizar no banco de dados
+      const [updatedType] = await db.update(vehicleSetTypes)
+        .set(updateData)
+        .where(eq(vehicleSetTypes.id, typeId))
+        .returning();
+      
+      if (!updatedType) {
+        return res.status(404).json({ message: 'Tipo de conjunto não encontrado' });
+      }
+      
+      console.log('[VEHICLE SET TYPES] Tipo atualizado com sucesso:', typeId);
+      
+      res.json({ 
+        success: true, 
+        message: 'Tipo de conjunto atualizado com sucesso',
+        data: updatedType 
+      });
     } catch (error) {
       console.error('[VEHICLE SET TYPES] Erro ao atualizar tipo:', error);
       res.status(500).json({ message: 'Erro ao atualizar tipo de conjunto' });
@@ -6453,8 +6547,26 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   // Deletar tipo de conjunto
   app.delete('/api/admin/vehicle-set-types/:id', requireAuth, async (req, res) => {
     try {
-      // Por enquanto apenas retornamos sucesso
-      // Futuramente isso deletará do banco de dados
+      const user = req.user as any;
+      if (user.role !== 'admin') {
+        return res.status(403).json({ message: 'Acesso negado. Apenas administradores podem deletar tipos de conjunto.' });
+      }
+      
+      const { vehicleSetTypes } = await import('../shared/schema');
+      const { eq } = await import('drizzle-orm');
+      const typeId = req.params.id;
+      
+      // Verificar se o tipo existe
+      const existingType = await db.select().from(vehicleSetTypes).where(eq(vehicleSetTypes.id, typeId)).limit(1);
+      if (existingType.length === 0) {
+        return res.status(404).json({ message: 'Tipo de conjunto não encontrado' });
+      }
+      
+      // Deletar do banco de dados
+      await db.delete(vehicleSetTypes).where(eq(vehicleSetTypes.id, typeId));
+      
+      console.log('[VEHICLE SET TYPES] Tipo deletado com sucesso:', typeId);
+      
       res.status(204).send();
     } catch (error) {
       console.error('[VEHICLE SET TYPES] Erro ao deletar tipo:', error);
