@@ -6354,7 +6354,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   // ==========================================
   
   // Listar todos os tipos de conjunto
-  app.get('/api/admin/vehicle-set-types', requireAuth, requirePermission('admin', 'read'), async (req, res) => {
+  app.get('/api/admin/vehicle-set-types', requireAuth, async (req, res) => {
     try {
       const { DEFAULT_VEHICLE_SET_TYPES } = await import('../shared/vehicle-set-types');
       
@@ -6368,7 +6368,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // Criar novo tipo de conjunto
-  app.post('/api/admin/vehicle-set-types', requireAuth, requirePermission('admin', 'create'), async (req, res) => {
+  app.post('/api/admin/vehicle-set-types', requireAuth, async (req, res) => {
     try {
       // Por enquanto apenas retornamos sucesso
       // Futuramente isso salvará no banco de dados
@@ -6380,7 +6380,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // Atualizar tipo de conjunto
-  app.put('/api/admin/vehicle-set-types/:id', requireAuth, requirePermission('admin', 'update'), async (req, res) => {
+  app.put('/api/admin/vehicle-set-types/:id', requireAuth, async (req, res) => {
     try {
       // Por enquanto apenas retornamos sucesso
       // Futuramente isso atualizará no banco de dados
@@ -6392,7 +6392,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   });
 
   // Deletar tipo de conjunto
-  app.delete('/api/admin/vehicle-set-types/:id', requireAuth, requirePermission('admin', 'delete'), async (req, res) => {
+  app.delete('/api/admin/vehicle-set-types/:id', requireAuth, async (req, res) => {
     try {
       // Por enquanto apenas retornamos sucesso
       // Futuramente isso deletará do banco de dados
