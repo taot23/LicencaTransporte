@@ -75,6 +75,7 @@ import {
   getAxleSpecificationSummary,
   AXLE_CONFIGURATIONS 
 } from "@/utils/vehicle-axle-validation";
+import { VehicleSetType } from "@shared/vehicle-set-types";
 
 // Função auxiliar para obter o rótulo do tipo de licença
 const getLicenseTypeLabel = (type: string): string => {
@@ -186,6 +187,13 @@ export function LicenseForm({
     useQuery<Transporter[]>({
       queryKey: ["/api/user/transporters"],
     });
+
+  // Fetch vehicle set types (includes custom types)
+  const { data: vehicleSetTypes = [], isLoading: isLoadingVehicleSetTypes } = useQuery<VehicleSetType[]>({
+    queryKey: ['/api/admin/vehicle-set-types'],
+    staleTime: 2 * 60 * 1000, // 2 minutos de cache
+    refetchOnWindowFocus: true,
+  });
 
   // Define basic vehicle lists
   const tractorUnits = vehicles?.filter((v) => v.type === "tractor_unit") || [];
@@ -805,45 +813,24 @@ export function LicenseForm({
     setThirdPartyVehiclesInSubmit([]);
   };
 
-  // Dynamic vehicle filters based on license type
+  // Dynamic vehicle filters based on license type using dynamic validation
   const semiTrailers = useMemo(() => {
+    if (!licenseType) return allSemiTrailers;
+    
     return allSemiTrailers.filter((v) => {
-      // Rodotrem 9 eixos: pode selecionar semi-reboques de 2 eixos
-      if (licenseType === "roadtrain_9_axles") {
-        return v.axleCount === 2;
-      }
-      
-      // Bitrem 9 eixos: só pode selecionar semi-reboques de 3 eixos
-      if (licenseType === "bitrain_9_axles") {
-        return v.axleCount === 3;
-      }
-      
-      // Bitrem 7 eixos: pode selecionar semi-reboques de 2 eixos
-      if (licenseType === "bitrain_7_axles") {
-        return v.axleCount === 2;
-      }
-      
-      // Bitrem 6 eixos: pode selecionar semi-reboques de 2 eixos
-      if (licenseType === "bitrain_6_axles") {
-        return v.axleCount === 2;
-      }
-      
-      // Para outros tipos, permitir todos
-      return true;
+      const result = validateVehicleForPosition(v, 'firstTrailer', licenseType, vehicleSetTypes);
+      return result.isValid;
     });
-  }, [allSemiTrailers, licenseType]);
+  }, [allSemiTrailers, licenseType, vehicleSetTypes]);
   
   const dollys = useMemo(() => {
+    if (!licenseType) return allDollys;
+    
     return allDollys.filter((v) => {
-      // Rodotrem 9 eixos: pode selecionar dollys de 2 eixos
-      if (licenseType === "roadtrain_9_axles") {
-        return v.axleCount === 2;
-      }
-      
-      // Para outros tipos, permitir todos
-      return true;
+      const result = validateVehicleForPosition(v, 'dolly', licenseType, vehicleSetTypes);
+      return result.isValid;
     });
-  }, [allDollys, licenseType]);
+  }, [allDollys, licenseType, vehicleSetTypes]);
 
   // Watch for type changes to conditionally render fields
   useEffect(() => {
@@ -1727,66 +1714,27 @@ export function LicenseForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="roadtrain_9_axles">
-                        <div className="flex items-center">
-                          <VehicleTypeImage
-                            type="roadtrain_9_axles"
-                            className="mr-2"
-                            iconSize={24}
-                          />
-                          <span>Rodotrem 9 eixos</span>
+                      {isLoadingVehicleSetTypes ? (
+                        <div className="flex items-center justify-center p-4">
+                          <LoaderCircle className="h-4 w-4 animate-spin mr-2" />
+                          <span className="text-sm text-gray-500">Carregando tipos...</span>
                         </div>
-                      </SelectItem>
-                      <SelectItem value="bitrain_9_axles">
-                        <div className="flex items-center">
-                          <VehicleTypeImage
-                            type="bitrain_9_axles"
-                            className="mr-2"
-                            iconSize={24}
-                          />
-                          <span>Bitrem 9 eixos</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="bitrain_7_axles">
-                        <div className="flex items-center">
-                          <VehicleTypeImage
-                            type="bitrain_7_axles"
-                            className="mr-2"
-                            iconSize={24}
-                          />
-                          <span>Bitrem 7 eixos</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="bitrain_6_axles">
-                        <div className="flex items-center">
-                          <VehicleTypeImage
-                            type="bitrain_6_axles"
-                            className="mr-2"
-                            iconSize={24}
-                          />
-                          <span>Bitrem 6 eixos</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="flatbed">
-                        <div className="flex items-center">
-                          <VehicleTypeImage
-                            type="flatbed"
-                            className="mr-2"
-                            iconSize={24}
-                          />
-                          <span>Prancha</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="romeo_and_juliet">
-                        <div className="flex items-center">
-                          <VehicleTypeImage
-                            type="romeo_and_juliet"
-                            className="mr-2"
-                            iconSize={24}
-                          />
-                          <span>Romeu e Julieta</span>
-                        </div>
-                      </SelectItem>
+                      ) : (
+                        vehicleSetTypes
+                          .filter(type => type.isActive) // Apenas tipos ativos
+                          .map((vehicleSetType) => (
+                            <SelectItem key={vehicleSetType.id} value={vehicleSetType.name}>
+                              <div className="flex items-center">
+                                <VehicleTypeImage
+                                  type={vehicleSetType.name as any}
+                                  className="mr-2"
+                                  iconSize={24}
+                                />
+                                <span>{vehicleSetType.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />

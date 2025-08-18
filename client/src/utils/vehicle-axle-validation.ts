@@ -1,4 +1,5 @@
 import { LicenseType, Vehicle } from "@shared/schema";
+import { VehicleSetType } from "@shared/vehicle-set-types";
 
 export interface AxleConfiguration {
   tractorAxles: number;
@@ -7,9 +8,10 @@ export interface AxleConfiguration {
   dollyAxles?: number;
   totalAxles: number;
   requiresDolly: boolean;
+  isFlexible?: boolean;
 }
 
-// Configurações de eixos por tipo de licença
+// Configurações de eixos por tipo de licença (compatibilidade com tipos padrão)
 export const AXLE_CONFIGURATIONS: Record<LicenseType, AxleConfiguration> = {
   "bitrain_9_axles": {
     tractorAxles: 3,
@@ -62,13 +64,43 @@ export interface VehicleValidationResult {
   warning?: string;
 }
 
+// Função para buscar configuração de eixos (dinâmica ou estática)
+export function getAxleConfiguration(licenseType: string, vehicleSetTypes?: VehicleSetType[]): AxleConfiguration | null {
+  // Primeiro, tentar buscar nos tipos dinâmicos
+  if (vehicleSetTypes) {
+    const dynamicType = vehicleSetTypes.find(type => type.name === licenseType);
+    if (dynamicType) {
+      return {
+        tractorAxles: dynamicType.axleConfiguration.tractorAxles,
+        firstTrailerAxles: dynamicType.axleConfiguration.firstTrailerAxles,
+        secondTrailerAxles: dynamicType.axleConfiguration.secondTrailerAxles,
+        dollyAxles: dynamicType.axleConfiguration.dollyAxles,
+        totalAxles: dynamicType.axleConfiguration.totalAxles,
+        requiresDolly: dynamicType.axleConfiguration.requiresDolly,
+        isFlexible: dynamicType.axleConfiguration.isFlexible,
+      };
+    }
+  }
+  
+  // Fallback para configurações estáticas (tipos padrão)
+  return AXLE_CONFIGURATIONS[licenseType as LicenseType] || null;
+}
+
 // Validar se um veículo é compatível com uma posição específica na composição
 export function validateVehicleForPosition(
   vehicle: Vehicle,
   position: 'tractor' | 'firstTrailer' | 'secondTrailer' | 'dolly',
-  licenseType: LicenseType
+  licenseType: LicenseType | string,
+  vehicleSetTypes?: VehicleSetType[]
 ): VehicleValidationResult {
-  const config = AXLE_CONFIGURATIONS[licenseType];
+  const config = getAxleConfiguration(licenseType, vehicleSetTypes);
+  
+  if (!config) {
+    return {
+      isValid: false,
+      error: "Configuração de tipo de licença não encontrada"
+    };
+  }
   
   if (!vehicle.axleCount) {
     return {
@@ -111,9 +143,9 @@ export function validateVehicleForPosition(
 
   // REGRAS ESPECÍFICAS CRÍTICAS POR TIPO DE LICENÇA
   
-  // PRANCHA e ROMEU E JULIETA: SEM restrições de eixos (flexível)
-  if (licenseType === 'flatbed' || licenseType === 'romeo_and_juliet') {
-    // Para prancha e romeu e julieta, apenas verificar o tipo de veículo, não os eixos
+  // TIPOS FLEXÍVEIS: SEM restrições de eixos 
+  if (config?.isFlexible || licenseType === 'flatbed' || licenseType === 'romeo_and_juliet') {
+    // Para tipos flexíveis, apenas verificar o tipo de veículo, não os eixos
     return { isValid: true };
   }
   
@@ -170,13 +202,21 @@ export function validateVehicleForPosition(
 
 // Validar a composição completa
 export function validateCompleteComposition(
-  licenseType: LicenseType,
+  licenseType: LicenseType | string,
   tractor?: Vehicle,
   firstTrailer?: Vehicle,
   secondTrailer?: Vehicle,
-  dolly?: Vehicle
+  dolly?: Vehicle,
+  vehicleSetTypes?: VehicleSetType[]
 ): VehicleValidationResult {
-  const config = AXLE_CONFIGURATIONS[licenseType];
+  const config = getAxleConfiguration(licenseType, vehicleSetTypes);
+  
+  if (!config) {
+    return {
+      isValid: false,
+      error: "Configuração de tipo de licença não encontrada"
+    };
+  }
   
   // Verificar se o dolly é obrigatório
   if (config.requiresDolly && !dolly) {
@@ -216,9 +256,14 @@ export function validateCompleteComposition(
 export function filterVehiclesForPosition(
   vehicles: Vehicle[],
   position: 'tractor' | 'firstTrailer' | 'secondTrailer' | 'dolly',
-  licenseType: LicenseType
+  licenseType: LicenseType | string,
+  vehicleSetTypes?: VehicleSetType[]
 ): Vehicle[] {
-  const config = AXLE_CONFIGURATIONS[licenseType];
+  const config = getAxleConfiguration(licenseType, vehicleSetTypes);
+  
+  if (!config) {
+    return [];
+  }
   
   let expectedAxles: number;
   let expectedType: string;
@@ -264,8 +309,8 @@ function getVehicleTypeLabel(type: string): string {
   return labels[type] || type;
 }
 
-function getLicenseTypeLabel(type: LicenseType): string {
-  const labels: Record<LicenseType, string> = {
+function getLicenseTypeLabel(type: LicenseType | string): string {
+  const labels: Record<string, string> = {
     'bitrain_9_axles': 'Bitrem 9 eixos',
     'roadtrain_9_axles': 'Rodotrem 9 eixos',
     'bitrain_7_axles': 'Bitrem 7 eixos',
@@ -277,8 +322,12 @@ function getLicenseTypeLabel(type: LicenseType): string {
 }
 
 // Obter resumo das especificações para um tipo de licença
-export function getAxleSpecificationSummary(licenseType: LicenseType): string {
-  const config = AXLE_CONFIGURATIONS[licenseType];
+export function getAxleSpecificationSummary(licenseType: LicenseType | string, vehicleSetTypes?: VehicleSetType[]): string {
+  const config = getAxleConfiguration(licenseType, vehicleSetTypes);
+  
+  if (!config) {
+    return `Tipo de licença não encontrado: ${licenseType}`;
+  }
   
   let summary = `${getLicenseTypeLabel(licenseType)}:\n`;
   summary += `• Cavalo: ${config.tractorAxles} eixos\n`;
