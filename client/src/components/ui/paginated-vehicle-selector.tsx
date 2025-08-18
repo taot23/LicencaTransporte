@@ -18,6 +18,7 @@ interface PaginatedVehicleSelectorProps {
   label?: string;
   onCreateNew?: () => void;
   vehicleType?: 'tractor_unit' | 'trailer' | 'semi_trailer' | 'dolly' | 'truck' | 'flatbed';
+  axleFilter?: number; // NOVO: Filtrar por número específico de eixos
 }
 
 interface VehicleSearchResponse {
@@ -44,6 +45,7 @@ export function PaginatedVehicleSelector({
   label,
   onCreateNew,
   vehicleType,
+  axleFilter,
 }: PaginatedVehicleSelectorProps) {
   const [inputValue, setInputValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -58,19 +60,20 @@ export function PaginatedVehicleSelector({
 
   // Query para buscar veículos com paginação
   const { data: vehicleData, isLoading, error } = useQuery<VehicleSearchResponse>({
-    queryKey: ['/api/vehicles/search', debouncedSearchTerm, currentPage, vehicleType],
+    queryKey: ['/api/vehicles/search-paginated', debouncedSearchTerm, currentPage, vehicleType, axleFilter],
     queryFn: async () => {
       const params = new URLSearchParams({
         search: debouncedSearchTerm,
         page: currentPage.toString(),
         limit: PAGE_SIZE.toString(),
-        ...(vehicleType && { type: vehicleType })
+        ...(vehicleType && { type: vehicleType }),
+        ...(axleFilter && { axles: axleFilter.toString() }) // NOVO: Filtro de eixos
       });
       
       console.log(`[PAGINATED VEHICLE] Buscando veículos - tipo: ${vehicleType}, busca: "${debouncedSearchTerm}", página: ${currentPage}`);
       console.log(`[PAGINATED VEHICLE] URL completa: /api/vehicles/search?${params.toString()}`);
       
-      const res = await fetch(`/api/vehicles/search?${params}`, {
+      const res = await fetch(`/api/vehicles/search-paginated?${params}`, {
         credentials: "include"
       });
       

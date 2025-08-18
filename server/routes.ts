@@ -1300,9 +1300,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const page = parseInt(req.query.page as string) || 1;
       const limit = Math.min(parseInt(req.query.limit as string) || 10, 50); // Max 50 por página
       const vehicleType = req.query.type as string;
+      const axleFilter = req.query.axles ? parseInt(req.query.axles as string) : null; // NOVO: Filtro de eixos
       const offset = (page - 1) * limit;
       
-      console.log(`[VEHICLE SEARCH PAGINATED] Usuário ${user.email} - busca: "${search}", página: ${page}, tipo: ${vehicleType || 'todos'}`);
+      console.log(`[VEHICLE SEARCH PAGINATED] Usuário ${user.email} - busca: "${search}", página: ${page}, tipo: ${vehicleType || 'todos'}, eixos: ${axleFilter || 'todos'}`);
       
       let allVehicles;
       
@@ -1329,6 +1330,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         filteredVehicles = filteredVehicles.filter(vehicle => 
           vehicle.type === vehicleType
         );
+      }
+      
+      // CRÍTICO: Filtrar por número de eixos se especificado
+      if (axleFilter !== null) {
+        const originalCount = filteredVehicles.length;
+        filteredVehicles = filteredVehicles.filter(vehicle => 
+          vehicle.axleCount === axleFilter
+        );
+        console.log(`[VEHICLE SEARCH PAGINATED] Filtro de eixos ${axleFilter}: ${originalCount} → ${filteredVehicles.length} veículos`);
       }
       
       // Ordenar por placa

@@ -109,7 +109,49 @@ export function validateVehicleForPosition(
     };
   }
 
-  // Verificar quantidade de eixos
+  // REGRAS ESPECÍFICAS CRÍTICAS POR TIPO DE LICENÇA
+  
+  // BITREM 7 EIXOS: Apenas semirreboques de 2 eixos
+  if (licenseType === 'bitrain_7_axles' && (position === 'firstTrailer' || position === 'secondTrailer')) {
+    if (vehicle.axleCount !== 2) {
+      return {
+        isValid: false,
+        error: `⚠️ BITREM 7 EIXOS: Este semirreboque possui ${vehicle.axleCount} eixos. Para Bitrem 7 eixos são aceitos APENAS semirreboques de 2 eixos.`
+      };
+    }
+  }
+  
+  // BITREM 6 EIXOS: Apenas semirreboques de 2 eixos
+  if (licenseType === 'bitrain_6_axles' && (position === 'firstTrailer' || position === 'secondTrailer')) {
+    if (vehicle.axleCount !== 2) {
+      return {
+        isValid: false,
+        error: `⚠️ BITREM 6 EIXOS: Este semirreboque possui ${vehicle.axleCount} eixos. Para Bitrem 6 eixos são aceitos APENAS semirreboques de 2 eixos.`
+      };
+    }
+  }
+  
+  // BITREM 9 EIXOS: Apenas semirreboques de 3 eixos
+  if (licenseType === 'bitrain_9_axles' && (position === 'firstTrailer' || position === 'secondTrailer')) {
+    if (vehicle.axleCount !== 3) {
+      return {
+        isValid: false,
+        error: `⚠️ BITREM 9 EIXOS: Este semirreboque possui ${vehicle.axleCount} eixos. Para Bitrem 9 eixos são aceitos APENAS semirreboques de 3 eixos.`
+      };
+    }
+  }
+  
+  // RODOTREM 9 EIXOS: Apenas semirreboques de 2 eixos
+  if (licenseType === 'roadtrain_9_axles' && (position === 'firstTrailer' || position === 'secondTrailer')) {
+    if (vehicle.axleCount !== 2) {
+      return {
+        isValid: false,
+        error: `⚠️ RODOTREM 9 EIXOS: Este semirreboque possui ${vehicle.axleCount} eixos. Para Rodotrem 9 eixos são aceitos APENAS semirreboques de 2 eixos.`
+      };
+    }
+  }
+  
+  // Verificar quantidade de eixos (regra geral)
   if (vehicle.axleCount !== expectedAxles) {
     return {
       isValid: false,
