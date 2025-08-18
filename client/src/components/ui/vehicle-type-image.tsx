@@ -1,5 +1,7 @@
 import { FC } from 'react';
 import { Truck } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { VehicleSetType } from '@shared/vehicle-set-types';
 
 // Importando as imagens dos tipos de veículos
 import bitrain6AxlesImg from '../../assets/vehicles/bitrain_6_axles.png';
@@ -20,7 +22,30 @@ export const VehicleTypeImage: FC<VehicleTypeImageProps> = ({
   className = "",
   iconSize = 20
 }) => {
-  // Verificar o tipo de veículo e retornar a imagem apropriada
+  // Buscar tipos personalizados da API
+  const { data: vehicleSetTypes = [] } = useQuery<VehicleSetType[]>({
+    queryKey: ['/api/admin/vehicle-set-types'],
+    staleTime: 2 * 60 * 1000, // 2 minutos de cache
+  });
+
+  // Verificar se é um tipo personalizado com imagem
+  const customType = vehicleSetTypes.find(vst => vst.name === type);
+  if (customType && customType.imageUrl) {
+    return (
+      <img 
+        src={customType.imageUrl} 
+        alt={customType.label} 
+        className={`w-auto ${className}`}
+        style={{ 
+          height: `${iconSize}px`,
+          objectFit: 'contain',
+          objectPosition: 'center'
+        }}
+      />
+    );
+  }
+
+  // Verificar o tipo de veículo e retornar a imagem apropriada (tipos padrão)
   switch (type) {
     case 'bitrain_6_axles':
       return (
