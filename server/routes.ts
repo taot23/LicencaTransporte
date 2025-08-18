@@ -6407,7 +6407,10 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       const cacheKey = 'vehicle_set_types_cache';
       const cacheTime = 5 * 60 * 1000; // 5 minutos
       
-      if (global[cacheKey] && global[`${cacheKey}_time`] > Date.now() - cacheTime) {
+      // Forçar atualização se o cache existir mas for solicitado refresh
+      const forceRefresh = req.query.refresh === 'true';
+      
+      if (!forceRefresh && global[cacheKey] && global[`${cacheKey}_time`] > Date.now() - cacheTime) {
         console.log('[VEHICLE SET TYPES] Retornando dados do cache');
         return res.json(global[cacheKey]);
       }
@@ -6488,11 +6491,13 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         .values(vehicleSetTypeData)
         .returning();
       
-      // Limpar cache
+      // Limpar cache GLOBAL forçadamente
+      global['vehicle_set_types_cache'] = null;
+      global['vehicle_set_types_cache_time'] = null;
       delete global['vehicle_set_types_cache'];
       delete global['vehicle_set_types_cache_time'];
       
-      console.log('[VEHICLE SET TYPES] Tipo criado com sucesso:', newType.id);
+      console.log('[VEHICLE SET TYPES] Cache limpo e tipo criado com sucesso:', newType.id);
       
       res.json({ 
         success: true, 
@@ -6548,11 +6553,13 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         return res.status(404).json({ message: 'Tipo de conjunto não encontrado' });
       }
       
-      // Limpar cache
+      // Limpar cache GLOBAL forçadamente  
+      global['vehicle_set_types_cache'] = null;
+      global['vehicle_set_types_cache_time'] = null;
       delete global['vehicle_set_types_cache'];
       delete global['vehicle_set_types_cache_time'];
       
-      console.log('[VEHICLE SET TYPES] Tipo atualizado com sucesso:', typeId);
+      console.log('[VEHICLE SET TYPES] Cache limpo e tipo atualizado com sucesso:', typeId);
       
       res.json({ 
         success: true, 
