@@ -6370,9 +6370,21 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   // Criar novo tipo de conjunto
   app.post('/api/admin/vehicle-set-types', requireAuth, async (req, res) => {
     try {
+      console.log('[VEHICLE SET TYPES] Recebendo dados para criação:', req.body);
+      
+      // Validar se é um usuário admin
+      const user = req.user as any;
+      if (user.role !== 'admin') {
+        return res.status(403).json({ message: 'Acesso negado. Apenas administradores podem criar tipos de conjunto.' });
+      }
+      
       // Por enquanto apenas retornamos sucesso
       // Futuramente isso salvará no banco de dados
-      res.json({ success: true, message: 'Tipo de conjunto criado com sucesso' });
+      res.json({ 
+        success: true, 
+        message: 'Tipo de conjunto criado com sucesso',
+        data: req.body 
+      });
     } catch (error) {
       console.error('[VEHICLE SET TYPES] Erro ao criar tipo:', error);
       res.status(500).json({ message: 'Erro ao criar tipo de conjunto' });

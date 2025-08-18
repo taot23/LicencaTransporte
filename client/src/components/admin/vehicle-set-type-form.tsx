@@ -79,10 +79,16 @@ export function VehicleSetTypeForm({ vehicleSetType, onClose, onSuccess }: Vehic
         tractorAxles: 2,
         firstTrailerAxles: 2,
         secondTrailerAxles: 0,
+        totalAxles: 4,
         requiresDolly: false,
         isFlexible: false,
       },
-      dimensionLimits: {},
+      dimensionLimits: {
+        minLength: undefined,
+        maxLength: undefined,
+        maxWidth: undefined,
+        maxHeight: undefined,
+      },
       vehicleTypes: {
         tractor: ["tractor_unit"],
         firstTrailer: ["semi_trailer"],
@@ -99,6 +105,8 @@ export function VehicleSetTypeForm({ vehicleSetType, onClose, onSuccess }: Vehic
         ? `/api/admin/vehicle-set-types/${vehicleSetType.id}`
         : '/api/admin/vehicle-set-types';
       
+      console.log('[MUTATION] Enviando para:', url, 'Dados:', data);
+      
       const res = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -106,10 +114,22 @@ export function VehicleSetTypeForm({ vehicleSetType, onClose, onSuccess }: Vehic
         body: JSON.stringify(data),
       });
       
-      if (!res.ok) throw new Error('Erro ao salvar tipo de conjunto');
-      return res.json();
+      const result = await res.json();
+      console.log('[MUTATION] Resposta:', result);
+      
+      if (!res.ok) {
+        throw new Error(result.message || 'Erro ao salvar tipo de conjunto');
+      }
+      
+      return result;
     },
-    onSuccess,
+    onSuccess: (result) => {
+      console.log('[MUTATION] Sucesso:', result);
+      onSuccess();
+    },
+    onError: (error) => {
+      console.error('[MUTATION] Erro:', error);
+    },
   });
 
   const onSubmit = (data: FormData) => {
@@ -119,8 +139,17 @@ export function VehicleSetTypeForm({ vehicleSetType, onClose, onSuccess }: Vehic
         data.axleConfiguration.tractorAxles + 
         data.axleConfiguration.firstTrailerAxles + 
         data.axleConfiguration.secondTrailerAxles;
+    } else {
+      data.axleConfiguration.totalAxles = 0;
     }
     
+    // Limpar valores undefined dos limites de dimensões
+    if (data.dimensionLimits.minLength === undefined) delete data.dimensionLimits.minLength;
+    if (data.dimensionLimits.maxLength === undefined) delete data.dimensionLimits.maxLength;
+    if (data.dimensionLimits.maxWidth === undefined) delete data.dimensionLimits.maxWidth;
+    if (data.dimensionLimits.maxHeight === undefined) delete data.dimensionLimits.maxHeight;
+    
+    console.log('[VEHICLE SET TYPE FORM] Enviando dados:', data);
     mutation.mutate(data);
   };
 
