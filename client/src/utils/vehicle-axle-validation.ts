@@ -309,7 +309,7 @@ function getVehicleTypeLabel(type: string): string {
   return labels[type] || type;
 }
 
-function getLicenseTypeLabel(type: LicenseType | string): string {
+export function getLicenseTypeLabel(type: LicenseType | string): string {
   const labels: Record<string, string> = {
     'bitrain_9_axles': 'Bitrem 9 eixos',
     'roadtrain_9_axles': 'Rodotrem 9 eixos',

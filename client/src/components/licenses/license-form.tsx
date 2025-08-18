@@ -74,22 +74,12 @@ import {
   validateCompleteComposition, 
   getAxleSpecificationSummary,
   validateVehicleForPosition,
+  getLicenseTypeLabel,
   AXLE_CONFIGURATIONS 
 } from "@/utils/vehicle-axle-validation";
 import { VehicleSetType } from "@shared/vehicle-set-types";
 
-// Função auxiliar para obter o rótulo do tipo de licença
-const getLicenseTypeLabel = (type: string): string => {
-  const labels: Record<string, string> = {
-    'bitrain_9_axles': 'Bitrem 9 eixos',
-    'bitrain_7_axles': 'Bitrem 7 eixos', 
-    'bitrain_6_axles': 'Bitrem 6 eixos',
-    'roadtrain_9_axles': 'Rodotrem 9 eixos',
-    'flatbed': 'Prancha',
-    'romeo_and_juliet': 'Romeu e Julieta'
-  };
-  return labels[type] || type;
-};
+
 
 // Tipos de carga por categoria
 const NON_FLATBED_CARGO_TYPES = [
@@ -1891,20 +1881,41 @@ export function LicenseForm({
         </div>
 
         {/* Painel de Especificações de Eixos - Posicionado após as dimensões básicas */}
-        {licenseType && licenseType !== 'flatbed' && licenseType !== 'romeo_and_juliet' && (
+        {licenseType && licenseType !== 'flatbed' && licenseType !== 'romeo_and_juliet' && (() => {
+          // Verificar se o tipo tem configuração de eixos (não é flexível)
+          const customType = vehicleSetTypes?.find(type => type.name === licenseType);
+          if (customType) {
+            return !customType.axleConfiguration.isFlexible;
+          }
+          // Para tipos padrão, mostrar normalmente
+          return true;
+        })() && (
           <div className="border border-blue-200 rounded-lg p-4 bg-blue-50 mb-6">
             <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
               <Info className="h-4 w-4 mr-2" />
-              Especificações de Eixos para {getLicenseTypeLabel(licenseType as any)}
+              Especificações de Eixos para {(() => {
+                const customType = vehicleSetTypes?.find(type => type.name === licenseType);
+                return customType ? customType.label : getLicenseTypeLabel(licenseType);
+              })()}
             </h4>
             <div className="text-xs text-blue-700 whitespace-pre-line">
-              {getAxleSpecificationSummary(licenseType as any)}
+              {getAxleSpecificationSummary(licenseType, vehicleSetTypes)}
             </div>
-            {AXLE_CONFIGURATIONS[licenseType as any]?.requiresDolly && (
-              <div className="mt-2 text-xs text-blue-800 font-medium">
-                ⚠️ Este tipo de licença requer um dolly na composição
-              </div>
-            )}
+            {(() => {
+              // Verificar se requer dolly usando configuração dinâmica
+              const config = vehicleSetTypes 
+                ? vehicleSetTypes.find(type => type.name === licenseType) 
+                : null;
+              const requiresDolly = config 
+                ? config.axleConfiguration.requiresDolly 
+                : AXLE_CONFIGURATIONS[licenseType as any]?.requiresDolly;
+              
+              return requiresDolly && (
+                <div className="mt-2 text-xs text-blue-800 font-medium">
+                  ⚠️ Este tipo de licença requer um dolly na composição
+                </div>
+              );
+            })()}
           </div>
         )}
 
