@@ -61,13 +61,33 @@ import {
   FileUp,
   Check,
   Shield,
+  Info,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "wouter";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 import { VehicleTypeImage } from "@/components/ui/vehicle-type-image";
 import { PaginatedVehicleSelector } from "@/components/ui/paginated-vehicle-selector";
+import { IntelligentVehicleSelector } from "@/components/ui/intelligent-vehicle-selector";
 import { OptimizedTransporterSelector } from "@/components/forms/optimized-transporter-selector";
+import { 
+  validateCompleteComposition, 
+  getAxleSpecificationSummary,
+  AXLE_CONFIGURATIONS 
+} from "@/utils/vehicle-axle-validation";
+
+// Função auxiliar para obter o rótulo do tipo de licença
+const getLicenseTypeLabel = (type: string): string => {
+  const labels: Record<string, string> = {
+    'bitrain_9_axles': 'Bitrem 9 eixos',
+    'bitrain_7_axles': 'Bitrem 7 eixos', 
+    'bitrain_6_axles': 'Bitrem 6 eixos',
+    'roadtrain_9_axles': 'Rodotrem 9 eixos',
+    'flatbed': 'Prancha',
+    'romeo_and_juliet': 'Romeu e Julieta'
+  };
+  return labels[type] || type;
+};
 
 // Tipos de carga por categoria
 const NON_FLATBED_CARGO_TYPES = [
@@ -1844,6 +1864,24 @@ export function LicenseForm({
               />
             )}
 
+            {/* Painel de Especificações de Eixos */}
+            {licenseType && (
+              <div className="border border-blue-200 rounded-lg p-4 bg-blue-50 mb-6">
+                <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
+                  <Info className="h-4 w-4 mr-2" />
+                  Especificações de Eixos para {getLicenseTypeLabel(licenseType as any)}
+                </h4>
+                <div className="text-xs text-blue-700 whitespace-pre-line">
+                  {getAxleSpecificationSummary(licenseType as any)}
+                </div>
+                {AXLE_CONFIGURATIONS[licenseType as any]?.requiresDolly && (
+                  <div className="mt-2 text-xs text-blue-800 font-medium">
+                    ⚠️ Este tipo de licença requer um dolly na composição
+                  </div>
+                )}
+              </div>
+            )}
+
             <FormField
               control={form.control}
               name="length"
@@ -1942,8 +1980,10 @@ export function LicenseForm({
                       Unidade Tratora (Cavalo Mecânico)
                     </FormLabel>
                     <FormControl>
-                      <PaginatedVehicleSelector
+                      <IntelligentVehicleSelector
                         vehicleType="tractor_unit"
+                        licenseType={licenseType}
+                        position="tractor"
                         value={field.value}
                         onSelect={(vehicleId) => {
                           field.onChange(vehicleId);
@@ -1996,8 +2036,10 @@ export function LicenseForm({
                     <FormItem>
                       <FormLabel className="font-medium">1ª Carreta</FormLabel>
                       <FormControl>
-                        <PaginatedVehicleSelector
+                        <IntelligentVehicleSelector
                           vehicleType="semi_trailer"
+                          licenseType={licenseType}
+                          position="firstTrailer"
                           value={field.value}
                           onSelect={(vehicleId) => {
                             field.onChange(vehicleId);
@@ -2022,8 +2064,10 @@ export function LicenseForm({
                     <FormItem>
                       <FormLabel className="font-medium">Dolly</FormLabel>
                       <FormControl>
-                        <PaginatedVehicleSelector
+                        <IntelligentVehicleSelector
                           vehicleType="dolly"
+                          licenseType={licenseType}
+                          position="dolly"
                           value={field.value}
                           onSelect={(vehicleId) => {
                             field.onChange(vehicleId);

@@ -87,7 +87,7 @@ export function PaginatedVehicleSelector({
     },
     enabled: isOpen,
     staleTime: 2 * 60 * 1000, // 2 minutos
-    cacheTime: 5 * 60 * 1000, // 5 minutos
+    gcTime: 5 * 60 * 1000, // 5 minutos
   });
 
   // Buscar veículo selecionado por ID
@@ -138,7 +138,7 @@ export function PaginatedVehicleSelector({
     
     // Limpar seleção se o input foi limpo
     if (!newValue && value) {
-      onSelect(null);
+      onSelect(undefined);
     }
 
     // Se permitir entrada manual e não há veículo correspondente
