@@ -1864,23 +1864,7 @@ export function LicenseForm({
               />
             )}
 
-            {/* Painel de Especificações de Eixos - Oculto para Prancha e Romeu e Julieta */}
-            {licenseType && licenseType !== 'flatbed' && licenseType !== 'romeo_and_juliet' && (
-              <div className="border border-blue-200 rounded-lg p-4 bg-blue-50 mb-6">
-                <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
-                  <Info className="h-4 w-4 mr-2" />
-                  Especificações de Eixos para {getLicenseTypeLabel(licenseType as any)}
-                </h4>
-                <div className="text-xs text-blue-700 whitespace-pre-line">
-                  {getAxleSpecificationSummary(licenseType as any)}
-                </div>
-                {AXLE_CONFIGURATIONS[licenseType as any]?.requiresDolly && (
-                  <div className="mt-2 text-xs text-blue-800 font-medium">
-                    ⚠️ Este tipo de licença requer um dolly na composição
-                  </div>
-                )}
-              </div>
-            )}
+
 
             <FormField
               control={form.control}
@@ -1956,6 +1940,24 @@ export function LicenseForm({
             />
           </div>
         </div>
+
+        {/* Painel de Especificações de Eixos - Posicionado após as dimensões básicas */}
+        {licenseType && licenseType !== 'flatbed' && licenseType !== 'romeo_and_juliet' && (
+          <div className="border border-blue-200 rounded-lg p-4 bg-blue-50 mb-6">
+            <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
+              <Info className="h-4 w-4 mr-2" />
+              Especificações de Eixos para {getLicenseTypeLabel(licenseType as any)}
+            </h4>
+            <div className="text-xs text-blue-700 whitespace-pre-line">
+              {getAxleSpecificationSummary(licenseType as any)}
+            </div>
+            {AXLE_CONFIGURATIONS[licenseType as any]?.requiresDolly && (
+              <div className="mt-2 text-xs text-blue-800 font-medium">
+                ⚠️ Este tipo de licença requer um dolly na composição
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Dynamic fields for Rodotrem 9 eixos */}
         {licenseType === "roadtrain_9_axles" && (
