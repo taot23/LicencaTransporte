@@ -25,6 +25,7 @@ const formSchema = z.object({
     secondTrailerAxles: z.number().min(0),
     totalAxles: z.number().min(0),
     requiresDolly: z.boolean(),
+    dollyAxles: z.number().min(1).optional(),
     isFlexible: z.boolean(),
   }),
   dimensionLimits: z.object({
@@ -84,6 +85,7 @@ export function VehicleSetTypeForm({ vehicleSetType, onClose, onSuccess }: Vehic
         secondTrailerAxles: 0,
         totalAxles: 4,
         requiresDolly: false,
+        dollyAxles: 2,
         isFlexible: false,
       },
       dimensionLimits: {
@@ -158,6 +160,7 @@ export function VehicleSetTypeForm({ vehicleSetType, onClose, onSuccess }: Vehic
   };
 
   const isFlexible = form.watch("axleConfiguration.isFlexible");
+  const requiresDolly = form.watch("axleConfiguration.requiresDolly");
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -363,6 +366,32 @@ export function VehicleSetTypeForm({ vehicleSetType, onClose, onSuccess }: Vehic
                           </FormItem>
                         )}
                       />
+
+                      {/* Campo dinâmico para eixos do dolly */}
+                      {requiresDolly && (
+                        <FormField
+                          control={form.control}
+                          name="axleConfiguration.dollyAxles"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Eixos do Dolly</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  min="1"
+                                  max="3"
+                                  {...field} 
+                                  onChange={e => field.onChange(Number(e.target.value))}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Quantidade de eixos do dolly (normalmente 2)
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
 
                       {/* Resumo dos Eixos */}
                       <div className="bg-blue-50 p-3 rounded-lg">
