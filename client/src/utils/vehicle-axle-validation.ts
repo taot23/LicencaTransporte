@@ -22,7 +22,7 @@ export const AXLE_CONFIGURATIONS: Record<LicenseType, AxleConfiguration> = {
     tractorAxles: 3,
     firstTrailerAxles: 2,
     secondTrailerAxles: 2,
-    dollyAxles: 1,
+    dollyAxles: 2,
     totalAxles: 9,
     requiresDolly: true
   },
@@ -94,7 +94,7 @@ export function validateVehicleForPosition(
       expectedType = 'semi_trailer';
       break;
     case 'dolly':
-      expectedAxles = config.dollyAxles || 1;
+      expectedAxles = config.dollyAxles || 2;
       expectedType = 'dolly';
       break;
     default:
@@ -237,7 +237,7 @@ export function filterVehiclesForPosition(
       expectedType = 'semi_trailer';
       break;
     case 'dolly':
-      expectedAxles = config.dollyAxles || 1;
+      expectedAxles = config.dollyAxles || 2;
       expectedType = 'dolly';
       break;
     default:

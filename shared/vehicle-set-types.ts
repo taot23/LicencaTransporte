@@ -10,6 +10,7 @@ export const vehicleSetTypeSchema = z.object({
     tractorAxles: z.number(),
     firstTrailerAxles: z.number(),
     secondTrailerAxles: z.number(),
+    dollyAxles: z.number().optional(),
     totalAxles: z.number(),
     requiresDolly: z.boolean(),
     isFlexible: z.boolean(), // Se true, ignora validação de eixos
@@ -137,6 +138,7 @@ function getDefaultVehicleSetTypes(): VehicleSetType[] {
       tractorAxles: 3,
       firstTrailerAxles: 2,
       secondTrailerAxles: 2,
+      dollyAxles: 2,
       totalAxles: 9,
       requiresDolly: true,
       isFlexible: false,
