@@ -14,9 +14,12 @@ export default function VehicleSetTypesPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingType, setEditingType] = useState<VehicleSetType | null>(null);
 
-  // Buscar tipos de conjunto
+  // Buscar tipos de conjunto (com cache e otimizações)
   const { data: vehicleSetTypes = [], isLoading } = useQuery<VehicleSetType[]>({
     queryKey: ['/api/admin/vehicle-set-types'],
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   // Mutação para deletar tipo
@@ -50,8 +53,29 @@ export default function VehicleSetTypesPage() {
   if (isLoading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Carregando tipos de conjunto...</div>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">Tipos de Conjunto de Veículos</h1>
+              <p className="text-gray-600">Carregando tipos disponíveis...</p>
+            </div>
+            <div className="animate-pulse bg-gray-200 h-10 w-32 rounded"></div>
+          </div>
+          <div className="bg-white rounded-lg border shadow-sm p-6">
+            <div className="space-y-4">
+              {[1,2,3].map(i => (
+                <div key={i} className="animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-8 bg-gray-200 rounded"></div>
+                    <div className="flex-1">
+                      <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </AdminLayout>
     );

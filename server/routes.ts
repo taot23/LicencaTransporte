@@ -6400,9 +6400,18 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   // GESTÃO DE TIPOS DE CONJUNTO (ADMIN)
   // ==========================================
   
-  // Listar todos os tipos de conjunto
+  // Listar todos os tipos de conjunto (com cache)
   app.get('/api/admin/vehicle-set-types', requireAuth, async (req, res) => {
     try {
+      // Cache simples em memória por 5 minutos
+      const cacheKey = 'vehicle_set_types_cache';
+      const cacheTime = 5 * 60 * 1000; // 5 minutos
+      
+      if (global[cacheKey] && global[`${cacheKey}_time`] > Date.now() - cacheTime) {
+        console.log('[VEHICLE SET TYPES] Retornando dados do cache');
+        return res.json(global[cacheKey]);
+      }
+      
       const { DEFAULT_VEHICLE_SET_TYPES } = await import('../shared/vehicle-set-types');
       const { vehicleSetTypes } = await import('../shared/schema');
       const { eq } = await import('drizzle-orm');
@@ -6422,6 +6431,10 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
           updatedAt: new Date(type.updatedAt),
         }))
       ];
+      
+      // Armazenar no cache
+      global[cacheKey] = allTypes;
+      global[`${cacheKey}_time`] = Date.now();
       
       console.log(`[VEHICLE SET TYPES] Retornando ${allTypes.length} tipos (${DEFAULT_VEHICLE_SET_TYPES.length} padrão + ${customTypes.length} personalizados)`);
       res.json(allTypes);
@@ -6474,6 +6487,10 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       const [newType] = await db.insert(vehicleSetTypes)
         .values(vehicleSetTypeData)
         .returning();
+      
+      // Limpar cache
+      delete global['vehicle_set_types_cache'];
+      delete global['vehicle_set_types_cache_time'];
       
       console.log('[VEHICLE SET TYPES] Tipo criado com sucesso:', newType.id);
       
@@ -6531,6 +6548,10 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         return res.status(404).json({ message: 'Tipo de conjunto não encontrado' });
       }
       
+      // Limpar cache
+      delete global['vehicle_set_types_cache'];
+      delete global['vehicle_set_types_cache_time'];
+      
       console.log('[VEHICLE SET TYPES] Tipo atualizado com sucesso:', typeId);
       
       res.json({ 
@@ -6564,6 +6585,10 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       
       // Deletar do banco de dados
       await db.delete(vehicleSetTypes).where(eq(vehicleSetTypes.id, typeId));
+      
+      // Limpar cache
+      delete global['vehicle_set_types_cache'];
+      delete global['vehicle_set_types_cache_time'];
       
       console.log('[VEHICLE SET TYPES] Tipo deletado com sucesso:', typeId);
       

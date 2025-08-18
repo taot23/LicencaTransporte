@@ -35,8 +35,15 @@ export const vehicleSetTypeSchema = z.object({
 
 export type VehicleSetType = z.infer<typeof vehicleSetTypeSchema>;
 
-// Tipos padrão do sistema
-export const DEFAULT_VEHICLE_SET_TYPES: VehicleSetType[] = [
+// Tipos padrão do sistema (cache estático)
+let _defaultTypesCache: VehicleSetType[] | null = null;
+
+function getDefaultVehicleSetTypes(): VehicleSetType[] {
+  if (_defaultTypesCache) {
+    return _defaultTypesCache;
+  }
+  
+  _defaultTypesCache = [
   {
     id: "bitrain_6_axles",
     name: "bitrain_6_axles",
@@ -202,4 +209,9 @@ export const DEFAULT_VEHICLE_SET_TYPES: VehicleSetType[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
   },
-];
+  ];
+  
+  return _defaultTypesCache;
+}
+
+export const DEFAULT_VEHICLE_SET_TYPES = getDefaultVehicleSetTypes();
