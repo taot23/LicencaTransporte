@@ -21,6 +21,7 @@ import VehicleModelsPage from "@/pages/admin/vehicle-models-page";
 import BoletosPage from "@/pages/admin/boletos-page";
 import DashboardAET from "@/pages/admin/dashboard-aet";
 import VehicleTransferPage from "@/pages/admin/vehicle-transfer-page";
+import VehicleSetTypesPage from "@/pages/admin/vehicle-set-types";
 import MeusBoletos from "@/pages/meus-boletos";
 import BulkVehiclesPage from "@/pages/bulk-vehicles-page";
 import RedirectPage from "@/pages/redirect-page";
@@ -28,7 +29,7 @@ import { ProtectedRoute, AdminRoute, StaffRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
 import { WebSocketProvider } from "./hooks/use-websocket-context";
 import { MobileProvider, useMobileContext } from "./hooks/use-mobile-context";
-import { useEffect } from "react";
+import { useEffect, lazy } from "react";
 
 // Importar páginas mobile
 import MobileDashboardPage from "@/pages/mobile/mobile-dashboard";
@@ -58,6 +59,7 @@ function Router() {
       <StaffRoute path="/admin/vehicles-optimized" component={AdminVehiclesOptimizedPage} requiredRole="operational" />
       <AdminRoute path="/test-selectors" component={TestOptimizedSelectorsPage} />
       <AdminRoute path="/admin/vehicle-models" component={VehicleModelsPage} />
+      <AdminRoute path="/admin/vehicle-set-types" component={VehicleSetTypesPage} />
       <AdminRoute path="/admin/vehicle-transfer" component={VehicleTransferPage} />
       <StaffRoute path="/admin/boletos" component={BoletosPage} requiredRole="financial" />
       <AdminRoute path="/admin/dashboard-aet" component={DashboardAET} />

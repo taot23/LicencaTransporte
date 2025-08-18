@@ -6349,5 +6349,59 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
   // Log da configuração final de uploads
   console.log(`[UPLOAD] Servindo arquivos de ${uploadDir} em /uploads`);
 
+  // ==========================================
+  // GESTÃO DE TIPOS DE CONJUNTO (ADMIN)
+  // ==========================================
+  
+  // Listar todos os tipos de conjunto
+  app.get('/api/admin/vehicle-set-types', requireAuth, requirePermission('admin', 'read'), async (req, res) => {
+    try {
+      const { DEFAULT_VEHICLE_SET_TYPES } = await import('../shared/vehicle-set-types');
+      
+      // Por enquanto retornamos os tipos padrão
+      // Futuramente isso virá do banco de dados
+      res.json(DEFAULT_VEHICLE_SET_TYPES);
+    } catch (error) {
+      console.error('[VEHICLE SET TYPES] Erro ao buscar tipos:', error);
+      res.status(500).json({ message: 'Erro ao buscar tipos de conjunto' });
+    }
+  });
+
+  // Criar novo tipo de conjunto
+  app.post('/api/admin/vehicle-set-types', requireAuth, requirePermission('admin', 'create'), async (req, res) => {
+    try {
+      // Por enquanto apenas retornamos sucesso
+      // Futuramente isso salvará no banco de dados
+      res.json({ success: true, message: 'Tipo de conjunto criado com sucesso' });
+    } catch (error) {
+      console.error('[VEHICLE SET TYPES] Erro ao criar tipo:', error);
+      res.status(500).json({ message: 'Erro ao criar tipo de conjunto' });
+    }
+  });
+
+  // Atualizar tipo de conjunto
+  app.put('/api/admin/vehicle-set-types/:id', requireAuth, requirePermission('admin', 'update'), async (req, res) => {
+    try {
+      // Por enquanto apenas retornamos sucesso
+      // Futuramente isso atualizará no banco de dados
+      res.json({ success: true, message: 'Tipo de conjunto atualizado com sucesso' });
+    } catch (error) {
+      console.error('[VEHICLE SET TYPES] Erro ao atualizar tipo:', error);
+      res.status(500).json({ message: 'Erro ao atualizar tipo de conjunto' });
+    }
+  });
+
+  // Deletar tipo de conjunto
+  app.delete('/api/admin/vehicle-set-types/:id', requireAuth, requirePermission('admin', 'delete'), async (req, res) => {
+    try {
+      // Por enquanto apenas retornamos sucesso
+      // Futuramente isso deletará do banco de dados
+      res.status(204).send();
+    } catch (error) {
+      console.error('[VEHICLE SET TYPES] Erro ao deletar tipo:', error);
+      res.status(500).json({ message: 'Erro ao deletar tipo de conjunto' });
+    }
+  });
+
   return httpServer;
 }
