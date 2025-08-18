@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { VehicleSetType } from "@shared/vehicle-set-types";
 import { Truck, Plus, X } from "lucide-react";
+import { ImageUploader } from "./image-uploader";
 
 const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -38,6 +39,7 @@ const formSchema = z.object({
     secondTrailer: z.array(z.string()).optional(),
     dolly: z.array(z.string()).optional(),
   }),
+  imageUrl: z.string().optional(),
   isActive: z.boolean(),
 });
 
@@ -70,6 +72,7 @@ export function VehicleSetTypeForm({ vehicleSetType, onClose, onSuccess }: Vehic
       axleConfiguration: vehicleSetType.axleConfiguration,
       dimensionLimits: vehicleSetType.dimensionLimits,
       vehicleTypes: vehicleSetType.vehicleTypes,
+      imageUrl: vehicleSetType.imageUrl || "",
       isActive: vehicleSetType.isActive,
     } : {
       name: "",
@@ -95,6 +98,7 @@ export function VehicleSetTypeForm({ vehicleSetType, onClose, onSuccess }: Vehic
         secondTrailer: [],
         dolly: [],
       },
+      imageUrl: "",
       isActive: true,
     }
   });
@@ -217,6 +221,21 @@ export function VehicleSetTypeForm({ vehicleSetType, onClose, onSuccess }: Vehic
                         <FormControl>
                           <Textarea {...field} placeholder="Descrição do tipo de conjunto" />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Upload de Imagem */}
+                  <FormField
+                    control={form.control}
+                    name="imageUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <ImageUploader
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
                         <FormMessage />
                       </FormItem>
                     )}

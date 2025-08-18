@@ -88,8 +88,16 @@ export default function VehicleSetTypesPage() {
               {vehicleSetTypes.map((type) => (
                 <TableRow key={type.id}>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Truck className="h-4 w-4 text-gray-500" />
+                    <div className="flex items-center gap-3">
+                      {type.imageUrl ? (
+                        <img 
+                          src={type.imageUrl} 
+                          alt={type.label}
+                          className="w-12 h-8 object-contain rounded border"
+                        />
+                      ) : (
+                        <Truck className="h-8 w-8 text-gray-400 p-1 border rounded" />
+                      )}
                       <div>
                         <div className="font-medium">{type.label}</div>
                         {type.description && (
