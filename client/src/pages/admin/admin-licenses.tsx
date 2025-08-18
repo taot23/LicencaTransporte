@@ -167,40 +167,6 @@ export default function AdminLicensesPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [aetNumberValidationError, setAetNumberValidationError] = useState<string>("");
 
-  // Função para validar unicidade do número AET
-  const validateAetNumberUniqueness = useCallback((aetNumber: string, currentState: string, currentLicense: LicenseRequest) => {
-    if (!aetNumber || !currentLicense) return null;
-
-    // Verificar se o número já existe em outros estados da mesma licença
-    if (currentLicense.stateAETNumbers) {
-      const duplicateInSameLicense = currentLicense.stateAETNumbers.find(entry => {
-        const [state, number] = entry.split(':');
-        return state !== currentState && number === aetNumber;
-      });
-      
-      if (duplicateInSameLicense) {
-        const [duplicateState] = duplicateInSameLicense.split(':');
-        return `O número "${aetNumber}" já está sendo usado no estado ${duplicateState} desta licença`;
-      }
-    }
-
-    // Verificar se o número já existe em outras licenças (busca global)
-    const duplicateInOtherLicense = licenses.find(license => {
-      if (license.id === currentLicense.id) return false; // Pular a licença atual
-      
-      return license.stateAETNumbers?.some(entry => {
-        const [, number] = entry.split(':');
-        return number === aetNumber;
-      });
-    });
-
-    if (duplicateInOtherLicense) {
-      return `O número "${aetNumber}" já está sendo usado na licença ${duplicateInOtherLicense.requestNumber}`;
-    }
-
-    return null; // Número é único
-  }, [licenses]);
-
   // Effect para invalidar cache quando houver atualizações via WebSocket
   useEffect(() => {
     if (lastMessage && lastMessage.data) {
@@ -390,6 +356,40 @@ export default function AdminLicensesPage() {
   const { data: transporters = [] } = useQuery<Transporter[]>({
     queryKey: ['/api/admin/transporters'],
   });
+
+  // Função para validar unicidade do número AET
+  const validateAetNumberUniqueness = useCallback((aetNumber: string, currentState: string, currentLicense: LicenseRequest) => {
+    if (!aetNumber || !currentLicense) return null;
+
+    // Verificar se o número já existe em outros estados da mesma licença
+    if (currentLicense.stateAETNumbers) {
+      const duplicateInSameLicense = currentLicense.stateAETNumbers.find(entry => {
+        const [state, number] = entry.split(':');
+        return state !== currentState && number === aetNumber;
+      });
+      
+      if (duplicateInSameLicense) {
+        const [duplicateState] = duplicateInSameLicense.split(':');
+        return `O número "${aetNumber}" já está sendo usado no estado ${duplicateState} desta licença`;
+      }
+    }
+
+    // Verificar se o número já existe em outras licenças (busca global)
+    const duplicateInOtherLicense = licenses.find(license => {
+      if (license.id === currentLicense.id) return false; // Pular a licença atual
+      
+      return license.stateAETNumbers?.some(entry => {
+        const [, number] = entry.split(':');
+        return number === aetNumber;
+      });
+    });
+
+    if (duplicateInOtherLicense) {
+      return `O número "${aetNumber}" já está sendo usado na licença ${duplicateInOtherLicense.requestNumber}`;
+    }
+
+    return null; // Número é único
+  }, [licenses]);
 
   // Função de atualização melhorada com feedback visual e integração WebSocket
   const handleRefresh = async () => {
@@ -890,7 +890,10 @@ export default function AdminLicensesPage() {
                 license.status === "rejected" ? "Rejeitado" :
                 license.status === "canceled" ? "Cancelado" : license.status,
         Estados: license.states.join(", "),
-        Transportador: license.transporter?.name || license.transporter?.tradeName || `ID: ${license.transporterId}`,
+        Transportador: (() => {
+          const transporter = transporters.find(t => t.id === license.transporterId);
+          return transporter?.name || transporter?.tradeName || `ID: ${license.transporterId}`;
+        })(),
         "Data de Criação": formatDateForCSV(license.createdAt),
         "Última Atualização": formatDateForCSV(license.updatedAt)
       }));
