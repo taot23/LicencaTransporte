@@ -1864,8 +1864,8 @@ export function LicenseForm({
               />
             )}
 
-            {/* Painel de Especificações de Eixos */}
-            {licenseType && (
+            {/* Painel de Especificações de Eixos - Oculto para Prancha e Romeu e Julieta */}
+            {licenseType && licenseType !== 'flatbed' && licenseType !== 'romeo_and_juliet' && (
               <div className="border border-blue-200 rounded-lg p-4 bg-blue-50 mb-6">
                 <h4 className="text-sm font-medium text-blue-800 mb-3 flex items-center">
                   <Info className="h-4 w-4 mr-2" />
