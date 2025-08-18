@@ -73,6 +73,7 @@ import { OptimizedTransporterSelector } from "@/components/forms/optimized-trans
 import { 
   validateCompleteComposition, 
   getAxleSpecificationSummary,
+  validateVehicleForPosition,
   AXLE_CONFIGURATIONS 
 } from "@/utils/vehicle-axle-validation";
 import { VehicleSetType } from "@shared/vehicle-set-types";
