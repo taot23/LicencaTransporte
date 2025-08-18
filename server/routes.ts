@@ -6440,6 +6440,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       global[`${cacheKey}_time`] = Date.now();
       
       console.log(`[VEHICLE SET TYPES] Retornando ${allTypes.length} tipos (${DEFAULT_VEHICLE_SET_TYPES.length} padrão + ${customTypes.length} personalizados)`);
+      console.log(`[VEHICLE SET TYPES] Tipos personalizados no banco:`, customTypes.map(t => ({name: t.name, label: t.label, isActive: t.isActive})));
       res.json(allTypes);
     } catch (error) {
       console.error('[VEHICLE SET TYPES] Erro ao buscar tipos:', error);

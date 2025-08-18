@@ -14,12 +14,21 @@ export default function VehicleSetTypesPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingType, setEditingType] = useState<VehicleSetType | null>(null);
 
-  // Buscar tipos de conjunto (com cache e otimizações)
-  const { data: vehicleSetTypes = [], isLoading } = useQuery<VehicleSetType[]>({
+  // Buscar tipos de conjunto (com debug)
+  const { data: vehicleSetTypes = [], isLoading, error } = useQuery<VehicleSetType[]>({
     queryKey: ['/api/admin/vehicle-set-types'],
-    staleTime: 5 * 60 * 1000, // 5 minutos
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    staleTime: 0, // Sempre buscar dados frescos
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    retry: 3,
+    onError: (error) => {
+      console.error('[VEHICLE SET TYPES] Erro na query:', error);
+    },
+    onSuccess: (data) => {
+      console.log('[VEHICLE SET TYPES] Dados recebidos:', data?.length || 0, 'tipos');
+      console.log('[VEHICLE SET TYPES] Lista completa:', data?.map(t => t.name));
+      console.log('[VEHICLE SET TYPES] Tipos personalizados:', data?.filter(t => !['bitrain_6_axles', 'bitrain_7_axles', 'bitrain_9_axles', 'rodotrem_9_axles', 'romeu_e_julieta', 'prancha'].includes(t.id)).map(t => t.name));
+    }
   });
 
   // Mutação para deletar tipo

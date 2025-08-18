@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -131,6 +132,9 @@ export function VehicleSetTypeForm({ vehicleSetType, onClose, onSuccess }: Vehic
     },
     onSuccess: (result) => {
       console.log('[MUTATION] Sucesso:', result);
+      // Invalidar cache do React Query forçadamente
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/vehicle-set-types'] });
+      queryClient.refetchQueries({ queryKey: ['/api/admin/vehicle-set-types'] });
       onSuccess();
     },
     onError: (error) => {
