@@ -61,7 +61,6 @@ export const DEFAULT_VEHICLE_SET_TYPES: VehicleSetType[] = [
       firstTrailer: ["semi_trailer"],
       secondTrailer: ["semi_trailer"],
     },
-    imageUrl: "/public-objects/vehicle-types/bitrem-6-eixos.png",
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),

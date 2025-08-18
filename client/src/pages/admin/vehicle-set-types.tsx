@@ -94,10 +94,15 @@ export default function VehicleSetTypesPage() {
                           src={type.imageUrl} 
                           alt={type.label}
                           className="w-12 h-8 object-contain rounded border"
+                          onError={(e) => {
+                            // Se a imagem falhar, mostra o ícone padrão
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            target.nextElementSibling?.classList.remove('hidden');
+                          }}
                         />
-                      ) : (
-                        <Truck className="h-8 w-8 text-gray-400 p-1 border rounded" />
-                      )}
+                      ) : null}
+                      <Truck className={`h-8 w-8 text-gray-400 p-1 border rounded ${type.imageUrl ? 'hidden' : ''}`} />
                       <div>
                         <div className="font-medium">{type.label}</div>
                         {type.description && (
