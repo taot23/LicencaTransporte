@@ -2540,28 +2540,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate a request number
       const requestNumber = `AET-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
       
-      // Validate license data (partially - since we're more permissive with client-side submissions)
+      // Validate license data using the complete schema with conditional validations
       try {
-        // Vamos fazer somente algumas validações básicas
-        if (!licenseData.transporterId) {
-          return res.status(400).json({ message: "Um transportador deve ser selecionado" });
+        console.log('Validando dados da licença com schema completo...');
+        console.log('Dados a validar:', JSON.stringify(licenseData, null, 2));
+        
+        const validationResult = insertLicenseRequestSchema.safeParse(licenseData);
+        if (!validationResult.success) {
+          console.log('❌ VALIDATION ERROR:', validationResult.error);
+          const validationError = fromZodError(validationResult.error);
+          return res.status(400).json({ 
+            message: validationError.message,
+            errors: validationResult.error.errors 
+          });
         }
         
-        if (!licenseData.type) {
-          return res.status(400).json({ message: "O tipo é obrigatório" });
-        }
+        console.log('✅ Validação bem-sucedida');
+        // Use os dados validados
+        licenseData = validationResult.data;
         
-        if (!licenseData.states || licenseData.states.length === 0) {
-          return res.status(400).json({ message: "Selecione pelo menos um estado" });
-        }
-        
-        if (!licenseData.mainVehiclePlate) {
-          return res.status(400).json({ message: "A placa principal é obrigatória" });
-        }
-        
-        if (!licenseData.length || licenseData.length <= 0) {
-          return res.status(400).json({ message: "O comprimento deve ser positivo" });
-        }
       } catch (error: any) {
         console.error('Validation error:', error);
         return res.status(400).json({ message: error.message || "Erro de validação" });
