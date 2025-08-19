@@ -357,12 +357,108 @@ export const insertLicenseRequestSchema = createInsertSchema(licenseRequests)
     firstTrailerManualPlate: z.string().optional(),
     dollyManualPlate: z.string().optional(),
     secondTrailerManualPlate: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    const licenseType = data.type;
+    
+    // VALIDAÇÃO OBRIGATÓRIA: Unidade Tratora/Cavalo sempre obrigatória
+    if (!data.tractorUnitId && !data.mainVehiclePlate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "A Unidade Tratora (Cavalo Mecânico) é obrigatória",
+        path: ["tractorUnitId"]
+      });
+    }
+
+    // VALIDAÇÕES ESPECÍFICAS POR TIPO DE LICENÇA
+    if (licenseType?.includes('flatbed') || licenseType?.includes('prancha')) {
+      // TIPO PRANCHA: Cavalo + Prancha obrigatórios
+      if (!data.flatbedId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "A Prancha é obrigatória para licenças do tipo Prancha",
+          path: ["flatbedId"]
+        });
+      }
+    } else if (licenseType?.includes('rodotrem') || licenseType?.includes('road_train')) {
+      // TIPO RODOTREM: Cavalo + 1ª Carreta + Dolly + 2ª Carreta obrigatórios
+      if (!data.firstTrailerId && !data.firstTrailerManualPlate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "A 1ª Carreta é obrigatória para licenças do tipo Rodotrem",
+          path: ["firstTrailerId"]
+        });
+      }
+      if (!data.dollyId && !data.dollyManualPlate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "O Dolly é obrigatório para licenças do tipo Rodotrem",
+          path: ["dollyId"]
+        });
+      }
+      if (!data.secondTrailerId && !data.secondTrailerManualPlate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "A 2ª Carreta é obrigatória para licenças do tipo Rodotrem",
+          path: ["secondTrailerId"]
+        });
+      }
+    } else if (licenseType?.includes('bitrem') || licenseType?.includes('bitrain')) {
+      // TIPO BITREM: Cavalo + 1ª Carreta + 2ª Carreta obrigatórios (sem dolly)
+      if (!data.firstTrailerId && !data.firstTrailerManualPlate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "A 1ª Carreta é obrigatória para licenças do tipo Bitrem",
+          path: ["firstTrailerId"]
+        });
+      }
+      if (!data.secondTrailerId && !data.secondTrailerManualPlate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "A 2ª Carreta é obrigatória para licenças do tipo Bitrem",
+          path: ["secondTrailerId"]
+        });
+      }
+    } else {
+      // TIPOS SIMPLES: Cavalo + 1ª Carreta obrigatórios
+      if (!data.firstTrailerId && !data.firstTrailerManualPlate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "A 1ª Carreta é obrigatória",
+          path: ["firstTrailerId"]
+        });
+      }
+    }
   });
 
-export const insertDraftLicenseSchema = insertLicenseRequestSchema.partial().extend({
-  type: licenseTypeEnum,
-  isDraft: z.literal(true),
-});
+// Schema para rascunhos - não aplicar validações rigorosas de linha de frente
+export const insertDraftLicenseSchema = createInsertSchema(licenseRequests)
+  .omit({ 
+    id: true, 
+    userId: true, 
+    requestNumber: true, 
+    createdAt: true, 
+    updatedAt: true, 
+    licenseFileUrl: true, 
+    validUntil: true,
+    aetNumber: true,
+    stateAETNumbers: true
+  })
+  .extend({
+    type: licenseTypeEnum,
+    isDraft: z.literal(true),
+    transporterId: z.number().optional(),
+    states: z.array(z.string()).optional().default([]),
+    cargoType: cargoTypeEnum.optional(),
+    length: z.coerce.number().optional(),
+    width: z.coerce.number().optional(),
+    height: z.coerce.number().optional(),
+    additionalPlates: z.array(z.string()).optional().default([]),
+    additionalPlatesDocuments: z.array(z.string()).optional().default([]),
+    firstTrailerManualPlate: z.string().optional(),
+    dollyManualPlate: z.string().optional(),
+    secondTrailerManualPlate: z.string().optional(),
+  });
 
 export const updateLicenseStatusSchema = createInsertSchema(licenseRequests)
   .pick({
