@@ -2540,6 +2540,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate a request number
       const requestNumber = `AET-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
       
+      // CONVERSÃO: Frontend envia em centímetros, backend espera em metros
+      console.log('Valores ANTES da conversão:', {
+        length: licenseData.length,
+        width: licenseData.width, 
+        height: licenseData.height
+      });
+      
+      // Converter para metros se os valores parecem estar em centímetros
+      if (licenseData.length && licenseData.length > 100) {
+        licenseData.length = licenseData.length / 100; // centímetros para metros
+      }
+      if (licenseData.width && licenseData.width > 50) {
+        licenseData.width = licenseData.width / 100; // centímetros para metros  
+      }
+      if (licenseData.height && licenseData.height > 50) {
+        licenseData.height = licenseData.height / 100; // centímetros para metros
+      }
+      
+      console.log('Valores DEPOIS da conversão:', {
+        length: licenseData.length,
+        width: licenseData.width,
+        height: licenseData.height
+      });
+      
       // Validate license data using the complete schema with conditional validations
       try {
         console.log('Validando dados da licença com schema completo...');
