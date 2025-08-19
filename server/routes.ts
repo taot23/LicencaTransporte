@@ -1273,7 +1273,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Enriquecer veículos com dados do transportador para exportações CSV
       const allTransporters = await storage.getAllTransporters();
       const vehiclesWithTransporter = vehicles.map(vehicle => {
-        const transporter = allTransporters.find(t => t.id === vehicle.transporterId);
+        const transporter = allTransporters.find(t => t.id === (vehicle as any).transporterId);
         return {
           ...vehicle,
           transporter: transporter ? {
@@ -2678,7 +2678,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       broadcastDashboardUpdate();
       
       res.json(licenseRequest);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting license request:', error);
       res.status(500).json({ message: 'Erro ao enviar solicitação de licença', error: String(error) });
     }
@@ -3088,7 +3088,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: `Combinação específica não encontrada no estado ${estado} - nova configuração permitida`
       });
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('[VALIDAÇÃO COMBINAÇÃO] ❌ ERRO:', error);
       return res.status(500).json({ 
         bloqueado: false, // Em caso de erro, liberar para não bloquear o usuário
