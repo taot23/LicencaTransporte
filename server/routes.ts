@@ -3788,7 +3788,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Usar o userId do transportador, não do usuário logado
           const { transporterUserId, ...vehicleDataClean } = vehicleData;
-          await storage.createVehicle(transporterUserId, vehicleDataClean);
+          const cleanVehicleData = {
+            ...vehicleDataClean,
+            bodyType: vehicleDataClean.bodyType || undefined
+          };
+          await storage.createVehicle(transporterUserId, cleanVehicleData);
           
           console.log('[BULK IMPORT] Veículo criado com sucesso para transportador:', vehicleData.plate);
           results.inserted++;
@@ -4303,7 +4307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
         role,
         phone,
-        isAdmin: role === 'admin'
+
       });
       
       res.status(201).json(newUser);
@@ -4503,7 +4507,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Lógica básica de criação sem upload de arquivo
       const newTransporter = await storage.createTransporter({
         name: req.body.name || 'Novo Transportador',
-        cnpj: req.body.cnpj || '00000000000000',
+        documentNumber: req.body.documentNumber || '00000000000000',
         email: req.body.email || 'teste@exemplo.com',
         phone: req.body.phone || '(00) 00000-0000',
         address: req.body.address || 'Endereço teste',
@@ -4896,13 +4900,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('licenseFile'), async (req, res) => {
     try {
       const licenseId = parseInt(req.params.id);
-      const statusData: {
-        status: LicenseStatus;
-        comments: string;
-        validUntil?: string;
-        state?: string; // Agora exigimos um estado específico
-        aetNumber?: string; // Número AET específico do estado
-      } = {
+      const statusData: any = {
         status: req.body.status as LicenseStatus,
         comments: req.body.comments,
       };
@@ -4957,7 +4955,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       }
       
       // Verifica se o estado está incluído na lista de estados da licença
-      if (!existingLicense.states.includes(statusData.state)) {
+      if (statusData.state && !existingLicense.states.includes(statusData.state)) {
         return res.status(400).json({ message: 'Estado não incluído na solicitação da licença' });
       }
       
@@ -4976,9 +4974,9 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       // sejam específicos para o estado selecionado
       const updatedLicense = await storage.updateLicenseStateStatus({
         licenseId,
-        state: statusData.state,
+        state: statusData.state || '',
         stateStatus: statusData.status,
-        comments: statusData.comments,
+        comments: statusData.comments || '',
         validUntil: statusData.validUntil,
         issuedAt: statusData.issuedAt,
         aetNumber: statusData.aetNumber,
@@ -4989,7 +4987,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       // Registrar mudança no histórico de status
       await storage.createStatusHistory({
         licenseId: updatedLicense.id,
-        state: statusData.state,
+        state: statusData.state || '',
         userId: req.user!.id,
         oldStatus: previousStateStatus,
         newStatus: statusData.status,
@@ -5000,7 +4998,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       console.log(`Histórico de status criado para licença ${licenseId}, estado ${statusData.state}: ${previousStateStatus} -> ${statusData.status}`);
       
       // Se o status foi alterado para 'approved' ou 'released', sincronizar com licencas_emitidas
-      if ((statusData.status === 'approved' || statusData.status === 'released') && statusData.validUntil && statusData.aetNumber) {
+      if ((statusData.status === 'approved' || statusData.status === 'released') && statusData.validUntil && statusData.aetNumber && statusData.state) {
         try {
           console.log(`[SINCRONIZAÇÃO AUTOMÁTICA] Licença ${licenseId} aprovada para estado ${statusData.state} - iniciando sincronização`);
           await sincronizarLicencaEmitida(updatedLicense, statusData.state, statusData.aetNumber, statusData.validUntil);
@@ -5016,7 +5014,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       broadcastDashboardUpdate();
       broadcastActivityLog({
         licenseId: updatedLicense.id,
-        state: statusData.state,
+        state: statusData.state || '',
         oldStatus: previousStateStatus,
         newStatus: statusData.status,
         userId: req.user!.id,
@@ -5558,7 +5556,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     if (file.mimetype === 'application/pdf') {
       cb(null, true);
     } else {
-      cb(new Error('Apenas arquivos PDF são aceitos'), false);
+      cb(null, false);
     }
   };
 
@@ -6023,7 +6021,9 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       const user = req.user!;
       const { q: searchTerm = '', type = '' } = req.query;
       
-      if (!searchTerm || searchTerm.toString().length < 2) {
+      const searchTermString = typeof searchTerm === 'string' ? searchTerm : String(searchTerm);
+      
+      if (!searchTerm || searchTermString.length < 2) {
         return res.json({ vehicles: [] });
       }
       
@@ -6046,14 +6046,14 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       let vehicleQuery;
       
       // Para buscas curtas (2-3 chars), usar trigram que é mais rápido em volumes grandes
-      if (searchTerm.length <= 3) {
+      if (searchTermString.length <= 3) {
         vehicleQuery = sql`
           SELECT v.id, v.plate, v.brand, v.model, v.type, v.tare::text,
                  v.axle_count, v.status,
                  similarity(v.plate, ${searchTerm.toString().toUpperCase()}) as sim
           FROM vehicles v
           WHERE v.status = 'active' 
-            AND v.plate % ${searchTerm.toString().toUpperCase()}
+            AND v.plate % ${searchTermString.toUpperCase()}
         `;
       } else {
         // Para buscas longas, usar índice UPPER otimizado
@@ -6077,7 +6077,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       }
       
       // Ordenação otimizada para grandes volumes
-      if (searchTerm.length <= 3) {
+      if (searchTermString.length <= 3) {
         vehicleQuery = sql`${vehicleQuery} 
           ORDER BY sim DESC, v.plate
           LIMIT 12`;
@@ -6286,9 +6286,9 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       // Forçar atualização se o cache existir mas for solicitado refresh
       const forceRefresh = req.query.refresh === 'true';
       
-      if (!forceRefresh && global[cacheKey] && global[`${cacheKey}_time`] > Date.now() - cacheTime) {
+      if (!forceRefresh && (global as any)[cacheKey] && (global as any)[`${cacheKey}_time`] > Date.now() - cacheTime) {
         console.log('[VEHICLE SET TYPES] Retornando dados do cache');
-        return res.json(global[cacheKey]);
+        return res.json((global as any)[cacheKey]);
       }
       
       const { DEFAULT_VEHICLE_SET_TYPES } = await import('../shared/vehicle-set-types');
@@ -6312,8 +6312,8 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       ];
       
       // Armazenar no cache
-      global[cacheKey] = allTypes;
-      global[`${cacheKey}_time`] = Date.now();
+      (global as any)[cacheKey] = allTypes;
+      (global as any)[`${cacheKey}_time`] = Date.now();
       
       console.log(`[VEHICLE SET TYPES] Retornando ${allTypes.length} tipos (${DEFAULT_VEHICLE_SET_TYPES.length} padrão + ${customTypes.length} personalizados)`);
       console.log(`[VEHICLE SET TYPES] Tipos personalizados no banco:`, customTypes.map(t => ({name: t.name, label: t.label, isActive: t.isActive})));
