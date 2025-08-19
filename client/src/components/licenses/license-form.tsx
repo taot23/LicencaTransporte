@@ -2054,8 +2054,10 @@ export function LicenseForm({
                     <FormItem>
                       <FormLabel className="font-medium">2ª Carreta</FormLabel>
                       <FormControl>
-                        <PaginatedVehicleSelector
+                        <IntelligentVehicleSelector
                           vehicleType="semi_trailer"
+                          licenseType={licenseType}
+                          position="secondTrailer"
                           value={field.value}
                           onSelect={(vehicleId) => {
                             field.onChange(vehicleId);
@@ -2264,8 +2266,10 @@ export function LicenseForm({
                     <FormItem>
                       <FormLabel className="font-medium">1ª Carreta</FormLabel>
                       <FormControl>
-                        <PaginatedVehicleSelector
+                        <IntelligentVehicleSelector
                           vehicleType="semi_trailer"
+                          licenseType={licenseType}
+                          position="firstTrailer"
                           value={field.value}
                           onSelect={(vehicleId) => {
                             field.onChange(vehicleId);
@@ -2290,8 +2294,10 @@ export function LicenseForm({
                     <FormItem>
                       <FormLabel className="font-medium">2ª Carreta</FormLabel>
                       <FormControl>
-                        <PaginatedVehicleSelector
+                        <IntelligentVehicleSelector
                           vehicleType="semi_trailer"
+                          licenseType={licenseType}
+                          position="secondTrailer"
                           value={field.value}
                           onSelect={(vehicleId) => {
                             field.onChange(vehicleId);
