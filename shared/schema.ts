@@ -342,16 +342,9 @@ export const insertLicenseRequestSchema = createInsertSchema(licenseRequests)
       message: "O tipo de carga é obrigatório",
       path: ["cargoType"]
     }),
-    length: z.coerce.number()
-      .positive("O comprimento deve ser positivo")
-      .min(19.8, "O comprimento deve ser de no mínimo 19,80 metros")
-      .max(30.0, "O comprimento deve ser de no máximo 30,00 metros"),
-    width: z.coerce.number()
-      .positive("A largura deve ser um valor positivo")
-      .max(3.20, "A largura máxima permitida é 3,20 metros"),
-    height: z.coerce.number()
-      .positive("A altura deve ser um valor positivo")
-      .max(4.95, "A altura máxima permitida é 4,95 metros"),
+    length: z.coerce.number().positive("O comprimento deve ser positivo"),
+    width: z.coerce.number().positive("A largura deve ser um valor positivo"),
+    height: z.coerce.number().positive("A altura deve ser um valor positivo"),
     additionalPlates: z.array(z.string()).optional().default([]),
     additionalPlatesDocuments: z.array(z.string()).optional().default([]),
     firstTrailerManualPlate: z.string().optional(),
@@ -360,6 +353,73 @@ export const insertLicenseRequestSchema = createInsertSchema(licenseRequests)
   })
   .superRefine((data, ctx) => {
     const licenseType = data.type;
+    
+    // Importar tipos de conjunto para validação dinâmica
+    let vehicleSetType;
+    try {
+      // Buscar o tipo de conjunto correspondente
+      const { DEFAULT_VEHICLE_SET_TYPES } = require('./vehicle-set-types');
+      vehicleSetType = DEFAULT_VEHICLE_SET_TYPES.find(
+        (vst: any) => vst.id === licenseType || vst.name === licenseType
+      );
+    } catch (error) {
+      console.error('Erro ao importar types de conjunto:', error);
+    }
+    
+    // Validação dinâmica de dimensões baseada no tipo de conjunto
+    if (vehicleSetType?.dimensionLimits) {
+      const limits = vehicleSetType.dimensionLimits;
+      
+      // Validar comprimento
+      if (limits.minLength && data.length < limits.minLength) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.too_small,
+          minimum: limits.minLength,
+          type: "number",
+          inclusive: true,
+          exact: false,
+          message: `O comprimento deve ser de no mínimo ${limits.minLength.toFixed(2)} metros`,
+          path: ["length"]
+        });
+      }
+      if (limits.maxLength && data.length > limits.maxLength) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.too_big,
+          maximum: limits.maxLength,
+          type: "number",
+          inclusive: true,
+          exact: false,
+          message: `O comprimento deve ser de no máximo ${limits.maxLength.toFixed(2)} metros`,
+          path: ["length"]
+        });
+      }
+      
+      // Validar largura
+      if (limits.maxWidth && data.width && data.width > limits.maxWidth) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.too_big,
+          maximum: limits.maxWidth,
+          type: "number",
+          inclusive: true,
+          exact: false,
+          message: `A largura máxima permitida é ${limits.maxWidth.toFixed(2)} metros`,
+          path: ["width"]
+        });
+      }
+      
+      // Validar altura
+      if (limits.maxHeight && data.height && data.height > limits.maxHeight) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.too_big,
+          maximum: limits.maxHeight,
+          type: "number",
+          inclusive: true,
+          exact: false,
+          message: `A altura máxima permitida é ${limits.maxHeight.toFixed(2)} metros`,
+          path: ["height"]
+        });
+      }
+    }
     
     // VALIDAÇÃO OBRIGATÓRIA: Unidade Tratora/Cavalo sempre obrigatória
     if (!data.tractorUnitId && !data.mainVehiclePlate) {
