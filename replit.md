@@ -24,6 +24,7 @@ The system is built with a React.js frontend using TypeScript, a Node.js/Express
 - **Intelligent Axle Validation**: Sistema rigoroso de validação de eixos por tipo de licença com filtros automáticos no frontend e backend
 - **Flexible License Types**: Prancha e Romeu e Julieta têm validação flexível (sem restrições específicas de eixos)
 - **Dynamic Vehicle Set Types**: Sistema híbrido que carrega tipos personalizados da API junto com tipos padrão, mantendo 100% compatibilidade com funcionalidades existentes
+- **Data Type Fix (August 19, 2025)**: Corrigido problema crítico com campos de dimensões - agora usam NUMERIC (float) para suportar casas decimais, com conversão automática centímetros→metros no servidor
 
 **Key Architectural Decisions:**
 - **External Uploads System**: Files are stored in an external, configurable directory to prevent data loss during reinstalls. The system automatically detects write permissions and prioritizes `UPLOAD_DIR` (environment variable), `/var/uploads`, `/tmp/uploads`, `../uploads`, and `./uploads` in that order. Subfolders for `vehicles/` and `transporter/` ensure organization.
