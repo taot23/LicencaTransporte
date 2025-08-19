@@ -21,6 +21,7 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [pageKey, setPageKey] = useState(`${location}-${contentKey || ''}`);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const isMobile = useIsMobile();
   
   // Otimização de navegação - remove delay artificial
@@ -73,11 +74,18 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
   return (
     <div className="min-h-screen flex bg-gray-50">
       {/* Sidebar apenas para desktop */}
-      {!isMobile && <Sidebar />}
+      {!isMobile && (
+        <Sidebar
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        />
+      )}
       
       {/* Header fixo no topo - apenas para desktop */}
       {!isMobile && (
-        <div className="fixed top-0 right-0 left-0 md:left-56 lg:left-64 xl:left-72 z-30 bg-white border-b border-gray-200 h-16">
+        <div className={`fixed top-0 right-0 left-0 z-30 bg-white border-b border-gray-200 h-16 transition-all duration-300 ${
+          isSidebarCollapsed ? 'md:left-16' : 'md:left-56 lg:left-64 xl:left-72'
+        }`}>
           <div className="flex items-center justify-end h-full px-6">
             <div className="flex items-center space-x-3">
               <div className="text-right">
@@ -120,7 +128,11 @@ export function UnifiedLayout({ children, contentKey }: UnifiedLayoutProps) {
       )}
       
       {/* Conteúdo principal */}
-      <div className={`flex-1 ${isMobile ? 'pt-0 pb-20' : 'md:ml-56 lg:ml-64 xl:ml-72 pt-16'} relative`}>
+      <div className={`flex-1 relative transition-all duration-300 ${
+        isMobile 
+          ? 'pt-0 pb-20' 
+          : `pt-16 ${isSidebarCollapsed ? 'md:ml-16' : 'md:ml-56 lg:ml-64 xl:ml-72'}`
+      }`}>
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-60 z-10">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />

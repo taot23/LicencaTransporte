@@ -24,25 +24,29 @@ import {
   RefreshCw,
   Receipt,
   BarChart3,
-  UploadCloud
+  UploadCloud,
+  PanelLeftClose,
+  PanelLeftOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Logo } from "@/components/ui/logo";
 import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SidebarProps {
   className?: string;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ className, isCollapsed = false, onToggleCollapse }: SidebarProps) {
   const [location, setLocation] = useLocation();
   const { user, logoutMutation } = useAuth();
   const permissions = usePermissions();
 
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [vehicleMenuExpanded, setVehicleMenuExpanded] = useState(false);
 
   const userInitials = user?.fullName
@@ -95,26 +99,84 @@ export function Sidebar({ className }: SidebarProps) {
     }
   };
 
+  // Componente SidebarItem com tooltip para modo colapsado
+  const SidebarItem = ({ icon: Icon, label, path, isActive, children }: {
+    icon: any;
+    label: string;
+    path?: string;
+    isActive?: boolean;
+    children?: React.ReactNode;
+  }) => {
+    const content = (
+      <Button
+        variant="ghost"
+        className={cn(
+          "w-full text-white hover:bg-gray-700 transition-colors",
+          isCollapsed ? "justify-center px-2" : "justify-start",
+          isActive ? "bg-gray-700" : "bg-transparent"
+        )}
+        onClick={() => path && handleNavigate(path)}
+      >
+        <Icon className={cn("h-5 w-5", !isCollapsed && "mr-3")} />
+        {!isCollapsed && <span className="flex-1 text-left">{label}</span>}
+        {!isCollapsed && children}
+      </Button>
+    );
+
+    if (isCollapsed) {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              {content}
+            </TooltipTrigger>
+            <TooltipContent side="right" className="ml-2">
+              {label}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+
+    return content;
+  };
+
   const NavItems = () => (
     <>
-      <div className="flex items-center justify-center h-16 px-4 bg-gray-900">
-        <Logo width={120} className="py-2" />
-      </div>
-      
-      <div className="px-2 py-4 space-y-1 overflow-y-auto h-full max-h-screen scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-        {/* Dashboard - Apenas para transportadores (usuários comuns) */}
-        {user?.role === 'user' && (
+      {/* Header da Sidebar */}
+      <div className={cn(
+        "flex items-center h-16 px-4 bg-gray-900 border-b border-gray-700",
+        isCollapsed ? "justify-center" : "justify-between"
+      )}>
+        {!isCollapsed && <Logo width={120} className="py-2" />}
+        {isCollapsed && <Logo width={32} className="py-2" />}
+        
+        {/* Botão de colapsar - apenas quando não está colapsado */}
+        {!isMobile && !isCollapsed && onToggleCollapse && (
           <Button
             variant="ghost"
-            className={cn(
-              "w-full justify-start text-white hover:bg-gray-700",
-              (location === "/" || location === "/dashboard") ? "bg-gray-700" : "bg-transparent"
-            )}
-            onClick={() => handleNavigate("/")}
+            size="sm"
+            onClick={onToggleCollapse}
+            className="text-white hover:bg-gray-700 p-1"
           >
-            <Home className="mr-3 h-5 w-5" />
-            Dashboard
+            <PanelLeftClose className="h-4 w-4" />
           </Button>
+        )}
+      </div>
+      
+      {/* Conteúdo Principal da Sidebar */}
+      <div className={cn(
+        "py-4 space-y-1 overflow-y-auto h-full max-h-screen scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800",
+        isCollapsed ? "px-1" : "px-2"
+      )}>
+        {/* Dashboard - Apenas para transportadores (usuários comuns) */}
+        {user?.role === 'user' && (
+          <SidebarItem
+            icon={Home}
+            label="Dashboard"
+            path="/"
+            isActive={location === "/" || location === "/dashboard"}
+          />
         )}
         
 
@@ -123,25 +185,35 @@ export function Sidebar({ className }: SidebarProps) {
         {permissions.canViewVehicles() && (
           <div className="space-y-1">
             {/* Menu Principal de Veículos */}
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full justify-start text-white hover:bg-gray-700",
-                (location === "/vehicles" || location === "/admin/vehicle-models" || location === "/admin/vehicle-transfer" || location === "/cadastro-massa-veiculos") ? "bg-gray-700" : "bg-transparent"
-              )}
-              onClick={() => setVehicleMenuExpanded(!vehicleMenuExpanded)}
-            >
-              <Truck className="mr-3 h-5 w-5" />
-              <span className="flex-1 text-left">Veículos</span>
-              {vehicleMenuExpanded ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </Button>
+            {!isCollapsed ? (
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start text-white hover:bg-gray-700",
+                  (location === "/vehicles" || location === "/admin/vehicle-models" || location === "/admin/vehicle-transfer" || location === "/cadastro-massa-veiculos") ? "bg-gray-700" : "bg-transparent"
+                )}
+                onClick={() => setVehicleMenuExpanded(!vehicleMenuExpanded)}
+              >
+                <Truck className="mr-3 h-5 w-5" />
+                <span className="flex-1 text-left">Veículos</span>
+                {vehicleMenuExpanded ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </Button>
+            ) : (
+              // No modo colapsado, mostrar apenas ícone dos veículos com acesso direto à lista
+              <SidebarItem
+                icon={Truck}
+                label="Veículos"
+                path="/vehicles"
+                isActive={location === "/vehicles" || location === "/admin/vehicle-models" || location === "/admin/vehicle-transfer" || location === "/cadastro-massa-veiculos"}
+              />
+            )}
             
-            {/* Submenus de Veículos */}
-            {vehicleMenuExpanded && (
+            {/* Submenus de Veículos - apenas no modo expandido */}
+            {!isCollapsed && vehicleMenuExpanded && (
               <div className="ml-6 space-y-1 border-l border-gray-600 pl-4">
                 {/* Veículos Cadastrados */}
                 <Button
@@ -207,166 +279,189 @@ export function Sidebar({ className }: SidebarProps) {
         
         {/* Solicitar Licença - Todos podem solicitar */}
         {permissions.canCreateLicenses() && (
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start text-white hover:bg-gray-700",
-              location === "/request-license" ? "bg-gray-700" : "bg-transparent"
-            )}
-            onClick={() => handleNavigate("/request-license")}
-          >
-            <FileText className="mr-3 h-5 w-5" />
-            Solicitar Licença
-          </Button>
+          <SidebarItem
+            icon={FileText}
+            label="Solicitar Licença"
+            path="/request-license"
+            isActive={location === "/request-license"}
+          />
         )}
         
         {/* Acompanhar Licença - Todos podem acompanhar */}
         {permissions.canTrackLicenses() && (
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start text-white hover:bg-gray-700",
-              location === "/track-license" ? "bg-gray-700" : "bg-transparent"
-            )}
-            onClick={() => handleNavigate("/track-license")}
-          >
-            <ClipboardList className="mr-3 h-5 w-5" />
-            Acompanhar Licença
-          </Button>
+          <SidebarItem
+            icon={ClipboardList}
+            label="Acompanhar Licença"
+            path="/track-license"
+            isActive={location === "/track-license"}
+          />
         )}
         
         {/* Licenças Emitidas - Todos podem ver suas licenças emitidas */}
         {permissions.canTrackLicenses() && (
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start text-white hover:bg-gray-700",
-              location === "/issued-licenses" ? "bg-gray-700" : "bg-transparent"
-            )}
-            onClick={() => handleNavigate("/issued-licenses")}
-          >
-            <ListChecks className="mr-3 h-5 w-5" />
-            Licenças Emitidas
-          </Button>
+          <SidebarItem
+            icon={ListChecks}
+            label="Licenças Emitidas"
+            path="/issued-licenses"
+            isActive={location === "/issued-licenses"}
+          />
         )}
         
         {/* MEUS BOLETOS - Conforme permissões */}
         {permissions.canViewMyBoletos() && (
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start text-white hover:bg-gray-700",
-              location === "/meus-boletos" ? "bg-gray-700" : "bg-transparent"
-            )}
-            onClick={() => handleNavigate("/meus-boletos")}
-          >
-            <Receipt className="mr-3 h-5 w-5" />
-            Meus Boletos
-          </Button>
+          <SidebarItem
+            icon={Receipt}
+            label="Meus Boletos"
+            path="/meus-boletos"
+            isActive={location === "/meus-boletos"}
+          />
         )}
         
         {/* Seção de Funcionalidades Administrativas */}
         {user && ['admin', 'manager', 'supervisor', 'financial', 'operational'].includes(user.role) && (
           <>
-            <div className="pt-2 pb-2">
-              <Separator className="bg-gray-700" />
-              <p className="text-xs text-gray-400 uppercase mt-2 ml-2 font-semibold">Administração</p>
-            </div>
+            {!isCollapsed && (
+              <div className="pt-2 pb-2">
+                <Separator className="bg-gray-700" />
+                <p className="text-xs text-gray-400 uppercase mt-2 ml-2 font-semibold">Administração</p>
+              </div>
+            )}
             
             {/* Dashboard AET - para perfis com acesso ao dashboard */}
             {permissions.canViewDashboard() && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-white hover:bg-gray-700",
-                  location === "/admin/dashboard-aet" ? "bg-gray-700" : "bg-transparent"
-                )}
-                onClick={() => handleNavigate("/admin/dashboard-aet")}
-              >
-                <BarChart3 className="mr-3 h-5 w-5" />
-                Dashboard AET
-              </Button>
+              <SidebarItem
+                icon={BarChart3}
+                label="Dashboard AET"
+                path="/admin/dashboard-aet"
+                isActive={location === "/admin/dashboard-aet"}
+              />
             )}
             
             {/* Gerenciar Licenças - conforme permissões de gerenciamento */}
             {user && ['admin', 'manager', 'supervisor', 'financial', 'operational'].includes(user.role) && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-white hover:bg-gray-700",
-                  (location === "/admin/licenses" || location === "/gerenciar-licencas") ? "bg-gray-700" : "bg-transparent"
-                )}
-                onClick={() => handleNavigate("/admin/licenses")}
-              >
-                <ClipboardEdit className="mr-3 h-5 w-5" />
-                Gerenciar Licenças
-              </Button>
+              <SidebarItem
+                icon={ClipboardEdit}
+                label="Gerenciar Licenças"
+                path="/admin/licenses"
+                isActive={location === "/admin/licenses" || location === "/gerenciar-licencas"}
+              />
             )}
             
             {/* Gerenciar Transportadores - conforme permissões */}
             {user && ['admin', 'manager', 'supervisor', 'financial', 'operational'].includes(user.role) && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-white hover:bg-gray-700",
-                  location === "/admin/transporters" ? "bg-gray-700" : "bg-transparent"
-                )}
-                onClick={() => handleNavigate("/admin/transporters")}
-              >
-                <Building2 className="mr-3 h-5 w-5" />
-                Transportadores
-              </Button>
+              <SidebarItem
+                icon={Building2}
+                label="Transportadores"
+                path="/admin/transporters"
+                isActive={location === "/admin/transporters"}
+              />
             )}
             
             {/* Gerenciar Usuários - conforme permissões */}
             {permissions.canViewUsers() && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-white hover:bg-gray-700",
-                  location === "/admin/users" ? "bg-gray-700" : "bg-transparent"
-                )}
-                onClick={() => handleNavigate("/admin/users")}
-              >
-                <Users className="mr-3 h-5 w-5" />
-                Usuários
-              </Button>
+              <SidebarItem
+                icon={Users}
+                label="Usuários"
+                path="/admin/users"
+                isActive={location === "/admin/users"}
+              />
             )}
             
             {/* Tipos de Conjunto - apenas admin */}
             {user?.role === 'admin' && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-white hover:bg-gray-700",
-                  location === "/admin/vehicle-set-types" ? "bg-gray-700" : "bg-transparent"
-                )}
-                onClick={() => handleNavigate("/admin/vehicle-set-types")}
-              >
-                <Settings className="mr-3 h-5 w-5" />
-                Tipos de Conjunto
-              </Button>
+              <SidebarItem
+                icon={Settings}
+                label="Tipos de Conjunto"
+                path="/admin/vehicle-set-types"
+                isActive={location === "/admin/vehicle-set-types"}
+              />
             )}
-
             
             {/* Módulo Financeiro - apenas para perfis financeiro, manager e admin */}
             {permissions.canViewFinancial() && (
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-white hover:bg-gray-700",
-                  location === "/admin/boletos" ? "bg-gray-700" : "bg-transparent"
-                )}
-                onClick={() => handleNavigate("/admin/boletos")}
-              >
-                <Receipt className="mr-3 h-5 w-5" />
-                Módulo Financeiro
-              </Button>
+              <SidebarItem
+                icon={Receipt}
+                label="Módulo Financeiro"
+                path="/admin/boletos"
+                isActive={location === "/admin/boletos"}
+              />
             )}
-            
 
           </>
         )}
+      </div>
+      
+      {/* Footer da Sidebar com informações do usuário */}
+      <div className="mt-auto border-t border-gray-700">
+        {/* Botão de expandir quando colapsado */}
+        {!isMobile && isCollapsed && onToggleCollapse && (
+          <div className="p-2 flex justify-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleCollapse}
+              className="text-white hover:bg-gray-700 p-2"
+            >
+              <PanelLeftOpen className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+        
+        {/* Informações do usuário */}
+        <div className={cn(
+          "p-3 bg-gray-800",
+          isCollapsed ? "flex justify-center" : "flex items-center space-x-3"
+        )}>
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="bg-blue-600 text-white text-sm">
+              {userInitials}
+            </AvatarFallback>
+          </Avatar>
+          
+          {!isCollapsed && (
+            <>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">
+                  {user?.fullName}
+                </p>
+                <p className="text-xs text-gray-400 truncate">
+                  {user?.email}
+                </p>
+              </div>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                disabled={logoutMutation.isPending}
+                className="text-gray-300 hover:text-white hover:bg-gray-700 p-1"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+          
+          {isCollapsed && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleLogout}
+                    disabled={logoutMutation.isPending}
+                    className="text-gray-300 hover:text-white hover:bg-gray-700 p-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="ml-2">
+                  Sair ({user?.fullName})
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
       </div>
       
 
@@ -412,9 +507,10 @@ export function Sidebar({ className }: SidebarProps) {
     </>
   ) : (
     <>
-      {/* Desktop Sidebar - Mantém as classes do layout original */}
+      {/* Desktop Sidebar - Responsiva com colapso */}
       <div className={cn(
-        "hidden md:flex md:w-56 lg:w-64 xl:w-72 md:flex-col md:fixed md:inset-y-0 bg-gray-800 text-white z-10",
+        "hidden md:flex md:flex-col md:fixed md:inset-y-0 bg-gray-800 text-white z-10 transition-all duration-300",
+        isCollapsed ? "md:w-16" : "md:w-56 lg:w-64 xl:w-72",
         className
       )}>
         <div className="flex flex-col h-full">
