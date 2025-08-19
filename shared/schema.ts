@@ -291,9 +291,9 @@ export const licenseRequests = pgTable("license_requests", {
   dollyManualPlate: text("dolly_manual_plate"), // Placa manual para dolly
   secondTrailerManualPlate: text("second_trailer_manual_plate"), // Placa manual para 2ª carreta
   flatbedId: integer("flatbed_id").references(() => vehicles.id),
-  length: integer("length").notNull(), // total length in cm
-  width: integer("width"), // width in cm
-  height: integer("height"), // height in cm
+  length: numeric("length", { precision: 10, scale: 2 }).notNull(), // total length in meters
+  width: numeric("width", { precision: 5, scale: 2 }), // width in meters
+  height: numeric("height", { precision: 5, scale: 2 }), // height in meters
   cargoType: text("cargo_type"), // tipo de carga (union de nonFlatbedCargoType e flatbedCargoType)
   additionalPlates: text("additional_plates").array(), // Lista de placas adicionais 
   additionalPlatesDocuments: text("additional_plates_documents").array(), // URLs dos documentos das placas adicionais
