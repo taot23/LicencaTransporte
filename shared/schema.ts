@@ -1,6 +1,7 @@
 import { pgTable, text, serial, integer, boolean, timestamp, json, index, uniqueIndex, numeric, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { DEFAULT_VEHICLE_SET_TYPES } from './vehicle-set-types';
 
 // Define enum para os tipos de role/perfil de usuário
 export const userRoleEnum = z.enum([
@@ -354,17 +355,10 @@ export const insertLicenseRequestSchema = createInsertSchema(licenseRequests)
   .superRefine((data, ctx) => {
     const licenseType = data.type;
     
-    // Importar tipos de conjunto para validação dinâmica
-    let vehicleSetType;
-    try {
-      // Buscar o tipo de conjunto correspondente
-      const { DEFAULT_VEHICLE_SET_TYPES } = require('./vehicle-set-types');
-      vehicleSetType = DEFAULT_VEHICLE_SET_TYPES.find(
-        (vst: any) => vst.id === licenseType || vst.name === licenseType
-      );
-    } catch (error) {
-      console.error('Erro ao importar types de conjunto:', error);
-    }
+    // Buscar o tipo de conjunto correspondente
+    const vehicleSetType = DEFAULT_VEHICLE_SET_TYPES.find(
+      (vst) => vst.id === licenseType || vst.name === licenseType
+    );
     
     // Validação dinâmica de dimensões baseada no tipo de conjunto
     if (vehicleSetType?.dimensionLimits) {
@@ -425,7 +419,7 @@ export const insertLicenseRequestSchema = createInsertSchema(licenseRequests)
     if (!data.tractorUnitId && !data.mainVehiclePlate) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "A Unidade Tratora (Cavalo Mecânico) é obrigatória",
+        message: "Falta Placa da Linha de frente",
         path: ["tractorUnitId"]
       });
     }

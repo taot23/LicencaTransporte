@@ -2463,7 +2463,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const user = req.user!;
       const userId = user.id;
-      const licenseData = { ...req.body };
+      let licenseData = { ...req.body };
       
       console.log('=== VERIFICAÇÃO DOS ESTADOS ===');
       console.log('Estados no req.body:', req.body.states);
