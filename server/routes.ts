@@ -2540,25 +2540,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate a request number
       const requestNumber = `AET-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
       
-      // CONVERSÃO: Frontend envia em centímetros, backend espera em metros
+      // CONVERSÃO: Frontend envia em centímetros, PostgreSQL espera inteiros (centímetros)
       console.log('Valores ANTES da conversão:', {
         length: licenseData.length,
         width: licenseData.width, 
         height: licenseData.height
       });
       
-      // Converter para metros se os valores parecem estar em centímetros
-      if (licenseData.length && licenseData.length > 100) {
-        licenseData.length = licenseData.length / 100; // centímetros para metros
+      // Garantir que os valores sejam inteiros (em centímetros)
+      if (licenseData.length) {
+        licenseData.length = Math.round(Number(licenseData.length));
       }
-      if (licenseData.width && licenseData.width > 50) {
-        licenseData.width = licenseData.width / 100; // centímetros para metros  
+      if (licenseData.width) {
+        licenseData.width = Math.round(Number(licenseData.width));
       }
-      if (licenseData.height && licenseData.height > 50) {
-        licenseData.height = licenseData.height / 100; // centímetros para metros
+      if (licenseData.height) {
+        licenseData.height = Math.round(Number(licenseData.height));
       }
       
-      console.log('Valores DEPOIS da conversão:', {
+      console.log('Valores DEPOIS da conversão (inteiros):', {
         length: licenseData.length,
         width: licenseData.width,
         height: licenseData.height

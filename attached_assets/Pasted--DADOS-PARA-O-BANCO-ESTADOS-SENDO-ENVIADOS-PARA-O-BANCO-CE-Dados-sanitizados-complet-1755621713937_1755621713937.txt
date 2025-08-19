@@ -1,0 +1,66 @@
+=== DADOS PARA O BANCO ===
+ESTADOS SENDO ENVIADOS PARA O BANCO: [ 'CE' ]
+Dados sanitizados completos: {
+  "transporterId": 5,
+  "type": "bitrain_9_axles",
+  "mainVehiclePlate": "QRX9B92",
+  "tractorUnitId": 1299,
+  "firstTrailerId": 1538,
+  "secondTrailerId": 1539,
+  "length": 19.8,
+  "width": 2.6,
+  "height": 4.4,
+  "cargoType": "liquid_cargo",
+  "additionalPlates": [],
+  "additionalPlatesDocuments": [],
+  "states": [
+    "CE"
+  ],
+  "status": "pending_registration",
+  "stateStatuses": [
+    "CE:pending_registration"
+  ],
+  "comments": "",
+  "requestNumber": "AET-2025-2020",
+  "isDraft": false
+}
+CreateLicenseRequest - dados originais: {
+  width: 2.6,
+  height: 4.4,
+  cargoType: 'liquid_cargo',
+  states: [ 'CE' ]
+}
+CreateLicenseRequest - dados sanitizados: {
+  width: 2.6,
+  height: 4.4,
+  cargoType: 'liquid_cargo',
+  states: [ 'CE' ]
+}
+STORAGE - Estados recebidos: [ 'CE' ]
+STORAGE - Tipo dos estados: object
+STORAGE - É array? true
+Error submitting license request: error: invalid input syntax for type integer: "19.8"
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/node_modules/src/node-postgres/session.ts:104:19)
+    at async TransactionalStorage.createLicenseRequest (/home/runner/workspace/server/transactional-storage.ts:436:30)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:2641:30) {
+  length: 147,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $9 = '...'",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numutils.c',
+  line: '617',
+  routine: 'pg_strtoint32_safe'
+}
+4:41:24 PM [express] POST /api/licenses/submit 500 in 34ms :: {"message":"Erro ao enviar solicitação…
