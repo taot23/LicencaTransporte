@@ -451,17 +451,20 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
   }
   
   // Formatar valores para exibição
-  const formatDimension = (value: number | null | undefined): string => {
+  const formatDimension = (value: number | string | null | undefined): string => {
     if (value === null || value === undefined) {
       return '-';
     }
     
-    // Verificar se o valor está em centímetros (>100) ou metros (<100)
-    const isInCentimeters = value > 100;
-    const valueInMeters = isInCentimeters ? value / 100 : value;
+    // Converter para número se for string
+    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
     
-    // Formatar com 2 casas decimais
-    return valueInMeters.toFixed(2);
+    if (isNaN(numericValue)) {
+      return '-';
+    }
+    
+    // Como os dados agora vêm em metros do banco, não precisa conversão
+    return numericValue.toFixed(2);
   };
   
   // Função para obter o label do status
