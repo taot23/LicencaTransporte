@@ -10,6 +10,7 @@ This project is a robust system for managing AET (Autorização Especial de Trâ
 - API calls: Usar fetch padrão ao invés de apiRequest para logout e operações simples
 - Segurança: Sistema de permissões granular por tipo de usuário deve ser rigorosamente testado
 - Senhas: Não alterar senhas existentes dos usuários em produção - preservar credenciais originais
+- **Novos Menus**: Sempre criar novos menus na configuração padrão de visualizar as páginas (não colapsados)
 
 ### System Architecture
 The system is built with a React.js frontend using TypeScript, a Node.js/Express backend, and a PostgreSQL database. Real-time communication is handled via WebSockets, and data validation uses Zod schemas. The UI/UX prioritizes responsiveness with Tailwind CSS, ensuring a consistent experience across devices.
