@@ -21,6 +21,7 @@ The system is built with a React.js frontend using TypeScript, a Node.js/Express
 - **WebSocket Context Otimizado**: Sistema resetQueries + refetchQueries para garantir dados frescos instantaneamente  
 - **Performance Anti-Travamento Mantida**: Filtros memoizados, limites de memória (máx 1000 itens), operações otimizadas
 - **Indicador Visual Ativo**: Badge tempo real mostra conexão WebSocket + cores dos indicadores mudam instantaneamente
+- **BUG CRÍTICO DE EXIBIÇÃO CORRIGIDO (August 20, 2025)**: Problema grave na função `formatDimension` resolvido - valores de comprimento, largura e altura agora são convertidos corretamente de centímetros (BD) para metros (exibição), corrigindo bug que mostrava valores 100x maiores que o real
 
 **Previous Performance Optimization (August 2025):**
 - **Ultra-fast Vehicle Search**: Plate searches optimized for 50,000+ vehicle records, responding in <1 second

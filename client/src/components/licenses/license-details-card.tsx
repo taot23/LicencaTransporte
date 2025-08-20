@@ -463,8 +463,9 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
       return '-';
     }
     
-    // Como os dados agora vêm em metros do banco, não precisa conversão
-    return numericValue.toFixed(2);
+    // CORREÇÃO: Os dados vêm em centímetros do banco, converter para metros
+    const metersValue = numericValue / 100;
+    return metersValue.toFixed(2);
   };
   
   // Função para obter o label do status
