@@ -145,7 +145,7 @@ const csvFileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilte
   if (file.mimetype === 'text/csv' || file.originalname.toLowerCase().endsWith('.csv')) {
     cb(null, true);
   } else {
-    cb(new Error('Apenas arquivos CSV são aceitos'), false);
+    cb(null, false);
   }
 };
 
@@ -3827,12 +3827,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             continue;
           }
 
-          // 8. Criar a licença
+          // 8. Gerar número da licença
+          const requestNumber = `AET-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000)}`;
+
+          // 9. Criar a licença
           const newLicense = {
-            userId: user.id,
             transporterId: transporter.id,
             type: licenseType,
             mainVehiclePlate: tractorVehicle.plate,
+            requestNumber,
             
             // Veículos
             tractorUnitId: tractorVehicle.id,
@@ -3846,6 +3849,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             width: width.toString(),
             height: height.toString(),
             totalWeight: totalWeight,
+            cargoType: 'dry_cargo' as const,
             
             // Estados e metadados
             states: states,
@@ -3854,7 +3858,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             comments: rowData.observacoes || `Importado via planilha em ${new Date().toLocaleString('pt-BR')}`
           };
 
-          await storage.createLicenseRequest(newLicense, user.id);
+          await storage.createLicenseRequest(user.id, newLicense);
           results.imported++;
 
           console.log(`[BULK LICENSE IMPORT] Licença criada: ${newLicense.mainVehiclePlate} - ${licenseType}`);
