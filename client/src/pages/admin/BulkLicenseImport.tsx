@@ -25,7 +25,10 @@ export default function BulkLicenseImport() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
     if (file) {
       // Validar tipo do arquivo
       if (!file.name.endsWith('.csv')) {
@@ -40,7 +43,10 @@ export default function BulkLicenseImport() {
 
   const handleDrop = (event: React.DragEvent) => {
     event.preventDefault();
-    const file = event.dataTransfer.files[0];
+    const files = event.dataTransfer.files;
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
     if (file && file.name.endsWith('.csv')) {
       setSelectedFile(file);
       setImportResult(null);
@@ -281,18 +287,18 @@ export default function BulkLicenseImport() {
 
             <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">{importResult.imported}</div>
+                <div className="text-2xl font-bold text-blue-600">{importResult.imported || 0}</div>
                 <div className="text-sm text-blue-600">Licenças Importadas</div>
               </div>
               
-              {importResult.warnings.length > 0 && (
+              {importResult.warnings && importResult.warnings.length > 0 && (
                 <div className="text-center p-4 bg-yellow-50 rounded-lg">
                   <div className="text-2xl font-bold text-yellow-600">{importResult.warnings.length}</div>
                   <div className="text-sm text-yellow-600">Avisos</div>
                 </div>
               )}
               
-              {importResult.errors.length > 0 && (
+              {importResult.errors && importResult.errors.length > 0 && (
                 <div className="text-center p-4 bg-red-50 rounded-lg">
                   <div className="text-2xl font-bold text-red-600">{importResult.errors.length}</div>
                   <div className="text-sm text-red-600">Erros</div>
@@ -300,16 +306,16 @@ export default function BulkLicenseImport() {
               )}
             </div>
 
-            {(importResult.warnings.length > 0 || importResult.errors.length > 0) && (
+            {((importResult.warnings && importResult.warnings.length > 0) || (importResult.errors && importResult.errors.length > 0)) && (
               <div className="mt-6 space-y-4">
-                {importResult.warnings.length > 0 && (
+                {importResult.warnings && importResult.warnings.length > 0 && (
                   <div>
                     <h4 className="font-semibold flex items-center gap-2 mb-2">
                       <AlertTriangle className="w-4 h-4 text-yellow-600" />
-                      Avisos ({importResult.warnings.length})
+                      Avisos ({importResult.warnings?.length || 0})
                     </h4>
                     <ScrollArea className="h-24 w-full border rounded p-2 bg-yellow-50">
-                      {importResult.warnings.map((warning, index) => (
+                      {(importResult.warnings || []).map((warning, index) => (
                         <div key={index} className="text-sm text-yellow-700 mb-1">
                           {warning}
                         </div>
@@ -318,14 +324,14 @@ export default function BulkLicenseImport() {
                   </div>
                 )}
 
-                {importResult.errors.length > 0 && (
+                {importResult.errors && importResult.errors.length > 0 && (
                   <div>
                     <h4 className="font-semibold flex items-center gap-2 mb-2">
                       <XCircle className="w-4 h-4 text-red-600" />
-                      Erros ({importResult.errors.length})
+                      Erros ({importResult.errors?.length || 0})
                     </h4>
                     <ScrollArea className="h-32 w-full border rounded p-2 bg-red-50">
-                      {importResult.errors.map((error, index) => (
+                      {(importResult.errors || []).map((error, index) => (
                         <div key={index} className="text-sm text-red-700 mb-1">
                           {error}
                         </div>
