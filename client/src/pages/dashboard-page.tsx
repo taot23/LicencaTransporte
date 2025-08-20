@@ -6,7 +6,7 @@ import { LicenseTable } from "@/components/dashboard/license-table";
 import { StatusChart } from "@/components/dashboard/status-chart";
 import { useDashboardStats } from "@/hooks/use-dashboard-stats";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useWebSocket } from "@/hooks/use-websocket";
+import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import { CheckCircle, Clock, Truck, AlertCircle, Search } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SkeletonCardGroup } from "@/components/ui/skeleton-card";
@@ -17,8 +17,8 @@ export default function DashboardPage() {
   const { data: stats, isLoading, error } = useDashboardStats();
   const isMobile = useIsMobile();
   
-  // Hook para tempo real
-  const { isConnected } = useWebSocket();
+  // Hook para tempo real INSTANTÂNEO
+  const { isConnected } = useWebSocketContext();
 
   return (
     <MainLayout>

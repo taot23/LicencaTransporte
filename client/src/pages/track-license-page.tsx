@@ -27,7 +27,7 @@ import { exportToCSV, formatDateForCSV } from "@/lib/csv-export";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
 import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
 import { brazilianStates } from "@shared/schema";
-import { useWebSocket } from "@/hooks/use-websocket";
+import { useWebSocketContext } from "@/hooks/use-websocket-context";
 
 export default function TrackLicensePage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,7 +42,7 @@ export default function TrackLicensePage() {
   const { toast } = useToast();
   
   // Hook para tempo real - OBRIGATÓRIO para atualizações de status e pedidos
-  const { isConnected } = useWebSocket();
+  const { isConnected } = useWebSocketContext();
   
   // Indicador visual de conexão em tempo real
   console.log(`[TRACK LICENSES] Conexão WebSocket: ${isConnected ? 'ATIVA' : 'INATIVA'} - Tempo real ${isConnected ? 'HABILITADO' : 'DESABILITADO'}`);
@@ -70,9 +70,9 @@ export default function TrackLicensePage() {
       
       return filteredData;
     },
-    // TEMPO REAL: Para status e pedidos aparecerem em tempo real
-    staleTime: 30 * 1000, // 30 segundos
-    refetchInterval: 45 * 1000, // Refetch a cada 45 segundos (balanceado)
+    // TEMPO REAL INSTANTÂNEO: Para cores de status mudarem IMEDIATAMENTE
+    staleTime: 1000, // 1 segundo apenas (instantâneo)
+    refetchInterval: 15 * 1000, // Refetch a cada 15 segundos (ultra rápido)
     refetchOnWindowFocus: true, // Reabilitado para tempo real
     refetchOnMount: true,
     retry: 1

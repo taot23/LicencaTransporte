@@ -16,11 +16,11 @@ This project is a robust system for managing AET (Autorização Especial de Trâ
 The system is built with a React.js frontend using TypeScript, a Node.js/Express backend, and a PostgreSQL database. Real-time communication is handled via WebSockets, and data validation uses Zod schemas. The UI/UX prioritizes responsiveness with Tailwind CSS, ensuring a consistent experience across devices.
 
 **Recent Performance Optimization (August 20, 2025):**
-- **Sistema de Tempo Real Restaurado**: Atualizações de status e pedidos aparecem em tempo real com WebSocket e polling otimizado (45s)
-- **Performance Anti-Travamento**: Implementadas otimizações críticas para evitar travamentos durante redimensionamento de janela
-- **Filtros Memoizados**: `useMemo` aplicado em todas as operações de filtro e busca para evitar reprocessamento desnecessário  
-- **Cache Inteligente**: Balanceamento entre tempo real (45s) e performance, com limites de memória (máx 1000 itens)
-- **Indicador Visual**: Badge de tempo real no dashboard e páginas principais mostrando status da conexão WebSocket
+- **Sistema de Tempo Real INSTANTÂNEO Implementado**: Cores de status mudam em tempo real imediatamente como anteriormente funcionava
+- **Cache Ultra-Rápido**: staleTime reduzido para 1 segundo, refetch forçado via WebSocket para atualizações instantâneas
+- **WebSocket Context Otimizado**: Sistema resetQueries + refetchQueries para garantir dados frescos instantaneamente  
+- **Performance Anti-Travamento Mantida**: Filtros memoizados, limites de memória (máx 1000 itens), operações otimizadas
+- **Indicador Visual Ativo**: Badge tempo real mostra conexão WebSocket + cores dos indicadores mudam instantaneamente
 
 **Previous Performance Optimization (August 2025):**
 - **Ultra-fast Vehicle Search**: Plate searches optimized for 50,000+ vehicle records, responding in <1 second

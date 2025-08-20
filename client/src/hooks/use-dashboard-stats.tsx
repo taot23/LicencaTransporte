@@ -34,34 +34,18 @@ export function useDashboardStats() {
       }
       return res.json();
     },
-    staleTime: 45000, // Cache por 45 segundos (tempo real otimizado)
-    refetchInterval: 60000, // Refetch a cada 60 segundos
+    staleTime: 1000, // Cache por 1 segundo (instantâneo)
+    refetchInterval: 15000, // Refetch a cada 15 segundos (ultra rápido)
   });
 
-  // Atualizar dashboard em tempo real quando houver mudanças via WebSocket
+  // TEMPO REAL INSTANTÂNEO: Dashboard atualiza cores imediatamente
   useEffect(() => {
-    if (lastMessage?.data) {
-      try {
-        const message = JSON.parse(lastMessage.data);
-        
-        // Invalidar cache do dashboard quando houver mudanças relevantes
-        if (message.type === 'STATUS_UPDATE' || 
-            message.type === 'LICENSE_UPDATE' ||
-            message.type === 'VEHICLE_CREATED' ||
-            message.type === 'VEHICLE_UPDATED') {
-          
-          console.log('📊 Atualizando dashboard em tempo real:', message.type);
-          
-          // Invalidar múltiplas queries relacionadas ao dashboard
-          queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
-          queryClient.invalidateQueries({ queryKey: ["/api/dashboard/vehicle-stats"] });
-          queryClient.invalidateQueries({ queryKey: ["/api/dashboard/state-stats"] });
-          queryClient.invalidateQueries({ queryKey: ["/api/licenses/issued"] });
-          queryClient.invalidateQueries({ queryKey: ["/api/admin/dashboard/stats"] });
-        }
-      } catch (error) {
-        // Ignorar mensagens que não são JSON válido
-      }
+    if (lastMessage?.type && (lastMessage.type === 'STATUS_UPDATE' || lastMessage.type === 'LICENSE_UPDATE')) {
+      console.log('📊 [TEMPO REAL INSTANTÂNEO] Atualizando dashboard:', lastMessage.type);
+      
+      // FORÇAR RESET E REFETCH IMEDIATO para cores mudarem instantaneamente
+      queryClient.resetQueries({ queryKey: ["/api/dashboard/stats"] });
+      queryClient.refetchQueries({ queryKey: ["/api/dashboard/stats"], type: 'active' });
     }
   }, [lastMessage]);
 

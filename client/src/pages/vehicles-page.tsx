@@ -8,7 +8,7 @@ import { Plus, RefreshCw, Download } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Vehicle } from "@shared/schema";
 import { Input } from "@/components/ui/input";
-import { useWebSocket } from "@/hooks/use-websocket";
+import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import { useToast } from "@/hooks/use-toast";
 import { exportToCSV } from "@/lib/csv-export";
 import { 
@@ -29,7 +29,7 @@ export default function VehiclesPage() {
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { isConnected } = useWebSocket();
+  const { isConnected } = useWebSocketContext();
   
   // Checar se existe uma placa pré-preenchida no localStorage
   // (Vindo de outro componente como a tela de adicionar placas adicionais)
