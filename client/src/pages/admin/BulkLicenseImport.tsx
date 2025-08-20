@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { AdminLayout } from '@/components/layout/admin-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Upload, Download, FileSpreadsheet, AlertTriangle, CheckCircle, XCircle, Info } from 'lucide-react';
@@ -129,13 +130,14 @@ export default function BulkLicenseImport() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Importação em Massa de Licenças</h1>
-        <p className="text-gray-600 mt-2">
-          Importe várias licenças AET de uma só vez usando uma planilha CSV
-        </p>
-      </div>
+    <AdminLayout>
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">Importação em Massa de Licenças</h1>
+          <p className="text-gray-600 mt-2">
+            Importe várias licenças AET de uma só vez usando uma planilha CSV
+          </p>
+        </div>
 
       {/* Instruções */}
       <Card className="mb-6">
@@ -374,6 +376,7 @@ export default function BulkLicenseImport() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

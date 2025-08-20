@@ -3565,7 +3565,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Upload e importação em lote de licenças/pedidos via CSV
   app.post('/api/admin/licenses/bulk-import', upload.single('csvFile'), requireAuth, async (req, res) => {
-    const user = await getUserFromSession(req);
+    const user = (req as any).user;
     if (!user) {
       return res.status(401).json({ message: "Não autenticado" });
     }
@@ -3771,7 +3771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           // 7. Verificar licenças existentes para evitar duplicatas
-          const existingLicenses = await storage.getAllLicenses();
+          const existingLicenses = await storage.getAllLicenseRequests();
           const vehicleCombination = [
             tractorVehicle.id,
             firstTrailerVehicle?.id,
@@ -3814,9 +3814,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             flatbedId: flatbedVehicle?.id,
             
             // Dimensões
-            length: length,
-            width: width,
-            height: height,
+            length: length.toString(),
+            width: width.toString(),
+            height: height.toString(),
             totalWeight: totalWeight,
             
             // Estados e metadados
@@ -3826,7 +3826,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             comments: rowData.observacoes || `Importado via planilha em ${new Date().toLocaleString('pt-BR')}`
           };
 
-          await storage.createLicense(newLicense);
+          await storage.createLicenseRequest(newLicense, user.id);
           results.imported++;
 
           console.log(`[BULK LICENSE IMPORT] Licença criada: ${newLicense.mainVehiclePlate} - ${licenseType}`);
@@ -3842,7 +3842,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       return res.json({
         message: `Importação concluída: ${results.imported} licenças importadas`,
-        success: results.errors.length === 0,
         ...results
       });
 
