@@ -143,6 +143,7 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
   // Garantir valores padrão para dimensões e tipo de carga
   const licenseData = {
     ...license,
+    length: license.length || getDefaultLength(license.type),
     width: license.width || getDefaultWidth(license.type),
     height: license.height || getDefaultHeight(license.type),
     cargoType: license.cargoType || getDefaultCargoType(license.type)
@@ -434,6 +435,11 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
       setSelectedVehicle(null);
     }
   }, [isEditVehicleModalOpen]);
+  
+  // Função para obter comprimento padrão baseado no tipo de licença  
+  function getDefaultLength(type: string): number {
+    return type === "flatbed" ? 2600 : 2500; // 26.00m para prancha, 25.00m para demais
+  }
   
   // Função para obter largura padrão baseada no tipo de licença
   function getDefaultWidth(type: string): number {
