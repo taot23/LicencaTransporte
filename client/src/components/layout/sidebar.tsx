@@ -195,13 +195,8 @@ export function Sidebar({ className, isCollapsed = false, onToggleCollapse }: Si
                   (location === "/vehicles" || location === "/admin/vehicle-models" || location === "/admin/vehicle-transfer" || location === "/cadastro-massa-veiculos") ? "bg-gray-700" : "bg-transparent"
                 )}
                 onClick={() => {
-                  // Se o menu já está expandido e estamos clicando, navegar para a página principal
-                  if (vehicleMenuExpanded) {
-                    handleNavigate("/vehicles");
-                  } else {
-                    // Se não está expandido, expandir primeiro
-                    setVehicleMenuExpanded(true);
-                  }
+                  // Sempre navegar para veículos ao clicar no menu principal
+                  handleNavigate("/vehicles");
                 }}
               >
                 <Truck className="mr-3 h-5 w-5" />
