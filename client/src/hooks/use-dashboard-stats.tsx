@@ -34,7 +34,7 @@ export function useDashboardStats() {
       }
       return res.json();
     },
-    staleTime: 30000, // Cache por 30 segundos
+    staleTime: 45000, // Cache por 45 segundos (tempo real otimizado)
     refetchInterval: 60000, // Refetch a cada 60 segundos
   });
 

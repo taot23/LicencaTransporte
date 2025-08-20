@@ -27,6 +27,7 @@ import { exportToCSV, formatDateForCSV } from "@/lib/csv-export";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
 import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
 import { brazilianStates } from "@shared/schema";
+import { useWebSocket } from "@/hooks/use-websocket";
 
 export default function TrackLicensePage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,6 +40,12 @@ export default function TrackLicensePage() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>('desc');
 
   const { toast } = useToast();
+  
+  // Hook para tempo real - OBRIGATÓRIO para atualizações de status e pedidos
+  const { isConnected } = useWebSocket();
+  
+  // Indicador visual de conexão em tempo real
+  console.log(`[TRACK LICENSES] Conexão WebSocket: ${isConnected ? 'ATIVA' : 'INATIVA'} - Tempo real ${isConnected ? 'HABILITADO' : 'DESABILITADO'}`);
   
   // Buscamos todas as licenças não finalizadas usando a rota /api/licenses
   // Rascunhos de renovação não devem aparecer aqui
@@ -56,24 +63,41 @@ export default function TrackLicensePage() {
       const data = await res.json();
       
       // Filtrar para remover quaisquer rascunhos de renovação que possam ter passado pelo filtro do backend
-      const filteredData = data.filter((license) => {
+      const filteredData = data.filter((license: any) => {
         // Exclui qualquer licença que seja rascunho E tenha 'Renovação' no campo comments
         return !(license.isDraft && license.comments?.includes('Renovação'));
       });
       
       return filteredData;
     },
-    // OTIMIZADO: Reduzir frequência de refetch para melhorar performance
-    staleTime: 2 * 60 * 1000, // 2 minutos  
-    refetchInterval: 5 * 60 * 1000, // Refetch a cada 5 minutos (reduzido)
-    refetchOnWindowFocus: false, // Desabilitado para evitar refetch desnecessário
+    // TEMPO REAL: Para status e pedidos aparecerem em tempo real
+    staleTime: 30 * 1000, // 30 segundos
+    refetchInterval: 45 * 1000, // Refetch a cada 45 segundos (balanceado)
+    refetchOnWindowFocus: true, // Reabilitado para tempo real
     refetchOnMount: true,
     retry: 1
   });
 
   // Usado para notificar o usuário sobre a disponibilidade de dados em cache
-  // Removido toast automático para evitar spam e melhorar performance
-  // Toast será exibido apenas quando necessário
+  // Notificação otimizada para novas licenças (apenas quando há mudanças significativas)
+  const [lastLicenseCount, setLastLicenseCount] = useState(0);
+  
+  useEffect(() => {
+    if (licenses && licenses.length > 0) {
+      // Só mostra toast se houve aumento significativo no número de licenças
+      if (licenses.length > lastLicenseCount && lastLicenseCount > 0) {
+        const newLicenses = licenses.length - lastLicenseCount;
+        if (newLicenses >= 1) {
+          toast({
+            title: "Novas licenças detectadas",
+            description: `${newLicenses} nova(s) licença(s) adicionada(s)`,
+            duration: 4000,
+          });
+        }
+      }
+      setLastLicenseCount(licenses.length);
+    }
+  }, [licenses, toast, lastLicenseCount]);
 
   // Otimizado usando useMemo para evitar recálculos desnecessários
   // Criar interface estendida para a licença com estado específico
@@ -349,7 +373,7 @@ export default function TrackLicensePage() {
         "Nº Solicitação": license.requestNumber || '',
         "Tipo de Veículo": translateVehicleType(license.type) || '',
         "Placa Principal": license.mainVehiclePlate || '',
-        "Transportador": license.transporter?.name || license.transporter?.tradeName || `ID: ${license.transporterId}`,
+        "Transportador": `ID: ${license.transporterId}`, // Simplificado para exportação
         "Estado": license.specificState || (license.states?.join(', ')) || '',
         "Status": translateStatus(license.specificStateStatus || license.status) || '',
         "Data de Solicitação": formatDateForCSV(license.createdAt),
@@ -380,7 +404,13 @@ export default function TrackLicensePage() {
       <div className="mb-6 flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Acompanhar Licença</h1>
-          <p className="text-gray-600 mt-1">Acompanhe o status de todas as suas licenças solicitadas</p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-gray-600">Acompanhe o status de todas as suas licenças solicitadas</p>
+            <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${isConnected ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-gray-400'}`}></div>
+              {isConnected ? 'Tempo Real Ativo' : 'Offline'}
+            </div>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button 

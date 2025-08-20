@@ -6,6 +6,7 @@ import { LicenseTable } from "@/components/dashboard/license-table";
 import { StatusChart } from "@/components/dashboard/status-chart";
 import { useDashboardStats } from "@/hooks/use-dashboard-stats";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useWebSocket } from "@/hooks/use-websocket";
 import { CheckCircle, Clock, Truck, AlertCircle, Search } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SkeletonCardGroup } from "@/components/ui/skeleton-card";
@@ -15,15 +16,26 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 export default function DashboardPage() {
   const { data: stats, isLoading, error } = useDashboardStats();
   const isMobile = useIsMobile();
+  
+  // Hook para tempo real
+  const { isConnected } = useWebSocket();
 
   return (
     <MainLayout>
       <PageTransition>
         {/* Header responsivo */}
         <div className={`${isMobile ? 'mb-4' : 'mb-6'} ${isMobile ? 'flex flex-col gap-3' : 'flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0'}`}>
-          <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-foreground`}>
-            Dashboard
-          </h1>
+          <div>
+            <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-foreground`}>
+              Dashboard
+            </h1>
+            <div className={`flex items-center gap-2 mt-1 ${isMobile ? 'text-xs' : 'text-sm'}`}>
+              <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${isMobile ? 'text-xs' : 'text-xs'} ${isConnected ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-gray-400'}`}></div>
+                {isConnected ? 'Tempo Real Ativo' : 'Offline'}
+              </div>
+            </div>
+          </div>
           
           {/* Barra de pesquisa responsiva */}
           <div className={`${isMobile ? 'w-full' : 'flex items-center w-full sm:w-auto'}`}>
