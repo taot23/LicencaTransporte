@@ -159,7 +159,7 @@ export default function AdminLicensesPage() {
   const [pageSize, setPageSize] = useState(25);
   
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { user } = useAuth();
   const { isConnected, lastMessage } = useWebSocketContext();
   
