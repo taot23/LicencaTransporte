@@ -41,7 +41,7 @@ export function useDashboardStats() {
   // TEMPO REAL INSTANTÂNEO: Dashboard atualiza cores imediatamente
   useEffect(() => {
     if (lastMessage?.type && (lastMessage.type === 'STATUS_UPDATE' || lastMessage.type === 'LICENSE_UPDATE')) {
-      console.log('📊 [TEMPO REAL INSTANTÂNEO] Atualizando dashboard:', lastMessage.type);
+      // Performance: Log removido
       
       // FORÇAR RESET E REFETCH IMEDIATO para cores mudarem instantaneamente
       queryClient.resetQueries({ queryKey: ["/api/dashboard/stats"] });

@@ -22,12 +22,10 @@ export default function VehicleSetTypesPage() {
     refetchOnMount: true,
     retry: 3,
     onError: (error) => {
-      console.error('[VEHICLE SET TYPES] Erro na query:', error);
+      // Performance: Log removido
     },
     onSuccess: (data) => {
-      console.log('[VEHICLE SET TYPES] Dados recebidos:', data?.length || 0, 'tipos');
-      console.log('[VEHICLE SET TYPES] Lista completa:', data?.map(t => t.name));
-      console.log('[VEHICLE SET TYPES] Tipos personalizados:', data?.filter(t => !['bitrain_6_axles', 'bitrain_7_axles', 'bitrain_9_axles', 'rodotrem_9_axles', 'romeu_e_julieta', 'prancha'].includes(t.id)).map(t => t.name));
+      // Performance: Logs removidos
     }
   });
 

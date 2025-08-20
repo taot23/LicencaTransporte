@@ -769,16 +769,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userRole = req.user!.role;
       const userEmail = req.user!.email;
       
-      console.log(`[DASHBOARD NEW] Usuário ${userId} (${userEmail}) role: ${userRole}`);
-      
       // Evitar cache
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       
       const isAdmin = userRole === 'admin' || userRole === 'supervisor' || userRole === 'manager' || userRole === 'financial';
       
       if (isAdmin) {
-        console.log(`[DASHBOARD NEW] ADMIN - Coletando dados globais`);
-        
         // Estatísticas globais para admin
         const allLicenses = await db.select().from(licenseRequests).where(eq(licenseRequests.isDraft, false));
         const allVehicles = await db.select().from(vehicles);
@@ -817,11 +813,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }))
         };
         
-        console.log(`[DASHBOARD NEW] ADMIN - Retornando:`, adminStats);
         res.json(adminStats);
         
       } else {
-        console.log(`[DASHBOARD NEW] TRANSPORTADOR - Coletando dados específicos do usuário ${userId}`);
+        // Performance: Log removido
         
         // Buscar transportadores associados ao usuário
         const userTransporters = await db.select()
@@ -829,7 +824,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(eq(transporters.userId, userId));
         
         const transporterIds = userTransporters.map(t => t.id);
-        console.log(`[DASHBOARD NEW] TRANSPORTADOR - IDs dos transportadores: ${transporterIds.join(', ')}`);
+        // Performance: Log removido
         
         // Buscar apenas veículos do usuário específico
         const userVehicles = await db.select()
@@ -838,7 +833,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const userActiveVehicles = userVehicles.filter(v => v.status === 'active');
         
-        console.log(`[DASHBOARD NEW] TRANSPORTADOR - Veículos: ${userVehicles.length} total, ${userActiveVehicles.length} ativos`);
+        // Performance: Log removido
         
         // Buscar licenças do usuário e transportadores associados
         let userLicenses = [];
@@ -861,7 +856,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ));
         }
         
-        console.log(`[DASHBOARD NEW] TRANSPORTADOR - Licenças encontradas: ${userLicenses.length}`);
+        // Performance: Log removido
         
         // APLICAR EXATAMENTE A MESMA FUNÇÃO expandedLicenses da página "Licenças Emitidas"
         const expandedLicenses: any[] = [];
@@ -1052,8 +1047,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user!;
       const { search = '', limit = '20' } = req.query;
       
-      console.log(`[TRANSPORTER SEARCH] Usuário ${user.email} buscando transportadores com termo: "${search}"`);
-      
       let transporters = [];
       const maxLimit = Math.min(parseInt(limit as string), 50); // Otimizado: máximo 50 para melhor performance
       
@@ -1092,7 +1085,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         transporters = userTransporters.slice(0, maxLimit);
       }
       
-      console.log(`[TRANSPORTER SEARCH] Encontrados ${transporters.length} transportadores para usuário ${user.role}`);
+      // Performance: Log removido
       
       res.json({
         transporters,
@@ -1254,30 +1247,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = req.user!;
       let vehicles;
       
-      console.log(`[DEBUG VEHICLES] Usuário ${user.email} (ID: ${user.id}, role: ${user.role}) buscando veículos`);
-      
       // Se for usuário com papel administrativo, buscar todos os veículos
       if (isAdminUser(user)) {
-        console.log(`[DEBUG VEHICLES] Usuário admin - buscando todos os veículos`);
         vehicles = await storage.getAllVehicles();
-        console.log(`[DEBUG VEHICLES] Admin encontrou ${vehicles.length} veículos no total`);
       } else {
-        console.log(`[DEBUG VEHICLES] Usuário comum - buscando veículos do usuário ${user.id}`);
-        
         // Buscar transportadores vinculados ao usuário
         const allTransporters = await storage.getAllTransporters();
         const userTransporters = allTransporters.filter(t => t.userId === user.id);
         
         if (userTransporters.length > 0) {
-          console.log(`[DEBUG VEHICLES] Usuário tem ${userTransporters.length} transportadores vinculados`);
           // Se tem transportadores vinculados, buscar veículos associados a esses transportadores
           vehicles = await storage.getVehiclesByUserId(user.id);
         } else {
-          console.log(`[DEBUG VEHICLES] Usuário não tem transportadores vinculados, buscando apenas veículos próprios`);
           vehicles = await storage.getVehiclesByUserId(user.id);
         }
-        
-        console.log(`[DEBUG VEHICLES] Usuário comum encontrou ${vehicles.length} veículos`);
       }
 
       // Enriquecer veículos com dados do transportador para exportações CSV
@@ -1313,8 +1296,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const axleFilter = req.query.axles ? parseInt(req.query.axles as string) : null; // NOVO: Filtro de eixos
       const offset = (page - 1) * limit;
       
-      console.log(`[VEHICLE SEARCH PAGINATED] Usuário ${user.email} - busca: "${search}", página: ${page}, tipo: ${vehicleType || 'todos'}, eixos: ${axleFilter || 'todos'}`);
-      
       let allVehicles;
       
       // Determinar quais veículos o usuário pode acessar
@@ -1348,7 +1329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         filteredVehicles = filteredVehicles.filter(vehicle => 
           vehicle.axleCount === axleFilter
         );
-        console.log(`[VEHICLE SEARCH PAGINATED] Filtro de eixos ${axleFilter}: ${originalCount} → ${filteredVehicles.length} veículos`);
+        // Performance: Log de filtro removido
       }
       
       // Ordenar por placa
@@ -1358,7 +1339,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const paginatedVehicles = filteredVehicles.slice(offset, offset + limit);
       const hasMore = offset + limit < total;
       
-      console.log(`[VEHICLE SEARCH PAGINATED] Encontrados ${total} veículos, retornando ${paginatedVehicles.length} (página ${page})`);
+      // Performance: Log removido
       
       res.json({
         vehicles: paginatedVehicles,
@@ -1870,13 +1851,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return !(draft.comments && draft.comments.includes('Renovação'));
           });
       
-      console.log(`Total de rascunhos: ${allDrafts.length}, filtrados: ${drafts.length}, incluindo renovação: ${shouldIncludeRenewalDrafts}`);
-      
-      // Log detalhado dos rascunhos
-      console.log(`[DEBUG DETALHES] Retornando ${drafts.length} licenças com os seguintes IDs:`);
-      drafts.forEach(d => {
-        console.log(`- ID: ${d.id}, isDraft: ${d.isDraft}, status: ${d.status}, transporterId: ${d.transporterId}, cargoType: ${d.cargoType}, comments: ${d.comments?.substring(0, 30)}`);
-      });
+      // Performance: Logs de debug removidos
       
       res.json(drafts);
     } catch (error) {
@@ -2068,8 +2043,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/licenses/drafts/:id/submit', requireAuth, async (req, res) => {
     try {
-      console.log('=== ENDPOINT DRAFTS SUBMIT ===');
-      console.log('Body recebido:', JSON.stringify(req.body, null, 2));
+      // Performance: Logs de debug removidos
       
       const user = req.user!;
       const draftId = parseInt(req.params.id);
@@ -2089,16 +2063,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isStaff = isAdminUser(user) || user.role === 'operational' || user.role === 'supervisor';
       
       if (!isStaff && existingDraft.userId !== user.id) {
-        console.log(`Usuário ${user.id} (${user.role}) tentou submeter rascunho ${draftId} do usuário ${existingDraft.userId}`);
         return res.status(403).json({ message: 'Acesso negado' });
       }
       
-      console.log(`Usuário ${user.id} (${user.role}) autorizado a submeter rascunho ${draftId}`);
-      
       // CORREÇÃO CRÍTICA: Usar os estados do req.body se disponíveis
       const bodyData = req.body || {};
-      console.log('Estados do req.body:', bodyData.states);
-      console.log('Estados do rascunho existente:', existingDraft.states);
       
       // Mesclar dados do rascunho com dados do body
       const draftData = { 
@@ -2107,17 +2076,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         states: bodyData.states || existingDraft.states // USAR ESTADOS DO FRONTEND
       };
       
-      console.log('Estados finais após merge:', draftData.states);
-      
       if (draftData.type === "flatbed") {
         // Para prancha: verifica requisitos específicos
-        console.log("Rascunho para submissão: É prancha");
         if (!draftData.width) draftData.width = 260; // 2.60m padrão
         if (!draftData.height) draftData.height = 440; // 4.40m padrão
         if (!draftData.cargoType) draftData.cargoType = "indivisible_cargo"; // Carga indivisível padrão
       } else if (draftData.type) {
         // Para não-prancha: verifica requisitos gerais
-        console.log("Rascunho para submissão: Não é prancha");
         if (!draftData.width) draftData.width = 260; // 2.60m padrão
         if (!draftData.height) draftData.height = 440; // 4.40m padrão
         if (!draftData.cargoType) draftData.cargoType = "dry_cargo"; // Carga seca padrão
@@ -2204,7 +2169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (conditions.length === 0) {
-        console.log(`[VALIDAÇÃO ESTADO] Nenhuma placa fornecida para validação`);
+        // Performance: Log removido
         return res.json(null);
       }
       
@@ -2229,8 +2194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         LIMIT 1
       `;
       
-      console.log(`[VALIDAÇÃO ESTADO] Query:`, query);
-      console.log(`[VALIDAÇÃO ESTADO] Params:`, params);
+      // Performance: Logs removidos
       
       const result = await pool.query(query, params);
       
@@ -2240,7 +2204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const validUntil = new Date(licenca.data_validade);
         const diasRestantes = Math.ceil((validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
         
-        console.log(`[VALIDAÇÃO ESTADO] Licença encontrada: ${licenca.numero_licenca}, ${diasRestantes} dias restantes`);
+        // Performance: Log removido
         
         return res.json({
           numero_licenca: licenca.numero_licenca,
@@ -2257,7 +2221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         });
       } else {
-        console.log(`[VALIDAÇÃO ESTADO] Nenhuma licença vigente encontrada para ${estado}`);
+        // Performance: Log removido
         return res.json(null);
       }
       
@@ -2468,24 +2432,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint para enviar um pedido de licença (usado no formulário frontened)
   app.post('/api/licenses/submit', requireAuth, async (req, res) => {
     try {
-      console.log('=== INÍCIO DO PROCESSAMENTO DE LICENÇA ===');
-      console.log('Received submit request with data:', JSON.stringify(req.body, null, 2));
-      
       const user = req.user!;
       const userId = user.id;
       let licenseData = { ...req.body };
-      
-      console.log('=== VERIFICAÇÃO DOS ESTADOS ===');
-      console.log('Estados no req.body:', req.body.states);
-      console.log('Estados no licenseData:', licenseData.states);
-      console.log('Tipo dos estados:', typeof licenseData.states);
-      console.log('É array?', Array.isArray(licenseData.states));
-      
-      console.log("Tipo de licença:", licenseData.type);
-      console.log("Tipo de carga:", licenseData.cargoType);
-      console.log("Comprimento:", licenseData.length);
-      console.log("Largura:", licenseData.width);
-      console.log("Altura:", licenseData.height);
       
       // Se é um rascunho existente, redireciona para a rota correspondente
       if (licenseData.id) {
@@ -2530,8 +2479,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Garantir que os estados estão corretos - priorizar o campo states do frontend
-      console.log("Estados recebidos - states:", licenseData.states);
-      console.log("Estados recebidos - requestedStates:", licenseData.requestedStates);
+      // Performance: Log removido
       
       if (!licenseData.states || !Array.isArray(licenseData.states)) {
         licenseData.states = licenseData.requestedStates || [];
@@ -2660,7 +2608,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Criar registros individuais para cada estado na nova tabela state_licenses
-      console.log(`[NOVA ABORDAGEM] Criando registros individuais para estados: ${sanitizedData.states.join(', ')}`);
       
       try {
         for (const state of sanitizedData.states) {
@@ -2791,7 +2738,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ENDPOINT DE VALIDAÇÃO CRÍTICA PARA TODOS OS ESTADOS BRASILEIROS - PRODUÇÃO
   app.post('/api/validacao-critica', requireAuth, async (req, res) => {
     try {
-      console.log('[VALIDAÇÃO CRÍTICA PRODUÇÃO] Requisição recebida:', req.body);
+      // Performance: Log de validação removido
       
       const { estado, placas } = req.body;
       
@@ -2805,7 +2752,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Validação robusta de entrada
       if (!estado || !estadosValidos.includes(estado.toUpperCase())) {
-        console.log('[VALIDAÇÃO CRÍTICA] Estado inválido:', estado);
+        // Performance: Log removido
         return res.status(400).json({ 
           bloqueado: false, 
           error: 'Estado inválido ou não suportado',
@@ -2814,7 +2761,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (!placas || !Array.isArray(placas) || placas.length === 0) {
-        console.log('[VALIDAÇÃO CRÍTICA] Placas inválidas:', placas);
+        // Performance: Log removido
         return res.status(400).json({ 
           bloqueado: false, 
           error: 'Lista de placas é obrigatória e deve conter ao menos uma placa',
@@ -2831,11 +2778,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .filter(placa => placa.length >= 6); // Placas brasileiras têm pelo menos 6 caracteres
 
       if (placasNormalizadas.length === 0) {
-        console.log('[VALIDAÇÃO CRÍTICA] Nenhuma placa válida após normalização');
+        // Performance: Log removido
         return res.json({ bloqueado: false });
       }
 
-      console.log(`[VALIDAÇÃO CRÍTICA] Estado: ${estadoNormalizado}, Placas: ${placasNormalizadas.join(', ')}`);
+      // Performance: Log removido
 
       // Query SQL otimizada com múltiplos campos de placas e validação robusta
       const query = `

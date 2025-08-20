@@ -28,12 +28,9 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/ws`;
     
-    console.log('Conectando ao WebSocket em', wsUrl);
-    
     const ws = new WebSocket(wsUrl);
     
     ws.onopen = () => {
-      console.log('WebSocket conectado');
       setIsConnected(true);
       setSocket(ws);
     };
@@ -41,13 +38,10 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
     ws.onmessage = (event) => {
       try {
         const message: WebSocketMessage = JSON.parse(event.data);
-        console.log('Mensagem recebida:', message);
         setLastMessage(message);
         
         // TEMPO REAL INSTANTÂNEO: Processar atualizações imediatamente
         if (message.type === 'STATUS_UPDATE' || message.type === 'LICENSE_UPDATE') {
-          console.log('🔄 [TEMPO REAL INSTANTÂNEO] Processando:', message.type, message.data);
-          
           // FORÇAR ATUALIZAÇÃO IMEDIATA - staleTime = 0 temporariamente
           queryClient.resetQueries({ queryKey: ['/api/licenses'] });
           queryClient.resetQueries({ queryKey: ['/api/admin/licenses'] });
@@ -58,9 +52,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
             queryClient.refetchQueries({ queryKey: ['/api/licenses'], type: 'active' }),
             queryClient.refetchQueries({ queryKey: ['/api/admin/licenses'], type: 'active' }),
             queryClient.refetchQueries({ queryKey: ['/api/dashboard/stats'], type: 'active' })
-          ]).then(() => {
-            console.log('✅ [TEMPO REAL] Todas as queries atualizadas instantaneamente');
-          });
+          ]);
           
           // Forçar re-render dos componentes com timestamp único
           setLastMessage({ ...message, timestamp: new Date().toISOString() });
@@ -71,7 +63,6 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
     };
     
     ws.onclose = () => {
-      console.log('WebSocket desconectado');
       setIsConnected(false);
       setSocket(null);
       

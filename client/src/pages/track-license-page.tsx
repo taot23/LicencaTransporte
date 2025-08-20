@@ -45,7 +45,7 @@ export default function TrackLicensePage() {
   const { isConnected } = useWebSocketContext();
   
   // Indicador visual de conexão em tempo real
-  console.log(`[TRACK LICENSES] Conexão WebSocket: ${isConnected ? 'ATIVA' : 'INATIVA'} - Tempo real ${isConnected ? 'HABILITADO' : 'DESABILITADO'}`);
+  // Performance: Log removido
   
   // Buscamos todas as licenças não finalizadas usando a rota /api/licenses
   // Rascunhos de renovação não devem aparecer aqui
