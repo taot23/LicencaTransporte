@@ -459,11 +459,11 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
     // Converter para número se for string
     const numericValue = typeof value === 'string' ? parseFloat(value) : value;
     
-    if (isNaN(numericValue)) {
+    if (isNaN(numericValue) || numericValue <= 0) {
       return '-';
     }
     
-    // CORREÇÃO: Os dados vêm em centímetros do banco, converter para metros
+    // CORREÇÃO: Todos os valores agora vêm em centímetros do banco, converter para metros
     const metersValue = numericValue / 100;
     return metersValue.toFixed(2);
   };
