@@ -142,26 +142,46 @@ const updateStateStatusSchema = z.object({
 // Constantes e funções auxiliares para status
 
 export default function AdminLicensesPage() {
-  const { toast } = useToast();
-  const { user } = useAuth();
+  const [selectedLicense, setSelectedLicense] = useState<LicenseRequest | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [transporterFilter, setTransporterFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState("");
+  const [transporterFilter, setTransporterFilter] = useState("");
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showStateCnpjSelector, setShowStateCnpjSelector] = useState(false);
+  const [selectedState, setSelectedState] = useState("");
+  const [includeRenewalDrafts, setIncludeRenewalDrafts] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState({
+    id: true,
+    requestNumber: true,
+    plate: true,
+    transporter: true,
+    type: true,
+    states: true,
+    status: true,
+    createdAt: true
+  });
+  
+  // PAGINAÇÃO PARA 50K+ REGISTROS  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  const { user } = useAuth();
+  const { isConnected, lastMessage } = useWebSocketContext();
+  
+  // Estados para controle de filtros e busca
   const [transporterSearchTerm, setTransporterSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
-  const [stateFilter, setStateFilter] = useState("all_states");
-  const [selectedLicense, setSelectedLicense] = useState<LicenseRequest | null>(null);
   const [licenseDetailsOpen, setLicenseDetailsOpen] = useState(false);
   const [stateStatusDialogOpen, setStateStatusDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedState, setSelectedState] = useState("");
-  const [location] = useLocation();
   const [visibleStateFlows, setVisibleStateFlows] = useState<string[]>([]);
   
   // Estado para ordenação
   const [sortField, setSortField] = useState<string>("createdAt");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const { lastMessage, isConnected } = useWebSocketContext();
   
   // Estados para controle do botão de atualização
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -324,12 +344,36 @@ export default function AdminLicensesPage() {
   });
 
   // Buscar todas as licenças (excluindo rascunhos de renovação)
-  const { data: licenses = [], isLoading, refetch } = useQuery<LicenseRequest[]>({
-    queryKey: [apiEndpoint, "excludeRenewal"],
+  // QUERY OTIMIZADA PARA 50K+ REGISTROS - COM PAGINAÇÃO NO SERVIDOR
+  const { data: response = { data: [], pagination: {} }, isLoading, refetch } = useQuery({
+    queryKey: [apiEndpoint, {
+      page: currentPage,
+      limit: pageSize,
+      search: searchTerm,
+      status: statusFilter === "all" ? undefined : statusFilter,
+      state: stateFilter === "all_states" ? undefined : stateFilter,
+      transporter: transporterFilter === "all" ? undefined : transporterFilter,
+      includeRenewal: false
+    }],
     queryFn: async () => {
-      const res = await fetch(`${apiEndpoint}?includeRenewal=false`, {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: pageSize.toString(),
+        includeRenewal: 'false'
+      });
+      
+      if (searchTerm?.trim()) params.set('search', searchTerm.trim());
+      if (statusFilter !== "all") params.set('status', statusFilter);
+      if (stateFilter !== "all_states") params.set('state', stateFilter);
+      if (transporterFilter !== "all") params.set('transporter', transporterFilter);
+      
+      console.log(`🚀 [FRONTEND] Buscando licenças: página ${currentPage}, tamanho ${pageSize}`);
+      const startTime = Date.now();
+      
+      const res = await fetch(`${apiEndpoint}?${params.toString()}`, {
         credentials: "include"
       });
+      
       if (!res.ok) {
         if (res.status === 401) {
           throw new Error("Não autorizado");
@@ -338,19 +382,21 @@ export default function AdminLicensesPage() {
       }
       
       const data = await res.json();
+      const endTime = Date.now();
       
-      // Filtro adicional no cliente para garantir que não vamos mostrar
-      // rascunhos de renovação na página de gerenciamento
-      return data.filter((license: LicenseRequest) => {
-        return !(license.isDraft && license.comments?.includes('Renovação'));
-      });
+      console.log(`⚡ [FRONTEND] Licenças carregadas em ${endTime - startTime}ms - ${data.data?.length || 0} registros`);
+      
+      return data;
     },
-    // TEMPO REAL: Configurações para atualizações automáticas
-    staleTime: 30 * 1000, // 30 segundos
-    refetchInterval: 60 * 1000, // Refetch a cada 60 segundos
+    // TEMPO REAL OTIMIZADO
+    staleTime: 1000, // 1 segundo para tempo real instantâneo
+    refetchInterval: 15000, // Refetch a cada 15 segundos
     refetchOnWindowFocus: true,
     refetchOnMount: true,
   });
+  
+  const licenses = response.data || [];
+  const pagination = response.pagination || {};
 
   // Buscar todos os transportadores para o filtro
   const { data: transporters = [] } = useQuery<Transporter[]>({
@@ -627,12 +673,13 @@ export default function AdminLicensesPage() {
     });
 
   // Hook de paginação das licenças filtradas
-  const { 
-    paginatedItems: paginatedLicenses, 
-    pagination, 
-    currentPage, 
-    setCurrentPage 
-  } = usePaginatedList({ items: filteredLicenses });
+  // FILTROS JÁ APLICADOS NO SERVIDOR - DADOS PRONTOS PARA USO
+  const paginatedLicenses = licenses;
+  
+  // Reset para primeira página quando filtros mudam
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, stateFilter, transporterFilter]);
 
   // Função removida pois o status agora só será editado por estado individual
 
@@ -1384,25 +1431,73 @@ export default function AdminLicensesPage() {
                 </>
               )}
 
-              {/* Controles de paginação - Versão desktop */}
-              {filteredLicenses.length > 0 && !isLoading && (
-                <div className="hidden md:block mt-6">
-                  <ListPagination 
-                    currentPage={currentPage}
-                    totalPages={pagination.totalPages}
-                    totalItems={filteredLicenses.length}
-                    itemsPerPage={10}
-                    hasPrev={currentPage > 1}
-                    hasNext={currentPage < pagination.totalPages}
-                    startItem={(currentPage - 1) * 10 + 1}
-                    endItem={Math.min(currentPage * 10, filteredLicenses.length)}
-                    onPageChange={setCurrentPage}
-                  />
-                </div>
-              )}
-
+              {/* PAGINAÇÃO OTIMIZADA PARA 50K+ REGISTROS */}
+              {pagination && pagination.total > 0 && (
+                  <div className="mt-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                    <div className="text-sm text-muted-foreground">
+                      Mostrando {((pagination.page - 1) * pagination.limit) + 1} a {Math.min(pagination.page * pagination.limit, pagination.total)} de {pagination.total} licenças
+                      {response.performance && (
+                        <span className="ml-2 text-green-600 font-mono">
+                          {response.performance.executionTime}ms
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <select 
+                        value={pageSize} 
+                        onChange={(e) => setPageSize(parseInt(e.target.value))}
+                        className="border rounded px-2 py-1 text-sm"
+                      >
+                        <option value={10}>10 por página</option>
+                        <option value={25}>25 por página</option>
+                        <option value={50}>50 por página</option>
+                        <option value={100}>100 por página</option>
+                      </select>
+                      
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(1)}
+                          disabled={!pagination.hasPrev}
+                        >
+                          ««
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(currentPage - 1)}
+                          disabled={!pagination.hasPrev}
+                        >
+                          ‹
+                        </Button>
+                        <span className="text-sm px-3">
+                          {currentPage} de {pagination.totalPages}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(currentPage + 1)}
+                          disabled={!pagination.hasNext}
+                        >
+                          ›
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(pagination.totalPages)}
+                          disabled={!pagination.hasNext}
+                        >
+                          »»
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              
               {/* Controles de paginação - Versão mobile */}
-              {filteredLicenses.length > 0 && !isLoading && (
+              {pagination && pagination.total > 0 && (
                 <div className="block md:hidden mt-6">
                   <MobileListPagination
                     currentPage={currentPage}

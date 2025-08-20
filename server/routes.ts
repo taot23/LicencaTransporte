@@ -4278,54 +4278,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Rota para admin/operational obter todas as licenças
   app.get('/api/admin/licenses', requireAuth, requirePermission('manageLicenses', 'view'), async (req, res) => {
     try {
-      // Obter todas as licenças
-      const allLicenses = await storage.getAllLicenseRequests();
+      console.log('🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...');
+      const startTime = Date.now();
       
-      // Verificar se deve incluir rascunhos de renovação (por padrão não inclui)
+      // PAGINAÇÃO OTIMIZADA PARA 50K+ REGISTROS
+      const page = Math.max(1, parseInt(req.query.page as string) || 1);
+      const limit = Math.min(100, parseInt(req.query.limit as string) || 25); // Máx 100 por página
+      const offset = (page - 1) * limit;
+      
+      // FILTROS OTIMIZADOS
+      const searchTerm = (req.query.search as string)?.trim();
+      const statusFilter = req.query.status as string;
+      const stateFilter = req.query.state as string;
+      const transporterFilter = req.query.transporter as string;
       const shouldIncludeRenewalDrafts = req.query.includeRenewal === 'true';
       
-      // Filtrar rascunhos de renovação, a menos que solicitado explicitamente para incluí-los
-      const licenses = shouldIncludeRenewalDrafts 
-        ? allLicenses 
-        : allLicenses.filter(license => {
-            // Se é um rascunho e o comentário menciona "Renovação", é um rascunho de renovação
-            if (license.isDraft && license.comments && license.comments.includes('Renovação')) {
-              return false; // excluir rascunhos de renovação
-            }
-            return true; // manter todos os outros
-          });
+      console.log(`📊 [ADMIN LICENSES] Parâmetros: page=${page}, limit=${limit}, search="${searchTerm}", status="${statusFilter}"`);
       
-      // Log para diagnóstico
-      if (licenses.length > 0) {
-        // Get direct database row of last license for comparison
-        const lastLicenseId = licenses[licenses.length - 1].id;
-        const dbResult = await db.select().from(licenseRequests).where(eq(licenseRequests.id, lastLicenseId));
-        
-        console.log("Licença exemplo recuperada:", JSON.stringify(licenses[licenses.length - 1], null, 2));
-        console.log("Mesma licença diretamente do banco de dados:", JSON.stringify(dbResult[0], null, 2));
+      // QUERY OTIMIZADA COM ÍNDICES - BUSCA APENAS DADOS NECESSÁRIOS
+      let query = db.select({
+        id: licenseRequests.id,
+        userId: licenseRequests.userId,
+        transporterId: licenseRequests.transporterId,
+        requestNumber: licenseRequests.requestNumber,
+        type: licenseRequests.type,
+        mainVehiclePlate: licenseRequests.mainVehiclePlate,
+        states: licenseRequests.states,
+        status: licenseRequests.status,
+        stateStatuses: licenseRequests.stateStatuses,
+        createdAt: licenseRequests.createdAt,
+        updatedAt: licenseRequests.updatedAt,
+        isDraft: licenseRequests.isDraft,
+        comments: licenseRequests.comments,
+        validUntil: licenseRequests.validUntil,
+        issuedAt: licenseRequests.issuedAt,
+        aetNumber: licenseRequests.aetNumber
+      }).from(licenseRequests);
+      
+      // APLICAR FILTROS NO BANCO PARA PERFORMANCE
+      const conditions = [];
+      
+      // Filtro de rascunhos de renovação
+      if (!shouldIncludeRenewalDrafts) {
+        conditions.push(
+          or(
+            eq(licenseRequests.isDraft, false),
+            and(
+              eq(licenseRequests.isDraft, true),
+              or(
+                isNull(licenseRequests.comments),
+                not(ilike(licenseRequests.comments, '%Renovação%'))
+              )
+            )
+          )
+        );
       }
       
-      // Enriquecer licenças com dados do transportador para exportações CSV
-      const allTransporters = await storage.getAllTransporters();
-      const licensesWithTransporter = licenses.map(license => {
-        const transporter = allTransporters.find(t => t.id === license.transporterId);
-        return {
-          ...license,
-          transporter: transporter ? {
-            id: transporter.id,
-            name: transporter.name,
-            tradeName: transporter.tradeName,
-            documentNumber: transporter.documentNumber
-          } : null
-        };
-      });
-
-      console.log(`Total de licenças admin: ${allLicenses.length}, filtradas: ${licensesWithTransporter.length}, incluindo renovação: ${shouldIncludeRenewalDrafts}`);
+      // Filtro de busca por placa ou número de pedido
+      if (searchTerm) {
+        conditions.push(
+          or(
+            ilike(licenseRequests.mainVehiclePlate, `%${searchTerm}%`),
+            ilike(licenseRequests.requestNumber, `%${searchTerm}%`)
+          )
+        );
+      }
       
-      res.json(licensesWithTransporter);
+      // Filtro de status
+      if (statusFilter && statusFilter !== 'all') {
+        conditions.push(eq(licenseRequests.status, statusFilter));
+      }
+      
+      // APLICAR TODAS AS CONDIÇÕES
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+      
+      // BUSCAR CONTAGEM TOTAL (OTIMIZADA)
+      const countQuery = db.select({ count: count() }).from(licenseRequests);
+      if (conditions.length > 0) {
+        countQuery.where(and(...conditions));
+      }
+      
+      // EXECUTAR QUERIES EM PARALELO PARA PERFORMANCE
+      const [licenses, totalResult] = await Promise.all([
+        query.orderBy(desc(licenseRequests.createdAt)).limit(limit).offset(offset),
+        countQuery
+      ]);
+      
+      const total = totalResult[0].count;
+      const totalPages = Math.ceil(total / limit);
+      
+      console.log(`⚡ [ADMIN LICENSES] Query executada em ${Date.now() - startTime}ms - ${licenses.length}/${total} registros`);
+      
+      // BUSCAR TRANSPORTADORES APENAS DOS REGISTROS ATUAIS (OTIMIZADO)
+      const transporterIds = [...new Set(licenses.map(l => l.transporterId).filter(Boolean))];
+      const transportersMap = new Map();
+      
+      if (transporterIds.length > 0) {
+        const transportersData = await db.select({
+          id: transporters.id,
+          name: transporters.name,
+          tradeName: transporters.tradeName,
+          documentNumber: transporters.documentNumber
+        }).from(transporters).where(inArray(transporters.id, transporterIds));
+        
+        transportersData.forEach(t => {
+          transportersMap.set(t.id, t);
+        });
+      }
+      
+      // ENRIQUECER APENAS OS DADOS ATUAIS
+      const licensesWithTransporter = licenses.map(license => ({
+        ...license,
+        transporter: transportersMap.get(license.transporterId) || null
+      }));
+      
+      const endTime = Date.now();
+      console.log(`✅ [ADMIN LICENSES] Resposta preparada em ${endTime - startTime}ms - Performance otimizada para grande escala`);
+      
+      res.json({
+        data: licensesWithTransporter,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1
+        },
+        performance: {
+          executionTime: endTime - startTime,
+          recordsPerSecond: Math.round((licenses.length / (endTime - startTime)) * 1000)
+        }
+      });
     } catch (error) {
-      console.error('Error fetching all license requests:', error);
-      res.status(500).json({ message: 'Erro ao buscar todas as solicitações de licenças' });
+      console.error('Error fetching admin licenses (optimized):', error);
+      res.status(500).json({ message: 'Erro ao buscar licenças administrativas' });
     }
   });
   
