@@ -315,11 +315,16 @@ export default function BulkLicenseImport() {
                       Avisos ({importResult.warnings?.length || 0})
                     </h4>
                     <ScrollArea className="h-24 w-full border rounded p-2 bg-yellow-50">
-                      {(importResult.warnings || []).map((warning, index) => (
+                      {(importResult.warnings || []).slice(0, 50).map((warning, index) => (
                         <div key={index} className="text-sm text-yellow-700 mb-1">
                           {warning}
                         </div>
                       ))}
+                      {(importResult.warnings?.length || 0) > 50 && (
+                        <div className="text-sm text-yellow-600 mt-2 font-semibold">
+                          ... e mais {(importResult.warnings?.length || 0) - 50} avisos
+                        </div>
+                      )}
                     </ScrollArea>
                   </div>
                 )}
@@ -331,11 +336,16 @@ export default function BulkLicenseImport() {
                       Erros ({importResult.errors?.length || 0})
                     </h4>
                     <ScrollArea className="h-32 w-full border rounded p-2 bg-red-50">
-                      {(importResult.errors || []).map((error, index) => (
+                      {(importResult.errors || []).slice(0, 50).map((error, index) => (
                         <div key={index} className="text-sm text-red-700 mb-1">
                           {error}
                         </div>
                       ))}
+                      {(importResult.errors?.length || 0) > 50 && (
+                        <div className="text-sm text-red-600 mt-2 font-semibold">
+                          ... e mais {(importResult.errors?.length || 0) - 50} erros
+                        </div>
+                      )}
                     </ScrollArea>
                   </div>
                 )}
