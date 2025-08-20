@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { MainLayout } from "@/components/layout/main-layout";
 import { VehicleList } from "@/components/vehicles/vehicle-list";
 import { VehicleForm } from "@/components/vehicles/vehicle-form";
@@ -81,13 +81,16 @@ export default function VehiclesPage() {
     }
   };
 
-  const filteredVehicles = vehicles?.filter(vehicle => {
-    const matchesSearch = !searchTerm || 
-      vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = !typeFilter || typeFilter === "all_types" || vehicle.type === typeFilter;
-    const matchesStatus = !statusFilter || statusFilter === "all_status" || vehicle.status === statusFilter;
-    return matchesSearch && matchesType && matchesStatus;
-  });
+  const filteredVehicles = useMemo(() => {
+    if (!vehicles) return [];
+    return vehicles.filter(vehicle => {
+      const matchesSearch = !searchTerm || 
+        vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesType = !typeFilter || typeFilter === "all_types" || vehicle.type === typeFilter;
+      const matchesStatus = !statusFilter || statusFilter === "all_status" || vehicle.status === statusFilter;
+      return matchesSearch && matchesType && matchesStatus;
+    });
+  }, [vehicles, searchTerm, typeFilter, statusFilter]);
 
   const handleAddVehicle = () => {
     setCurrentVehicle(null);
@@ -173,7 +176,7 @@ export default function VehiclesPage() {
         Status: vehicle.status === "active" ? "Ativo" : 
                 vehicle.status === "inactive" ? "Inativo" : 
                 vehicle.status === "maintenance" ? "Manutenção" : vehicle.status,
-        Transportador: vehicle.transporter?.name || vehicle.transporter?.tradeName || "-"
+        Transportador: "-" // Campo removido da exportação
       }));
 
       exportToCSV({

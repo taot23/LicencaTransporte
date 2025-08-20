@@ -89,8 +89,8 @@ export function PaginatedVehicleSelector({
       return data;
     },
     enabled: isOpen,
-    staleTime: 2 * 60 * 1000, // 2 minutos
-    gcTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 5 * 60 * 1000, // 5 minutos (otimizado)
+    gcTime: 10 * 60 * 1000, // 10 minutos (otimizado)
   });
 
   // Buscar veículo selecionado por ID
@@ -120,7 +120,11 @@ export function PaginatedVehicleSelector({
     if (currentPage === 1) {
       setAllVehicles(vehicleData.vehicles);
     } else {
-      setAllVehicles(prev => [...prev, ...vehicleData.vehicles]);
+      setAllVehicles(prev => {
+        // Otimização: Limitar o número total de veículos em memória para evitar problemas de performance
+        const newVehicles = [...prev, ...vehicleData.vehicles];
+        return newVehicles.length > 1000 ? newVehicles.slice(-1000) : newVehicles;
+      });
     }
   }, [vehicleData?.vehicles, currentPage]);
 

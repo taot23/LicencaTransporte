@@ -63,24 +63,17 @@ export default function TrackLicensePage() {
       
       return filteredData;
     },
-    // TEMPO REAL: Reduzir stale time e habilitar refetch automático
-    staleTime: 30 * 1000, // 30 segundos
-    refetchInterval: 60 * 1000, // Refetch a cada 60 segundos
-    refetchOnWindowFocus: true,
+    // OTIMIZADO: Reduzir frequência de refetch para melhorar performance
+    staleTime: 2 * 60 * 1000, // 2 minutos  
+    refetchInterval: 5 * 60 * 1000, // Refetch a cada 5 minutos (reduzido)
+    refetchOnWindowFocus: false, // Desabilitado para evitar refetch desnecessário
     refetchOnMount: true,
     retry: 1
   });
 
   // Usado para notificar o usuário sobre a disponibilidade de dados em cache
-  useEffect(() => {
-    if (licenses && licenses.length > 0) {
-      toast({
-        title: "Licenças carregadas",
-        description: `${licenses.length} licenças disponíveis para consulta.`,
-        duration: 3000,
-      });
-    }
-  }, [licenses, toast]);
+  // Removido toast automático para evitar spam e melhorar performance
+  // Toast será exibido apenas quando necessário
 
   // Otimizado usando useMemo para evitar recálculos desnecessários
   // Criar interface estendida para a licença com estado específico
@@ -180,36 +173,47 @@ export default function TrackLicensePage() {
   
   // Aplicar filtros à lista expandida
   const filteredLicenses = useMemo(() => {
+    // Otimização: Evitar processamento se não há dados
+    if (!expandedLicenses || expandedLicenses.length === 0) return [];
+    
+    // Otimização: Preparar valores de busca uma vez só
+    const lowerSearchTerm = searchTerm?.toLowerCase();
+    
     return expandedLicenses.filter(license => {
-      const matchesSearch = !searchTerm || 
-        license.requestNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        license.mainVehiclePlate.toLowerCase().includes(searchTerm.toLowerCase());
+      // Otimização: Busca otimizada com early return
+      if (lowerSearchTerm && 
+          !license.requestNumber.toLowerCase().includes(lowerSearchTerm) &&
+          !license.mainVehiclePlate.toLowerCase().includes(lowerSearchTerm)) {
+        return false;
+      }
       
       // Filtragem específica por status (geral ou estado específico)
-      let matchesStatus = !statusFilter || statusFilter === "all_status";
-      
       if (statusFilter && statusFilter !== "all_status") {
         // Para o status "Pedido em Cadastramento", verificar licenças sem status específico de estado
         if (statusFilter === "pending_registration") {
           // Licença sem status específico ou com status geral pending_registration
-          matchesStatus = (!license.specificStateStatus || license.specificStateStatus === "pending_registration") &&
+          const matchesStatus = (!license.specificStateStatus || license.specificStateStatus === "pending_registration") &&
                         (!license.stateStatuses || license.stateStatuses.length === 0 || license.status === "pending_registration");
+          if (!matchesStatus) return false;
         } else {
           // Para outros status, verificar status específico do estado primeiro, depois o status geral
-          matchesStatus = (license.specificStateStatus === statusFilter) || 
+          const matchesStatus = (license.specificStateStatus === statusFilter) || 
                          (license.status === statusFilter);
+          if (!matchesStatus) return false;
         }
       }
       
-      const matchesDate = !dateFilter || (
-        license.createdAt && 
-        format(new Date(license.createdAt), "yyyy-MM-dd") === dateFilter
-      );
+      if (dateFilter && license.createdAt) {
+        const matchesDate = format(new Date(license.createdAt), "yyyy-MM-dd") === dateFilter;
+        if (!matchesDate) return false;
+      }
 
-      const matchesState = !stateFilter || stateFilter === "all_states" ||
-        license.specificState === stateFilter;
+      if (stateFilter && stateFilter !== "all_states") {
+        const matchesState = license.specificState === stateFilter;
+        if (!matchesState) return false;
+      }
       
-      return matchesSearch && matchesStatus && matchesDate && matchesState;
+      return true;
     });
   }, [expandedLicenses, searchTerm, statusFilter, dateFilter, stateFilter]);
 

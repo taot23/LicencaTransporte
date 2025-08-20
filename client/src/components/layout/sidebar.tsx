@@ -59,10 +59,12 @@ export function Sidebar({ className, isCollapsed = false, onToggleCollapse }: Si
   // Auto-expand vehicle menu when on vehicle-related pages
   useEffect(() => {
     const vehiclePages = ['/vehicles', '/admin/vehicle-models', '/admin/vehicle-transfer', '/cadastro-massa-veiculos'];
-    if (vehiclePages.includes(location)) {
-      setVehicleMenuExpanded(true);
+    // Otimização: Usar early return e evitar expansão desnecessária
+    const shouldExpand = vehiclePages.includes(location);
+    if (shouldExpand !== vehicleMenuExpanded) {
+      setVehicleMenuExpanded(shouldExpand);
     }
-  }, [location]);
+  }, [location, vehicleMenuExpanded]);
 
   const handleLogout = async () => {
     // Previne múltiplos cliques durante logout
