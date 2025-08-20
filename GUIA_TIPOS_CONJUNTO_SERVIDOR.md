@@ -198,7 +198,25 @@ Ou inserir direto no banco seguindo o mesmo padrão JSON dos exemplos acima.
 }
 ```
 
-## 7. Estados Suportados
+## 7. Imagens dos Tipos de Conjunto
+
+O sistema inclui ilustrações SVG técnicas para cada tipo:
+
+- `bitrain-6-axles.svg` - Bitrem 6 eixos
+- `bitrain-7-axles.svg` - Bitrem 7 eixos  
+- `bitrain-9-axles.svg` - Bitrem 9 eixos
+- `roadtrain-7-axles.svg` - Rodotrem 7 eixos
+- `roadtrain-9-axles.svg` - Rodotrem 9 eixos
+- `flatbed.svg` - Prancha (flexível)
+- `romeo-juliet.svg` - Romeu e Julieta (flexível)
+
+As imagens mostram:
+- Configuração exata de eixos
+- Cores diferenciadas por componente
+- Indicadores de total de eixos
+- Labels explicativos em português
+
+## 8. Estados Suportados
 
 O sistema funciona para todos os estados brasileiros exceto **MA (Maranhão)**.
 
