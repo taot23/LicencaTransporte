@@ -3565,16 +3565,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Upload e importação em lote de licenças/pedidos via CSV
   app.post('/api/admin/licenses/bulk-import', upload.single('csvFile'), requireAuth, async (req, res) => {
+    console.log('[BULK IMPORT DEBUG] Requisição recebida');
+    console.log('[BULK IMPORT DEBUG] Headers:', req.headers['content-type']);
+    console.log('[BULK IMPORT DEBUG] Body keys:', Object.keys(req.body || {}));
+    console.log('[BULK IMPORT DEBUG] File presente:', !!req.file);
+    
     const user = (req as any).user;
     if (!user) {
       return res.status(401).json({ message: "Não autenticado" });
     }
 
     if (!req.file) {
+      console.log('[BULK IMPORT DEBUG] Nenhum arquivo encontrado no req.file');
+      console.log('[BULK IMPORT DEBUG] Multer error?:', req.body);
       return res.status(400).json({ 
-        message: "Arquivo CSV não encontrado",
+        message: "Arquivo CSV não encontrado - verifique se o campo do formulário se chama 'csvFile'",
         success: false,
-        errors: ["Nenhum arquivo foi enviado"]
+        errors: ["Nenhum arquivo foi enviado ou nome do campo incorreto"]
       });
     }
 
