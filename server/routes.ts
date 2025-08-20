@@ -3851,6 +3851,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             totalWeight: totalWeight,
             cargoType: 'dry_cargo' as const,
             
+            // Campos obrigatórios
+            additionalPlates: [],
+            additionalPlatesDocuments: [],
+            
             // Estados e metadados
             states: states,
             status: 'pending_registration' as const,
@@ -5662,8 +5666,8 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       
       // Sanitizar os dados antes de atualizar
       const updateData = {
-        width: width !== undefined ? Number(width) : null,
-        height: height !== undefined ? Number(height) : null,
+        width: width !== undefined ? Number(width).toString() : null,
+        height: height !== undefined ? Number(height).toString() : null,
         cargoType: cargoType || null
       };
       
