@@ -3582,7 +3582,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const csvBuffer = req.file.buffer;
-      const csvString = csvBuffer.toString('utf-8');
+      let csvString = csvBuffer.toString('utf-8');
+      
+      // Remover BOM se presente
+      if (csvString.charCodeAt(0) === 0xFEFF) {
+        csvString = csvString.substring(1);
+      }
       
       // Parse CSV
       const lines = csvString.split('\n').filter(line => line.trim());
@@ -3624,15 +3629,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         warnings: [] as string[]
       };
 
-      // Mapeamento de tipos de conjunto
+      // Mapeamento de tipos de conjunto (case insensitive)
       const vehicleSetTypeMap: Record<string, string> = {
-        'Bitrem 6 eixos': 'bitrain_6_axles',
-        'Bitrem 7 eixos': 'bitrain_7_axles',
-        'Bitrem 9 eixos': 'bitrain_9_axles',
-        'Rodotrem 7 eixos': 'roadtrain_7_axles',
-        'Rodotrem 9 eixos': 'roadtrain_9_axles',
-        'Prancha': 'flatbed',
-        'Romeu e Julieta': 'romeo_juliet'
+        'bitrem 6 eixos': 'bitrain_6_axles',
+        'bitrem 7 eixos': 'bitrain_7_axles', 
+        'bitrem 9 eixos': 'bitrain_9_axles',
+        'rodotrem 7 eixos': 'roadtrain_7_axles',
+        'rodotrem 9 eixos': 'roadtrain_9_axles',
+        'prancha': 'flatbed',
+        'romeu e julieta': 'romeo_juliet'
       };
 
       // Obter todos os transportadores e veículos
@@ -3666,7 +3671,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           // 2. Validar tipo de conjunto
-          if (!rowData.tipo_conjunto || !vehicleSetTypeMap[rowData.tipo_conjunto]) {
+          if (!rowData.tipo_conjunto) {
+            throw new Error("Tipo de conjunto é obrigatório");
+          }
+          
+          const normalizedType = rowData.tipo_conjunto.toLowerCase().trim();
+          const licenseType = vehicleSetTypeMap[normalizedType];
+          
+          if (!licenseType) {
             throw new Error(`Tipo de conjunto inválido: ${rowData.tipo_conjunto}. Valores aceitos: ${Object.keys(vehicleSetTypeMap).join(', ')}`);
           }
 
@@ -3704,7 +3716,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           // 6. Buscar veículos adicionais baseado no tipo
-          const licenseType = vehicleSetTypeMap[rowData.tipo_conjunto];
           let firstTrailerVehicle = null;
           let secondTrailerVehicle = null;
           let dollyVehicle = null;
