@@ -2337,6 +2337,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Valores padrão baseados no tipo de licença - prancha tem limites diferentes
       const isPrancha = licenseData.type === "flatbed";
       
+      // Verificar length (comprimento) - CONVERSÃO DE METROS PARA CENTÍMETROS
+      if (licenseData.length === undefined || licenseData.length === null || licenseData.length === "") {
+        licenseData.length = isPrancha ? 2600 : 2500; // 26.00m para prancha, 25.00m para outros (em centímetros)
+        console.log(`Aplicando valor padrão para comprimento: ${licenseData.length} cm`);
+      } else {
+        // Converter metros para centímetros (frontend envia em metros, BD armazena em centímetros)
+        const metersValue = Number(licenseData.length);
+        licenseData.length = metersValue * 100;
+        console.log(`Convertendo comprimento de ${metersValue}m para ${licenseData.length} cm`);
+      }
+      
       // Verificar width (largura)
       if (licenseData.width === undefined || licenseData.width === null || licenseData.width === "") {
         licenseData.width = isPrancha ? 320 : 260; // 3.20m para prancha, 2.60m para outros
