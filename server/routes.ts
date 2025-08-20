@@ -140,6 +140,15 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCa
   }
 };
 
+const csvFileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  // Accept only CSV files
+  if (file.mimetype === 'text/csv' || file.originalname.toLowerCase().endsWith('.csv')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Apenas arquivos CSV são aceitos'), false);
+  }
+};
+
 // Middleware para processar dados do veículo, tanto de FormData quanto JSON direto
 const processVehicleData = (req: any, res: any, next: any) => {
   console.log('Processing request body:', req.body);
@@ -205,6 +214,7 @@ const upload = multer({
 // Upload específico para CSV (sem fileFilter)
 const uploadCSV = multer({
   storage: multer.memoryStorage(), // Usar memória para CSV
+  fileFilter: csvFileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB max para CSV
   }
@@ -3564,7 +3574,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Upload e importação em lote de licenças/pedidos via CSV
-  app.post('/api/admin/licenses/bulk-import', upload.single('csvFile'), requireAuth, async (req, res) => {
+  app.post('/api/admin/licenses/bulk-import', uploadCSV.single('csvFile'), requireAuth, async (req, res) => {
     console.log('[BULK IMPORT DEBUG] Requisição recebida');
     console.log('[BULK IMPORT DEBUG] Headers:', req.headers['content-type']);
     console.log('[BULK IMPORT DEBUG] Body keys:', Object.keys(req.body || {}));
