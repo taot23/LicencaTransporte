@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,13 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Download, FileText, Receipt, Search, Filter, DollarSign, Calendar } from "lucide-react";
+import { Download, FileText, Receipt, Search, Filter, DollarSign, Calendar, RefreshCw, Loader2 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { Boleto } from "@shared/schema";
 import { UnifiedLayout } from "@/components/layout/unified-layout";
 import { useToast } from "@/hooks/use-toast";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePaginatedList } from "@/hooks/use-paginated-list";
+import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
 
 const getStatusBadgeVariant = (status: string) => {
   switch (status) {
@@ -49,6 +51,7 @@ export default function MeusBoletos() {
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
   const [filtroVencimento, setFiltroVencimento] = useState<string>("todos");
   const [termoBusca, setTermoBusca] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
   const { lastMessage } = useWebSocketContext();
   const isMobile = useIsMobile();
@@ -56,6 +59,7 @@ export default function MeusBoletos() {
   const { data: boletos = [], isLoading, error, refetch } = useQuery<Boleto[]>({
     queryKey: ["/api/meus-boletos"],
     refetchInterval: 30000, // Atualiza a cada 30 segundos
+    staleTime: 1000, // 1 segundo para garantir dados frescos
   });
 
   // Atualização em tempo real via WebSocket
@@ -71,45 +75,90 @@ export default function MeusBoletos() {
     return new Date(dataVencimento) < new Date();
   };
 
-  // Filtrar boletos com lógica melhorada
-  const boletosFiltrados = boletos.filter((boleto) => {
-    // Filtro por status
-    let matchStatus = true;
-    if (filtroStatus && filtroStatus !== "todos") {
-      if (filtroStatus === "aguardando_pagamento") {
-        matchStatus = boleto.status === "pendente";
-      } else if (filtroStatus === "vencido") {
-        matchStatus = isVencido(boleto.dataVencimento);
-      } else {
-        matchStatus = boleto.status === filtroStatus;
-      }
-    }
+  // Aplicar filtros e busca
+  const boletosFiltrados = useMemo(() => {
+    if (!boletos) return [];
     
-    // Filtro por vencimento
-    let matchVencimento = true;
-    if (filtroVencimento && filtroVencimento !== "todos") {
-      const hoje = new Date();
-      const vencimento = new Date(boleto.dataVencimento);
-      const seteDiasDepois = new Date();
-      seteDiasDepois.setDate(hoje.getDate() + 7);
+    return boletos.filter((boleto) => {
+      // Filtro por status
+      let matchStatus = true;
+      if (filtroStatus && filtroStatus !== "todos") {
+        if (filtroStatus === "aguardando_pagamento") {
+          matchStatus = boleto.status === "pendente";
+        } else if (filtroStatus === "vencido") {
+          matchStatus = isVencido(boleto.dataVencimento);
+        } else {
+          matchStatus = boleto.status === filtroStatus;
+        }
+      }
       
-      if (filtroVencimento === "vencidos") {
-        matchVencimento = vencimento < hoje;
-      } else if (filtroVencimento === "vencendo") {
-        matchVencimento = vencimento >= hoje && vencimento <= seteDiasDepois;
-      } else if (filtroVencimento === "futuros") {
-        matchVencimento = vencimento > seteDiasDepois;
+      // Filtro por vencimento
+      let matchVencimento = true;
+      if (filtroVencimento && filtroVencimento !== "todos") {
+        const hoje = new Date();
+        const vencimento = new Date(boleto.dataVencimento);
+        const seteDiasDepois = new Date();
+        seteDiasDepois.setDate(hoje.getDate() + 7);
+        
+        if (filtroVencimento === "vencidos") {
+          matchVencimento = vencimento < hoje;
+        } else if (filtroVencimento === "vencendo") {
+          matchVencimento = vencimento >= hoje && vencimento <= seteDiasDepois;
+        } else if (filtroVencimento === "futuros") {
+          matchVencimento = vencimento > seteDiasDepois;
+        }
       }
-    }
-    
-    // Filtro de busca
-    const matchBusca = !termoBusca || 
-      boleto.numeroBoleto.toLowerCase().includes(termoBusca.toLowerCase()) ||
-      boleto.nomeTransportador.toLowerCase().includes(termoBusca.toLowerCase()) ||
-      boleto.cpfCnpj.includes(termoBusca);
-    
-    return matchStatus && matchVencimento && matchBusca;
+      
+      // Filtro de busca
+      const matchBusca = !termoBusca || 
+        boleto.numeroBoleto.toLowerCase().includes(termoBusca.toLowerCase()) ||
+        boleto.nomeTransportador.toLowerCase().includes(termoBusca.toLowerCase()) ||
+        boleto.cpfCnpj.includes(termoBusca);
+      
+      return matchStatus && matchVencimento && matchBusca;
+    });
+  }, [boletos, filtroStatus, filtroVencimento, termoBusca]);
+
+  // Implementar paginação
+  const {
+    currentPage,
+    pageSize,
+    paginatedItems: boletosExibidos,
+    totalPages,
+    totalItems,
+    handlePageChange,
+    handlePageSizeChange,
+    goToFirstPage,
+    goToLastPage,
+    goToPreviousPage,
+    goToNextPage,
+    canGoPrevious,
+    canGoNext
+  } = usePaginatedList({
+    items: boletosFiltrados,
+    defaultPageSize: 25,
+    searchTerm: termoBusca
   });
+
+  // Função para atualizar manualmente
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+      toast({
+        title: "Atualizado",
+        description: "Lista de boletos atualizada com sucesso",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar boletos",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const handleDownloadFile = (url: string, fileName: string) => {
     if (!url) {
@@ -223,10 +272,25 @@ export default function MeusBoletos() {
             <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold`}>Meus Boletos</h1>
             <p className="text-muted-foreground">Gerencie seus boletos financeiros</p>
           </div>
-          <Button onClick={exportToCSV} className={`${isMobile ? 'w-full' : 'ml-4'}`}>
-            <Download className="h-4 w-4 mr-2" />
-            Exportar CSV
-          </Button>
+          <div className={`flex gap-2 ${isMobile ? 'w-full' : ''}`}>
+            <Button 
+              onClick={handleRefresh} 
+              variant="outline"
+              disabled={isRefreshing}
+              className={`${isMobile ? 'flex-1' : ''}`}
+            >
+              {isRefreshing ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Atualizar
+            </Button>
+            <Button onClick={exportToCSV} className={`${isMobile ? 'flex-1' : ''}`}>
+              <Download className="h-4 w-4 mr-2" />
+              Exportar CSV
+            </Button>
+          </div>
         </div>
 
         {/* Estatísticas */}
@@ -360,9 +424,11 @@ export default function MeusBoletos() {
           // Layout Mobile - Cards
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Boletos ({boletosFiltrados.length})</h3>
+              <h3 className="text-lg font-semibold">
+                Boletos ({totalItems} total{totalItems !== boletosExibidos.length ? `, ${boletosExibidos.length} exibidos` : ''})
+              </h3>
             </div>
-            {boletosFiltrados.map((boleto: Boleto) => (
+            {boletosExibidos.map((boleto: Boleto) => (
               <Card key={boleto.id} className="shadow-sm">
                 <CardContent className="p-4">
                   <div className="space-y-3">
@@ -433,12 +499,32 @@ export default function MeusBoletos() {
                 </CardContent>
               </Card>
             ))}
+            
+            {/* Paginação Mobile */}
+            {totalItems > 0 && (
+              <MobileListPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                pageSize={pageSize}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+                goToFirstPage={goToFirstPage}
+                goToLastPage={goToLastPage}
+                goToPreviousPage={goToPreviousPage}
+                goToNextPage={goToNextPage}
+                canGoPrevious={canGoPrevious}
+                canGoNext={canGoNext}
+              />
+            )}
           </div>
         ) : (
           // Layout Desktop - Tabela
           <Card>
             <CardHeader>
-              <CardTitle>Boletos ({boletosFiltrados.length})</CardTitle>
+              <CardTitle>
+                Boletos ({totalItems} total{totalItems !== boletosExibidos.length ? `, ${boletosExibidos.length} exibidos` : ''})
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
@@ -456,7 +542,7 @@ export default function MeusBoletos() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {boletosFiltrados.map((boleto: Boleto) => (
+                    {boletosExibidos.map((boleto: Boleto) => (
                       <TableRow key={boleto.id}>
                         <TableCell className="font-medium">
                           {boleto.numeroBoleto}
@@ -509,6 +595,26 @@ export default function MeusBoletos() {
                   </TableBody>
                 </Table>
               </div>
+              
+              {/* Paginação Desktop */}
+              {totalItems > 0 && (
+                <div className="mt-4 pt-4 border-t">
+                  <ListPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={totalItems}
+                    pageSize={pageSize}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
+                    goToFirstPage={goToFirstPage}
+                    goToLastPage={goToLastPage}
+                    goToPreviousPage={goToPreviousPage}
+                    goToNextPage={goToNextPage}
+                    canGoPrevious={canGoPrevious}
+                    canGoNext={canGoNext}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
