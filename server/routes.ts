@@ -3669,15 +3669,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             throw new Error("Pelo menos um estado deve ser informado");
           }
 
-          // 5. Validar dimensões
-          const length = parseFloat(rowData.comprimento?.replace(',', '.') || '0');
-          const width = parseFloat(rowData.largura?.replace(',', '.') || '0');
-          const height = parseFloat(rowData.altura?.replace(',', '.') || '0');
+          // 5. Validar dimensões (planilha em metros, BD em centímetros)
+          const lengthInMeters = parseFloat(rowData.comprimento?.replace(',', '.') || '0');
+          const widthInMeters = parseFloat(rowData.largura?.replace(',', '.') || '0');
+          const heightInMeters = parseFloat(rowData.altura?.replace(',', '.') || '0');
           const totalWeight = parseFloat(rowData.peso_total?.replace(',', '.') || '0');
 
-          if (length <= 0 || width <= 0 || height <= 0 || totalWeight <= 0) {
+          if (lengthInMeters <= 0 || widthInMeters <= 0 || heightInMeters <= 0 || totalWeight <= 0) {
             throw new Error("Dimensões e peso devem ser valores positivos");
           }
+
+          // Converter de metros para centímetros (como espera o banco de dados)
+          const length = Math.round(lengthInMeters * 100); // 25.5m → 2550cm
+          const width = Math.round(widthInMeters * 100);   // 2.6m → 260cm
+          const height = Math.round(heightInMeters * 100); // 4.4m → 440cm
 
           // 6. Buscar veículos adicionais baseado no tipo
           let firstTrailerVehicle = null;
@@ -3791,10 +3796,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             dollyId: dollyVehicle?.id,
             flatbedId: flatbedVehicle?.id,
             
-            // Dimensões
-            length: length.toString(),
-            width: width.toString(),
-            height: height.toString(),
+            // Dimensões (em centímetros)
+            length: length, // Já convertido para cm
+            width: width,   // Já convertido para cm
+            height: height, // Já convertido para cm
             totalWeight: totalWeight,
             cargoType: 'dry_cargo' as const,
             
