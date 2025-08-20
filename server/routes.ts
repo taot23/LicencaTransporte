@@ -3563,6 +3563,343 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Upload e importação em lote de licenças/pedidos via CSV
+  app.post('/api/admin/licenses/bulk-import', upload.single('csvFile'), requireAuth, async (req, res) => {
+    const user = await getUserFromSession(req);
+    if (!user) {
+      return res.status(401).json({ message: "Não autenticado" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ 
+        message: "Arquivo CSV não encontrado",
+        success: false,
+        errors: ["Nenhum arquivo foi enviado"]
+      });
+    }
+
+    console.log(`[BULK LICENSE IMPORT] Iniciando importação de licenças por usuário ${user.email} (role: ${user.role})`);
+
+    try {
+      const csvBuffer = req.file.buffer;
+      const csvString = csvBuffer.toString('utf-8');
+      
+      // Parse CSV
+      const lines = csvString.split('\n').filter(line => line.trim());
+      if (lines.length < 2) {
+        return res.status(400).json({ 
+          message: "Arquivo CSV inválido - deve conter cabeçalho e pelo menos uma linha de dados",
+          success: false,
+          errors: ["Arquivo vazio ou apenas com cabeçalho"]
+        });
+      }
+
+      const header = lines[0].split(';').map(col => col.trim());
+      
+      // Validar colunas obrigatórias
+      const requiredColumns = [
+        'transportador_cpf_cnpj',
+        'tipo_conjunto',
+        'cavalo_placa',
+        'estados',
+        'comprimento',
+        'largura',
+        'altura',
+        'peso_total'
+      ];
+
+      const missingColumns = requiredColumns.filter(col => !header.includes(col));
+      if (missingColumns.length > 0) {
+        return res.status(400).json({
+          message: `Colunas obrigatórias ausentes: ${missingColumns.join(', ')}`,
+          success: false,
+          errors: [`Colunas obrigatórias ausentes: ${missingColumns.join(', ')}`]
+        });
+      }
+
+      const results = {
+        success: true,
+        imported: 0,
+        errors: [] as string[],
+        warnings: [] as string[]
+      };
+
+      // Mapeamento de tipos de conjunto
+      const vehicleSetTypeMap: Record<string, string> = {
+        'Bitrem 6 eixos': 'bitrain_6_axles',
+        'Bitrem 7 eixos': 'bitrain_7_axles',
+        'Bitrem 9 eixos': 'bitrain_9_axles',
+        'Rodotrem 7 eixos': 'roadtrain_7_axles',
+        'Rodotrem 9 eixos': 'roadtrain_9_axles',
+        'Prancha': 'flatbed',
+        'Romeu e Julieta': 'romeo_juliet'
+      };
+
+      // Obter todos os transportadores e veículos
+      const allTransporters = await storage.getAllTransporters();
+      const allVehicles = await storage.getAllVehicles();
+
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line.trim()) continue;
+
+        const data = line.split(';').map(col => col.trim());
+        const rowData: Record<string, string> = {};
+        
+        header.forEach((col, index) => {
+          rowData[col] = data[index] || '';
+        });
+
+        try {
+          // 1. Validar transportador
+          if (!rowData.transportador_cpf_cnpj) {
+            throw new Error("CPF/CNPJ do transportador é obrigatório");
+          }
+
+          const transporterDoc = rowData.transportador_cpf_cnpj.replace(/\D/g, '');
+          const transporter = allTransporters.find(t => 
+            t.documentNumber?.replace(/\D/g, '') === transporterDoc
+          );
+          
+          if (!transporter) {
+            throw new Error(`Transportador não encontrado: ${rowData.transportador_cpf_cnpj}`);
+          }
+
+          // 2. Validar tipo de conjunto
+          if (!rowData.tipo_conjunto || !vehicleSetTypeMap[rowData.tipo_conjunto]) {
+            throw new Error(`Tipo de conjunto inválido: ${rowData.tipo_conjunto}. Valores aceitos: ${Object.keys(vehicleSetTypeMap).join(', ')}`);
+          }
+
+          // 3. Validar veículos obrigatórios
+          if (!rowData.cavalo_placa || rowData.cavalo_placa.length < 6) {
+            throw new Error("Placa do cavalo inválida (mínimo 6 caracteres)");
+          }
+
+          const tractorVehicle = allVehicles.find(v => 
+            v.plate.toUpperCase() === rowData.cavalo_placa.toUpperCase()
+          );
+          
+          if (!tractorVehicle) {
+            throw new Error(`Veículo cavalo não encontrado: ${rowData.cavalo_placa}`);
+          }
+
+          // 4. Validar estados
+          if (!rowData.estados) {
+            throw new Error("Estados são obrigatórios");
+          }
+
+          const states = rowData.estados.split(',').map(s => s.trim()).filter(s => s);
+          if (states.length === 0) {
+            throw new Error("Pelo menos um estado deve ser informado");
+          }
+
+          // 5. Validar dimensões
+          const length = parseFloat(rowData.comprimento?.replace(',', '.') || '0');
+          const width = parseFloat(rowData.largura?.replace(',', '.') || '0');
+          const height = parseFloat(rowData.altura?.replace(',', '.') || '0');
+          const totalWeight = parseFloat(rowData.peso_total?.replace(',', '.') || '0');
+
+          if (length <= 0 || width <= 0 || height <= 0 || totalWeight <= 0) {
+            throw new Error("Dimensões e peso devem ser valores positivos");
+          }
+
+          // 6. Buscar veículos adicionais baseado no tipo
+          const licenseType = vehicleSetTypeMap[rowData.tipo_conjunto];
+          let firstTrailerVehicle = null;
+          let secondTrailerVehicle = null;
+          let dollyVehicle = null;
+          let flatbedVehicle = null;
+
+          // Primeira carreta (obrigatória para bitrem e rodotrem)
+          if (licenseType.includes('bitrain') || licenseType.includes('roadtrain')) {
+            if (!rowData.primeira_carreta_placa) {
+              throw new Error("Primeira carreta é obrigatória para este tipo de conjunto");
+            }
+
+            firstTrailerVehicle = allVehicles.find(v => 
+              v.plate.toUpperCase() === rowData.primeira_carreta_placa.toUpperCase()
+            );
+            
+            if (!firstTrailerVehicle) {
+              throw new Error(`Primeira carreta não encontrada: ${rowData.primeira_carreta_placa}`);
+            }
+          }
+
+          // Segunda carreta (obrigatória para bitrem e rodotrem)
+          if (licenseType.includes('bitrain') || licenseType.includes('roadtrain')) {
+            if (!rowData.segunda_carreta_placa) {
+              throw new Error("Segunda carreta é obrigatória para este tipo de conjunto");
+            }
+
+            secondTrailerVehicle = allVehicles.find(v => 
+              v.plate.toUpperCase() === rowData.segunda_carreta_placa.toUpperCase()
+            );
+            
+            if (!secondTrailerVehicle) {
+              throw new Error(`Segunda carreta não encontrada: ${rowData.segunda_carreta_placa}`);
+            }
+          }
+
+          // Dolly (obrigatório para rodotrem)
+          if (licenseType.includes('roadtrain')) {
+            if (!rowData.dolly_placa) {
+              throw new Error("Dolly é obrigatório para rodotrem");
+            }
+
+            dollyVehicle = allVehicles.find(v => 
+              v.plate.toUpperCase() === rowData.dolly_placa.toUpperCase()
+            );
+            
+            if (!dollyVehicle) {
+              throw new Error(`Dolly não encontrado: ${rowData.dolly_placa}`);
+            }
+          }
+
+          // Prancha (obrigatória para prancha)
+          if (licenseType === 'flatbed') {
+            if (!rowData.prancha_placa) {
+              throw new Error("Prancha é obrigatória para este tipo de conjunto");
+            }
+
+            flatbedVehicle = allVehicles.find(v => 
+              v.plate.toUpperCase() === rowData.prancha_placa.toUpperCase()
+            );
+            
+            if (!flatbedVehicle) {
+              throw new Error(`Prancha não encontrada: ${rowData.prancha_placa}`);
+            }
+          }
+
+          // 7. Verificar licenças existentes para evitar duplicatas
+          const existingLicenses = await storage.getAllLicenses();
+          const vehicleCombination = [
+            tractorVehicle.id,
+            firstTrailerVehicle?.id,
+            secondTrailerVehicle?.id,
+            dollyVehicle?.id,
+            flatbedVehicle?.id
+          ].filter(Boolean).sort().join('-');
+
+          const existingLicense = existingLicenses.find(license => {
+            const licenseCombination = [
+              license.tractorUnitId,
+              license.firstTrailerId,
+              license.secondTrailerId,
+              license.dollyId,
+              license.flatbedId
+            ].filter(Boolean).sort().join('-');
+            
+            return licenseCombination === vehicleCombination && 
+                   license.status !== 'cancelled' &&
+                   states.some(state => license.states.includes(state));
+          });
+
+          if (existingLicense) {
+            results.warnings.push(`Linha ${i + 1}: Já existe licença similar (${existingLicense.requestNumber}) para esta combinação de veículos`);
+            continue;
+          }
+
+          // 8. Criar a licença
+          const newLicense = {
+            userId: user.id,
+            transporterId: transporter.id,
+            type: licenseType,
+            mainVehiclePlate: tractorVehicle.plate,
+            
+            // Veículos
+            tractorUnitId: tractorVehicle.id,
+            firstTrailerId: firstTrailerVehicle?.id,
+            secondTrailerId: secondTrailerVehicle?.id,
+            dollyId: dollyVehicle?.id,
+            flatbedId: flatbedVehicle?.id,
+            
+            // Dimensões
+            length: length,
+            width: width,
+            height: height,
+            totalWeight: totalWeight,
+            
+            // Estados e metadados
+            states: states,
+            status: 'pending_registration' as const,
+            isDraft: false,
+            comments: rowData.observacoes || `Importado via planilha em ${new Date().toLocaleString('pt-BR')}`
+          };
+
+          await storage.createLicense(newLicense);
+          results.imported++;
+
+          console.log(`[BULK LICENSE IMPORT] Licença criada: ${newLicense.mainVehiclePlate} - ${licenseType}`);
+
+        } catch (error) {
+          const errorMessage = `Linha ${i + 1}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`;
+          results.errors.push(errorMessage);
+          console.error(`[BULK LICENSE IMPORT] Erro linha ${i + 1}:`, error);
+        }
+      }
+
+      console.log(`[BULK LICENSE IMPORT] Concluído: ${results.imported} licenças importadas, ${results.errors.length} erros`);
+
+      return res.json({
+        message: `Importação concluída: ${results.imported} licenças importadas`,
+        success: results.errors.length === 0,
+        ...results
+      });
+
+    } catch (error) {
+      console.error('[BULK LICENSE IMPORT] Erro geral:', error);
+      return res.status(500).json({
+        message: "Erro interno do servidor",
+        success: false,
+        errors: [error instanceof Error ? error.message : 'Erro desconhecido']
+      });
+    }
+  });
+
+  // Endpoint para baixar template da planilha de licenças
+  app.get('/api/admin/licenses/bulk-import/template', requireAuth, async (req, res) => {
+    const csvHeaders = [
+      'transportador_cpf_cnpj',
+      'tipo_conjunto',
+      'cavalo_placa',
+      'primeira_carreta_placa',
+      'segunda_carreta_placa',
+      'dolly_placa',
+      'prancha_placa',
+      'estados',
+      'comprimento',
+      'largura',
+      'altura',
+      'peso_total',
+      'observacoes'
+    ];
+
+    const exampleData = [
+      '12.345.678/0001-90',
+      'Bitrem 9 eixos',
+      'ABC1234',
+      'DEF5678',
+      'GHI9012',
+      '',
+      '',
+      'SP,MG,RJ',
+      '25.5',
+      '2.6',
+      '4.4',
+      '74.0',
+      'Licença para rota SP-RJ'
+    ];
+
+    const csvContent = [
+      csvHeaders.join(';'),
+      exampleData.join(';')
+    ].join('\n');
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="template_importacao_licencas.csv"');
+    res.send('\uFEFF' + csvContent); // BOM para UTF-8
+  });
+
   // Endpoint para cadastro em massa de veículos via CSV
   app.post("/api/vehicles/bulk-import", requireAuth, uploadCSV.single('csvFile'), async (req, res) => {
     try {
@@ -6369,10 +6706,10 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         .returning();
       
       // Limpar cache GLOBAL forçadamente
-      global['vehicle_set_types_cache'] = null;
-      global['vehicle_set_types_cache_time'] = null;
-      delete global['vehicle_set_types_cache'];
-      delete global['vehicle_set_types_cache_time'];
+      (global as any)['vehicle_set_types_cache'] = null;
+      (global as any)['vehicle_set_types_cache_time'] = null;
+      delete (global as any)['vehicle_set_types_cache'];
+      delete (global as any)['vehicle_set_types_cache_time'];
       
       console.log('[VEHICLE SET TYPES] Cache limpo e tipo criado com sucesso:', newType.id);
       
@@ -6431,10 +6768,10 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       }
       
       // Limpar cache GLOBAL forçadamente  
-      global['vehicle_set_types_cache'] = null;
-      global['vehicle_set_types_cache_time'] = null;
-      delete global['vehicle_set_types_cache'];
-      delete global['vehicle_set_types_cache_time'];
+      (global as any)['vehicle_set_types_cache'] = null;
+      (global as any)['vehicle_set_types_cache_time'] = null;
+      delete (global as any)['vehicle_set_types_cache'];
+      delete (global as any)['vehicle_set_types_cache_time'];
       
       console.log('[VEHICLE SET TYPES] Cache limpo e tipo atualizado com sucesso:', typeId);
       
@@ -6471,8 +6808,8 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       await db.delete(vehicleSetTypes).where(eq(vehicleSetTypes.id, typeId));
       
       // Limpar cache
-      delete global['vehicle_set_types_cache'];
-      delete global['vehicle_set_types_cache_time'];
+      delete (global as any)['vehicle_set_types_cache'];
+      delete (global as any)['vehicle_set_types_cache_time'];
       
       console.log('[VEHICLE SET TYPES] Tipo deletado com sucesso:', typeId);
       

@@ -22,6 +22,7 @@ import BoletosPage from "@/pages/admin/boletos-page";
 import DashboardAET from "@/pages/admin/dashboard-aet";
 import VehicleTransferPage from "@/pages/admin/vehicle-transfer-page";
 import VehicleSetTypesPage from "@/pages/admin/vehicle-set-types";
+import BulkLicenseImport from "@/pages/admin/BulkLicenseImport";
 import MeusBoletos from "@/pages/meus-boletos";
 import BulkVehiclesPage from "@/pages/bulk-vehicles-page";
 import RedirectPage from "@/pages/redirect-page";
@@ -62,6 +63,7 @@ function Router() {
       <AdminRoute path="/admin/vehicle-set-types" component={VehicleSetTypesPage} />
       <AdminRoute path="/admin/vehicle-transfer" component={VehicleTransferPage} />
       <StaffRoute path="/admin/boletos" component={BoletosPage} requiredRole="financial" />
+      <StaffRoute path="/admin/bulk-license-import" component={BulkLicenseImport} requiredRole="operational" />
       <AdminRoute path="/admin/dashboard-aet" component={DashboardAET} />
       
       {/* Sistema de Controle de Licenças - Rotas do usuário (versão desktop ou mobile) */}

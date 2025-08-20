@@ -347,6 +347,16 @@ export function Sidebar({ className, isCollapsed = false, onToggleCollapse }: Si
               />
             )}
             
+            {/* Importação em Massa de Licenças - para perfis operacionais */}
+            {user && ['admin', 'manager', 'supervisor', 'operational'].includes(user.role) && (
+              <SidebarItem
+                icon={UploadCloud}
+                label="Importar Licenças"
+                path="/admin/bulk-license-import"
+                isActive={location === "/admin/bulk-license-import"}
+              />
+            )}
+            
             {/* Gerenciar Transportadores - conforme permissões */}
             {user && ['admin', 'manager', 'supervisor', 'financial', 'operational'].includes(user.role) && (
               <SidebarItem
