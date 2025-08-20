@@ -31,7 +31,7 @@ import {
   isAdministrativeRole,
   type UserRole 
 } from "@shared/permissions";
-import { eq, sql, or, inArray, and, desc, gt, ne, isNotNull } from "drizzle-orm";
+import { eq, and, or, desc, ilike, gte, lte, count, asc, like, not, sql, exists, inArray, isNull, gt, ne, isNotNull } from "drizzle-orm";
 import { fromZodError } from "zod-validation-error";
 import { ZodError } from "zod";
 import multer from "multer";
