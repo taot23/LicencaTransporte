@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, Edit, Download, FileText, Receipt, Filter } from "lucide-react";
+import { Trash2, Plus, Edit, Download, FileText, Receipt, Filter, RefreshCw, Loader2, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -71,41 +71,88 @@ export default function BoletosPage() {
   const [editingBoleto, setEditingBoleto] = useState<Boleto | null>(null);
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
   const [filtroVencimento, setFiltroVencimento] = useState<string>("todos");
+  const [termoBusca, setTermoBusca] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: boletos = [], isLoading } = useQuery({
-    queryKey: ["/api/boletos", filtroStatus, filtroVencimento],
-    queryFn: () => {
-      const params = new URLSearchParams();
-      if (filtroStatus !== "todos") params.set("status", filtroStatus);
-      if (filtroVencimento !== "todos") params.set("vencimento", filtroVencimento);
-      params.set("_t", Date.now().toString()); // Quebra cache
-      
-      return fetch(`/api/boletos?${params.toString()}`, {
-        headers: { 
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      }).then(res => res.json());
-    },
+  const { data: boletos = [], isLoading, error, refetch } = useQuery({
+    queryKey: ["/api/boletos"],
     refetchInterval: 30000, // Atualização automática a cada 30 segundos
     refetchOnWindowFocus: true,
-    staleTime: 0, // Dados sempre considerados obsoletos
+    staleTime: 1000, // 1 segundo para garantir dados frescos
   });
 
   const { data: transporters = [] } = useQuery({
     queryKey: ["/api/admin/transporters"],
   });
 
-  // Hook de paginação dos boletos
-  const { 
-    paginatedItems: paginatedBoletos, 
-    pagination, 
-    currentPage, 
-    setCurrentPage 
-  } = usePaginatedList({ items: boletos });
+  // Aplicar filtros e busca
+  const boletosFiltrados = useMemo(() => {
+    if (!boletos) return [];
+    
+    return boletos.filter((boleto) => {
+      // Filtro por status
+      let matchStatus = true;
+      if (filtroStatus && filtroStatus !== "todos") {
+        if (filtroStatus === "aguardando_pagamento") {
+          matchStatus = boleto.status === "pendente";
+        } else if (filtroStatus === "vencido") {
+          const hoje = new Date();
+          const vencimento = new Date(boleto.dataVencimento);
+          matchStatus = vencimento < hoje;
+        } else {
+          matchStatus = boleto.status === filtroStatus;
+        }
+      }
+      
+      // Filtro por vencimento
+      let matchVencimento = true;
+      if (filtroVencimento && filtroVencimento !== "todos") {
+        const hoje = new Date();
+        const vencimento = new Date(boleto.dataVencimento);
+        const seteDiasDepois = new Date();
+        seteDiasDepois.setDate(hoje.getDate() + 7);
+        
+        if (filtroVencimento === "vencidos") {
+          matchVencimento = vencimento < hoje;
+        } else if (filtroVencimento === "vencendo") {
+          matchVencimento = vencimento >= hoje && vencimento <= seteDiasDepois;
+        } else if (filtroVencimento === "futuros") {
+          matchVencimento = vencimento > seteDiasDepois;
+        }
+      }
+      
+      // Filtro de busca
+      const matchBusca = !termoBusca || 
+        boleto.numeroBoleto.toLowerCase().includes(termoBusca.toLowerCase()) ||
+        boleto.nomeTransportador.toLowerCase().includes(termoBusca.toLowerCase()) ||
+        boleto.cpfCnpj.includes(termoBusca);
+      
+      return matchStatus && matchVencimento && matchBusca;
+    });
+  }, [boletos, filtroStatus, filtroVencimento, termoBusca]);
+
+  // Implementar paginação
+  const {
+    currentPage,
+    pageSize,
+    paginatedItems: boletosExibidos,
+    totalPages,
+    totalItems,
+    handlePageChange,
+    handlePageSizeChange,
+    goToFirstPage,
+    goToLastPage,
+    goToPreviousPage,
+    goToNextPage,
+    canGoPrevious,
+    canGoNext
+  } = usePaginatedList({
+    items: boletosFiltrados,
+    defaultPageSize: 25,
+    searchTerm: termoBusca
+  });
 
   // Estados para controlar uploads
   const [uploadedBoleto, setUploadedBoleto] = useReactState<File | null>(null);
@@ -192,6 +239,26 @@ export default function BoletosPage() {
       });
     },
   });
+
+  // Função para atualizar manualmente
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refetch();
+      toast({
+        title: "Atualizado",
+        description: "Lista de boletos atualizada com sucesso",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar boletos",
+        variant: "destructive"
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   const handleEdit = (boleto: Boleto) => {
     setEditingBoleto(boleto);
@@ -447,6 +514,19 @@ export default function BoletosPage() {
         </div>
         <div className="flex gap-2">
           <Button
+            onClick={handleRefresh} 
+            variant="outline"
+            disabled={isRefreshing}
+            size="sm"
+          >
+            {isRefreshing ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
+            Atualizar
+          </Button>
+          <Button
             variant="outline"
             size="sm"
             onClick={handleExportCSV}
@@ -475,7 +555,20 @@ export default function BoletosPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <Label htmlFor="busca">Buscar</Label>
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="busca"
+                  placeholder="Número ou transportador..."
+                  value={termoBusca}
+                  onChange={(e) => setTermoBusca(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </div>
             <div>
               <Label htmlFor="filtro-status">Status</Label>
               <Select value={filtroStatus} onValueChange={setFiltroStatus}>
@@ -505,11 +598,24 @@ export default function BoletosPage() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="flex items-end">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setFiltroStatus("todos");
+                  setFiltroVencimento("todos");
+                  setTermoBusca("");
+                }}
+                className="w-full"
+              >
+                Limpar Filtros
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {boletos.length === 0 ? (
+      {boletosFiltrados.length === 0 ? (
         <Card>
           <CardContent className="py-8">
             <div className="text-center">
@@ -518,19 +624,26 @@ export default function BoletosPage() {
                 Nenhum boleto encontrado
               </h3>
               <p className="text-gray-500 mb-4">
-                Ainda não há boletos cadastrados no sistema.
+                {boletos.length === 0 
+                  ? "Ainda não há boletos cadastrados no sistema."
+                  : "Nenhum boleto corresponde aos filtros aplicados."
+                }
               </p>
-              <Button onClick={() => setIsFormOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Criar Primeiro Boleto
-              </Button>
+              {boletos.length === 0 && (
+                <Button onClick={() => setIsFormOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Criar Primeiro Boleto
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>Lista de Boletos ({boletos.length})</CardTitle>
+            <CardTitle>
+              Lista de Boletos ({totalItems} total{totalItems !== boletosExibidos.length ? `, ${boletosExibidos.length} exibidos` : ''})
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -548,7 +661,7 @@ export default function BoletosPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(paginatedBoletos as Boleto[]).map((boleto: Boleto) => (
+                {boletosExibidos.map((boleto: Boleto) => (
                   <TableRow key={boleto.id}>
                     <TableCell className="font-medium">
                       {boleto.numeroBoleto}
@@ -620,38 +733,41 @@ export default function BoletosPage() {
               </TableBody>
             </Table>
 
-            {/* Controles de paginação - Versão desktop */}
-            {boletos.length > 0 && !isLoading && (
-              <div className="hidden md:block mt-6">
-                <ListPagination 
-                  currentPage={currentPage}
-                  totalPages={pagination.totalPages}
-                  totalItems={boletos.length}
-                  itemsPerPage={10}
-                  hasPrev={currentPage > 1}
-                  hasNext={currentPage < pagination.totalPages}
-                  startItem={(currentPage - 1) * 10 + 1}
-                  endItem={Math.min(currentPage * 10, boletos.length)}
-                  onPageChange={setCurrentPage}
-                />
-              </div>
-            )}
+            {/* Controles de paginação modernos */}
+            {totalPages > 1 && (
+              <>
+                {/* Desktop */}
+                <div className="hidden md:block mt-6">
+                  <ListPagination 
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={totalItems}
+                    itemsPerPage={pageSize}
+                    hasPrev={canGoPrevious}
+                    hasNext={canGoNext}
+                    startItem={(currentPage - 1) * pageSize + 1}
+                    endItem={Math.min(currentPage * pageSize, totalItems)}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
+                    pageSizeOptions={[10, 25, 50, 100]}
+                  />
+                </div>
 
-            {/* Controles de paginação - Versão mobile */}
-            {boletos.length > 0 && !isLoading && (
-              <div className="block md:hidden mt-6">
-                <MobileListPagination
-                  currentPage={currentPage}
-                  totalPages={pagination.totalPages}
-                  totalItems={boletos.length}
-                  itemsPerPage={10}
-                  hasPrev={currentPage > 1}
-                  hasNext={currentPage < pagination.totalPages}
-                  startItem={(currentPage - 1) * 10 + 1}
-                  endItem={Math.min(currentPage * 10, boletos.length)}
-                  onPageChange={setCurrentPage}
-                />
-              </div>
+                {/* Mobile */}
+                <div className="block md:hidden mt-6">
+                  <MobileListPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={totalItems}
+                    itemsPerPage={pageSize}
+                    hasPrev={canGoPrevious}
+                    hasNext={canGoNext}
+                    startItem={(currentPage - 1) * pageSize + 1}
+                    endItem={Math.min(currentPage * pageSize, totalItems)}
+                    onPageChange={handlePageChange}
+                  />
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
