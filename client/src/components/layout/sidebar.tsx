@@ -194,7 +194,15 @@ export function Sidebar({ className, isCollapsed = false, onToggleCollapse }: Si
                   "w-full justify-start text-white hover:bg-gray-700",
                   (location === "/vehicles" || location === "/admin/vehicle-models" || location === "/admin/vehicle-transfer" || location === "/cadastro-massa-veiculos") ? "bg-gray-700" : "bg-transparent"
                 )}
-                onClick={() => setVehicleMenuExpanded(!vehicleMenuExpanded)}
+                onClick={() => {
+                  // Se o menu já está expandido e estamos clicando, navegar para a página principal
+                  if (vehicleMenuExpanded) {
+                    handleNavigate("/vehicles");
+                  } else {
+                    // Se não está expandido, expandir primeiro
+                    setVehicleMenuExpanded(true);
+                  }
+                }}
               >
                 <Truck className="mr-3 h-5 w-5" />
                 <span className="flex-1 text-left">Veículos</span>
