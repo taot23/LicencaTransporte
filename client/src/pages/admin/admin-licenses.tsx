@@ -142,14 +142,6 @@ const updateStateStatusSchema = z.object({
 // Constantes e funções auxiliares para status
 
 export default function AdminLicensesPage() {
-  const [selectedLicense, setSelectedLicense] = useState<LicenseRequest | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [stateFilter, setStateFilter] = useState("");
-  const [transporterFilter, setTransporterFilter] = useState("");
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showStateCnpjSelector, setShowStateCnpjSelector] = useState(false);
-  const [selectedState, setSelectedState] = useState("");
   const [includeRenewalDrafts, setIncludeRenewalDrafts] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState({
     id: true,
@@ -172,11 +164,17 @@ export default function AdminLicensesPage() {
   const { isConnected, lastMessage } = useWebSocketContext();
   
   // Estados para controle de filtros e busca
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [transporterFilter, setTransporterFilter] = useState("all");
   const [transporterSearchTerm, setTransporterSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState("all_states");
+  const [selectedLicense, setSelectedLicense] = useState<LicenseRequest | null>(null);
   const [licenseDetailsOpen, setLicenseDetailsOpen] = useState(false);
   const [stateStatusDialogOpen, setStateStatusDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedState, setSelectedState] = useState("");
   const [visibleStateFlows, setVisibleStateFlows] = useState<string[]>([]);
   
   // Estado para ordenação
@@ -570,31 +568,10 @@ export default function AdminLicensesPage() {
   });
 
   // Filtrar licenças com critérios múltiplos
+  // SISTEMA HÍBRIDO OTIMIZADO: Filtros principais no servidor, filtros extras no cliente
   const filteredLicenses = licenses
-    .filter(license => {
-      // Filtro de busca (número do pedido, placa)
-      const matchesSearch = !searchTerm || 
-        license.requestNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        license.mainVehiclePlate?.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      // Filtro de status - buscar nos estados individuais, não no status geral
-      let matchesStatus = !statusFilter || statusFilter === "all";
-      
-      if (statusFilter && statusFilter !== "all") {
-        // Verificar se algum estado da licença tem o status selecionado
-        if (license.stateStatuses && license.stateStatuses.length > 0) {
-          matchesStatus = license.stateStatuses.some(stateStatus => {
-            const parts = stateStatus.split(':');
-            // O status está na segunda posição: "ESTADO:STATUS:..."
-            return parts[1] === statusFilter;
-          });
-        } else {
-          // Se não há status por estado, verificar o status geral (fallback)
-          matchesStatus = license.status === statusFilter;
-        }
-      }
-      
-      // Filtro de transportador por busca de texto (nome, CNPJ, CPF)
+    .filter((license: LicenseRequest) => {
+      // Busca por transportador (aplicada no cliente para busca em tempo real)
       let matchesTransporter = true;
       if (transporterSearchTerm.trim()) {
         const searchLower = transporterSearchTerm.toLowerCase().trim();
@@ -611,7 +588,7 @@ export default function AdminLicensesPage() {
         }
       }
       
-      // Filtro de data
+      // Filtro de data (aplicado no cliente para precisão)
       let matchesDate = true;
       if (dateFilter) {
         const requestDate = license.createdAt ? new Date(license.createdAt) : null;
@@ -628,13 +605,7 @@ export default function AdminLicensesPage() {
         }
       }
       
-      // Filtro por estado
-      let matchesState = true;
-      if (stateFilter && stateFilter !== "all_states") {
-        matchesState = license.states && license.states.includes(stateFilter);
-      }
-      
-      return matchesSearch && matchesStatus && matchesTransporter && matchesDate && matchesState;
+      return matchesTransporter && matchesDate;
     })
     // Aplicar ordenação
     .sort((a, b) => {
@@ -672,14 +643,13 @@ export default function AdminLicensesPage() {
       }
     });
 
-  // Hook de paginação das licenças filtradas
-  // FILTROS JÁ APLICADOS NO SERVIDOR - DADOS PRONTOS PARA USO
-  const paginatedLicenses = licenses;
+  // DADOS OTIMIZADOS: Paginação no servidor + filtros finos no cliente
+  const paginatedLicenses = filteredLicenses;
   
   // Reset para primeira página quando filtros mudam
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, stateFilter, transporterFilter]);
+  }, [searchTerm, statusFilter, stateFilter, transporterFilter, transporterSearchTerm, dateFilter]);
 
   // Função removida pois o status agora só será editado por estado individual
 
@@ -1339,7 +1309,7 @@ export default function AdminLicensesPage() {
 
                   {/* Visão Mobile (Cards) */}
                   <div className="grid grid-cols-1 gap-4 md:hidden">
-                    {filteredLicenses.length === 0 ? (
+                    {paginatedLicenses.length === 0 ? (
                       <div className="text-center py-6 text-gray-500">
                         Nenhuma licença encontrada
                       </div>
@@ -1502,12 +1472,12 @@ export default function AdminLicensesPage() {
                   <MobileListPagination
                     currentPage={currentPage}
                     totalPages={pagination.totalPages}
-                    totalItems={filteredLicenses.length}
-                    itemsPerPage={10}
-                    hasPrev={currentPage > 1}
-                    hasNext={currentPage < pagination.totalPages}
-                    startItem={(currentPage - 1) * 10 + 1}
-                    endItem={Math.min(currentPage * 10, filteredLicenses.length)}
+                    totalItems={pagination.total}
+                    itemsPerPage={pageSize}
+                    hasPrev={pagination.hasPrev}
+                    hasNext={pagination.hasNext}
+                    startItem={((pagination.page - 1) * pagination.limit) + 1}
+                    endItem={Math.min(pagination.page * pagination.limit, pagination.total)}
                     onPageChange={setCurrentPage}
                   />
                 </div>
