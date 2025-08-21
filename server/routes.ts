@@ -4318,6 +4318,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         conditions.push(eq(licenseRequests.status, statusFilter));
       }
       
+      // Filtro de estado
+      if (stateFilter && stateFilter !== 'all_states') {
+        // O campo states é um array de texto, então verificamos se o estado está contido no array
+        conditions.push(sql`${stateFilter} = ANY(${licenseRequests.states})`);
+      }
+      
       // APLICAR TODAS AS CONDIÇÕES
       if (conditions.length > 0) {
         query = query.where(and(...conditions));
