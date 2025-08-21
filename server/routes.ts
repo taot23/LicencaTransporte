@@ -63,7 +63,7 @@ const getUploadDir = () => {
       }
       
       // Criar subdiretórios necessários
-      const subDirs = ['vehicles', 'transporters', 'boletos'];
+      const subDirs = ['vehicles', 'transporters', 'boletos', 'vehicle-set-types'];
       subDirs.forEach(subDir => {
         const subPath = path.join(uploadPath!, subDir);
         if (!fs.existsSync(subPath)) {
@@ -6670,16 +6670,35 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     }
   });
 
-  // Rota para upload de objetos
+  // Rota para upload de objetos (híbrida: Object Storage + Upload Local)
   app.post("/api/objects/upload", requireAuth, async (req, res) => {
     try {
-      const { ObjectStorageService } = await import('./objectStorage');
-      const objectStorageService = new ObjectStorageService();
-      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-      res.json({ uploadURL });
+      // Tentar usar Object Storage primeiro (desenvolvimento/Replit)
+      if (process.env.PRIVATE_OBJECT_DIR) {
+        const { ObjectStorageService } = await import('./objectStorage');
+        const objectStorageService = new ObjectStorageService();
+        const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+        return res.json({ uploadURL, type: 'object_storage' });
+      }
+      
+      // Fallback para upload local (produção)
+      console.log('[UPLOAD] Object Storage não disponível, usando upload local');
+      return res.json({ 
+        uploadURL: null, 
+        type: 'local_upload',
+        message: 'Use local upload endpoint instead' 
+      });
+      
     } catch (error) {
       console.error("Error getting upload URL:", error);
-      res.status(500).json({ error: "Failed to get upload URL" });
+      
+      // Se Object Storage falhar, usar upload local como fallback
+      console.log('[UPLOAD] Fallback para upload local devido a erro no Object Storage');
+      return res.json({ 
+        uploadURL: null, 
+        type: 'local_upload',
+        message: 'Fallback to local upload due to Object Storage error' 
+      });
     }
   });
 
@@ -6693,6 +6712,65 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
     } catch (error) {
       console.error("Error accessing object:", error);
       res.status(404).json({ error: "Object not found" });
+    }
+  });
+
+  // Upload local para imagens de tipos de conjunto (fallback para produção)
+  const vehicleSetTypeImageUpload = multer({ 
+    storage: multer.diskStorage({
+      destination: function (req, file, cb) {
+        const vehicleSetTypeDir = path.join(uploadDir, 'vehicle-set-types');
+        cb(null, vehicleSetTypeDir);
+      },
+      filename: function (req, file, cb) {
+        const timestamp = Date.now();
+        const ext = path.extname(file.originalname);
+        const filename = `vehicle-set-type-${timestamp}${ext}`;
+        cb(null, filename);
+      }
+    }),
+    fileFilter: function (req, file, cb) {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Tipo de arquivo não suportado. Use JPEG, PNG ou WebP.'), false);
+      }
+    },
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB max
+    }
+  });
+
+  app.post("/api/upload/vehicle-set-type-image", requireAuth, vehicleSetTypeImageUpload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "Nenhum arquivo enviado" });
+      }
+
+      const imageUrl = `/uploads/vehicle-set-types/${req.file.filename}`;
+      
+      console.log(`[UPLOAD] Imagem do tipo de conjunto salva: ${imageUrl}`);
+      
+      res.json({ 
+        imageUrl,
+        originalName: req.file.originalname,
+        size: req.file.size 
+      });
+      
+    } catch (error) {
+      console.error("Erro no upload da imagem:", error);
+      
+      // Limpar arquivo em caso de erro
+      if (req.file?.path) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupError) {
+          console.error("Erro ao limpar arquivo:", cleanupError);
+        }
+      }
+      
+      res.status(500).json({ error: error.message || "Erro interno do servidor" });
     }
   });
 

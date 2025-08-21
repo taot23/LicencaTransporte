@@ -33,39 +33,57 @@ export function ImageUploader({ value, onChange, className }: ImageUploaderProps
     setIsUploading(true);
 
     try {
-      // 1. Obter URL de upload
-      const uploadResponse = await fetch('/api/objects/upload', {
+      // 1. Verificar se Object Storage está disponível
+      const uploadConfigResponse = await fetch('/api/objects/upload', {
         method: 'POST',
         credentials: 'include',
       });
       
-      if (!uploadResponse.ok) {
-        throw new Error('Erro ao obter URL de upload');
+      if (!uploadConfigResponse.ok) {
+        throw new Error('Erro ao obter configuração de upload');
       }
       
-      const { uploadURL } = await uploadResponse.json();
+      const { uploadURL, type } = await uploadConfigResponse.json();
 
-      // 2. Fazer upload da imagem
-      const formData = new FormData();
-      formData.append('file', file);
+      if (type === 'object_storage' && uploadURL) {
+        // 2a. Upload via Object Storage (desenvolvimento)
+        const putResponse = await fetch(uploadURL, {
+          method: 'PUT',
+          body: file,
+          headers: {
+            'Content-Type': file.type,
+          },
+        });
 
-      const putResponse = await fetch(uploadURL, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': file.type,
-        },
-      });
+        if (!putResponse.ok) {
+          throw new Error('Erro ao fazer upload da imagem via Object Storage');
+        }
 
-      if (!putResponse.ok) {
-        throw new Error('Erro ao fazer upload da imagem');
+        // Obter URL normalizada para Object Storage
+        const normalizedUrl = `/objects/uploads/${uploadURL.split('/').pop()?.split('?')[0]}`;
+        setPreview(normalizedUrl);
+        onChange(normalizedUrl);
+        
+      } else {
+        // 2b. Upload local (produção)
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const localUploadResponse = await fetch('/api/upload/vehicle-set-type-image', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        });
+
+        if (!localUploadResponse.ok) {
+          const errorData = await localUploadResponse.json();
+          throw new Error(errorData.error || 'Erro ao fazer upload da imagem');
+        }
+
+        const { imageUrl } = await localUploadResponse.json();
+        setPreview(imageUrl);
+        onChange(imageUrl);
       }
-
-      // 3. Obter URL normalizada
-      const normalizedUrl = `/objects/uploads/${uploadURL.split('/').pop()?.split('?')[0]}`;
-      
-      setPreview(normalizedUrl);
-      onChange(normalizedUrl);
       
     } catch (error) {
       console.error('Erro no upload:', error);

@@ -1,0 +1,41 @@
+12|aet-license-system  | Cliente WebSocket desconectado
+12|aet-license-system  | 11:18:15 PM [express] GET /api/admin/licenses 401 in 3ms :: {"message":"Não autenticado"}
+12|aet-license-system  | 11:18:16 PM [express] GET /api/admin/licenses 401 in 4ms :: {"message":"Não autenticado"}
+12|aet-license-system  | 11:18:16 PM [express] GET /api/admin/licenses 401 in 1ms :: {"message":"Não autenticado"}
+12|aet-license-system  | Novo cliente WebSocket conectado
+12|aet-license-system  | Mensagem recebida: {"type":"REGISTER_INTEREST","licenseId":406}
+12|aet-license-system  | 11:18:18 PM [express] GET /api/admin/vehicle-set-types 401 in 2ms :: {"message":"Não autenticado"}
+12|aet-license-system  | 11:18:18 PM [express] GET /api/admin/vehicle-set-types 401 in 2ms :: {"message":"Não autenticado"}
+12|aet-license-system  | 11:18:19 PM [express] GET /api/admin/vehicle-set-types 401 in 2ms :: {"message":"Não autenticado"}
+12|aet-license-system  | 11:18:20 PM [express] GET /api/admin/vehicle-set-types 401 in 2ms :: {"message":"Não autenticado"}
+12|aet-license-system  | Cliente WebSocket desconectado
+12|aet-license-system  | Cliente WebSocket desconectado
+12|aet-license-system  | Novo cliente WebSocket conectado
+12|aet-license-system  | Mensagem recebida: {"type":"REGISTER_INTEREST","licenseId":425}
+12|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+12|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+12|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+12|aet-license-system  | [VEHICLE SET TYPES] Retornando dados do cache
+12|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+12|aet-license-system  | 11:18:26 PM [express] GET /api/admin/vehicle-set-types 304 in 20ms :: [{"id":"bitrain_6_axles","name"…
+12|aet-license-system  | 11:18:26 PM [express] GET /api/user 304 in 26ms :: {"id":1,"email":"admin@sistema.com","fullName":"Ad…
+12|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+12|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+12|aet-license-system  | Error getting upload URL: Error: PRIVATE_OBJECT_DIR not set. Create a bucket in 'Object Storage' tool and set PRIVATE_OBJECT_DIR env var.
+12|aet-license-system  |     at ObjectStorageService.getPrivateObjectDir (/var/www/aetlicensesystem/LicencaTransporte/server/objectStorage.ts:62:13)
+12|aet-license-system  |     at ObjectStorageService.getObjectEntityUploadURL (/var/www/aetlicensesystem/LicencaTransporte/server/objectStorage.ts:124:35)
+12|aet-license-system  |     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/routes.ts:6678:52)
+12|aet-license-system  | 11:18:35 PM [express] POST /api/objects/upload 500 in 8ms :: {"error":"Failed to get upload URL"}
+12|aet-license-system  | Cliente WebSocket desconectado
+12|aet-license-system  | Cliente WebSocket desconectado
+12|aet-license-system  | Novo cliente WebSocket conectado
+12|aet-license-system  | Novo cliente WebSocket conectado
+12|aet-license-system  | Cliente WebSocket desconectado
+12|aet-license-system  | Novo cliente WebSocket conectado
+12|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+12|aet-license-system  | [AUTH DEBUG] Deserializing user ID: 1
+12|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+12|aet-license-system  | [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+12|aet-license-system  | [VEHICLE SET TYPES] Retornando dados do cache
+12|aet-license-system  | 11:18:53 PM [express] GET /api/user 304 in 9ms :: {"id":1,"email":"admin@sistema.com","fullName":"Adm…
+12|aet-license-system  | 11:18:53 PM [express] GET /api/admin/vehicle-set-types 304 in 8ms :: [{"id":"bitrain_6_axles","name":…

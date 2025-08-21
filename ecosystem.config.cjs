@@ -10,7 +10,6 @@ module.exports = {
         NODE_ENV: "production",
         PORT: 5050
         // EVITE pôr segredos aqui (ver nota no fim)
-        DATABASE_URL: "postgresql://aetuser:nvs123@localhost:5432/aetlicensesystem",
       }
     }
   ]
