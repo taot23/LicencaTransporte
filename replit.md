@@ -15,7 +15,15 @@ This project is a robust system for managing AET (Autorização Especial de Trâ
 ### System Architecture
 The system is built with a React.js frontend using TypeScript, a Node.js/Express backend, and a PostgreSQL database. Real-time communication is handled via WebSockets, and data validation uses Zod schemas. The UI/UX prioritizes responsiveness with Tailwind CSS, ensuring a consistent experience across devices.
 
-**Recent Performance Optimization (August 20, 2025):**
+**Recent Performance Optimization (August 21, 2025):**
+- **SISTEMA DE UPLOAD HÍBRIDO IMPLEMENTADO**: Solução robusta que detecta automaticamente entre Object Storage (desenvolvimento) e upload local (produção)
+- **MÓDULO FINANCEIRO MODERNIZADO**: Sistema de paginação unificado implementado em todas as páginas financeiras com usePaginatedList, filtros integrados e navegação responsiva
+- **CORREÇÃO CRÍTICA DE PRODUÇÃO**: Resolvido problema de upload de imagens dos tipos de conjunto veicular devido a variáveis de ambiente ausentes no servidor de produção
+- **IMAGEUPLOADER ATUALIZADO**: Componente modernizado para suportar ambos os sistemas de upload com fallback automático
+- **ESTRUTURA DE DIRETÓRIOS ORGANIZADA**: Subdiretórios específicos criados para imagens de tipos de conjunto (`/uploads/vehicle-set-types/`) com configuração de produção otimizada
+- **CORREÇÕES DE TIPOS TYPESCRIPT**: Resolvidos 8 erros LSP relacionados a tipos de dados incompatíveis e propriedades inexistentes no schema
+
+**Previous Optimization (August 20, 2025):**
 - **Sistema de Tempo Real INSTANTÂNEO Implementado**: Cores de status mudam em tempo real imediatamente como anteriormente funcionava
 - **Cache Ultra-Rápido**: staleTime reduzido para 1 segundo, refetch forçado via WebSocket para atualizações instantâneas
 - **WebSocket Context Otimizado**: Sistema resetQueries + refetchQueries para garantir dados frescos instantaneamente  

@@ -4335,16 +4335,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`⚡ [ADMIN LICENSES] Query executada em ${Date.now() - startTime}ms - ${licenses.length}/${total} registros`);
       
       // BUSCAR TRANSPORTADORES APENAS DOS REGISTROS ATUAIS (OTIMIZADO)
-      const transporterIds = [...new Set(licenses.map(l => l.transporterId).filter(Boolean))];
+      const transporterIds = Array.from(new Set(licenses.map(l => l.transporterId).filter(Boolean)));
       const transportersMap = new Map();
       
       if (transporterIds.length > 0) {
+        const validTransporterIds = transporterIds.filter(id => id !== null) as number[];
         const transportersData = await db.select({
           id: transporters.id,
           name: transporters.name,
           tradeName: transporters.tradeName,
           documentNumber: transporters.documentNumber
-        }).from(transporters).where(inArray(transporters.id, transporterIds));
+        }).from(transporters).where(inArray(transporters.id, validTransporterIds));
         
         transportersData.forEach(t => {
           transportersMap.set(t.id, t);
@@ -4933,9 +4934,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name: req.body.name || 'Novo Transportador',
         documentNumber: req.body.documentNumber || '00000000000000',
         email: req.body.email || 'teste@exemplo.com',
-        phone: req.body.phone || '(00) 00000-0000',
-        address: req.body.address || 'Endereço teste',
-        userId: user.id
+        phone: req.body.phone || '(00) 00000-0000'
       });
       
       res.status(201).json(newTransporter);
@@ -5399,13 +5398,13 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       const updatedLicense = await storage.updateLicenseStateStatus({
         licenseId,
         state: statusData.state || '',
-        stateStatus: statusData.status,
+        status: statusData.status,
         comments: statusData.comments || '',
         validUntil: statusData.validUntil,
         issuedAt: statusData.issuedAt,
         aetNumber: statusData.aetNumber,
         selectedCnpj: statusData.selectedCnpj,
-        stateFile: file
+        file: file
       });
       
       // Registrar mudança no histórico de status
@@ -5415,8 +5414,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         userId: req.user!.id,
         oldStatus: previousStateStatus,
         newStatus: statusData.status,
-        comments: statusData.comments || null,
-        createdAt: new Date()
+        comments: statusData.comments || null
       });
       
       console.log(`Histórico de status criado para licença ${licenseId}, estado ${statusData.state}: ${previousStateStatus} -> ${statusData.status}`);
@@ -5679,8 +5677,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         userId: req.user!.id,
         oldStatus: previousStateStatus,
         newStatus: stateStatusData.status,
-        comments: stateStatusData.comments || null,
-        createdAt: new Date()
+        comments: stateStatusData.comments || null
       });
       
       console.log(`Histórico de status criado para licença ${licenseId}, estado ${stateStatusData.state}: ${previousStateStatus} -> ${stateStatusData.status}`);
@@ -6734,7 +6731,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
       } else {
-        cb(new Error('Tipo de arquivo não suportado. Use JPEG, PNG ou WebP.'), false);
+        cb(null, false);
       }
     },
     limits: {
@@ -6770,7 +6767,8 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         }
       }
       
-      res.status(500).json({ error: error.message || "Erro interno do servidor" });
+      const errorMessage = error instanceof Error ? error.message : "Erro interno do servidor";
+      res.status(500).json({ error: errorMessage });
     }
   });
 
