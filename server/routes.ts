@@ -4931,10 +4931,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Lógica básica de criação sem upload de arquivo
       const newTransporter = await storage.createTransporter({
+        personType: 'pj' as const,
         name: req.body.name || 'Novo Transportador',
         documentNumber: req.body.documentNumber || '00000000000000',
         email: req.body.email || 'teste@exemplo.com',
-        phone: req.body.phone || '(00) 00000-0000'
+        phone: req.body.phone || '(00) 00000-0000',
+        subsidiaries: [],
+        documents: []
       });
       
       res.status(201).json(newTransporter);
