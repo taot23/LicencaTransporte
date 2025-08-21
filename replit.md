@@ -16,6 +16,11 @@ This project is a robust system for managing AET (Autorização Especial de Trâ
 The system is built with a React.js frontend using TypeScript, a Node.js/Express backend, and a PostgreSQL database. Real-time communication is handled via WebSockets, and data validation uses Zod schemas. The UI/UX prioritizes responsiveness with Tailwind CSS, ensuring a consistent experience across devices.
 
 **Recent Performance Optimization (August 21, 2025):**
+- **STORAGE CENTRALIZADO E ORGANIZADO**: Nova estrutura hierárquica para licenças: `/uploads/licenses/{transportadora}/{estado}/{licença}/` com sistema de slugs limpos e organização automática
+- **CORREÇÃO DE DUPLICAÇÃO DE UPLOADS**: Eliminada duplicação de caminhos "uploads" no backend - agora usa UPLOAD_DIR dinâmico consistentemente
+- **SISTEMA DE SAÚDE E PRODUÇÃO**: Healthcheck endpoint `/healthz` implementado, ecosystem.config.cjs configurado para PM2 com variáveis de ambiente organizadas
+- **SCRIPTS DE MIGRAÇÃO**: Script `reorganizar-licencas.ts` criado para migrar arquivos existentes para nova estrutura organizada
+- **TRIGGERS DE UPDATED_AT**: Sistema automático de timestamps para auditoria de mudanças em tabelas principais (vehicles, licenses, transporters)
 - **SISTEMA DE UPLOAD HÍBRIDO IMPLEMENTADO**: Solução robusta que detecta automaticamente entre Object Storage (desenvolvimento) e upload local (produção)
 - **MÓDULO FINANCEIRO MODERNIZADO**: Sistema de paginação unificado implementado em todas as páginas financeiras com usePaginatedList, filtros integrados e navegação responsiva
 - **CORREÇÃO CRÍTICA DE PRODUÇÃO**: Resolvido problema de upload de imagens dos tipos de conjunto veicular devido a variáveis de ambiente ausentes no servidor de produção
@@ -45,6 +50,7 @@ The system is built with a React.js frontend using TypeScript, a Node.js/Express
 
 **Key Architectural Decisions:**
 - **External Uploads System**: Files are stored in an external, configurable directory to prevent data loss during reinstalls. The system automatically detects write permissions and prioritizes `UPLOAD_DIR` (environment variable), `/var/uploads`, `/tmp/uploads`, `../uploads`, and `./uploads` in that order. Subfolders for `vehicles/` and `transporter/` ensure organization.
+- **Centralized License Storage**: New organized structure using `server/lib/storage.ts` creates hierarchical directories `/uploads/licenses/{transportadora-slug}/{ESTADO}/{licenca-slug}/` with automated slug generation and collision avoidance.
 - **Dedicated Production Server**: A specific `server/production-server.js` is used for production deployments to avoid Vite-related issues, integrated with PM2 for process management.
 - **Universal Pagination**: A standardized pagination system (`usePaginatedList`, `ListPagination`, `MobileListPagination`) is implemented across all administrative and user-facing lists (licenses, vehicles, transporters, users, invoices), ensuring performance with large datasets (e.g., 40,000+ plates).
 - **Intelligent License Validation**: A robust validation system checks for existing licenses based on specific vehicle combinations (tractor + 1st trailer + 2nd trailer/dolly) across 27 Brazilian states and federal bodies (DNIT, ANTT, PRF). It blocks new requests if an identical combination has a license with more than 60 days remaining validity.
