@@ -2,11 +2,9 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
-// Load environment variables (only in development)
+// Load environment variables
 import dotenv from "dotenv";
-if (process.env.NODE_ENV !== "production") {
-  dotenv.config();
-}
+dotenv.config();
 
 const app = express();
 app.use(express.json());
@@ -49,9 +47,6 @@ app.use((req, res, next) => {
 
   next();
 });
-
-  // Health check endpoint
-  app.get("/healthz", (_req, res) => res.send("ok"));
 
 (async () => {
   const server = await registerRoutes(app);
