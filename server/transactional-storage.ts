@@ -714,14 +714,20 @@ export class TransactionalStorage implements IStorage {
       stateStatuses.push(newStateStatus);
     }
     
-    // Atualizar arquivo do estado se fornecido
+    // Atualizar arquivo do estado se fornecido - priorizar URL organizada
     let stateFiles = [...(license.stateFiles || [])];
     let licenseFileUrl = license.licenseFileUrl;
     
-    if (data.file && typeof data.file !== 'string') {
-      // Extrair o nome do arquivo do caminho completo
+    // Usar URL organizada se disponível, senão processar o arquivo enviado
+    let fileUrl: string | undefined = data.organizedFileUrl;
+    
+    if (!fileUrl && data.file && typeof data.file !== 'string') {
+      // Fallback para o comportamento original se não há URL organizada
       const filename = data.file.filename;
-      const fileUrl = `/uploads/${filename}`;
+      fileUrl = `/uploads/${filename}`;
+    }
+    
+    if (fileUrl) {
       const newStateFile = `${data.state}:${fileUrl}`;
       
       const existingFileIndex = stateFiles.findIndex(s => s.startsWith(`${data.state}:`));

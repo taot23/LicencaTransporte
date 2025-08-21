@@ -40,6 +40,7 @@ import * as fs from "fs";
 import { promisify } from "util";
 import { WebSocketServer, WebSocket } from "ws";
 import { withCache, invalidateCache, appCache } from "./cache";
+import type { LicenseMetadata } from './lib/license-storage';
 
 // Set up file storage for uploads - configuração robusta para produção
 const getUploadDir = () => {
@@ -63,7 +64,7 @@ const getUploadDir = () => {
       }
       
       // Criar subdiretórios necessários
-      const subDirs = ['vehicles', 'transporters', 'boletos', 'vehicle-set-types'];
+      const subDirs = ['vehicles', 'transporters', 'boletos', 'vehicle-set-types', 'licenses'];
       subDirs.forEach(subDir => {
         const subPath = path.join(uploadPath!, subDir);
         if (!fs.existsSync(subPath)) {
@@ -114,12 +115,12 @@ const storage_config = multer.diskStorage({
       return;
     }
     
-    // Para arquivos de estado de licenças liberadas - MANTER NOME ORIGINAL
+    // Para arquivos de estado de licenças - será processado manualmente no endpoint
     if (file.fieldname === 'stateFile' || file.fieldname.includes('stateFile')) {
-      // **NOVA REGRA**: Arquivos de licenças emitidas devem manter o nome original
-      const originalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
-      console.log(`[UPLOAD NAMING] StateFile: mantendo nome original sanitizado: ${originalName}`);
-      cb(null, originalName);
+      // Para arquivos de licenças, usaremos estrutura organizacional posteriormente
+      const tempName = `temp-${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      console.log(`[UPLOAD NAMING] StateFile: nome temporário para reorganização: ${tempName}`);
+      cb(null, tempName);
       return;
     }
     
@@ -5660,10 +5661,51 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         console.log(`[VALIDAÇÃO AET] ✅ Número "${stateStatusData.aetNumber}" válido para estado ${stateStatusData.state}`);
       }
       
-      // Adicionar arquivo se fornecido
+      // Processar arquivo se fornecido com estrutura organizacional
       let file: Express.Multer.File | undefined = undefined;
+      let organizedFileUrl: string | undefined = undefined;
+      
       if (req.file) {
-        file = req.file;
+        const { saveLicenseFile } = await import('./lib/license-storage');
+        
+        // Buscar dados da transportadora para criar a estrutura de pastas
+        const transporter = await db.select({
+          name: transporters.name
+        }).from(transporters)
+        .where(eq(transporters.id, existingLicense.transporterId))
+        .limit(1);
+        
+        if (transporter.length > 0) {
+          try {
+            // Ler o arquivo temporário
+            const fs = await import('fs/promises');
+            const tempFilePath = req.file.path;
+            const fileBuffer = await fs.readFile(tempFilePath);
+            
+            // Salvar na estrutura organizacional
+            const result = await saveLicenseFile({
+              buffer: fileBuffer,
+              originalName: req.file.originalname,
+              transporter: transporter[0].name,
+              state: stateStatusData.state!,
+              licenseNumber: existingLicense.requestNumber
+            });
+            
+            organizedFileUrl = result.publicUrl;
+            
+            // Remover arquivo temporário
+            await fs.unlink(tempFilePath);
+            
+            console.log(`[LICENSE ORGANIZATION] ✅ Arquivo organizado: ${organizedFileUrl}`);
+          } catch (error) {
+            console.error('[LICENSE ORGANIZATION] ❌ Erro ao organizar arquivo:', error);
+            // Em caso de erro, manter comportamento original
+            file = req.file;
+          }
+        } else {
+          console.error('[LICENSE ORGANIZATION] ❌ Transportadora não encontrada');
+          file = req.file;
+        }
       }
       
       // Obter o status anterior do estado específico
@@ -5683,6 +5725,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         selectedCnpj: stateStatusData.selectedCnpj,
         stateCnpj: stateStatusData.selectedCnpj, // Usar selectedCnpj como stateCnpj
         file,
+        organizedFileUrl, // Usar URL organizada se disponível
       });
       
       // Registrar mudança no histórico de status

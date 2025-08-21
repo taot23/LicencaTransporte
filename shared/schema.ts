@@ -543,6 +543,7 @@ export const updateLicenseStateSchema = z.object({
   aetNumber: z.string().optional(), // Número da AET para o status "Análise do Órgão"
   selectedCnpj: z.string().optional(), // CNPJ selecionado da empresa transportadora (global - legado)
   stateCnpj: z.string().optional(), // CNPJ específico para este estado
+  organizedFileUrl: z.string().optional(), // URL do arquivo organizadamente armazenado na estrutura hierárquica
 });
 
 // Type definitions

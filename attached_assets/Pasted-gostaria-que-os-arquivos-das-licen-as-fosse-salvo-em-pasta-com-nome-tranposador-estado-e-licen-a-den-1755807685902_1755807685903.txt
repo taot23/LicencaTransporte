@@ -1,0 +1,207 @@
+gostaria que os arquivos das licenças fosse salvo em pasta com nome tranposador estado e licença dentro é possivel pois quero uma organização melhor  
+O ChatGPT disse:
+Pensou por 42s
+
+dá sim — vamos organizar assim:
+
+Estrutura sugerida
+/var/uploads/licenses/<transportadora>/<UF>/<licenca>/
+  └── <arquivo(s)>.pdf|jpg|png
+
+
+Ex.:
+/var/uploads/licenses/transportadora-nossa-senhora/PR/AET-09466425/2025-08-07.pdf
+
+O Nginx pode continuar com alias /var/uploads/; – nada muda na config.
+
+Patch no backend (TypeScript/Express)
+
+Crie um helper central para construir o caminho e salvar o arquivo:
+
+// server/lib/storage.ts
+import path from "node:path";
+import fs from "node:fs/promises";
+
+const UPLOAD_BASE = process.env.UPLOAD_DIR || path.join(process.cwd(), "uploads");
+
+export function toSlug(raw: string): string {
+  return (raw || "desconhecido")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")   // tira acentos
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 60);
+}
+
+export function buildLicenseDir(opts: { transporter: string; state: string; licenseNumber: string }) {
+  const t = toSlug(opts.transporter);
+  const uf = toSlug(opts.state);
+  const lic = toSlug(opts.licenseNumber);
+  return {
+    absDir: path.join(UPLOAD_BASE, "licenses", t, uf, lic),
+    relUrlBase: `/uploads/licenses/${encodeURIComponent(t)}/${encodeURIComponent(uf)}/${encodeURIComponent(lic)}`
+  };
+}
+
+async function exists(p: string) {
+  try { await fs.stat(p); return true; } catch { return false; }
+}
+
+export async function saveLicenseFile(params: {
+  buffer: Buffer;
+  originalName: string; // ex.: "comprovante.pdf"
+  transporter: string;  // ex.: "Transportadora X"
+  state: string;        // ex.: "PR"
+  licenseNumber: string;// ex.: "AET-09466425"
+}) {
+  const { absDir, relUrlBase } = buildLicenseDir(params);
+  await fs.mkdir(absDir, { recursive: true });
+
+  const ext = (path.extname(params.originalName) || ".pdf").toLowerCase();
+  const base = toSlug(path.basename(params.originalName, ext)) || "arquivo";
+  let file = `${base}${ext}`;
+  let outPath = path.join(absDir, file);
+  let i = 1;
+  while (await exists(outPath)) {
+    file = `${base}-${i++}${ext}`;
+    outPath = path.join(absDir, file);
+  }
+
+  await fs.writeFile(outPath, params.buffer);
+
+  const publicUrl = `${relUrlBase}/${encodeURIComponent(file)}`;
+  return { outPath, publicUrl };
+}
+
+Como usar no endpoint que gera/salva PDFs de licença
+// server/routes/licenses.ts (trecho)
+import { saveLicenseFile } from "../lib/storage";
+
+// Exemplo: gerar PDF e salvar
+app.post("/api/licenses/:id/generate-pdf", async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+
+    // Pegue metadados da licença e da transportadora no seu DB
+    // Ajuste nomes de tabelas/colunas conforme seu schema
+    const meta = await db.one<{
+      transporter: string; state: string; license_number: string;
+    }>(`
+      SELECT t.name  AS transporter,
+             COALESCE(l.state, t.state) AS state,
+             l.number AS license_number
+      FROM licenses l
+      JOIN transporters t ON t.id = l.transporter_id
+      WHERE l.id = $1
+    `, [id]);
+
+    // Gere o PDF (substitua pela sua função real)
+    const { buffer, suggestedName } = await generateLicensePdf(id); // suggestedName ex.: "2025-08-07.pdf"
+
+    const { publicUrl, outPath } = await saveLicenseFile({
+      buffer,
+      originalName: suggestedName || `${meta.license_number}.pdf`,
+      transporter: meta.transporter,
+      state: meta.state,
+      licenseNumber: meta.license_number,
+    });
+
+    // (Opcional) salvar caminho/URL no banco
+    await db.none(`UPDATE licenses SET file_url = $1 WHERE id = $2`, [publicUrl, id]);
+
+    return res.json({ ok: true, url: publicUrl, path: outPath });
+  } catch (err) {
+    next(err);
+  }
+});
+
+Para uploads manuais relacionados à licença
+
+Se você tem um endpoint (multipart) tipo POST /api/licenses/:id/upload, use o mesmo saveLicenseFile passando req.file.buffer e o originalname.
+
+Script para reorganizar arquivos existentes
+
+Se você já tem PDFs soltos em /var/uploads ou em outra hierarquia, mova-os de acordo com o banco:
+
+// scripts/reorganizar-licencas.ts
+import { Client } from "pg";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { saveLicenseFile } from "../server/lib/storage.js"; // ajuste caminho
+
+const UPLOAD_BASE = process.env.UPLOAD_DIR || "/var/uploads";
+
+async function main() {
+  const db = new Client({ connectionString: process.env.DATABASE_URL });
+  await db.connect();
+
+  // Ajuste os campos abaixo ao seu schema real
+  const { rows } = await db.query(`
+    SELECT l.id, l.number AS license_number,
+           COALESCE(l.state, t.state) AS state,
+           t.name AS transporter,
+           l.file_url
+    FROM licenses l
+    JOIN transporters t ON t.id = l.transporter_id
+    WHERE l.file_url IS NOT NULL
+  `);
+
+  for (const r of rows) {
+    // Caminho antigo relativo começando em /uploads…
+    const rel = r.file_url.replace(/^\/uploads\//, "");
+    const oldAbs = path.join(UPLOAD_BASE, rel);
+
+    try {
+      const buf = await fs.readFile(oldAbs);
+      const origName = path.basename(oldAbs);
+      const { publicUrl } = await saveLicenseFile({
+        buffer: buf,
+        originalName: origName,
+        transporter: r.transporter,
+        state: r.state,
+        licenseNumber: r.license_number,
+      });
+
+      if (publicUrl !== r.file_url) {
+        await db.query(`UPDATE licenses SET file_url = $1 WHERE id = $2`, [publicUrl, r.id]);
+        await fs.rm(oldAbs).catch(() => {});
+        console.log(`✔ movido: ${r.file_url} -> ${publicUrl}`);
+      }
+    } catch (e) {
+      console.error(`✖ falha ao mover ${oldAbs}:`, e.message);
+    }
+  }
+
+  await db.end();
+}
+
+main().catch(err => { console.error(err); process.exit(1); });
+
+
+Execute no servidor:
+
+cd /var/www/aetlicensesystem/LicencaTransporte
+export NODE_ENV=production
+export UPLOAD_DIR=/var/uploads
+export DATABASE_URL="postgresql://aetuser:***@localhost:5432/aetlicensesystem"
+node --loader tsx scripts/reorganizar-licencas.ts   # se for TS/tsx
+# ou: ts-node, ou transpile para JS e rode com node
+
+Observações importantes
+
+Sanitização: toSlug remove acentos e caracteres proibidos dos nomes de pasta.
+
+Colisão: se já existir arquivo com mesmo nome, o helper cria -1, -2, etc.
+
+Permissões: mantenha UPLOAD_DIR com dono www-data (Nginx/Node) e 644/755.
+
+URLs: ficam assim
+/uploads/licenses/<slug-transporter>/<uf>/<licenca>/<arquivo>
+
+Nginx: siga com
+
+location /uploads/ {
+  alias /var/uploads/;
+  try_files $uri =404;
+  add_header Cache-Control "public, max-age=31536000, immutable";
+}
