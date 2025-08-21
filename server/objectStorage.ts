@@ -130,7 +130,10 @@ export class ObjectStorageService {
     }
 
     const objectId = randomUUID();
-    const fullPath = `${privateObjectDir}/uploads/${objectId}`;
+    // Evitar duplicar "uploads" se privateObjectDir já contém o caminho completo
+    const fullPath = privateObjectDir.includes('/uploads') 
+      ? `${privateObjectDir}/${objectId}` 
+      : `${privateObjectDir}/uploads/${objectId}`;
 
     const { bucketName, objectName } = parseObjectPath(fullPath);
 
