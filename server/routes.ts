@@ -4275,7 +4275,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         comments: licenseRequests.comments,
         validUntil: licenseRequests.validUntil,
         issuedAt: licenseRequests.issuedAt,
-        aetNumber: licenseRequests.aetNumber
+        aetNumber: licenseRequests.aetNumber,
+        // CAMPOS DOS VEÍCULOS - ESSENCIAIS PARA A LINHA DE FRENTE
+        tractorUnitId: licenseRequests.tractorUnitId,
+        firstTrailerId: licenseRequests.firstTrailerId,
+        dollyId: licenseRequests.dollyId,
+        secondTrailerId: licenseRequests.secondTrailerId,
+        flatbedId: licenseRequests.flatbedId
       }).from(licenseRequests);
       
       // APLICAR FILTROS NO BANCO PARA PERFORMANCE
