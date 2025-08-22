@@ -1,7 +1,8 @@
 module.exports = {
   apps: [{
     name: 'aet-sistema',
-    script: 'server/production-server.js',
+    script: 'server/index.ts',
+    interpreter: 'tsx',
     cwd: '/var/www/aetlicensesystem/LicencaTransporte',
     instances: 1,
     exec_mode: 'fork',
