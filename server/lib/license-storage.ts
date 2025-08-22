@@ -31,7 +31,8 @@ function validateUploadDir(): string {
   }
 }
 
-const UPLOAD_BASE = validateUploadDir();
+// Remover validação na importação - será validado quando necessário
+let UPLOAD_BASE: string;
 
 // Função para criar slug limpo sem acentos e caracteres especiais
 export function toSlug(raw: string): string {
@@ -49,6 +50,11 @@ export function buildLicenseDir(opts: {
   state: string; 
   licenseNumber: string 
 }) {
+  // Validar diretório toda vez que for usado (sem cache)
+  if (!UPLOAD_BASE) {
+    UPLOAD_BASE = validateUploadDir();
+  }
+  
   const t = toSlug(opts.transporter);
   const uf = toSlug(opts.state);
   const lic = toSlug(opts.licenseNumber);
