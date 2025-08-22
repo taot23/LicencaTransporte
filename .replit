@@ -15,7 +15,7 @@ localPort = 5000
 externalPort = 80
 
 [workflows]
-runButton = "Project"
+runButton = "Produção"
 
 [[workflows.workflow]]
 name = "Project"
@@ -40,6 +40,15 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "Produção"
+author = 42040698
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node server/production-server.js"
 
 [agent]
 integrations = ["javascript_websocket==1.0.0"]
