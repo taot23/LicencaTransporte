@@ -4238,9 +4238,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Rota para admin/operational obter todas as licenças
   app.get('/api/admin/licenses', requireAuth, requirePermission('manageLicenses', 'view'), async (req, res) => {
     try {
-      console.log('🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...');
-      const startTime = Date.now();
-      
       // PAGINAÇÃO OTIMIZADA PARA 50K+ REGISTROS
       const page = Math.max(1, parseInt(req.query.page as string) || 1);
       const limit = Math.min(100, parseInt(req.query.limit as string) || 25); // Máx 100 por página
@@ -4252,8 +4249,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stateFilter = req.query.state as string;
       const transporterFilter = req.query.transporter as string;
       const shouldIncludeRenewalDrafts = req.query.includeRenewal === 'true';
-      
-      console.log(`📊 [ADMIN LICENSES] Parâmetros: page=${page}, limit=${limit}, search="${searchTerm}", status="${statusFilter}"`);
       
       // QUERY OTIMIZADA COM ÍNDICES - BUSCA APENAS DADOS NECESSÁRIOS
       let query = db.select({
@@ -4346,7 +4341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const total = totalResult[0].count;
       const totalPages = Math.ceil(total / limit);
       
-      console.log(`⚡ [ADMIN LICENSES] Query executada em ${Date.now() - startTime}ms - ${licenses.length}/${total} registros`);
+
       
       // BUSCAR TRANSPORTADORES APENAS DOS REGISTROS ATUAIS (OTIMIZADO)
       const transporterIds = Array.from(new Set(licenses.map(l => l.transporterId).filter(Boolean)));
@@ -4372,9 +4367,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         transporter: transportersMap.get(license.transporterId) || null
       }));
       
-      const endTime = Date.now();
-      console.log(`✅ [ADMIN LICENSES] Resposta preparada em ${endTime - startTime}ms - Performance otimizada para grande escala`);
-      
       res.json({
         data: licensesWithTransporter,
         pagination: {
@@ -4385,10 +4377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           hasNext: page < totalPages,
           hasPrev: page > 1
         },
-        performance: {
-          executionTime: endTime - startTime,
-          recordsPerSecond: Math.round((licenses.length / (endTime - startTime)) * 1000)
-        }
+
       });
     } catch (error) {
       console.error('Error fetching admin licenses (optimized):', error);

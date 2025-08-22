@@ -365,7 +365,6 @@ export default function AdminLicensesPage() {
       if (stateFilter !== "all_states") params.set('state', stateFilter);
       if (transporterFilter !== "all") params.set('transporter', transporterFilter);
       
-      console.log(`🚀 [FRONTEND] Buscando licenças: página ${currentPage}, tamanho ${pageSize}`);
       const startTime = Date.now();
       
       const res = await fetch(`${apiEndpoint}?${params.toString()}`, {
@@ -382,7 +381,7 @@ export default function AdminLicensesPage() {
       const data = await res.json();
       const endTime = Date.now();
       
-      console.log(`⚡ [FRONTEND] Licenças carregadas em ${endTime - startTime}ms - ${data.data?.length || 0} registros`);
+
       
       return data;
     },

@@ -1,0 +1,239 @@
+T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 10ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 3ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 10ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 6ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 11ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 11ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 5ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 6ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 11ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 10ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 10ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 3ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 10ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 11ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 17ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 6ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 10ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 6ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 17ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 9ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 15ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 10ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 5ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 7ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 11ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 9ms :: {"data":[{"id":406,"userId":1,"transporte…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 10ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 11ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 7ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 12ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 3ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 10ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 11ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 5ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 8ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 12ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 6ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 13ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 10ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 6ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 9ms :: {"data":[{"id":406,"userId":1,"transporte…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 6ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 9ms :: {"data":[{"id":406,"userId":1,"transporte…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 6ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 10ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 3ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 11ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 9ms :: {"data":[{"id":406,"userId":1,"transporte…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 9ms :: {"data":[{"id":406,"userId":1,"transporte…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 11ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 3ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 4ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 9ms :: {"data":[{"id":406,"userId":1,"transporte…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 3ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 4ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 8ms :: {"data":[{"id":406,"userId":1,"transporte…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 3ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 5ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 8ms :: {"data":[{"id":406,"userId":1,"transporte…
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:04: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:04: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:04: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:04: ⚡ [ADMIN LICENSES] Query executada em 3ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:04: ✅ [ADMIN LICENSES] Resposta preparada em 4ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:04: 3:20:04 PM [express] GET /api/admin/licenses 200 in 8ms :: {"data":[{"id":406,"userId":1,"transporte…
+0|aet-sistema  | 2025-08-22T15:20:05: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:05: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:05: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:05: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:05: ⚡ [ADMIN LICENSES] Query executada em 3ms - 55/55 registros
+0|aet-sistema  | 2025-08-22T15:20:05: ✅ [ADMIN LICENSES] Resposta preparada em 4ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T15:20:05: 3:20:05 PM [express] GET /api/admin/licenses 200 in 14ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sistema  | 2025-08-22T15:20:05: [AUTH DEBUG] Deserializing user ID: 11
+0|aet-sistema  | 2025-08-22T15:20:05: [AUTH DEBUG] User deserialized: elias@nvslicencas.com.br (role: operational)
+0|aet-sistema  | 2025-08-22T15:20:05: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T15:20:05: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=100, search="undefined", status="undefined"
+0|aet-sistema  | 2025-08-22T15:20:05: ⚡ [ADMIN LICENSES] Query executada em 4ms - 55/55 registros
+^C
+servidorvoipnvs@appnvs:~$ 
