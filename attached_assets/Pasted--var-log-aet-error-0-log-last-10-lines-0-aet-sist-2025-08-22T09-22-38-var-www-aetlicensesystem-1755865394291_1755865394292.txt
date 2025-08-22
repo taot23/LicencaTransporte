@@ -1,0 +1,69 @@
+/var/log/aet/error-0.log last 10 lines:
+0|aet-sist | 2025-08-22T09:22:38: /var/www/aetlicensesystem/LicencaTransporte/server/vite.ts:77
+0|aet-sist | 2025-08-22T09:22:38:     throw new Error(
+0|aet-sist | 2025-08-22T09:22:38:           ^
+0|aet-sist | 2025-08-22T09:22:38: 
+0|aet-sist | 2025-08-22T09:22:38: 
+0|aet-sist | 2025-08-22T09:22:38: Error: Could not find the build directory: /var/www/aetlicensesystem/LicencaTransporte/server/public, make sure to build the client first
+0|aet-sist | 2025-08-22T09:22:38:     at serveStatic (/var/www/aetlicensesystem/LicencaTransporte/server/vite.ts:77:11)
+0|aet-sist | 2025-08-22T09:22:38:     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/index.ts:66:5)
+0|aet-sist | 2025-08-22T09:22:38: 
+0|aet-sist | 2025-08-22T09:22:38: Node.js v20.19.4
+
+0|aet-sistema  | 2025-08-22T09:22:42: [UPLOAD] Validando diretório de upload (SEM FALLBACK): /var/www/aetlicensesystem/uploads
+0|aet-sistema  | 2025-08-22T09:22:42: [UPLOAD] ✅ Diretório validado: /var/www/aetlicensesystem/uploads
+0|aet-sistema  | 2025-08-22T09:22:42: [UPLOAD] 📁 Subdiretórios: vehicles, transporters, boletos, vehicle-set-types, licenses
+0|aet-sistema  | 2025-08-22T09:22:42: [dotenv@17.2.1] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+0|aet-sistema  | 2025-08-22T09:22:42: Warning: connect.session() MemoryStore is not
+0|aet-sistema  | 2025-08-22T09:22:42: designed for a production environment, as it will leak
+0|aet-sistema  | 2025-08-22T09:22:42: memory, and will not scale past a single process.
+0|aet-sistema  | 2025-08-22T09:22:42: [UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/uploads em /uploads
+0|aet-sistema  | 2025-08-22T09:22:42: [UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/uploads em /uploads
+0|aet-sistema  | 2025-08-22T09:22:42: /var/www/aetlicensesystem/LicencaTransporte/server/vite.ts:77
+0|aet-sistema  | 2025-08-22T09:22:42:     throw new Error(
+0|aet-sistema  | 2025-08-22T09:22:42:           ^
+0|aet-sistema  | 2025-08-22T09:22:42: 
+0|aet-sistema  | 2025-08-22T09:22:42: 
+0|aet-sistema  | 2025-08-22T09:22:42: Error: Could not find the build directory: /var/www/aetlicensesystem/LicencaTransporte/server/public, make sure to build the client first
+0|aet-sistema  | 2025-08-22T09:22:42:     at serveStatic (/var/www/aetlicensesystem/LicencaTransporte/server/vite.ts:77:11)
+0|aet-sistema  | 2025-08-22T09:22:42:     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/index.ts:66:5)
+0|aet-sistema  | 2025-08-22T09:22:42: 
+0|aet-sistema  | 2025-08-22T09:22:42: Node.js v20.19.4
+0|aet-sistema  | 2025-08-22T09:22:46: [UPLOAD] Validando diretório de upload (SEM FALLBACK): /var/www/aetlicensesystem/uploads
+0|aet-sistema  | 2025-08-22T09:22:46: [UPLOAD] ✅ Diretório validado: /var/www/aetlicensesystem/uploads
+0|aet-sistema  | 2025-08-22T09:22:46: [UPLOAD] 📁 Subdiretórios: vehicles, transporters, boletos, vehicle-set-types, licenses
+0|aet-sistema  | 2025-08-22T09:22:46: [dotenv@17.2.1] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+0|aet-sistema  | 2025-08-22T09:22:46: Warning: connect.session() MemoryStore is not
+0|aet-sistema  | 2025-08-22T09:22:46: designed for a production environment, as it will leak
+0|aet-sistema  | 2025-08-22T09:22:46: memory, and will not scale past a single process.
+0|aet-sistema  | 2025-08-22T09:22:46: [UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/uploads em /uploads
+0|aet-sistema  | 2025-08-22T09:22:46: [UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/uploads em /uploads
+0|aet-sistema  | 2025-08-22T09:22:46: /var/www/aetlicensesystem/LicencaTransporte/server/vite.ts:77
+0|aet-sistema  | 2025-08-22T09:22:46:     throw new Error(
+0|aet-sistema  | 2025-08-22T09:22:46:           ^
+0|aet-sistema  | 2025-08-22T09:22:46: 
+0|aet-sistema  | 2025-08-22T09:22:46: 
+0|aet-sistema  | 2025-08-22T09:22:46: Error: Could not find the build directory: /var/www/aetlicensesystem/LicencaTransporte/server/public, make sure to build the client first
+0|aet-sistema  | 2025-08-22T09:22:46:     at serveStatic (/var/www/aetlicensesystem/LicencaTransporte/server/vite.ts:77:11)
+0|aet-sistema  | 2025-08-22T09:22:46:     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/index.ts:66:5)
+0|aet-sistema  | 2025-08-22T09:22:46: 
+0|aet-sistema  | 2025-08-22T09:22:46: Node.js v20.19.4
+0|aet-sistema  | 2025-08-22T09:22:50: [UPLOAD] Validando diretório de upload (SEM FALLBACK): /var/www/aetlicensesystem/uploads
+0|aet-sistema  | 2025-08-22T09:22:50: [UPLOAD] ✅ Diretório validado: /var/www/aetlicensesystem/uploads
+0|aet-sistema  | 2025-08-22T09:22:50: [UPLOAD] 📁 Subdiretórios: vehicles, transporters, boletos, vehicle-set-types, licenses
+0|aet-sistema  | 2025-08-22T09:22:50: [dotenv@17.2.1] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+0|aet-sistema  | 2025-08-22T09:22:50: Warning: connect.session() MemoryStore is not
+0|aet-sistema  | 2025-08-22T09:22:50: designed for a production environment, as it will leak
+0|aet-sistema  | 2025-08-22T09:22:50: memory, and will not scale past a single process.
+0|aet-sistema  | 2025-08-22T09:22:50: [UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/uploads em /uploads
+0|aet-sistema  | 2025-08-22T09:22:50: [UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/uploads em /uploads
+0|aet-sistema  | 2025-08-22T09:22:50: /var/www/aetlicensesystem/LicencaTransporte/server/vite.ts:77
+0|aet-sistema  | 2025-08-22T09:22:50:     throw new Error(
+0|aet-sistema  | 2025-08-22T09:22:50:           ^
+0|aet-sistema  | 2025-08-22T09:22:50: 
+0|aet-sistema  | 2025-08-22T09:22:50: 
+0|aet-sistema  | 2025-08-22T09:22:50: Error: Could not find the build directory: /var/www/aetlicensesystem/LicencaTransporte/server/public, make sure to build the client first
+0|aet-sistema  | 2025-08-22T09:22:50:     at serveStatic (/var/www/aetlicensesystem/LicencaTransporte/server/vite.ts:77:11)
+0|aet-sistema  | 2025-08-22T09:22:50:     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/index.ts:66:5)
+0|aet-sistema  | 2025-08-22T09:22:50: 
+0|aet-sistema  | 2025-08-22T09:22:50: Node.js v20.19.4

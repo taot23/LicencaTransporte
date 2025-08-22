@@ -1,201 +1,124 @@
-# 🔧 Correção Build - Erro Vite no Servidor
+# 🚀 Correção Final: Build do Frontend - Servidor Google
 
-## ❌ Problema Identificado
+## ✅ Upload Directory CORRIGIDO!
+O upload agora funciona corretamente:
 ```
-sh: 1: vite: not found
+[UPLOAD] ✅ Diretório validado: /var/www/aetlicensesystem/uploads
 ```
 
-O Vite não está disponível como comando global no servidor.
+## 🔧 Problema Atual: Falta Build do Frontend
 
-## ✅ Soluções
+### Erro:
+```
+Error: Could not find the build directory: /var/www/aetlicensesystem/LicencaTransporte/server/public
+```
 
-### Solução 1: Instalar Vite localmente (Recomendado)
+## ✅ Solução: Build da Aplicação
+
+No servidor Google, execute:
+
 ```bash
 cd /var/www/aetlicensesystem/LicencaTransporte
 
-# Instalar todas as dependências (incluindo dev)
+# 1. Parar aplicação temporariamente
+pm2 stop aet-sistema
+
+# 2. Instalar dependências (se necessário)
 npm install
 
-# Agora fazer build
+# 3. Build da aplicação para produção
 npm run build
-```
 
-### Solução 2: Build alternativo sem Vite global
-```bash
-# Usar npx para executar vite local
-npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
-```
-
-### Solução 3: Script personalizado para produção
-Criar script que não depende de comandos globais:
-
-```bash
-# Editar package.json para usar npx
-nano package.json
-```
-
-Modificar a seção "scripts":
-```json
-{
-  "scripts": {
-    "build": "npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
-    "build:prod": "NODE_ENV=production npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist"
-  }
-}
-```
-
-## 🚀 Comandos de Correção Imediata
-
-Execute na ordem:
-
-### 1. Instalar dependências completas
-```bash
-cd /var/www/aetlicensesystem/LicencaTransporte
-
-# Remover node_modules se houver problemas
-rm -rf node_modules package-lock.json
-
-# Instalar TODAS as dependências (dev + prod)
-npm install
-```
-
-### 2. Verificar se Vite está instalado
-```bash
-# Verificar se vite está nas dependências locais
-./node_modules/.bin/vite --version
-
-# Ou usar npx
-npx vite --version
-```
-
-### 3. Fazer build usando npx
-```bash
-# Build usando npx (não precisa de instalação global)
-npx vite build
-
-# Build do servidor
-npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
-
-# Ou tudo junto
-npm run build
-```
-
-### 4. Verificar se build foi criado
-```bash
+# 4. Verificar se build foi criado
 ls -la dist/
 ls -la dist/public/
+
+# 5. Reiniciar aplicação
+pm2 start aet-sistema
+
+# 6. Verificar logs
+pm2 logs aet-sistema --lines 10
 ```
 
-## 🎯 Script Completo de Deploy
+## 🎯 Resultado Esperado
 
-Salvar como `deploy.sh`:
+### Logs Após Build:
+```
+[UPLOAD] Validando diretório de upload (SEM FALLBACK): /var/www/aetlicensesystem/uploads
+[UPLOAD] ✅ Diretório validado: /var/www/aetlicensesystem/uploads
+[UPLOAD] 📁 Subdiretórios: vehicles, transporters, boletos, vehicle-set-types, licenses
+[UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/uploads em /uploads
+9:XX:XX AM [express] Serving static files from: /var/www/aetlicensesystem/LicencaTransporte/dist/public
+9:XX:XX AM [express] Production server running on port 5000
+```
+
+### Estrutura Após Build:
+```
+/var/www/aetlicensesystem/LicencaTransporte/
+├── dist/                          # ✅ Build gerado
+│   └── public/                    # ✅ Arquivos estáticos
+├── server/
+├── client/
+└── package.json
+```
+
+## 🌐 Teste Final
+
 ```bash
-#!/bin/bash
-set -e
+# 1. Status do PM2
+pm2 status
 
-echo "🚀 Iniciando deploy do Sistema AET"
+# 2. Testar aplicação
+curl -I http://localhost:5000
 
-# Navegar para diretório
-cd /var/www/aetlicensesystem/LicencaTransporte
+# 3. Testar no navegador
+# http://SEU_IP_SERVIDOR
+```
 
-# Instalar dependências
-echo "📦 Instalando dependências..."
+## 🔧 Troubleshooting
+
+### Se npm run build falhar:
+
+```bash
+# Verificar Node.js version
+node --version
+npm --version
+
+# Limpar cache e reinstalar
+rm -rf node_modules package-lock.json
 npm install
 
-# Fazer build
-echo "🏗️ Fazendo build..."
-npm run build
-
-# Verificar build
-if [ ! -d "dist" ]; then
-    echo "❌ Build falhou - diretório dist não encontrado"
-    exit 1
-fi
-
-# Configurar banco de dados
-echo "🗄️ Configurando banco de dados..."
-npm run db:push --force
-
-# Parar aplicação atual se estiver rodando
-echo "⏹️ Parando aplicação atual..."
-pm2 stop aet-sistema || true
-
-# Iniciar aplicação
-echo "▶️ Iniciando aplicação..."
-pm2 start ecosystem.config.cjs
-
-# Salvar configuração PM2
-pm2 save
-
-echo "✅ Deploy concluído!"
-echo "📊 Status:"
-pm2 status
-```
-
-Tornar executável e executar:
-```bash
-chmod +x deploy.sh
-./deploy.sh
-```
-
-## 🔍 Verificação de Problemas
-
-### Verificar dependências instaladas
-```bash
-npm list vite
-npm list esbuild
-```
-
-### Verificar estrutura do projeto
-```bash
-ls -la
-cat package.json | grep -A 10 "scripts"
-```
-
-### Logs detalhados de build
-```bash
-npm run build --verbose
-```
-
-## 🛠️ Se ainda houver problemas
-
-### Opção A: Usar apenas produção
-```bash
-# Para produção, instalar só dependências necessárias
-NODE_ENV=production npm install --production=false
-
-# Build
+# Tentar build novamente
 npm run build
 ```
 
-### Opção B: Build manual
-```bash
-# Fazer build do frontend manualmente
-npx vite build --mode production
+### Se ainda não funcionar:
 
-# Build do backend
-npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --minify
+```bash
+# Verificar script de build no package.json
+cat package.json | grep -A 5 "scripts"
+
+# Build manual se necessário
+npx vite build
+
+# Verificar se dist foi criado
+ls -la dist/
 ```
 
-### Opção C: Usar servidor de produção direto
-Se o build continuar falhando, usar diretamente:
-```bash
-# Usar tsx para produção (mais simples)
-npm install -g tsx
-tsx server/production-server.js
-```
+## 🚀 Sistema Completamente Funcional
 
-## 📝 Notas Importantes
+Após esta correção:
 
-1. **Dependências Dev**: Em produção, você precisa das dependências de desenvolvimento para fazer build
-2. **npx vs global**: Use npx para evitar problemas de instalação global
-3. **Permissões**: Certifique-se que o usuário tem permissões para instalar e executar
-4. **Memória**: Build pode precisar de mais memória, considere usar `--max-old-space-size=4096`
+1. ✅ **Upload Directory**: Externo e funcionando
+2. ✅ **Frontend Build**: Aplicação servindo arquivos estáticos
+3. ✅ **Sistema Sem Fallback**: Logs claros e configuração explícita
+4. ✅ **Produção Ready**: PM2 + TSX + Build otimizado
 
-## ✅ Resultado Esperado
+## 🎯 URLs Finais
 
-Após correção:
-- ✅ Build criado em `dist/`
-- ✅ Frontend otimizado em `dist/public/`
-- ✅ Backend bundle em `dist/index.js`
-- ✅ Aplicação funcionando com PM2
+- **Sistema**: `http://SEU_IP_SERVIDOR`
+- **API**: `http://SEU_IP_SERVIDOR/api/`
+- **Uploads**: `http://SEU_IP_SERVIDOR/uploads/licenses/...`
+- **Admin**: `http://SEU_IP_SERVIDOR/admin`
+
+O sistema estará 100% funcional após o build do frontend.
