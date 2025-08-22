@@ -4,7 +4,7 @@ module.exports = {
     script: 'server/index.ts',          // ✅ Usa index.ts
     interpreter: 'tsx',                 // ✅ Usa TSX para TypeScript
     cwd: '/var/www/aetlicensesystem/LicencaTransporte',
-    instances: 1, 
+    instances: 1,
     exec_mode: 'fork',
     env: {
       NODE_ENV: 'production',
