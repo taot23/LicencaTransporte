@@ -1,3 +1,21 @@
+#!/bin/bash
+
+# Script para corrigir upload no servidor Google
+echo "🔧 Iniciando correção de upload no servidor..."
+
+cd /var/www/aetlicensesystem/LicencaTransporte
+
+# Parar aplicação
+echo "⏹️  Parando aplicação..."
+pm2 stop aet-sistema
+
+# Backup do arquivo original
+echo "💾 Fazendo backup..."
+cp server/lib/license-storage.ts server/lib/license-storage.ts.backup
+
+# Criar versão corrigida
+echo "✏️  Aplicando correção..."
+cat > server/lib/license-storage.ts << 'EOF'
 import path from "node:path";
 import fs from "node:fs/promises";
 import { existsSync, constants } from "node:fs";
@@ -36,7 +54,7 @@ function validateUploadDir(): string {
   }
 }
 
-// Remover validação na importação - será validado quando necessário
+// Validação sob demanda - não na importação
 let UPLOAD_BASE: string;
 
 // Função para criar slug limpo sem acentos e caracteres especiais
@@ -148,3 +166,28 @@ export interface LicenseMetadata {
   state: string;
   licenseNumber: string;
 }
+EOF
+
+# Garantir permissões do arquivo
+chmod 644 server/lib/license-storage.ts
+
+# Garantir permissões do diretório de upload
+echo "🔐 Corrigindo permissões do diretório de upload..."
+cd /var/www/aetlicensesystem
+sudo chown -R servidorvoipnvs:www-data uploads/
+sudo chmod -R 775 uploads/
+
+# Voltar para diretório da aplicação
+cd LicencaTransporte
+
+# Reiniciar aplicação
+echo "🚀 Reiniciando aplicação..."
+pm2 start aet-sistema
+
+# Verificar logs
+echo "📊 Verificando logs..."
+sleep 3
+pm2 logs aet-sistema --lines 10
+
+echo "✅ Correção aplicada! Teste o upload agora."
+EOF
