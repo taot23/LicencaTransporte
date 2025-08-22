@@ -4273,6 +4273,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         validUntil: licenseRequests.validUntil,
         issuedAt: licenseRequests.issuedAt,
         aetNumber: licenseRequests.aetNumber,
+        // CAMPOS DAS DIMENSÕES - ESSENCIAIS PARA DADOS DO CONJUNTO
+        length: licenseRequests.length,
+        width: licenseRequests.width,
+        height: licenseRequests.height,
+        cargoType: licenseRequests.cargoType,
         // CAMPOS DOS VEÍCULOS - ESSENCIAIS PARA A LINHA DE FRENTE
         tractorUnitId: licenseRequests.tractorUnitId,
         firstTrailerId: licenseRequests.firstTrailerId,

@@ -149,21 +149,7 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
     cargoType: license.cargoType || getDefaultCargoType(license.type)
   };
   
-  // DEBUG: Log das dimensões para verificar origem dos dados
-  console.log('[DEBUG] Valores originais das dimensões:', {
-    length: license.length,
-    width: license.width,
-    height: license.height,
-    lengthType: typeof license.length,
-    widthType: typeof license.width,
-    heightType: typeof license.height
-  });
-  
-  console.log('[DEBUG] Valores finais do licenseData:', {
-    length: licenseData.length,
-    width: licenseData.width,
-    height: licenseData.height
-  });
+
   
   // Estados para armazenar dados dos veículos e controlar modais
   const [vehicles, setVehicles] = useState<{[key: string]: Vehicle}>({});
@@ -487,8 +473,6 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
     
     // Retornar valor exatamente como está no banco, mantendo precisão float
     // Usar toFixed(2) para garantir 2 casas decimais na exibição
-    console.log(`[DIMENSION] Valor do banco: ${numericValue} - exibindo: ${numericValue.toFixed(2)}`);
-    
     return numericValue.toFixed(2);
   };
   
