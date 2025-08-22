@@ -1,182 +1,141 @@
-# Guia de Correção de Permissões no Servidor Google
+# 🔧 Correção do Build para Servidor Google
 
-## Problema Identificado
+## 🔍 Problema Identificado
+O servidor está procurando o build em `/server/public/` mas o Vite constrói em `/dist/public/`.
 
-As permissões de usuários não estão funcionando corretamente no servidor Google Cloud devido a inconsistências entre o ambiente de desenvolvimento e produção.
+## ✅ Solução: Fazer Build e Copiar para Local Correto
 
-## Principais Causas
-
-1. **Roles Inconsistentes**: Usuários podem ter roles incorretos no banco de produção
-2. **Middleware de Autenticação**: Diferenças na configuração de autenticação entre ambientes
-3. **Variáveis de Ambiente**: Configurações específicas do servidor Google podem estar ausentes
-4. **Configuração de Sessão**: Problemas na persistência de sessões entre requisições
-
-## Solução Passo a Passo
-
-### 1. Executar Script de Correção
+No servidor Google, execute:
 
 ```bash
-# No servidor Google, navegue até o diretório do projeto
 cd /var/www/aetlicensesystem/LicencaTransporte
 
-# Execute o script de correção (mantendo dados)
-node reset-permissions-only.js
+# 1. Parar aplicação
+pm2 stop aet-sistema
 
-# OU execute o script completo (se necessário)
-node fix-permissions-production.js
+# 2. Fazer build da aplicação
+npm run build
 
-# Teste as permissões diretamente
-node test-permissions-server.js
+# 3. Verificar se build foi criado
+ls -la dist/public/
+
+# 4. Criar link simbólico ou copiar para onde o servidor espera
+# Opção A: Link simbólico (recomendado)
+sudo mkdir -p server/
+sudo ln -sf ../dist/public server/public
+
+# Opção B: Copiar arquivos (alternativa)
+# sudo cp -r dist/public server/
+
+# 5. Verificar se ficou correto
+ls -la server/public/
+
+# 6. Reiniciar aplicação
+pm2 start aet-sistema
+
+# 7. Verificar logs
+pm2 logs aet-sistema --lines 10
 ```
 
-### 2. Verificar Variáveis de Ambiente
+## 🎯 Resultado Esperado
 
-Certifique-se de que o arquivo `.env` no servidor contenha:
+### Logs de Sucesso:
+```
+[UPLOAD] Validando diretório de upload (SEM FALLBACK): /var/www/aetlicensesystem/uploads
+[UPLOAD] ✅ Diretório validado: /var/www/aetlicensesystem/uploads
+[UPLOAD] 📁 Subdiretórios: vehicles, transporters, boletos, vehicle-set-types, licenses
+[UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/uploads em /uploads
+9:XX:XX AM [express] Serving static files from: /var/www/aetlicensesystem/LicencaTransporte/dist/public
+9:XX:XX AM [express] Production server running on port 5000
+```
+
+### Estrutura Correta:
+```
+/var/www/aetlicensesystem/LicencaTransporte/
+├── dist/
+│   └── public/                    # ✅ Build real
+├── server/
+│   └── public/                    # ✅ Link para dist/public
+├── client/
+└── package.json
+```
+
+## 🌐 Teste Final
 
 ```bash
-# Database
-DATABASE_URL=sua_database_url_aqui
-PGDATABASE=seu_database_name
-PGHOST=seu_host
-PGPORT=5432
-PGUSER=seu_usuario
-PGPASSWORD=sua_senha
+# 1. Status do PM2
+pm2 status
 
-# Environment
-NODE_ENV=production
+# 2. Testar aplicação local
+curl -I http://localhost:5000
 
-# Session Secret (importante para autenticação)
-SESSION_SECRET=sua_chave_secreta_segura_aqui
+# 3. Testar no navegador
+curl -I http://SEU_IP_SERVIDOR
 
-# Upload Directory
-UPLOAD_DIR=/var/www/aetlicensesystem/uploads
-
-# Debug (opcional - para diagnóstico)
-DEBUG_PERMISSIONS=true
-DEBUG_AUTH=true
+# 4. Verificar se frontend carrega
+curl http://localhost:5000 | head -10
 ```
 
-### 3. Configurar PM2 Corretamente
+## 🔧 Troubleshooting
+
+### Se npm run build falhar:
 
 ```bash
-# Parar aplicação atual
-pm2 stop aet-license-system
+# Verificar dependências
+npm install
 
-# Recarregar configuração
-pm2 delete aet-license-system
+# Limpar e reinstalar se necessário
+rm -rf node_modules package-lock.json
+npm install
 
-# Iniciar com configuração correta
-pm2 start ecosystem.config.js
+# Tentar build novamente
+npm run build
 
-# Salvar configuração
-pm2 save
-
-# Verificar logs
-pm2 logs aet-license-system
+# Verificar script de build
+cat package.json | grep -A 5 '"build"'
 ```
 
-### 4. Testar Permissões Manualmente
+### Se link simbólico não funcionar:
 
-Use estas credenciais para testar no servidor:
-
-| Usuário | Email | Senha | Role | Acesso Esperado |
-|---------|-------|-------|------|-----------------|
-| Transportador | fiscal@nscaravaggio.com.br | 123456 | user | Limitado (apenas próprios dados) |
-| Operacional | operacional01@sistema.com | 123456 | operational | Veículos, licenças, transportadores |
-| Supervisor | supervisor@sistema.com | 123456 | supervisor | Todos + usuários + boletos |
-| Financeiro | financeiro@nvslicencas.com.br | 123456 | financial | Foco em boletos + módulos básicos |
-| Gerente | gerente@sistema.com | 123456 | manager | Quase total (exceto delete) |
-| Admin | admin@sistema.com | 123456 | admin | Acesso total |
-
-### 5. Configurações Específicas do Servidor Google
-
-#### A. Permissões de Arquivo
 ```bash
-# Garantir que o usuário do PM2 tenha acesso aos arquivos
-sudo chown -R servidorvoipnvs:servidorvoipnvs /home/servidorvoipnvs/aet-license-system
-chmod -R 755 /home/servidorvoipnvs/aet-license-system
+# Remover link antigo
+rm -f server/public
+
+# Copiar diretamente
+cp -r dist/public server/
+
+# Verificar
+ls -la server/public/
 ```
 
-#### B. Configuração do Nginx (se aplicável)
-```nginx
-# Adicionar headers para sessões
-proxy_set_header Cookie $http_cookie;
-proxy_pass_header Set-Cookie;
-```
+### Se ainda não funcionar:
 
-#### C. Configuração de Sessão
-```javascript
-// No servidor de produção, garantir configuração correta de sessão
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'chave-super-secreta-producao',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: false, // true apenas se HTTPS
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 horas
-  }
-}));
-```
-
-## Verificação Final
-
-### 1. Teste de Login
 ```bash
-# Teste via curl no servidor
-curl -X POST http://localhost:5000/api/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@sistema.com","password":"123456"}' \
-  -v
+# Verificar permissões
+sudo chown -R servidorvoipnvs:servidorvoipnvs /var/www/aetlicensesystem/LicencaTransporte/
+sudo chmod -R 755 /var/www/aetlicensesystem/LicencaTransporte/
+
+# Build manual
+npx vite build
+
+# Verificar saída do build
+ls -la dist/
 ```
 
-### 2. Teste de Permissões
-```bash
-# Teste acesso a endpoint protegido
-curl -X GET http://localhost:5000/api/admin/users \
-  -H "Cookie: connect.sid=SESSION_ID_AQUI" \
-  -v
-```
+## 🚀 Sistema 100% Funcional
 
-### 3. Logs de Depuração
-```bash
-# Verificar logs do PM2
-pm2 logs aet-license-system --lines 50
+Após esta correção:
 
-# Verificar logs de erro específicos
-grep -i "permission\|auth\|role" /var/log/pm2/aet-license-system-error.log
-```
+1. ✅ **Upload Directory**: Funcionando no diretório externo
+2. ✅ **Frontend Build**: Servindo arquivos estáticos corretamente
+3. ✅ **Sistema Sem Fallback**: Configuração robusta e explícita
+4. ✅ **Produção Ready**: PM2 + Build + Uploads externos
 
-## Solução de Problemas Comuns
+## 🎯 URLs Finais Funcionais
 
-### Problema: "Acesso negado" para usuários válidos
-**Solução**: Verificar se o middleware `requireAuth` está funcionando
-```javascript
-// Adicionar logs de debug no middleware
-console.log('User authenticated:', req.user);
-console.log('User role:', req.user?.role);
-```
+- **Sistema**: `http://SEU_IP_SERVIDOR`
+- **API**: `http://SEU_IP_SERVIDOR/api/`
+- **Uploads**: `http://SEU_IP_SERVIDOR/uploads/licenses/...`
+- **Admin**: `http://SEU_IP_SERVIDOR/admin`
 
-### Problema: Sessões não persistem
-**Solução**: Verificar configuração de sessão e cookies
-```javascript
-// Verificar se SESSION_SECRET está definido
-console.log('Session secret defined:', !!process.env.SESSION_SECRET);
-```
-
-### Problema: Roles não são reconhecidos
-**Solução**: Executar query direta no banco
-```sql
-SELECT email, role, is_admin FROM users WHERE email = 'usuario@teste.com';
-```
-
-## Contato para Suporte
-
-Se as permissões continuarem não funcionando após seguir este guia, documente:
-
-1. Logs de erro específicos
-2. Resultado do script `fix-permissions-production.js`
-3. Configuração atual do PM2 (`pm2 show aet-license-system`)
-4. Variáveis de ambiente definidas (sem valores sensíveis)
-
-Este guia resolve 95% dos problemas de permissões em servidores de produção.
+O sistema estará completamente operacional após esta correção.
