@@ -5610,11 +5610,16 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
           isNotNull(licenseRequests.stateAETNumbers)
         ));
         
+        // Função para normalizar números AET (remover prefixo AET- se existir)
+        const normalizeAetNumber = (num: string): string => {
+          return num.replace(/^AET-?/i, '').trim();
+        };
+        
         for (const license of allLicenses) {
           if (license.stateAETNumbers && Array.isArray(license.stateAETNumbers)) {
             const duplicate = license.stateAETNumbers.find((entry: string) => {
               const [, number] = entry.split(':');
-              return number === stateStatusData.aetNumber;
+              return normalizeAetNumber(number) === normalizeAetNumber(stateStatusData.aetNumber || '');
             });
             
             if (duplicate) {
@@ -5635,6 +5640,9 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
           if (existingAetEntry) {
             const [, existingNumber] = existingAetEntry.split(':');
             
+            const normalizedExisting = normalizeAetNumber(existingNumber);
+            const normalizedNew = normalizeAetNumber(stateStatusData.aetNumber || '');
+            
             // Verificar se o estado já foi tratado (tem status aprovado ou em análise)
             const currentStateStatus = existingLicense.stateStatuses?.find((status: string) => 
               status.startsWith(`${stateStatusData.state}:`)
@@ -5644,7 +5652,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
               const [, currentStatus] = currentStateStatus.split(':');
               const isAlreadyProcessed = ['approved', 'under_review', 'pending_approval'].includes(currentStatus);
               
-              if (isAlreadyProcessed && existingNumber !== stateStatusData.aetNumber) {
+              if (isAlreadyProcessed && normalizedExisting !== normalizedNew) {
                 console.log(`[VALIDAÇÃO AET] ❌ Tentativa de alterar número já tratado: ${existingNumber} → ${stateStatusData.aetNumber}`);
                 return res.status(400).json({ 
                   message: `Não é possível alterar o número AET "${existingNumber}" pois o estado ${stateStatusData.state} já foi tratado` 

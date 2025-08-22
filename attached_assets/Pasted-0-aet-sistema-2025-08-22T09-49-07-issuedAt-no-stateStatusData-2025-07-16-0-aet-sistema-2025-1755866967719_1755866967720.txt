@@ -1,0 +1,19 @@
+0|aet-sistema  | 2025-08-22T09:49:07: issuedAt no stateStatusData: 2025-07-16
+0|aet-sistema  | 2025-08-22T09:49:07: [VALIDAÇÃO AET] Validando número "AET-10554825" para estado SP
+0|aet-sistema  | 2025-08-22T09:49:07: [VALIDAÇÃO AET] ✅ Número "AET-10554825" válido para estado SP
+0|aet-sistema  | 2025-08-22T09:49:07: Error updating license state status: Error: Upload directory not writable: /var/www/aetlicensesystem/uploads. Configure UPLOAD_DIR environment variable with a writable directory.
+0|aet-sistema  | 2025-08-22T09:49:07:     at validateUploadDir (/var/www/aetlicensesystem/LicencaTransporte/server/lib/license-storage.ts:30:11)
+0|aet-sistema  | 2025-08-22T09:49:07:     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/lib/license-storage.ts:34:21)
+0|aet-sistema  | 2025-08-22T09:49:07:     at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+0|aet-sistema  | 2025-08-22T09:49:07:     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+0|aet-sistema  | 2025-08-22T09:49:07:     at async <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/routes.ts:5665:37)
+0|aet-sistema  | 2025-08-22T09:49:07: 9:49:07 AM [express] PATCH /api/admin/licenses/405/state-status 500 in 30ms :: {"message":"Erro ao a…
+0|aet-sistema  | 2025-08-22T09:49:08: [AUTH DEBUG] Deserializing user ID: 1
+0|aet-sistema  | 2025-08-22T09:49:08: [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+0|aet-sistema  | 2025-08-22T09:49:08: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T09:49:08: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=25, search="SXJ8D64", status="undefined"
+0|aet-sistema  | 2025-08-22T09:49:08: ⚡ [ADMIN LICENSES] Query executada em 5ms - 1/1 registros
+0|aet-sistema  | 2025-08-22T09:49:08: ✅ [ADMIN LICENSES] Resposta preparada em 6ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T09:49:08: 9:49:08 AM [express] GET /api/admin/licenses 200 in 9ms :: {"data":[{"id":405,"userId":1,"transporte…
+0|aet-sistema  | 2025-08-22T09:49:10: Cliente WebSocket desconectado
+0|aet-sistema  | 2025-08-22T09:49:12: Novo cliente WebSocket conectado
