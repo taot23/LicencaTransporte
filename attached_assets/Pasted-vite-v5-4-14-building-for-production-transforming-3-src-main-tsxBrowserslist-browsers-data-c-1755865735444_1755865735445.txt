@@ -1,0 +1,70 @@
+vite v5.4.14 building for production...
+transforming (3) src/main.tsxBrowserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 3584 modules transformed.
+[plugin:vite:reporter] [plugin vite:reporter] 
+(!) /var/www/aetlicensesystem/LicencaTransporte/client/src/lib/queryClient.ts is dynamically imported by /var/www/aetlicensesystem/LicencaTransporte/client/src/components/layout/sidebar.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/components/layout/unified-layout.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/components/layouts/mobile-layout.tsx but also statically imported by /var/www/aetlicensesystem/LicencaTransporte/client/src/App.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/components/admin/paginated-user-select.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/components/admin/transporter-form.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/components/admin/transporter-link-user.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/components/admin/user-select.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/components/admin/vehicle-set-type-form.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/components/admin/vehicle-transfer.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/components/licenses/license-details-card.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/components/licenses/license-form.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/components/licenses/license-list.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/components/licenses/placas-adicionais/campo-placa-adicional.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/components/licenses/renew-license-dialog.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/components/vehicles/optimized-vehicle-list.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/components/vehicles/vehicle-list.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/hooks/use-auth.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/hooks/use-dashboard-stats.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/hooks/use-websocket-context.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/hooks/use-websocket.ts, /var/www/aetlicensesystem/LicencaTransporte/client/src/pages/admin/admin-dashboard.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/pages/admin/admin-licenses.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/pages/admin/admin-transporters.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/pages/admin/admin-users.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/pages/admin/admin-vehicles-optimized.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/pages/admin/boletos-page.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/pages/admin/vehicle-models-page.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/pages/admin/vehicle-set-types.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/pages/issued-licenses-page.tsx, /var/www/aetlicensesystem/LicencaTransporte/client/src/pages/my-companies-page.tsx, dynamic import will not move module into another chunk.
+
+../dist/public/index.html                                 2.09 kB │ gzip:   0.88 kB
+../dist/public/assets/romeo_and_juliet-B4cvDGaF.png       6.16 kB
+../dist/public/assets/bitrain_7_axles-B5XwGOCw.png        7.78 kB
+../dist/public/assets/roadtrain_9_axles-BKlIL4qU.png      9.12 kB
+../dist/public/assets/bitrain_9_axles-DgGO0-iP.png       10.50 kB
+../dist/public/assets/bitrain_6_axles-yIrLMiMD.png       12.30 kB
+../dist/public/assets/flatbed-Br6N4C94.png               21.53 kB
+../dist/public/assets/logo-nvs-CtWo4a5Q.png             119.08 kB
+../dist/public/assets/index-DsTfM2U-.css                 94.00 kB │ gzip:  15.87 kB
+../dist/public/assets/index-Wu_3Jtzc.js               1,633.03 kB │ gzip: 433.34 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 49.65s
+
+  dist/index.js  354.0kb
+
+⚡ Done in 60ms
+total 16
+drwxr-xr-x 3 servidorvoipnvs servidorvoipnvs 4096 Aug 22 09:28 .
+drwxr-xr-x 3 servidorvoipnvs servidorvoipnvs 4096 Aug 21 22:01 ..
+drwxr-xr-x 2 servidorvoipnvs servidorvoipnvs 4096 Aug 22 09:28 assets
+-rw-r--r-- 1 servidorvoipnvs servidorvoipnvs 2094 Aug 22 09:28 index.html
+total 16
+drwxr-xr-x 3 servidorvoipnvs servidorvoipnvs 4096 Aug 22 09:28 .
+drwxr-xr-x 3 servidorvoipnvs servidorvoipnvs 4096 Aug 21 22:01 ..
+drwxr-xr-x 2 servidorvoipnvs servidorvoipnvs 4096 Aug 22 09:28 assets
+-rw-r--r-- 1 servidorvoipnvs servidorvoipnvs 2094 Aug 22 09:28 index.html
+[PM2] Applying action restartProcessId on app [aet-sistema](ids: [ 0 ])
+[PM2] [aet-sistema](0) ✓
+[PM2] Process successfully started
+┌────┬────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name           │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ aet-sistema    │ default     │ 1.0.0   │ fork    │ 747854   │ 0s     │ 47   │ online    │ 0%       │ 18.2mb   │ ser… │ disabled │
+└────┴────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+[TAILING] Tailing last 10 lines for [aet-sistema] process (change the value with --lines option)
+/var/log/aet/out-0.log last 10 lines:
+0|aet-sist | 2025-08-22T09:27:22: [UPLOAD] 📁 Subdiretórios: vehicles, transporters, boletos, vehicle-set-types, licenses
+0|aet-sist | 2025-08-22T09:27:22: [dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+0|aet-sist | 2025-08-22T09:27:22: [UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/uploads em /uploads
+0|aet-sist | 2025-08-22T09:27:22: [UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/uploads em /uploads
+0|aet-sist | 2025-08-22T09:27:29: [UPLOAD] Validando diretório de upload (SEM FALLBACK): /var/www/aetlicensesystem/uploads
+0|aet-sist | 2025-08-22T09:27:29: [UPLOAD] ✅ Diretório validado: /var/www/aetlicensesystem/uploads
+0|aet-sist | 2025-08-22T09:27:29: [UPLOAD] 📁 Subdiretórios: vehicles, transporters, boletos, vehicle-set-types, licenses
+0|aet-sist | 2025-08-22T09:27:29: [dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+0|aet-sist | 2025-08-22T09:27:29: [UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/uploads em /uploads
+0|aet-sist | 2025-08-22T09:27:29: [UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/uploads em /uploads
+
+/var/log/aet/error-0.log last 10 lines:
+0|aet-sist | 2025-08-22T09:27:29: /var/www/aetlicensesystem/LicencaTransporte/server/vite.ts:77
+0|aet-sist | 2025-08-22T09:27:29:     throw new Error(
+0|aet-sist | 2025-08-22T09:27:29:           ^
+0|aet-sist | 2025-08-22T09:27:29: 
+0|aet-sist | 2025-08-22T09:27:29: 
+0|aet-sist | 2025-08-22T09:27:29: Error: Could not find the build directory: /var/www/aetlicensesystem/LicencaTransporte/server/public, make sure to build the client first
+0|aet-sist | 2025-08-22T09:27:29:     at serveStatic (/var/www/aetlicensesystem/LicencaTransporte/server/vite.ts:77:11)
+0|aet-sist | 2025-08-22T09:27:29:     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/index.ts:66:5)
+0|aet-sist | 2025-08-22T09:27:29: 
+0|aet-sist | 2025-08-22T09:27:29: Node.js v20.19.4
