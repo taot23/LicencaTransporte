@@ -2,7 +2,7 @@ module.exports = {
   apps: [{
     name: 'aet-sistema',
     script: 'server/production-server.js',
-    cwd: '/home/servidorvoipnvs/aet-sistema',
+    cwd: '/var/www/aetlicensesystem/LicencaTransporte',
     instances: 1,
     exec_mode: 'fork',
     env: {
