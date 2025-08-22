@@ -1,0 +1,50 @@
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ pm2 logs aet-sistema --lines 10
+[TAILING] Tailing last 10 lines for [aet-sistema] process (change the value with --lines option)
+/var/log/aet/error-0.log last 10 lines:
+0|aet-sist | 2025-08-21T22:06:07: }
+0|aet-sist | 2025-08-21T22:14:09: Warning: connect.session() MemoryStore is not
+0|aet-sist | 2025-08-21T22:14:09: designed for a production environment, as it will leak
+0|aet-sist | 2025-08-21T22:14:09: memory, and will not scale past a single process.
+0|aet-sist | 2025-08-21T22:32:27: Warning: connect.session() MemoryStore is not
+0|aet-sist | 2025-08-21T22:32:27: designed for a production environment, as it will leak
+0|aet-sist | 2025-08-21T22:32:27: memory, and will not scale past a single process.
+0|aet-sist | 2025-08-22T09:17:37: Warning: connect.session() MemoryStore is not
+0|aet-sist | 2025-08-22T09:17:37: designed for a production environment, as it will leak
+0|aet-sist | 2025-08-22T09:17:37: memory, and will not scale past a single process.
+
+/var/log/aet/out-0.log last 10 lines:
+0|aet-sist | 2025-08-22T09:17:10: Mensagem recebida: {"type":"REGISTER_INTEREST","licenseId":406}
+0|aet-sist | 2025-08-22T09:17:37: [UPLOAD] Validando diretório de upload (SEM FALLBACK): /var/www/aetlicensesystem/LicencaTransporte/uploads
+0|aet-sist | 2025-08-22T09:17:37: [UPLOAD] ✅ Diretório validado: /var/www/aetlicensesystem/LicencaTransporte/uploads
+0|aet-sist | 2025-08-22T09:17:37: [UPLOAD] 📁 Subdiretórios: vehicles, transporters, boletos, vehicle-set-types, licenses
+0|aet-sist | 2025-08-22T09:17:37: [dotenv@17.2.1] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+0|aet-sist | 2025-08-22T09:17:37: [UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/LicencaTransporte/uploads em /uploads
+0|aet-sist | 2025-08-22T09:17:37: [UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/LicencaTransporte/uploads em /uploads
+0|aet-sist | 2025-08-22T09:17:37: 9:17:37 AM [express] Serving static files from: /var/www/aetlicensesystem/LicencaTransporte/dist/public
+0|aet-sist | 2025-08-22T09:17:37: 9:17:37 AM [express] Production server running on port 5000
+0|aet-sist | 2025-08-22T09:17:37: 9:17:37 AM [express] NODE_ENV: production
+
+0|aet-sistema  | 2025-08-22T09:17:48: Novo cliente WebSocket conectado
+0|aet-sistema  | 2025-08-22T09:17:48: Mensagem recebida: {"type":"REGISTER_INTEREST","licenseId":406}
+0|aet-sistema  | 2025-08-22T09:17:51: Novo cliente WebSocket conectado
+0|aet-sistema  | 2025-08-22T09:17:59: Novo cliente WebSocket conectado
+^C
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ grep UPLOAD_DIR /var/www/aetlicensesystem/LicencaTransporte/.env.production
+UPLOAD_DIR=/var/www/aetlicensesystem/uploads
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ pm2 logs aet-sistema | grep "UPLOAD"
+0|aet-sist | 2025-08-22T09:17:37: [UPLOAD] Validando diretório de upload (SEM FALLBACK): /var/www/aetlicensesystem/LicencaTransporte/uploads
+0|aet-sist | 2025-08-22T09:17:37: [UPLOAD] ✅ Diretório validado: /var/www/aetlicensesystem/LicencaTransporte/uploads
+0|aet-sist | 2025-08-22T09:17:37: [UPLOAD] 📁 Subdiretórios: vehicles, transporters, boletos, vehicle-set-types, licenses
+0|aet-sist | 2025-08-22T09:17:37: [UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/LicencaTransporte/uploads em /uploads
+0|aet-sist | 2025-08-22T09:17:37: [UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/LicencaTransporte/uploads em /uploads
+^C
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ ls -la /var/www/aetlicensesystem/uploads/
+total 28
+drwxr-xr-x 7 servidorvoipnvs www-data        4096 Aug 21 22:09 .
+drwxr-xr-x 4 servidorvoipnvs servidorvoipnvs 4096 Aug 21 22:09 ..
+drwxr-xr-x 2 servidorvoipnvs www-data        4096 Aug 21 22:09 boletos
+drwxr-xr-x 4 servidorvoipnvs www-data        4096 Aug 22 09:17 licenses
+drwxr-xr-x 2 servidorvoipnvs www-data        4096 Aug 21 22:09 transporters
+drwxr-xr-x 2 servidorvoipnvs www-data        4096 Aug 21 22:09 vehicle-set-types
+drwxr-xr-x 2 servidorvoipnvs www-data        4096 Aug 21 22:09 vehicles
+servidorvoipnvs@appnvs:/var/www/aetlicensesystem/LicencaTransporte$ 

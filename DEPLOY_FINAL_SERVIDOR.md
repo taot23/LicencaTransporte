@@ -1,234 +1,143 @@
-# ✅ Deploy Final - Servidor Google Configurado
+# 🚀 Correção Final - Upload Directory no Servidor Google
 
-## 🎯 Problema Resolvido
+## 🔍 Problema Identificado
+- PM2 não está carregando `.env.production` corretamente
+- Log mostra: `[dotenv@17.2.1] injecting env (0) from .env` (deveria ser .env.production)
+- Sistema usando diretório local ao invés do externo
 
-**Erro anterior:**
-```
-Cannot find module '/var/www/aetlicensesystem/LicencaTransporte/server/routes.js'
-```
+## ✅ Solução Completa
 
-**Solução aplicada:**
-- Alterado PM2 para usar `tsx` como interpretador
-- Script mudou de `server/production-server.js` para `server/index.ts`
-- Sistema agora executa TypeScript diretamente
+### 1. Copiar ecosystem.config.cjs Atualizado
 
-## 📋 Configuração Final para Servidor
+No servidor Google, execute:
 
-### 1. Instalar TSX globalmente no servidor
-```bash
-sudo npm install -g tsx
-```
-
-### 2. Configurar variáveis de ambiente no servidor
 ```bash
 cd /var/www/aetlicensesystem/LicencaTransporte
 
-# Criar .env.production
-cp .env.production.example .env.production
-nano .env.production
+# Backup do atual
+cp ecosystem.config.cjs ecosystem.config.cjs.backup
+
+# Criar novo ecosystem.config.cjs
+cat > ecosystem.config.cjs << 'EOF'
+module.exports = {
+  apps: [{
+    name: 'aet-sistema',
+    script: 'server/index.ts',
+    interpreter: 'tsx',
+    cwd: '/var/www/aetlicensesystem/LicencaTransporte',
+    instances: 1, 
+    exec_mode: 'fork',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 5000,
+      UPLOAD_DIR: '/var/www/aetlicensesystem/uploads'
+    },
+    env_file: '.env.production',
+    log_file: '/var/log/aet/combined.log',
+    out_file: '/var/log/aet/out.log',
+    error_file: '/var/log/aet/error.log',
+    time: true,
+    max_memory_restart: '1G',
+    node_args: '--max-old-space-size=1024',
+    watch: false,
+    ignore_watch: ['node_modules', 'uploads', 'dist']
+  }]
+}
+EOF
 ```
 
-**Conteúdo do .env.production:**
-```env
-NODE_ENV=production
-PORT=5000
+### 2. Garantir Estrutura de Diretórios
 
-# Banco de Dados
-DATABASE_URL=postgresql://aet_user:SUA_SENHA_SEGURA@localhost:5432/aet_production
-
-# Uploads - CORRIGIDO para seu servidor
-UPLOAD_DIR=/var/www/aetlicensesystem/uploads
-
-# Segurança
-SESSION_SECRET=GERE_UMA_CHAVE_MUITO_SEGURA_DE_64_CARACTERES_AQUI
-
-# PostgreSQL
-PGHOST=localhost
-PGPORT=5432
-PGDATABASE=aet_production
-PGUSER=aet_user
-PGPASSWORD=SUA_SENHA_SEGURA
-
-# Configurações
-MAX_FILE_SIZE=100
-COOKIE_SECURE=false
-```
-
-### 3. Configurar diretórios corretos
 ```bash
-# Criar diretório de uploads na localização correta
+# Criar diretório externo se não existir
 sudo mkdir -p /var/www/aetlicensesystem/uploads/{licenses,vehicles,transporters,boletos,vehicle-set-types}
 
 # Configurar permissões
 sudo chown -R servidorvoipnvs:www-data /var/www/aetlicensesystem/uploads
 sudo chmod -R 755 /var/www/aetlicensesystem/uploads
 
-# Criar diretório de logs
-sudo mkdir -p /var/log/aet
-sudo chown servidorvoipnvs:servidorvoipnvs /var/log/aet
+# Verificar estrutura
+ls -la /var/www/aetlicensesystem/uploads/
 ```
 
-### 4. Configurar banco de dados
+### 3. Reiniciar Aplicação
+
 ```bash
-cd /var/www/aetlicensesystem/LicencaTransporte
+# Parar aplicação atual
+pm2 stop aet-sistema
+pm2 delete aet-sistema
 
-# Instalar dependências
-npm install
-
-# Executar migrações
-npm run db:push --force
-```
-
-### 5. Iniciar aplicação com PM2
-```bash
-# O ecosystem.config.cjs já está correto com:
-# - script: 'server/index.ts'
-# - interpreter: 'tsx'
-# - cwd: '/var/www/aetlicensesystem/LicencaTransporte'
-
-# Iniciar aplicação
+# Iniciar com nova configuração
 pm2 start ecosystem.config.cjs
 
-# Configurar para iniciar no boot
+# Configurar para inicialização automática
 pm2 startup
 pm2 save
+```
 
-# Verificar status
+### 4. Verificar Correção
+
+```bash
+# Verificar logs - deve mostrar diretório externo
+pm2 logs aet-sistema --lines 10
+
+# Deve aparecer:
+# [UPLOAD] Validando diretório de upload (SEM FALLBACK): /var/www/aetlicensesystem/uploads
+# [UPLOAD] ✅ Diretório validado: /var/www/aetlicensesystem/uploads
+```
+
+### 5. Testar Upload
+
+```bash
+# Status da aplicação
 pm2 status
-pm2 logs aet-sistema
+
+# Acessar sistema e criar uma licença para testar
+# Verificar se arquivo é salvo no local correto:
+ls -la /var/www/aetlicensesystem/uploads/licenses/
 ```
 
-## 🔧 Configuração Nginx (Recomendado)
+## 🎯 Resultado Esperado
 
-### 1. Instalar Nginx
-```bash
-sudo apt install nginx -y
+### Logs Corretos:
+```
+[UPLOAD] Validando diretório de upload (SEM FALLBACK): /var/www/aetlicensesystem/uploads
+[UPLOAD] ✅ Diretório validado: /var/www/aetlicensesystem/uploads
+[UPLOAD] 📁 Subdiretórios: vehicles, transporters, boletos, vehicle-set-types, licenses
+[UPLOAD] Servindo arquivos de /var/www/aetlicensesystem/uploads em /uploads
 ```
 
-### 2. Configurar site
-```bash
-sudo nano /etc/nginx/sites-available/aet-sistema
-```
-
-**Configuração Nginx:**
-```nginx
-server {
-    listen 80;
-    server_name SEU_IP_OU_DOMINIO;
-
-    client_max_body_size 100M;
-
-    location / {
-        proxy_pass http://localhost:5000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-    }
-
-    # Servir uploads diretamente pelo Nginx
-    location /uploads/ {
-        alias /var/www/aetlicensesystem/uploads/;
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-}
-```
-
-### 3. Ativar site
-```bash
-sudo ln -s /etc/nginx/sites-available/aet-sistema /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
-sudo systemctl enable nginx
-```
-
-## 🛡️ Firewall
-```bash
-sudo ufw allow ssh
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw --force enable
-```
-
-## ✅ Verificação Final
-
-### Comandos de teste
-```bash
-# Status dos serviços
-pm2 status
-sudo systemctl status nginx
-sudo systemctl status postgresql
-
-# Testar aplicação
-curl -I http://localhost:5000
-curl -I http://SEU_IP_SERVIDOR
-
-# Verificar logs
-pm2 logs aet-sistema --lines 50
-tail -f /var/log/aet/error-0.log
-```
-
-### URLs de acesso
-- **Aplicação**: `http://SEU_IP_SERVIDOR`
-- **API**: `http://SEU_IP_SERVIDOR/api/`
-- **Uploads**: `http://SEU_IP_SERVIDOR/uploads/`
-
-## 📂 Estrutura Final Confirmada
-
+### Estrutura Final:
 ```
 /var/www/aetlicensesystem/
-├── LicencaTransporte/              # Código da aplicação
-│   ├── server/                     # Backend TypeScript
-│   │   ├── index.ts               # ← Script principal
-│   │   ├── routes.ts              # ← Rotas da API
-│   │   └── ...
-│   ├── client/                     # Frontend
-│   ├── .env.production            # Configurações
-│   ├── ecosystem.config.cjs       # PM2 config
-│   └── package.json
-└── uploads/                        # Arquivos uploadados
-    ├── licenses/                   # ← Licenças aqui
-    │   └── [transportador]/[estado]/[licenca]/
-    ├── vehicles/                   # CRLVs
-    ├── transporters/              # Docs transportadoras
-    ├── boletos/                   # Boletos/NFs
-    └── vehicle-set-types/         # Imagens tipos
+├── LicencaTransporte/              # Aplicação
+│   ├── server/
+│   ├── uploads/                    # ❌ Não usado mais
+│   └── ecosystem.config.cjs        # ✅ Configuração corrigida
+└── uploads/                        # ✅ Diretório externo correto
+    └── licenses/
+        └── benda-cia-ltda/sp/aet-2025-1570/arquivo.pdf
 ```
 
-## 🔄 Comandos de Manutenção
+## 🔧 Troubleshooting
+
+Se ainda não funcionar:
 
 ```bash
-# Reiniciar aplicação
-pm2 restart aet-sistema
+# Verificar variáveis de ambiente do PM2
+pm2 show aet-sistema | grep -A 20 "env:"
 
-# Ver logs em tempo real
-pm2 logs aet-sistema --lines 100 --follow
+# Verificar se UPLOAD_DIR aparece na lista
 
-# Backup do banco
-pg_dump -h localhost -U aet_user aet_production > backup_$(date +%Y%m%d).sql
-
-# Monitoramento
-pm2 monit
-
-# Atualizar código (quando houver updates)
-cd /var/www/aetlicensesystem/LicencaTransporte
-git pull  # se usando git
-npm install
+# Se necessário, definir manualmente:
+pm2 set aet-sistema:UPLOAD_DIR /var/www/aetlicensesystem/uploads
 pm2 restart aet-sistema
 ```
 
-## 🎯 Status Final
+## 🚀 Benefícios da Correção
 
-- ✅ **TSX configurado** - Sistema executa TypeScript diretamente
-- ✅ **PM2 funcionando** - Processo gerenciado e logs organizados
-- ✅ **Uploads corretos** - Arquivos salvos em `/var/www/aetlicensesystem/uploads/`
-- ✅ **Banco configurado** - PostgreSQL com migrações aplicadas
-- ✅ **Nginx opcional** - Proxy reverso para melhor performance
-- ✅ **Logs organizados** - Monitoramento em `/var/log/aet/`
-
-**Sistema pronto para produção!**
+1. ✅ Arquivos salvos fora do projeto (seguros em reinstalações)
+2. ✅ Configuração explícita no ecosystem.config.cjs
+3. ✅ Logs claros mostrando diretório correto
+4. ✅ Sistema sem fallback - falha se mal configurado
+5. ✅ Estrutura organizada e profissional

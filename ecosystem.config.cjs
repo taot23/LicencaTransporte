@@ -4,11 +4,12 @@ module.exports = {
     script: 'server/index.ts',          // ✅ Usa index.ts
     interpreter: 'tsx',                 // ✅ Usa TSX para TypeScript
     cwd: '/var/www/aetlicensesystem/LicencaTransporte',
-    instances: 1,sudo 
+    instances: 1, 
     exec_mode: 'fork',
     env: {
       NODE_ENV: 'production',
-      PORT: 5000
+      PORT: 5000,
+      UPLOAD_DIR: '/var/www/aetlicensesystem/uploads'
     },
     env_file: '.env.production',
     log_file: '/var/log/aet/combined.log',
