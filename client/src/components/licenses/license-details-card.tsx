@@ -143,11 +143,27 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
   // Garantir valores padrão para dimensões e tipo de carga
   const licenseData = {
     ...license,
-    length: license.length || getDefaultLength(license.type),
-    width: license.width || getDefaultWidth(license.type),
-    height: license.height || getDefaultHeight(license.type),
+    length: (license.length !== null && license.length !== undefined) ? license.length : getDefaultLength(license.type),
+    width: (license.width !== null && license.width !== undefined) ? license.width : getDefaultWidth(license.type),
+    height: (license.height !== null && license.height !== undefined) ? license.height : getDefaultHeight(license.type),
     cargoType: license.cargoType || getDefaultCargoType(license.type)
   };
+  
+  // DEBUG: Log das dimensões para verificar origem dos dados
+  console.log('[DEBUG] Valores originais das dimensões:', {
+    length: license.length,
+    width: license.width,
+    height: license.height,
+    lengthType: typeof license.length,
+    widthType: typeof license.width,
+    heightType: typeof license.height
+  });
+  
+  console.log('[DEBUG] Valores finais do licenseData:', {
+    length: licenseData.length,
+    width: licenseData.width,
+    height: licenseData.height
+  });
   
   // Estados para armazenar dados dos veículos e controlar modais
   const [vehicles, setVehicles] = useState<{[key: string]: Vehicle}>({});
