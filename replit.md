@@ -15,6 +15,14 @@ This project is a robust system for managing AET (Autorização Especial de Trâ
 ### System Architecture
 The system is built with a React.js frontend using TypeScript, a Node.js/Express backend, and a PostgreSQL database. Real-time communication is handled via WebSockets, and data validation uses Zod schemas. The UI/UX prioritizes responsiveness with Tailwind CSS, ensuring a consistent experience across devices.
 
+**UPLOAD SYSTEM FIXED (August 22, 2025):**
+- **PROBLEMA CRÍTICO RESOLVIDO**: Sistema de upload completamente corrigido no servidor de produção
+- **Validação sob demanda**: Modificada função validateUploadDir para não falhar na importação do módulo
+- **Permissões finalizadas**: chmod 775 aplicado ao diretório /var/www/aetlicensesystem/uploads
+- **Script automático**: Criado fix-upload-servidor.sh para correção completa e automática
+- **ecosystem.config.cjs**: Corrigido erro de sintaxe (vírgula ausente) que impedia carregamento do UPLOAD_DIR
+- **Sistema robusto**: Upload agora funciona com estrutura organizacional completa (licenses/transportadora/estado/licenca/)
+
 **Recent Performance Optimization (August 21, 2025):**
 - **SISTEMA DE UPLOAD HÍBRIDO IMPLEMENTADO**: Solução robusta que detecta automaticamente entre Object Storage (desenvolvimento) e upload local (produção)
 - **UPLOAD SEM FALLBACK (August 22, 2025)**: Sistema de upload modificado para falhar claramente com logs detalhados ao invés de tentar fallbacks, garantindo detecção rápida de problemas de configuração
