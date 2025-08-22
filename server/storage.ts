@@ -1408,29 +1408,77 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(licenseRequests)
       .where(eq(licenseRequests.id, id));
-    return results[0];
+    
+    const license = results[0];
+    if (!license) return license;
+    
+    // DEBUG: Log dos valores originais do banco
+    console.log(`[DEBUG] Dados originais do banco - ID ${id}:`, {
+      length: license.length,
+      width: license.width,
+      height: license.height,
+      lengthType: typeof license.length,
+      widthType: typeof license.width,
+      heightType: typeof license.height
+    });
+    
+    // Aplicar normalização usando função auxiliar
+    const normalizedLicense = this.normalizeLicenseDimensions(license);
+    
+    console.log(`[DEBUG] Valores normalizados - ID ${id}:`, {
+      length: normalizedLicense.length,
+      width: normalizedLicense.width,
+      height: normalizedLicense.height
+    });
+    
+    return normalizedLicense;
   }
 
   async getLicenseRequestsByUserId(userId: number): Promise<LicenseRequest[]> {
+    let results: LicenseRequest[];
+    
     // Retorna todas as licenças quando userId=0 (caso especial para admin)
     if (userId === 0) {
-      return db
+      results = await db
         .select()
         .from(licenseRequests)
         .where(eq(licenseRequests.isDraft, false))
         .orderBy(desc(licenseRequests.createdAt));
+    } else {
+      results = await db
+        .select()
+        .from(licenseRequests)
+        .where(
+          and(
+            eq(licenseRequests.userId, userId),
+            eq(licenseRequests.isDraft, false),
+          ),
+        )
+        .orderBy(desc(licenseRequests.createdAt));
     }
-
-    return db
-      .select()
-      .from(licenseRequests)
-      .where(
-        and(
-          eq(licenseRequests.userId, userId),
-          eq(licenseRequests.isDraft, false),
-        ),
-      )
-      .orderBy(desc(licenseRequests.createdAt));
+    
+    // Aplicar correção de dimensões em todas as licenças
+    return results.map(license => this.normalizeLicenseDimensions(license));
+  }
+  
+  // Função auxiliar para normalizar dimensões
+  private normalizeLicenseDimensions(license: LicenseRequest): LicenseRequest {
+    const correctedLicense = { ...license };
+    
+    // CORREÇÃO: Garantir que os valores estão em centímetros
+    if (correctedLicense.length && correctedLicense.length < 50) {
+      correctedLicense.length = correctedLicense.length * 100;
+    }
+    
+    if (correctedLicense.width && correctedLicense.width < 10) {
+      correctedLicense.width = correctedLicense.width * 100;
+    }
+    
+    if (correctedLicense.height && correctedLicense.height < 10) {
+      correctedLicense.height = correctedLicense.height * 100;
+    }
+    
+    return correctedLicense;
   }
 
   async getLicenseDraftsByUserId(userId: number): Promise<LicenseRequest[]> {
