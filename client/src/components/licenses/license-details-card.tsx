@@ -469,8 +469,21 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
       return '-';
     }
     
-    // CORREÇÃO: Todos os valores agora vêm em centímetros do banco, converter para metros
-    const metersValue = numericValue / 100;
+    // CORREÇÃO ATUALIZADA: Verificar se os valores já estão em formato correto
+    // Se o valor for menor que 10, assumir que já está em metros
+    // Se for maior que 100, assumir que está em centímetros e converter
+    let metersValue: number;
+    
+    if (numericValue > 100) {
+      // Valor em centímetros, converter para metros
+      metersValue = numericValue / 100;
+      console.log(`[DIMENSION] Valor ${numericValue} convertido de cm para ${metersValue}m`);
+    } else {
+      // Valor já em metros ou formato correto
+      metersValue = numericValue;
+      console.log(`[DIMENSION] Valor ${numericValue} mantido como ${metersValue}m`);
+    }
+    
     return metersValue.toFixed(2);
   };
   
@@ -673,6 +686,16 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
             </div>
           </div>
           
+          {/* DEBUG: Log dos valores originais */}
+          {console.log('[DEBUG] Valores originais das dimensões:', {
+            length: licenseData.length,
+            width: licenseData.width,
+            height: licenseData.height,
+            lengthType: typeof licenseData.length,
+            widthType: typeof licenseData.width,
+            heightType: typeof licenseData.height
+          })}
+
           {/* Dimensões em cards */}
           <div className="grid grid-cols-3 gap-4 mt-2">
             <div className="bg-gray-50 p-3 rounded-md text-center">
