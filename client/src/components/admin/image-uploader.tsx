@@ -65,7 +65,9 @@ export function ImageUploader({ value, onChange, className }: ImageUploaderProps
         onChange(normalizedUrl);
         
       } else {
-        // 2b. Upload local (produção)
+        // 2b. Upload local (produção) - SEM FALLBACK
+        console.log('[UPLOAD] Usando upload local - sem fallback habilitado');
+        
         const formData = new FormData();
         formData.append('image', file);
 
@@ -76,11 +78,16 @@ export function ImageUploader({ value, onChange, className }: ImageUploaderProps
         });
 
         if (!localUploadResponse.ok) {
-          const errorData = await localUploadResponse.json();
-          throw new Error(errorData.error || 'Erro ao fazer upload da imagem');
+          const errorData = await localUploadResponse.json().catch(() => ({ error: 'Erro desconhecido' }));
+          const errorMsg = `Upload local falhou: ${errorData.error}`;
+          console.error('[UPLOAD] Erro no upload local:', errorData);
+          
+          // Falhar claramente - SEM TENTATIVAS DE FALLBACK
+          throw new Error(errorMsg);
         }
 
         const { imageUrl } = await localUploadResponse.json();
+        console.log('[UPLOAD] ✓ Upload local bem-sucedido:', imageUrl);
         setPreview(imageUrl);
         onChange(imageUrl);
       }

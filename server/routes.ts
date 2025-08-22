@@ -42,54 +42,49 @@ import { WebSocketServer, WebSocket } from "ws";
 import { withCache, invalidateCache, appCache } from "./cache";
 import type { LicenseMetadata } from './lib/license-storage';
 
-// Set up file storage for uploads - configuração robusta para produção
-const getUploadDir = () => {
-  // Configurações específicas por ambiente
-  const possiblePaths = [
-    process.env.UPLOAD_DIR, // Variável de ambiente personalizada
-    '/home/servidorvoipnvs/uploads', // Diretório específico do usuário no servidor Google
-    '/var/www/uploads', // Diretório web padrão
-    '/var/uploads', // Padrão para produção
-    '/tmp/uploads', // Fallback temporário
-    path.join(process.cwd(), '..', 'uploads'), // Um nível acima do projeto
-    path.join(process.cwd(), 'storage'), // Dentro do projeto como storage
-    path.join(process.cwd(), 'uploads') // Último recurso dentro do projeto
-  ].filter(Boolean);
-
-  for (const uploadPath of possiblePaths) {
-    try {
-      // Tentar criar o diretório com permissões adequadas
-      if (!fs.existsSync(uploadPath!)) {
-        fs.mkdirSync(uploadPath!, { recursive: true, mode: 0o755 });
-      }
-      
-      // Criar subdiretórios necessários
-      const subDirs = ['vehicles', 'transporters', 'boletos', 'vehicle-set-types', 'licenses'];
-      subDirs.forEach(subDir => {
-        const subPath = path.join(uploadPath!, subDir);
-        if (!fs.existsSync(subPath)) {
-          fs.mkdirSync(subPath, { recursive: true, mode: 0o755 });
-        }
-      });
-      
-      // Testar se consegue escrever no diretório
-      const testFile = path.join(uploadPath!, '.write-test');
-      fs.writeFileSync(testFile, 'test');
-      fs.unlinkSync(testFile);
-      
-      console.log(`[UPLOAD] ✅ Usando diretório: ${uploadPath}`);
-      console.log(`[UPLOAD] 📁 Subdiretórios criados: ${subDirs.join(', ')}`);
-      return uploadPath!;
-    } catch (error) {
-      console.warn(`[UPLOAD] ❌ Falha em ${uploadPath}:`, (error as Error).message);
-      continue;
-    }
-  }
+// Configuração de upload SEM FALLBACK - falha claro se diretório não for gravável
+const validateUploadDirStrict = (): string => {
+  const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
   
-  throw new Error('❌ Nenhum diretório de upload válido encontrado');
+  console.log(`[UPLOAD] Validando diretório de upload (SEM FALLBACK): ${uploadDir}`);
+  
+  try {
+    // Verificar se diretório existe ou pode ser criado
+    if (!fs.existsSync(uploadDir)) {
+      console.log(`[UPLOAD] Criando diretório: ${uploadDir}`);
+      fs.mkdirSync(uploadDir, { recursive: true, mode: 0o755 });
+    }
+    
+    // Criar subdiretórios necessários
+    const subDirs = ['vehicles', 'transporters', 'boletos', 'vehicle-set-types', 'licenses'];
+    subDirs.forEach(subDir => {
+      const subPath = path.join(uploadDir, subDir);
+      if (!fs.existsSync(subPath)) {
+        fs.mkdirSync(subPath, { recursive: true, mode: 0o755 });
+      }
+    });
+    
+    // Testar permissão de escrita
+    const testFile = path.join(uploadDir, '.write-test');
+    fs.writeFileSync(testFile, 'test');
+    fs.unlinkSync(testFile);
+    
+    console.log(`[UPLOAD] ✅ Diretório validado: ${uploadDir}`);
+    console.log(`[UPLOAD] 📁 Subdiretórios: ${subDirs.join(', ')}`);
+    return uploadDir;
+    
+  } catch (error) {
+    const errorMsg = `[UPLOAD] ❌ ERRO CRÍTICO: Diretório não gravável: ${uploadDir}`;
+    console.error(errorMsg);
+    console.error(`[UPLOAD] Erro:`, error);
+    console.error(`[UPLOAD] SOLUÇÃO: Configure UPLOAD_DIR com diretório gravável ou ajuste permissões`);
+    
+    // Falhar imediatamente - SEM FALLBACK
+    throw new Error(`Upload directory not writable: ${uploadDir}. Set UPLOAD_DIR environment variable or fix permissions.`);
+  }
 };
 
-const uploadDir = getUploadDir();
+const uploadDir = validateUploadDirStrict();
 
 // Configuração de storage com lógica de nomeação específica
 const storage_config = multer.diskStorage({
