@@ -1,59 +1,104 @@
-# Correção para Problemas de Permissão em Produção
+# 🚨 Correção Urgente - Permissões de Upload
 
-## Problema Identificado
-O Vite estava tentando criar diretórios temporários em `node_modules/.vite/deps_temp_*` sem as permissões necessárias no servidor de produção.
-
-## Solução Implementada
-Criado servidor de produção dedicado que serve arquivos estáticos pré-construídos, evitando completamente o uso do Vite em tempo de execução.
-
-## Passos para Aplicar no Servidor
-
-### 1. Parar o PM2 Atual
-```bash
-pm2 stop aet-license-system
-pm2 delete aet-license-system
+## 🔍 Problema Crítico Identificado
+```
+Error: Upload directory not writable: /var/www/aetlicensesystem/uploads. 
+Configure UPLOAD_DIR environment variable with a writable directory.
 ```
 
-### 2. Limpar Cache e Preparar Ambiente
+## ✅ Solução Imediata no Servidor Google
+
+Execute estes comandos para corrigir as permissões:
+
 ```bash
-cd /var/www/aetlicensesystem/LicencaTransporte
-rm -rf node_modules/.vite
-rm -rf dist
+cd /var/www/aetlicensesystem
+
+# 1. Parar aplicação
+pm2 stop aet-sistema
+
+# 2. Corrigir permissões do diretório de uploads
+sudo chown -R servidorvoipnvs:www-data uploads/
+sudo chmod -R 755 uploads/
+
+# 3. Testar permissão de escrita
+echo "teste" > uploads/teste.txt && echo "✅ Permissão OK" || echo "❌ Ainda com problema"
+rm -f uploads/teste.txt
+
+# 4. Reiniciar aplicação
+pm2 start aet-sistema
+
+# 5. Verificar logs
+pm2 logs aet-sistema --lines 10
 ```
 
-### 3. Construir a Aplicação
+## 🔧 Se Ainda Não Funcionar
+
+Alternativa com permissões mais amplas:
+
 ```bash
-npm run build
+# Corrigir proprietário
+sudo chown -R servidorvoipnvs:servidorvoipnvs /var/www/aetlicensesystem/uploads/
+
+# Permissões de escrita para o usuário
+sudo chmod -R 775 /var/www/aetlicensesystem/uploads/
+
+# Verificar estrutura e permissões
+ls -la /var/www/aetlicensesystem/uploads/
 ```
 
-### 4. Ajustar Permissões
-```bash
-sudo chown -R servidorvoipnvs:servidorvoipnvs /var/www/aetlicensesystem/LicencaTransporte
-chmod +x /var/www/aetlicensesystem/LicencaTransporte/start-production.sh
+## 🎯 Verificação de Sucesso
+
+Após a correção, ao tentar salvar um arquivo no sistema, deve aparecer nos logs:
+
+```
+[UPLOAD] Validando diretório de upload (SEM FALLBACK): /var/www/aetlicensesystem/uploads
+[UPLOAD] ✅ Diretório validado: /var/www/aetlicensesystem/uploads
+[UPLOAD] Iniciando salvamento de arquivo: { originalName: "arquivo.pdf", ... }
+[UPLOAD] ✓ Arquivo salvo com sucesso: /var/www/aetlicensesystem/uploads/licenses/...
 ```
 
-### 5. Iniciar com PM2
-```bash
-pm2 start ecosystem.config.js
-pm2 save
-```
+## 🚀 Teste Completo
 
-### 6. Verificar Status
 ```bash
+# 1. Verificar status
 pm2 status
-pm2 logs aet-license-system --lines 10
+
+# 2. Verificar permissões
+ls -la /var/www/aetlicensesystem/uploads/
+
+# 3. Testar upload via interface web
+# - Acessar sistema
+# - Tentar fazer upload de arquivo
+# - Verificar logs: pm2 logs aet-sistema
 ```
 
-## Arquivos Criados/Modificados
-- `server/production.ts`: Novo servidor de produção sem dependência do Vite
-- `start-production.sh`: Script atualizado para usar servidor de produção
-- `ecosystem.config.js`: Configurado para usar o novo script
+## 📂 Estrutura Final Esperada
 
-## Vantagens da Nova Solução
-- Elimina problemas de permissão do Vite
-- Melhor performance em produção (arquivos estáticos)
-- Menos consumo de recursos
-- Mais estável para ambiente de produção
+```
+/var/www/aetlicensesystem/uploads/
+├── licenses/          (755 - servidorvoipnvs:www-data)
+├── vehicles/          (755 - servidorvoipnvs:www-data)
+├── transporters/      (755 - servidorvoipnvs:www-data)
+├── boletos/           (755 - servidorvoipnvs:www-data)
+└── vehicle-set-types/ (755 - servidorvoipnvs:www-data)
+```
 
-## Teste da Aplicação
-Após aplicar as correções, a aplicação deve iniciar corretamente e estar acessível em http://34.44.159.254:5000
+## ⚠️ Problema de Contexto
+
+O erro ocorre porque a função `validateUploadDir` é chamada durante o salvamento do arquivo, mas o diretório `/var/www/aetlicensesystem/uploads` não tem permissões adequadas para escrita pelo processo do Node.js.
+
+## 🎯 Comando Mais Seguro
+
+Se os comandos acima não funcionarem:
+
+```bash
+# Garantir que o usuário atual pode escrever
+sudo mkdir -p /var/www/aetlicensesystem/uploads/{licenses,vehicles,transporters,boletos,vehicle-set-types}
+sudo chown -R $USER:$USER /var/www/aetlicensesystem/uploads
+chmod -R 755 /var/www/aetlicensesystem/uploads
+
+# Verificar
+touch /var/www/aetlicensesystem/uploads/teste && rm /var/www/aetlicensesystem/uploads/teste && echo "✅ Funcionando"
+```
+
+Esta correção deve resolver o problema de upload imediatamente.

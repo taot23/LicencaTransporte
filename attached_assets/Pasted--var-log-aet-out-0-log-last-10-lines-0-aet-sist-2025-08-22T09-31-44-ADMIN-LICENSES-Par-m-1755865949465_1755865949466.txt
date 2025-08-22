@@ -1,0 +1,154 @@
+
+/var/log/aet/out-0.log last 10 lines:
+0|aet-sist | 2025-08-22T09:31:44: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=25, search="SXJ8D74", status="undefined"
+0|aet-sist | 2025-08-22T09:31:44: [AUTH DEBUG] Deserializing user ID: 1
+0|aet-sist | 2025-08-22T09:31:44: ⚡ [ADMIN LICENSES] Query executada em 17ms - 1/1 registros
+0|aet-sist | 2025-08-22T09:31:44: [AUTH DEBUG] Deserializing user ID: 1
+0|aet-sist | 2025-08-22T09:31:44: [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+0|aet-sist | 2025-08-22T09:31:44: ✅ [ADMIN LICENSES] Resposta preparada em 28ms - Performance otimizada para grande escala
+0|aet-sist | 2025-08-22T09:31:44: 9:31:44 AM [express] GET /api/admin/licenses 200 in 39ms :: {"data":[{"id":406,"userId":1,"transport…
+0|aet-sist | 2025-08-22T09:31:44: 9:31:44 AM [express] GET /api/public/transporters/6 304 in 20ms :: {"id":6,"name":"BENDO & CIA LTDA"…
+0|aet-sist | 2025-08-22T09:31:44: [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+0|aet-sist | 2025-08-22T09:31:44: 9:31:44 AM [express] GET /api/admin/transporters 304 in 311ms :: [{"id":534,"personType":"pj","name"…
+
+0|aet-sistema  | 2025-08-22T09:31:56: Cliente WebSocket desconectado
+0|aet-sistema  | 2025-08-22T09:31:59: [AUTH DEBUG] Deserializing user ID: 1
+0|aet-sistema  | 2025-08-22T09:31:59: [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+0|aet-sistema  | 2025-08-22T09:31:59: 9:31:59 AM [express] GET /api/user 304 in 6ms :: {"id":1,"email":"admin@sistema.com","fullName":"Adm…
+0|aet-sistema  | 2025-08-22T09:32:00: Novo cliente WebSocket conectado
+0|aet-sistema  | 2025-08-22T09:32:00: [AUTH DEBUG] Deserializing user ID: 1
+0|aet-sistema  | 2025-08-22T09:32:00: [AUTH DEBUG] Deserializing user ID: 1
+0|aet-sistema  | 2025-08-22T09:32:00: [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+0|aet-sistema  | 2025-08-22T09:32:00: [AUTH DEBUG] Deserializing user ID: 1
+0|aet-sistema  | 2025-08-22T09:32:00: [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+0|aet-sistema  | 2025-08-22T09:32:00: 9:32:00 AM [express] GET /api/admin/transporters 304 in 162ms :: [{"id":534,"personType":"pj","name"…
+0|aet-sistema  | 2025-08-22T09:32:00: [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+0|aet-sistema  | 2025-08-22T09:32:00: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T09:32:00: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=25, search="SXJ8D74", status="undefined"
+0|aet-sistema  | 2025-08-22T09:32:00: Mensagem recebida: {"type":"REGISTER_INTEREST","licenseId":406}
+0|aet-sistema  | 2025-08-22T09:32:00: 9:32:00 AM [express] GET /api/public/transporters/6 304 in 216ms :: {"id":6,"name":"BENDO & CIA LTDA…
+0|aet-sistema  | 2025-08-22T09:32:00: ⚡ [ADMIN LICENSES] Query executada em 20ms - 1/1 registros
+0|aet-sistema  | 2025-08-22T09:32:00: ✅ [ADMIN LICENSES] Resposta preparada em 27ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T09:32:00: 9:32:00 AM [express] GET /api/admin/licenses 200 in 229ms :: {"data":[{"id":406,"userId":1,"transpor…
+0|aet-sistema  | 2025-08-22T09:32:02: === PATCH REQUEST: /api/admin/licenses/406/state-status ===
+0|aet-sistema  | 2025-08-22T09:32:02: [AUTH DEBUG] Deserializing user ID: 1
+0|aet-sistema  | 2025-08-22T09:32:02: [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+0|aet-sistema  | 2025-08-22T09:32:02: [UPLOAD NAMING] Campo: stateFile, Arquivo original: AET-09466425 SXJ-8D74 08-07-2025 (1).pdf
+0|aet-sistema  | 2025-08-22T09:32:02: [UPLOAD NAMING] Dados do request: { state: 'SP', aetNumber: undefined, validUntil: '2026-06-24' }
+0|aet-sistema  | 2025-08-22T09:32:02: [UPLOAD NAMING] StateFile: nome temporário para reorganização: temp-1755865922508-AET-09466425_SXJ-8D74_08-07-2025__1_.pdf
+0|aet-sistema  | 2025-08-22T09:32:02: === ENDPOINT STATE-STATUS CHAMADO ===
+0|aet-sistema  | 2025-08-22T09:32:02: URL completa: /api/admin/licenses/406/state-status
+0|aet-sistema  | 2025-08-22T09:32:02: Método: PATCH
+0|aet-sistema  | 2025-08-22T09:32:02: Params: { id: '406' }
+0|aet-sistema  | 2025-08-22T09:32:02: Body completo: [Object: null prototype] {
+0|aet-sistema  | 2025-08-22T09:32:02:   state: 'SP',
+0|aet-sistema  | 2025-08-22T09:32:02:   status: 'approved',
+0|aet-sistema  | 2025-08-22T09:32:02:   validUntil: '2026-06-24',
+0|aet-sistema  | 2025-08-22T09:32:02:   issuedAt: '2025-07-24',
+0|aet-sistema  | 2025-08-22T09:32:02:   aetNumber: 'AET-09466425',
+0|aet-sistema  | 2025-08-22T09:32:02:   selectedCnpj: '51410529000114',
+0|aet-sistema  | 2025-08-22T09:32:02:   stateCnpj: '51410529000114'
+0|aet-sistema  | 2025-08-22T09:32:02: }
+0|aet-sistema  | 2025-08-22T09:32:02: issuedAt no body: 2025-07-24
+0|aet-sistema  | 2025-08-22T09:32:02: Tipo do issuedAt: string
+0|aet-sistema  | 2025-08-22T09:32:02: Dados recebidos no endpoint state-status: [Object: null prototype] {
+0|aet-sistema  | 2025-08-22T09:32:02:   state: 'SP',
+0|aet-sistema  | 2025-08-22T09:32:02:   status: 'approved',
+0|aet-sistema  | 2025-08-22T09:32:02:   validUntil: '2026-06-24',
+0|aet-sistema  | 2025-08-22T09:32:02:   issuedAt: '2025-07-24',
+0|aet-sistema  | 2025-08-22T09:32:02:   aetNumber: 'AET-09466425',
+0|aet-sistema  | 2025-08-22T09:32:02:   selectedCnpj: '51410529000114',
+0|aet-sistema  | 2025-08-22T09:32:02:   stateCnpj: '51410529000114'
+0|aet-sistema  | 2025-08-22T09:32:02: }
+0|aet-sistema  | 2025-08-22T09:32:02: selectedCnpj recebido: 51410529000114
+0|aet-sistema  | 2025-08-22T09:32:02: stateCnpj recebido: 51410529000114
+0|aet-sistema  | 2025-08-22T09:32:02: stateStatusData final: {
+0|aet-sistema  | 2025-08-22T09:32:02:   licenseId: 406,
+0|aet-sistema  | 2025-08-22T09:32:02:   state: 'SP',
+0|aet-sistema  | 2025-08-22T09:32:02:   status: 'approved',
+0|aet-sistema  | 2025-08-22T09:32:02:   comments: undefined,
+0|aet-sistema  | 2025-08-22T09:32:02:   validUntil: '2026-06-24',
+0|aet-sistema  | 2025-08-22T09:32:02:   issuedAt: '2025-07-24',
+0|aet-sistema  | 2025-08-22T09:32:02:   aetNumber: 'AET-09466425',
+0|aet-sistema  | 2025-08-22T09:32:02:   selectedCnpj: '51410529000114',
+0|aet-sistema  | 2025-08-22T09:32:02:   stateCnpj: '51410529000114'
+0|aet-sistema  | 2025-08-22T09:32:02: }
+0|aet-sistema  | 2025-08-22T09:32:02: issuedAt no stateStatusData: 2025-07-24
+0|aet-sistema  | 2025-08-22T09:32:02: [VALIDAÇÃO AET] Validando número "AET-09466425" para estado SP
+0|aet-sistema  | 2025-08-22T09:32:02: [VALIDAÇÃO AET] ✅ Número "AET-09466425" válido para estado SP
+0|aet-sistema  | 2025-08-22T09:32:02: Error updating license state status: Error: Upload directory not writable: /var/www/aetlicensesystem/uploads. Configure UPLOAD_DIR environment variable with a writable directory.
+0|aet-sistema  | 2025-08-22T09:32:02:     at validateUploadDir (/var/www/aetlicensesystem/LicencaTransporte/server/lib/license-storage.ts:30:11)
+0|aet-sistema  | 2025-08-22T09:32:02:     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/lib/license-storage.ts:34:21)
+0|aet-sistema  | 2025-08-22T09:32:02:     at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+0|aet-sistema  | 2025-08-22T09:32:02:     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+0|aet-sistema  | 2025-08-22T09:32:02:     at async <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/routes.ts:5665:37)
+0|aet-sistema  | 2025-08-22T09:32:02: 9:32:02 AM [express] PATCH /api/admin/licenses/406/state-status 500 in 16ms :: {"message":"Erro ao a…
+0|aet-sistema  | 2025-08-22T09:32:03: === PATCH REQUEST: /api/admin/licenses/406/state-status ===
+0|aet-sistema  | 2025-08-22T09:32:03: [AUTH DEBUG] Deserializing user ID: 1
+0|aet-sistema  | 2025-08-22T09:32:03: [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+0|aet-sistema  | 2025-08-22T09:32:03: [UPLOAD NAMING] Campo: stateFile, Arquivo original: AET-09466425 SXJ-8D74 08-07-2025 (1).pdf
+0|aet-sistema  | 2025-08-22T09:32:03: [UPLOAD NAMING] Dados do request: { state: 'SP', aetNumber: undefined, validUntil: '2026-06-24' }
+0|aet-sistema  | 2025-08-22T09:32:03: [UPLOAD NAMING] StateFile: nome temporário para reorganização: temp-1755865923848-AET-09466425_SXJ-8D74_08-07-2025__1_.pdf
+0|aet-sistema  | 2025-08-22T09:32:03: === ENDPOINT STATE-STATUS CHAMADO ===
+0|aet-sistema  | 2025-08-22T09:32:03: URL completa: /api/admin/licenses/406/state-status
+0|aet-sistema  | 2025-08-22T09:32:03: Método: PATCH
+0|aet-sistema  | 2025-08-22T09:32:03: Params: { id: '406' }
+0|aet-sistema  | 2025-08-22T09:32:03: Body completo: [Object: null prototype] {
+0|aet-sistema  | 2025-08-22T09:32:03:   state: 'SP',
+0|aet-sistema  | 2025-08-22T09:32:03:   status: 'approved',
+0|aet-sistema  | 2025-08-22T09:32:03:   validUntil: '2026-06-24',
+0|aet-sistema  | 2025-08-22T09:32:03:   issuedAt: '2025-07-24',
+0|aet-sistema  | 2025-08-22T09:32:03:   aetNumber: 'AET-09466425',
+0|aet-sistema  | 2025-08-22T09:32:03:   selectedCnpj: '51410529000114',
+0|aet-sistema  | 2025-08-22T09:32:03:   stateCnpj: '51410529000114'
+0|aet-sistema  | 2025-08-22T09:32:03: }
+0|aet-sistema  | 2025-08-22T09:32:03: issuedAt no body: 2025-07-24
+0|aet-sistema  | 2025-08-22T09:32:03: Tipo do issuedAt: string
+0|aet-sistema  | 2025-08-22T09:32:03: Dados recebidos no endpoint state-status: [Object: null prototype] {
+0|aet-sistema  | 2025-08-22T09:32:03:   state: 'SP',
+0|aet-sistema  | 2025-08-22T09:32:03:   status: 'approved',
+0|aet-sistema  | 2025-08-22T09:32:03:   validUntil: '2026-06-24',
+0|aet-sistema  | 2025-08-22T09:32:03:   issuedAt: '2025-07-24',
+0|aet-sistema  | 2025-08-22T09:32:03:   aetNumber: 'AET-09466425',
+0|aet-sistema  | 2025-08-22T09:32:03:   selectedCnpj: '51410529000114',
+0|aet-sistema  | 2025-08-22T09:32:03:   stateCnpj: '51410529000114'
+0|aet-sistema  | 2025-08-22T09:32:03: }
+0|aet-sistema  | 2025-08-22T09:32:03: selectedCnpj recebido: 51410529000114
+0|aet-sistema  | 2025-08-22T09:32:03: stateCnpj recebido: 51410529000114
+0|aet-sistema  | 2025-08-22T09:32:03: stateStatusData final: {
+0|aet-sistema  | 2025-08-22T09:32:03:   licenseId: 406,
+0|aet-sistema  | 2025-08-22T09:32:03:   state: 'SP',
+0|aet-sistema  | 2025-08-22T09:32:03:   status: 'approved',
+0|aet-sistema  | 2025-08-22T09:32:03:   comments: undefined,
+0|aet-sistema  | 2025-08-22T09:32:03:   validUntil: '2026-06-24',
+0|aet-sistema  | 2025-08-22T09:32:03:   issuedAt: '2025-07-24',
+0|aet-sistema  | 2025-08-22T09:32:03:   aetNumber: 'AET-09466425',
+0|aet-sistema  | 2025-08-22T09:32:03:   selectedCnpj: '51410529000114',
+0|aet-sistema  | 2025-08-22T09:32:03:   stateCnpj: '51410529000114'
+0|aet-sistema  | 2025-08-22T09:32:03: }
+0|aet-sistema  | 2025-08-22T09:32:03: issuedAt no stateStatusData: 2025-07-24
+0|aet-sistema  | 2025-08-22T09:32:03: [VALIDAÇÃO AET] Validando número "AET-09466425" para estado SP
+0|aet-sistema  | 2025-08-22T09:32:03: [VALIDAÇÃO AET] ✅ Número "AET-09466425" válido para estado SP
+0|aet-sistema  | 2025-08-22T09:32:03: Error updating license state status: Error: Upload directory not writable: /var/www/aetlicensesystem/uploads. Configure UPLOAD_DIR environment variable with a writable directory.
+0|aet-sistema  | 2025-08-22T09:32:03:     at validateUploadDir (/var/www/aetlicensesystem/LicencaTransporte/server/lib/license-storage.ts:30:11)
+0|aet-sistema  | 2025-08-22T09:32:03:     at <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/lib/license-storage.ts:34:21)
+0|aet-sistema  | 2025-08-22T09:32:03:     at ModuleJob.run (node:internal/modules/esm/module_job:263:25)
+0|aet-sistema  | 2025-08-22T09:32:03:     at async ModuleLoader.import (node:internal/modules/esm/loader:540:24)
+0|aet-sistema  | 2025-08-22T09:32:03:     at async <anonymous> (/var/www/aetlicensesystem/LicencaTransporte/server/routes.ts:5665:37)
+0|aet-sistema  | 2025-08-22T09:32:03: 9:32:03 AM [express] PATCH /api/admin/licenses/406/state-status 500 in 23ms :: {"message":"Erro ao a…
+0|aet-sistema  | 2025-08-22T09:32:07: [AUTH DEBUG] Deserializing user ID: 1
+0|aet-sistema  | 2025-08-22T09:32:07: [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+0|aet-sistema  | 2025-08-22T09:32:07: 9:32:07 AM [express] GET /api/user 304 in 6ms :: {"id":1,"email":"admin@sistema.com","fullName":"Adm…
+0|aet-sistema  | 2025-08-22T09:32:07: [AUTH DEBUG] Deserializing user ID: 1
+0|aet-sistema  | 2025-08-22T09:32:07: [AUTH DEBUG] Deserializing user ID: 1
+0|aet-sistema  | 2025-08-22T09:32:07: [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+0|aet-sistema  | 2025-08-22T09:32:07: [AUTH DEBUG] Deserializing user ID: 1
+0|aet-sistema  | 2025-08-22T09:32:07: [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+0|aet-sistema  | 2025-08-22T09:32:07: 🚀 [ADMIN LICENSES] Iniciando busca otimizada para grande escala...
+0|aet-sistema  | 2025-08-22T09:32:07: 📊 [ADMIN LICENSES] Parâmetros: page=1, limit=25, search="SXJ8D74", status="undefined"
+0|aet-sistema  | 2025-08-22T09:32:07: [AUTH DEBUG] User deserialized: admin@sistema.com (role: admin)
+0|aet-sistema  | 2025-08-22T09:32:07: 9:32:07 AM [express] GET /api/admin/transporters 304 in 120ms :: [{"id":534,"personType":"pj","name"…
+0|aet-sistema  | 2025-08-22T09:32:07: ⚡ [ADMIN LICENSES] Query executada em 40ms - 1/1 registros
+0|aet-sistema  | 2025-08-22T09:32:07: 9:32:07 AM [express] GET /api/public/transporters/6 304 in 149ms :: {"id":6,"name":"BENDO & CIA LTDA…
+0|aet-sistema  | 2025-08-22T09:32:07: ✅ [ADMIN LICENSES] Resposta preparada em 45ms - Performance otimizada para grande escala
+0|aet-sistema  | 2025-08-22T09:32:07: 9:32:07 AM [express] GET /api/admin/licenses 200 in 157ms :: {"data":[{"id":406,"userId":1,"transpor…
