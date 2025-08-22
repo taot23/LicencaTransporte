@@ -8,8 +8,8 @@ module.exports = {
     exec_mode: 'fork',
     env: {
       NODE_ENV: 'production',
-      PORT: 5000,
-      UPLOAD_DIR: '/var/www/aetlicensesystem/uploads'
+      PORT: 5000, //porta que incializar o serviço
+      UPLOAD_DIR: '/var/www/aetlicensesystem/uploads',
     },
     env_file: '.env.production',
     log_file: '/var/log/aet/combined.log',
