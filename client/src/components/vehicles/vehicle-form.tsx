@@ -74,14 +74,35 @@ interface VehicleFormProps {
   onCancel: () => void;
 }
 
-// Schema de validação
+// Schema de validação com mensagens humanizadas
 const vehicleSchema = z.object({
-  plate: z.string().min(1, "Placa é obrigatória"),
-  type: z.string().min(1, "Tipo de veículo é obrigatório"),
-  brand: z.string().min(1, "Marca é obrigatória"),
-  model: z.string().min(1, "Modelo é obrigatório"),
-  year: z.number().min(1900, "Ano deve ser maior que 1900"),
-  renavam: z.string().min(1, "Renavam é obrigatório"),
+  plate: z.string()
+    .min(1, "Por favor, informe a placa do veículo")
+    .refine(val => {
+      const cleanPlate = val.replace(/\s/g, '').toUpperCase();
+      const oldFormat = /^[A-Z]{3}-?\d{4}$/;
+      const mercosulFormat = /^[A-Z]{3}-?\d{1}[A-Z]{1}\d{2}$/;
+      return oldFormat.test(cleanPlate) || mercosulFormat.test(cleanPlate);
+    }, "Placa deve estar no formato ABC-1234 ou BRA2E19"),
+  
+  type: z.string().min(1, "Selecione o tipo de veículo (Unidade Tratora, Caminhão, etc.)"),
+  
+  brand: z.string().min(1, "Selecione a marca do veículo"),
+  
+  model: z.string().min(1, "Selecione o modelo do veículo"),
+  
+  year: z.number({
+    required_error: "Informe o ano de fabricação",
+    invalid_type_error: "Ano deve ser um número válido"
+  }).min(1980, "Ano de fabricação deve ser a partir de 1980")
+    .max(new Date().getFullYear() + 1, "Ano não pode ser futuro"),
+    
+  renavam: z.string()
+    .min(1, "Informe o número do RENAVAM")
+    .min(11, "RENAVAM deve ter 11 dígitos")
+    .max(11, "RENAVAM deve ter 11 dígitos")
+    .regex(/^\d+$/, "RENAVAM deve conter apenas números"),
+    
   tare: z.union([z.number(), z.string()]).transform((val) => {
     if (typeof val === 'string') {
       const parsed = parseFloat(val.replace(',', '.'));
@@ -89,15 +110,45 @@ const vehicleSchema = z.object({
       return parsed;
     }
     return val;
-  }).refine((val) => val > 0, "Tara deve ser maior que 0"),
-  axleCount: z.number().min(1, "Quantidade de eixos deve ser maior que 0"),
+  }).refine((val) => val > 0, "Informe a tara (peso vazio) do veículo"),
+  
+  axleCount: z.number({
+    required_error: "Informe a quantidade de eixos",
+    invalid_type_error: "Quantidade de eixos deve ser um número"
+  }).min(1, "Veículo deve ter pelo menos 1 eixo")
+    .max(10, "Quantidade de eixos não pode exceder 10"),
+    
   bodyType: z.string().optional(),
-  crlvYear: z.number().optional(),
+  
+  crlvYear: z.number({
+    required_error: "Informe o ano do CRLV",
+    invalid_type_error: "Ano do CRLV deve ser um número válido"
+  }).min(1980, "Ano do CRLV deve ser a partir de 1980")
+    .max(new Date().getFullYear(), "Ano do CRLV não pode ser futuro"),
+    
   status: z.string().default("active"),
   remarks: z.string().optional(),
   ownerName: z.string().optional(),
   ownershipType: z.enum(["proprio", "terceiro"]).default("proprio"),
   cmt: z.number().optional(),
+}).refine((data) => {
+  // Validação condicional para tipo de carroceria
+  if (["truck", "semi_trailer", "trailer"].includes(data.type) && !data.bodyType) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Selecione o tipo de carroceria para este veículo",
+  path: ["bodyType"]
+}).refine((data) => {
+  // Validação condicional para CMT (unidade tratora)
+  if (data.type === "tractor_unit" && (!data.cmt || data.cmt <= 0)) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Informe a Capacidade Máxima de Tração (CMT) para unidade tratora",
+  path: ["cmt"]
 });
 
 type VehicleFormData = z.infer<typeof vehicleSchema>;
@@ -364,9 +415,10 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
     },
     onError: (error: Error) => {
       console.error('Erro ao cadastrar veículo:', error);
+      const humanizedMessage = humanizeErrorMessage(error.message || "Erro desconhecido");
       toast({
-        title: "Erro ao cadastrar veículo",
-        description: error.message || "Erro desconhecido",
+        title: "Não foi possível cadastrar o veículo",
+        description: humanizedMessage,
         variant: "destructive",
       });
     },
@@ -394,9 +446,10 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
     },
     onError: (error: Error) => {
       console.error('Erro ao atualizar veículo:', error);
+      const humanizedMessage = humanizeErrorMessage(error.message || "Erro desconhecido");
       toast({
-        title: "Erro ao atualizar veículo",
-        description: error.message || "Erro desconhecido",
+        title: "Não foi possível atualizar o veículo",
+        description: humanizedMessage,
         variant: "destructive",
       });
     },
@@ -447,8 +500,48 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
     }
   };
 
+  // Função para humanizar mensagens de erro do backend
+  const humanizeErrorMessage = (errorMessage: string): string => {
+    const errorMappings: Record<string, string> = {
+      'Placa já cadastrada': 'Esta placa já está cadastrada no sistema. Verifique se não foi digitada incorretamente.',
+      'Vehicle with this plate already exists': 'Esta placa já está cadastrada no sistema. Verifique se não foi digitada incorretamente.',
+      'RENAVAM já cadastrado': 'Este RENAVAM já está cadastrado no sistema. Cada veículo deve ter um RENAVAM único.',
+      'renavam already exists': 'Este RENAVAM já está cadastrado no sistema. Cada veículo deve ter um RENAVAM único.',
+      'duplicate key value': 'Já existe um registro com estes dados. Verifique se o veículo não foi cadastrado anteriormente.',
+      'null value in column "crlv_year"': 'O ano do CRLV é obrigatório para finalizar o cadastro',
+      'violates not-null constraint': 'Alguns campos obrigatórios não foram preenchidos corretamente',
+      'Erro ao criar veículo': 'Não foi possível cadastrar o veículo. Verifique se todos os dados estão corretos.',
+      'Erro ao atualizar veículo': 'Não foi possível atualizar o veículo. Verifique se todos os dados estão corretos.',
+      'Permission denied': 'Você não tem permissão para cadastrar veículos. Contate o administrador.',
+      'User not authenticated': 'Sua sessão expirou. Faça login novamente para continuar.',
+      'Internal server error': 'Erro interno do sistema. Aguarde alguns momentos e tente novamente.',
+      'Invalid file format': 'Formato de arquivo inválido. Use apenas PDF, JPG ou PNG.',
+      'File too large': 'Arquivo muito grande. O tamanho máximo é de 10MB.'
+    };
+
+    // Procurar por correspondências parciais
+    for (const [key, value] of Object.entries(errorMappings)) {
+      if (errorMessage.toLowerCase().includes(key.toLowerCase())) {
+        return value;
+      }
+    }
+
+    return errorMessage;
+  };
+
   // Submit handler
   const onSubmit = async (data: VehicleFormData) => {
+    // Validar campos condicionais antes de enviar
+    if (data.type === "tractor_unit" && !data.cmt) {
+      form.setError("cmt", { message: "Informe a Capacidade Máxima de Tração (CMT) para unidade tratora" });
+      return;
+    }
+
+    if (["truck", "semi_trailer", "trailer"].includes(data.type) && !data.bodyType) {
+      form.setError("bodyType", { message: "Selecione o tipo de carroceria para este veículo" });
+      return;
+    }
+
     const formData = new FormData();
     
     Object.entries(data).forEach(([key, value]) => {
@@ -634,9 +727,9 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                           setSelectedBrand(value);
                           form.setValue("model", "");
                         }}
-                        placeholder={vehicleType ? "Buscar marca..." : "Selecione primeiro o tipo"}
+                        placeholder={vehicleType ? "Digite para buscar marca..." : "Primeiro selecione o tipo de veículo"}
                         disabled={!vehicleType}
-                        emptyMessage="Nenhuma marca encontrada"
+                        emptyMessage={!vehicleType ? "Selecione primeiro o tipo de veículo" : "Nenhuma marca encontrada para este tipo"}
                       />
                     </FormControl>
                     <FormMessage />
@@ -657,9 +750,9 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                         options={getFilteredModels(selectedBrand, vehicleType)}
                         value={field.value}
                         onValueChange={field.onChange}
-                        placeholder={selectedBrand ? "Buscar modelo..." : "Selecione primeiro a marca"}
+                        placeholder={selectedBrand ? "Digite para buscar modelo..." : "Primeiro selecione a marca"}
                         disabled={!selectedBrand || !vehicleType}
-                        emptyMessage="Nenhum modelo encontrado"
+                        emptyMessage={!selectedBrand ? "Selecione primeiro a marca" : "Nenhum modelo encontrado para esta marca"}
                       />
                     </FormControl>
                     <FormMessage />
