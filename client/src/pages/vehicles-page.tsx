@@ -306,7 +306,7 @@ export default function VehiclesPage() {
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent 
-          className="sm:max-w-[520px] p-0 max-h-[90vh] overflow-auto" 
+          className="sm:max-w-[700px] lg:max-w-[800px] p-0 max-h-[90vh] overflow-auto w-[95vw]" 
           hideCloseButton
           onInteractOutside={(e) => e.preventDefault()}
         >

@@ -118,7 +118,7 @@ export default function MobileVehiclesPage() {
                 <Plus className="h-4 w-4" />
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] p-0 h-[90vh] overflow-y-auto mobile-form-dialog">
+            <DialogContent className="sm:max-w-[700px] lg:max-w-[800px] p-0 h-[90vh] overflow-y-auto mobile-form-dialog w-[95vw]">
               <VehicleForm
                 onSuccess={() => setIsFormOpen(false)}
                 onCancel={() => setIsFormOpen(false)}
@@ -211,7 +211,7 @@ export default function MobileVehiclesPage() {
                     </CardContent>
                   </Card>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px] p-0 max-h-[90vh] h-auto overflow-y-auto mobile-form-dialog">
+                <DialogContent className="sm:max-w-[700px] lg:max-w-[800px] p-0 max-h-[90vh] h-auto overflow-y-auto mobile-form-dialog w-[95vw]">
                   <div className="p-4 border-b">
                     <h2 className="font-semibold text-lg">Informações do Veículo</h2>
                     <p className="text-sm text-muted-foreground">Visualize ou edite as informações do veículo</p>
