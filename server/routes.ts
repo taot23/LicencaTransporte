@@ -86,6 +86,35 @@ const validateUploadDirStrict = (): string => {
 
 const uploadDir = validateUploadDirStrict();
 
+// Função utilitária para limpeza de arquivos CRLV
+const cleanupCrlvFile = (crlvUrl: string, context: string = 'cleanup') => {
+  if (!crlvUrl) return;
+  
+  const fileName = path.basename(crlvUrl);
+  let filePath;
+  
+  // Verificar se é um arquivo antigo (na raiz) ou novo (na pasta vehicles)
+  if (crlvUrl.startsWith('/uploads/vehicles/')) {
+    filePath = path.join(uploadDir, 'vehicles', fileName);
+  } else {
+    filePath = path.join(uploadDir, fileName);
+  }
+  
+  if (fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+      console.log(`[CLEANUP] Arquivo CRLV excluído (${context}): ${filePath}`);
+      return true;
+    } catch (error) {
+      console.warn(`[CLEANUP] Erro ao excluir arquivo CRLV (${context}): ${filePath}`, error);
+      return false;
+    }
+  } else {
+    console.log(`[CLEANUP] Arquivo CRLV não encontrado (${context}): ${filePath}`);
+    return false;
+  }
+};
+
 // Configuração de storage com lógica de nomeação específica
 const storage_config = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -1633,13 +1662,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
       
-      // Add file URL if provided
+      // Add file URL if provided and handle old file deletion
       if (req.file) {
         // Para arquivos CRLV, usar o caminho correto com subdiretório vehicles
         if (req.file.fieldname === 'crlvFile' || req.file.fieldname.includes('crlv')) {
           storageData.crlvUrl = `/uploads/vehicles/${req.file.filename}`;
+          console.log(`[UPLOAD DEBUG] CRLV atualizado salvo em: ${req.file.path}, URL gerada: ${storageData.crlvUrl}`);
+          
+          // Excluir arquivo CRLV antigo se existir
+          if (existingVehicle.crlvUrl) {
+            cleanupCrlvFile(existingVehicle.crlvUrl, 'atualização');
+          }
         } else {
           storageData.crlvUrl = `/uploads/${req.file.filename}`;
+          console.log(`[UPLOAD DEBUG] Arquivo não-CRLV atualizado salvo em: ${req.file.path}, URL gerada: ${storageData.crlvUrl}`);
         }
       }
       
@@ -1685,6 +1721,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Usuário ${userId} (${user.role}) autorizado a excluir veículo ${vehicleId}`);
       
+      // Excluir arquivo CRLV associado antes de deletar o veículo
+      if (existingVehicle.crlvUrl) {
+        cleanupCrlvFile(existingVehicle.crlvUrl, 'exclusão de veículo');
+      }
       
       await storage.deleteVehicle(vehicleId);
       

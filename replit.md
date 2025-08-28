@@ -15,6 +15,13 @@ This project is a robust system for managing AET (Autorização Especial de Trâ
 ### System Architecture
 The system is built with a React.js frontend using TypeScript, a Node.js/Express backend, and a PostgreSQL database. Real-time communication is handled via WebSockets, and data validation uses Zod schemas. The UI/UX prioritizes responsiveness with Tailwind CSS, ensuring a consistent experience across devices.
 
+**SISTEMA DE UPLOAD OTIMIZADO (August 28, 2025):**
+- **ORGANIZAÇÃO APRIMORADA**: Arquivos CRLV agora são salvos em `/uploads/vehicles/` para melhor organização
+- **LIMPEZA AUTOMÁTICA**: Implementada exclusão automática de arquivos antigos ao atualizar ou deletar veículos
+- **FUNÇÃO UTILITÁRIA**: Criada `cleanupCrlvFile()` para gerenciamento consistente de arquivos
+- **LOGS DETALHADOS**: Sistema de logs específicos para debug e monitoramento de uploads
+- **COMPATIBILIDADE**: Sistema suporta tanto arquivos antigos (raiz) quanto novos (subdiretório vehicles)
+
 **UPLOAD SYSTEM FIXED (August 22, 2025):**
 - **PROBLEMA CRÍTICO RESOLVIDO**: Sistema de upload completamente corrigido no servidor de produção
 - **Validação sob demanda**: Modificada função validateUploadDir para não falhar na importação do módulo
