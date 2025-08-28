@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -147,21 +147,28 @@ function SearchableSelect({ options, value, onValueChange, placeholder, disabled
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  // Função para normalizar string (remove acentos e converte para minúsculo)
-  const normalizeString = (str: string) => {
+  // Função memoizada para normalizar string
+  const normalizeString = useCallback((str: string) => {
     return str.normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase();
-  };
+  }, []);
 
-  // Filtrar opções baseado na busca
+  // Filtrar opções baseado na busca (memoizado para estabilidade)
   const filteredOptions = useMemo(() => {
     if (!searchValue) return options;
     const normalizedSearch = normalizeString(searchValue);
     return options.filter((option) => 
       normalizeString(option).includes(normalizedSearch)
     );
-  }, [options, searchValue]);
+  }, [options, searchValue, normalizeString]);
+
+  // Reset search quando fechar o popover
+  useEffect(() => {
+    if (!open) {
+      setSearchValue("");
+    }
+  }, [open]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -194,7 +201,6 @@ function SearchableSelect({ options, value, onValueChange, placeholder, disabled
                   onSelect={() => {
                     onValueChange(option === value ? "" : option);
                     setOpen(false);
-                    setSearchValue("");
                   }}
                 >
                   <Check
@@ -246,7 +252,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
     },
   });
 
-  // Sincronizar estados quando o vehicle prop muda
+  // Sincronizar estados quando o vehicle prop muda (SEM dependência instável 'form')
   useEffect(() => {
     if (vehicle) {
       setSelectedBrand(vehicle.brand || "");
@@ -254,7 +260,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       setPlateDisplay(vehicle.plate || "");
       setTareDisplay(vehicle.tare ? vehicle.tare.toString() : "");
       
-      // Resetar os valores do formulário
+      // Resetar os valores do formulário APENAS quando vehicle muda
       form.reset({
         plate: vehicle.plate || "",
         type: vehicle.type || "",
@@ -273,7 +279,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
         cmt: (vehicle as any).cmt ? parseFloat((vehicle as any).cmt.toString()) : undefined,
       });
     }
-  }, [vehicle, form]);
+  }, [vehicle]); // ← REMOVIDA dependência 'form' que causava loops
 
   // Query para buscar modelos de veículos
   const { data: vehicleModels = [] } = useQuery<VehicleModel[]>({
@@ -281,16 +287,16 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
     staleTime: 5 * 60 * 1000,
   });
 
-  // Função para validar placas brasileiras
-  const validateBrazilianPlate = (plate: string): boolean => {
+  // Função estável para validar placas brasileiras
+  const validateBrazilianPlate = useCallback((plate: string): boolean => {
     const cleanPlate = plate.replace(/\s/g, '').toUpperCase();
     const oldFormat = /^[A-Z]{3}-?\d{4}$/;
     const mercosulFormat = /^[A-Z]{3}-?\d{1}[A-Z]{1}\d{2}$/;
     return oldFormat.test(cleanPlate) || mercosulFormat.test(cleanPlate);
-  };
+  }, []);
 
-  // Função para formatar placa
-  const formatPlate = (value: string): string => {
+  // Função estável para formatar placa
+  const formatPlate = useCallback((value: string): string => {
     const clean = value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
     if (clean.length <= 3) {
       return clean;
@@ -304,38 +310,23 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       }
     }
     return clean.slice(0, 7);
-  };
+  }, []);
 
-  // Funções para filtrar marcas e modelos
-  const getFilteredBrands = (type: string): string[] => {
-    console.log("getFilteredBrands called with type:", type);
-    console.log("vehicleModels length:", vehicleModels.length);
-    console.log("vehicleModels sample:", vehicleModels.slice(0, 3));
-
-    if (!type) {
-      console.log("allowedTypes:", [""]);
-      console.log("filteredModels:", 0);
-      console.log("final brands:", []);
-      return [];
-    }
+  // Funções estáveis para filtrar marcas e modelos (memoizadas para evitar re-renders)
+  const getFilteredBrands = useCallback((type: string): string[] => {
+    if (!type) return [];
 
     const allowedTypes = type === "tractor_unit" ? ["tractor_unit", "truck"] : 
                         type === "semi_trailer" ? ["semi_trailer", "trailer"] : [type];
-    
-    console.log("allowedTypes:", allowedTypes);
 
     const filteredModels = vehicleModels.filter(model => 
       allowedTypes.includes(model.vehicleType)
     );
-    console.log("filteredModels:", filteredModels.length);
 
-    const brands = Array.from(new Set(filteredModels.map(model => model.brand))).sort();
-    console.log("final brands:", brands);
-    
-    return brands;
-  };
+    return Array.from(new Set(filteredModels.map(model => model.brand))).sort();
+  }, [vehicleModels]);
 
-  const getFilteredModels = (brand: string, type: string): string[] => {
+  const getFilteredModels = useCallback((brand: string, type: string): string[] => {
     if (!brand || !type) return [];
 
     const allowedTypes = type === "tractor_unit" ? ["tractor_unit", "truck"] : 
@@ -348,7 +339,7 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
         )
         .map(model => model.model)
     )).sort();
-  };
+  }, [vehicleModels]);
 
   // Mutations
   const createMutation = useMutation({
@@ -712,15 +703,23 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                 name="crlvYear"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Ano CRLV</FormLabel>
+                    <FormLabel className="text-sm font-medium">
+                      Ano CRLV <span className="text-red-500">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
-                        placeholder="" 
+                        placeholder="Ex: 2020" 
                         {...field}
                         value={field.value || ''} 
-                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                        onChange={(e) => {
+                          const value = e.target.valueAsNumber;
+                          field.onChange(value && value > 0 ? value : '');
+                        }}
                         className="h-10 w-full" 
+                        required
+                        min="1980"
+                        max="2030"
                       />
                     </FormControl>
                     <FormMessage />
