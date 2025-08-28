@@ -89,6 +89,16 @@ const uploadDir = validateUploadDirStrict();
 // Configuração de storage com lógica de nomeação específica
 const storage_config = multer.diskStorage({
   destination: function (req, file, cb) {
+    // Para CRLV de veículos - usar subdiretório 'vehicles'
+    if (file.fieldname === 'crlvFile' || file.fieldname.includes('crlv')) {
+      const vehiclesDir = path.join(uploadDir, 'vehicles');
+      console.log(`[UPLOAD DESTINATION] CRLV: direcionando para ${vehiclesDir}`);
+      cb(null, vehiclesDir);
+      return;
+    }
+    
+    // Para outros arquivos - usar diretório raiz
+    console.log(`[UPLOAD DESTINATION] Outros arquivos: direcionando para ${uploadDir}`);
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
@@ -1508,7 +1518,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Add file URL if provided
       let crlvUrl: string | undefined = undefined;
       if (req.file) {
-        crlvUrl = `/uploads/${req.file.filename}`;
+        // Para arquivos CRLV, usar o caminho correto com subdiretório vehicles
+        if (req.file.fieldname === 'crlvFile' || req.file.fieldname.includes('crlv')) {
+          crlvUrl = `/uploads/vehicles/${req.file.filename}`;
+          console.log(`[UPLOAD DEBUG] CRLV salvo em: ${req.file.path}, URL gerada: ${crlvUrl}`);
+        } else {
+          crlvUrl = `/uploads/${req.file.filename}`;
+          console.log(`[UPLOAD DEBUG] Arquivo não-CRLV salvo em: ${req.file.path}, URL gerada: ${crlvUrl}`);
+        }
       }
       
       const vehicle = await storage.createVehicle(userId, {
@@ -1618,7 +1635,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Add file URL if provided
       if (req.file) {
-        storageData.crlvUrl = `/uploads/${req.file.filename}`;
+        // Para arquivos CRLV, usar o caminho correto com subdiretório vehicles
+        if (req.file.fieldname === 'crlvFile' || req.file.fieldname.includes('crlv')) {
+          storageData.crlvUrl = `/uploads/vehicles/${req.file.filename}`;
+        } else {
+          storageData.crlvUrl = `/uploads/${req.file.filename}`;
+        }
       }
       
       console.log('Dados preparados para storage:', storageData);
