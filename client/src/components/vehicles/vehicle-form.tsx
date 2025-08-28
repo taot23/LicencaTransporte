@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
-import { X, UploadCloud, LoaderCircle } from "lucide-react";
+import { X, UploadCloud, LoaderCircle, Check, ChevronsUpDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
@@ -118,6 +132,87 @@ const bodyTypeOptions = [
   { value: "log_carrier", label: "Tran Toras" },
   { value: "vtav", label: "VTAV" },
 ];
+
+// Componente de busca inteligente para dropdowns
+interface SearchableSelectProps {
+  options: string[];
+  value: string;
+  onValueChange: (value: string) => void;
+  placeholder: string;
+  disabled?: boolean;
+  emptyMessage?: string;
+}
+
+function SearchableSelect({ options, value, onValueChange, placeholder, disabled, emptyMessage = "Nenhum resultado encontrado" }: SearchableSelectProps) {
+  const [open, setOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+
+  // Função para normalizar string (remove acentos e converte para minúsculo)
+  const normalizeString = (str: string) => {
+    return str.normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  };
+
+  // Filtrar opções baseado na busca
+  const filteredOptions = useMemo(() => {
+    if (!searchValue) return options;
+    const normalizedSearch = normalizeString(searchValue);
+    return options.filter((option) => 
+      normalizeString(option).includes(normalizedSearch)
+    );
+  }, [options, searchValue]);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="h-10 w-full justify-between"
+          disabled={disabled}
+        >
+          {value ? options.find((option) => option === value) : placeholder}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0" align="start">
+        <Command shouldFilter={false}>
+          <CommandInput 
+            placeholder={`Buscar...`} 
+            value={searchValue}
+            onValueChange={setSearchValue}
+          />
+          <CommandList>
+            <CommandEmpty>{emptyMessage}</CommandEmpty>
+            <CommandGroup>
+              {filteredOptions.map((option) => (
+                <CommandItem
+                  key={option}
+                  value={option}
+                  onSelect={() => {
+                    onValueChange(option === value ? "" : option);
+                    setOpen(false);
+                    setSearchValue("");
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === option ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {option}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) {
   const { toast } = useToast();
@@ -539,28 +634,20 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                     <FormLabel className="text-sm font-medium">
                       Marca <span className="text-red-500">*</span>
                     </FormLabel>
-                    <Select 
-                      value={field.value} 
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        setSelectedBrand(value);
-                        form.setValue("model", "");
-                      }}
-                      disabled={!vehicleType}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="h-10 w-full">
-                          <SelectValue placeholder={vehicleType ? "Selecione a marca" : "Selecione primeiro o tipo"} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {getFilteredBrands(vehicleType).map((brand) => (
-                          <SelectItem key={brand} value={brand}>
-                            {brand}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <SearchableSelect
+                        options={getFilteredBrands(vehicleType)}
+                        value={field.value}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          setSelectedBrand(value);
+                          form.setValue("model", "");
+                        }}
+                        placeholder={vehicleType ? "Buscar marca..." : "Selecione primeiro o tipo"}
+                        disabled={!vehicleType}
+                        emptyMessage="Nenhuma marca encontrada"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -574,24 +661,16 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
                     <FormLabel className="text-sm font-medium">
                       Modelo <span className="text-red-500">*</span>
                     </FormLabel>
-                    <Select 
-                      value={field.value} 
-                      onValueChange={field.onChange}
-                      disabled={!selectedBrand || !vehicleType}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="h-10 w-full">
-                          <SelectValue placeholder={selectedBrand ? "Selecione o modelo" : "Selecione primeiro a marca"} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {getFilteredModels(selectedBrand, vehicleType).map((model) => (
-                          <SelectItem key={model} value={model}>
-                            {model}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <SearchableSelect
+                        options={getFilteredModels(selectedBrand, vehicleType)}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        placeholder={selectedBrand ? "Buscar modelo..." : "Selecione primeiro a marca"}
+                        disabled={!selectedBrand || !vehicleType}
+                        emptyMessage="Nenhum modelo encontrado"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
