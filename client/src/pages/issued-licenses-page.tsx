@@ -216,13 +216,18 @@ export default function IssuedLicensesPage() {
 
 
   // Verificar validade das licenças
-  const getLicenseStatus = (validUntil: string | null): 'active' | 'expired' | 'expiring_soon' => {
+  const getLicenseStatus = (validUntil: string | null): 'active' | 'expired' | 'expiring_soon' | 'out_of_validity' => {
     if (!validUntil) return 'active';
     
     const validDate = new Date(validUntil);
     const today = new Date();
     
     if (isBefore(validDate, today)) {
+      // Se vencida há mais de 60 dias, é "Fora de Validade"
+      const daysSinceExpiration = differenceInDays(today, validDate);
+      if (daysSinceExpiration > 60) {
+        return 'out_of_validity';
+      }
       return 'expired';
     }
     
@@ -659,17 +664,23 @@ export default function IssuedLicensesPage() {
                     Vencidas
                   </div>
                 </SelectItem>
+                <SelectItem value="out_of_validity">
+                  <div className="flex items-center">
+                    <AlertCircle className="h-3 w-3 mr-2 text-gray-500" /> 
+                    Fora de Validade
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
         
         {/* Estatísticas rápidas */}
-        <div className="grid grid-cols-3 gap-2 mt-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
           {expandedLicenses.length > 0 && (
             <>
               <div className="text-center py-2 bg-gray-50 rounded-md border border-gray-200">
-                <span className="text-xs text-gray-500">Total de licenças</span>
+                <span className="text-xs text-gray-500">Total</span>
                 <p className="font-semibold">{expandedLicenses.length}</p>
               </div>
               <div className="text-center py-2 bg-amber-50 rounded-md border border-amber-200">
@@ -682,6 +693,12 @@ export default function IssuedLicensesPage() {
                 <span className="text-xs text-red-800">Vencidas</span>
                 <p className="font-semibold text-red-700">
                   {expandedLicenses.filter(l => getLicenseStatus(l.validUntil) === 'expired').length}
+                </p>
+              </div>
+              <div className="text-center py-2 bg-gray-100 rounded-md border border-gray-300">
+                <span className="text-xs text-gray-600">Fora de Validade</span>
+                <p className="font-semibold text-gray-700">
+                  {expandedLicenses.filter(l => getLicenseStatus(l.validUntil) === 'out_of_validity').length}
                 </p>
               </div>
             </>
@@ -782,6 +799,7 @@ export default function IssuedLicensesPage() {
                             <span className={
                               validityStatus === 'expired' ? 'font-semibold text-red-700' : 
                               validityStatus === 'expiring_soon' ? 'font-semibold text-amber-700' : 
+                              validityStatus === 'out_of_validity' ? 'font-semibold text-gray-600' : 
                               'font-semibold text-green-700'
                             }>
                               {license.validUntil.split('-').reverse().join('/')}
@@ -796,6 +814,12 @@ export default function IssuedLicensesPage() {
                                 <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span>
                               </span>
                               Vencida
+                            </Badge>
+                          )}
+                          {validityStatus === 'out_of_validity' && (
+                            <Badge variant="outline" className="bg-gray-100 text-gray-600 flex items-center gap-1 justify-center w-28 mx-auto border-gray-300">
+                              <AlertCircle className="h-3 w-3" />
+                              Fora Validade
                             </Badge>
                           )}
                           {validityStatus === 'expiring_soon' && (
@@ -918,6 +942,7 @@ export default function IssuedLicensesPage() {
                     className={`p-4 ${
                       validityStatus === 'expired' ? 'bg-red-50' : 
                       validityStatus === 'expiring_soon' ? 'bg-amber-50' : 
+                      validityStatus === 'out_of_validity' ? 'bg-gray-50' :
                       'bg-white'
                     }`}
                   >
@@ -1031,6 +1056,7 @@ export default function IssuedLicensesPage() {
                         <div className={
                           validityStatus === 'expired' ? 'font-semibold text-red-700' : 
                           validityStatus === 'expiring_soon' ? 'font-semibold text-amber-700' : 
+                          validityStatus === 'out_of_validity' ? 'font-semibold text-gray-600' :
                           'font-semibold text-green-700'
                         }>
                           {license.validUntil ? license.validUntil.split('-').reverse().join('/') : '-'}
@@ -1048,6 +1074,12 @@ export default function IssuedLicensesPage() {
                               <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span>
                             </span>
                             Vencida
+                          </Badge>
+                        )}
+                        {validityStatus === 'out_of_validity' && (
+                          <Badge variant="outline" className="bg-gray-100 text-gray-600 flex items-center gap-1 justify-center w-28 mx-auto border-gray-300">
+                            <AlertCircle className="h-3 w-3" />
+                            Fora Validade
                           </Badge>
                         )}
                         {validityStatus === 'expiring_soon' && (

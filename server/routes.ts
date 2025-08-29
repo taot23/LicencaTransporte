@@ -957,7 +957,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         
         // Função getLicenseStatus IDÊNTICA à da página "Licenças Emitidas"
-        const getLicenseStatus = (validUntil: string | null): 'active' | 'expired' | 'expiring_soon' => {
+        const getLicenseStatus = (validUntil: string | null): 'active' | 'expired' | 'expiring_soon' | 'out_of_validity' => {
           if (!validUntil) return 'active';
           
           const validDate = new Date(validUntil);
@@ -965,6 +965,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Se a validade é antes de hoje (vencida)
           if (validDate < today) {
+            // Se vencida há mais de 60 dias, é "Fora de Validade"
+            const daysSinceExpiration = Math.ceil((today.getTime() - validDate.getTime()) / (1000 * 60 * 60 * 24));
+            if (daysSinceExpiration > 60) {
+              return 'out_of_validity';
+            }
             return 'expired';
           }
           
