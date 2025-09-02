@@ -591,14 +591,13 @@ export default function AdminLicensesPage() {
       let matchesDate = true;
       if (dateFilter) {
         const requestDate = license.createdAt ? new Date(license.createdAt) : null;
-        const filterDate = new Date(dateFilter);
         
         if (requestDate) {
-          // Comparar apenas ano, mês e dia
-          matchesDate = 
-            requestDate.getFullYear() === filterDate.getFullYear() &&
-            requestDate.getMonth() === filterDate.getMonth() &&
-            requestDate.getDate() === filterDate.getDate();
+          // Converter ambas as datas para formato YYYY-MM-DD para comparação precisa
+          const requestDateStr = requestDate.toISOString().split('T')[0]; // YYYY-MM-DD
+          const filterDateStr = dateFilter; // Já está no formato YYYY-MM-DD do input
+          
+          matchesDate = requestDateStr === filterDateStr;
         } else {
           matchesDate = false;
         }
