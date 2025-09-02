@@ -2581,13 +2581,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Converter de centímetros para metros se os valores parecem estar em centímetros
       if (licenseData.length && licenseData.length > 100) {
-        licenseData.length = Number((licenseData.length / 100).toFixed(2)); // centímetros para metros
+        // Licença já está em metros a partir do backend unificado
       }
       if (licenseData.width && licenseData.width > 50) {
-        licenseData.width = Number((licenseData.width / 100).toFixed(2)); // centímetros para metros  
+        // Licença já está em metros a partir do backend unificado  
       }
       if (licenseData.height && licenseData.height > 50) {
-        licenseData.height = Number((licenseData.height / 100).toFixed(2)); // centímetros para metros
+        // Licença já está em metros a partir do backend unificado
       }
       
       console.log('Valores DEPOIS da conversão (metros):', {
@@ -3784,7 +3784,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
 
-          // 6. Validar dimensões (planilha em metros, BD em centímetros)
+          // 6. Validar dimensões (planilha em metros, BD em metros)
           const lengthInMeters = parseFloat(rowData.comprimento?.replace(',', '.') || '0');
           const widthInMeters = parseFloat(rowData.largura?.replace(',', '.') || '0');
           const heightInMeters = parseFloat(rowData.altura?.replace(',', '.') || '0');
@@ -3794,10 +3794,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             throw new Error("Dimensões e peso devem ser valores positivos");
           }
 
-          // Converter de metros para centímetros (como espera o banco de dados)
-          const length = Math.round(lengthInMeters * 100); // 25.5m → 2550cm
-          const width = Math.round(widthInMeters * 100);   // 2.6m → 260cm
-          const height = Math.round(heightInMeters * 100); // 4.4m → 440cm
+          // Manter em metros (sistema unificado)
+          const length = lengthInMeters; // Manter em metros - sem conversão
+          const width = widthInMeters;   // Manter em metros - sem conversão
+          const height = heightInMeters; // Manter em metros - sem conversão
 
           // 7. Buscar veículos adicionais baseado no tipo
           let firstTrailerVehicle = null;
