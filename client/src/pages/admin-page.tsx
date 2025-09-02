@@ -341,7 +341,7 @@ export default function AdminPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">Comprimento</h3>
-                      <p className="text-gray-900">{selectedLicense.length} m</p>
+                      <p className="text-gray-900">{selectedLicense.length / 100} m</p>
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-gray-500">Data de Solicitação</h3>

@@ -2401,14 +2401,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Valores padrão baseados no tipo de licença - prancha tem limites diferentes
       const isPrancha = licenseData.type === "flatbed";
       
-      // Verificar length (comprimento) - FRONTEND JÁ ENVIA EM CENTÍMETROS
+      // Verificar length (comprimento) - CONVERTER METROS PARA CENTÍMETROS
       if (licenseData.length === undefined || licenseData.length === null || licenseData.length === "") {
         licenseData.length = isPrancha ? 2600 : 2500; // 26.00m para prancha, 25.00m para outros (em centímetros)
         console.log(`Aplicando valor padrão para comprimento: ${licenseData.length} cm`);
       } else {
-        // Frontend já envia em centímetros, apenas garantir que é número
-        licenseData.length = Number(licenseData.length);
-        console.log(`Comprimento já em centímetros: ${licenseData.length} cm`);
+        // Converter metros para centímetros (frontend envia em metros, BD armazena em centímetros)
+        const metersValue = Number(licenseData.length);
+        licenseData.length = metersValue * 100;
+        console.log(`Convertendo comprimento de ${metersValue}m para ${licenseData.length} cm`);
       }
       
       // Verificar width (largura)
@@ -2416,9 +2417,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         licenseData.width = isPrancha ? 320 : 260; // 3.20m para prancha, 2.60m para outros
         console.log(`Aplicando valor padrão para largura: ${licenseData.width}`);
       } else {
-        // Frontend já envia em centímetros, apenas garantir que é número
-        licenseData.width = Number(licenseData.width);
-        console.log(`Largura já em centímetros: ${licenseData.width} cm`);
+        // Converter metros para centímetros (frontend envia em metros, BD armazena em centímetros)
+        const metersValue = Number(licenseData.width);
+        licenseData.width = metersValue * 100;
+        console.log(`Convertendo largura de ${metersValue}m para ${licenseData.width} cm`);
       }
       
       // Verificar height (altura)
@@ -2426,9 +2428,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         licenseData.height = isPrancha ? 495 : 440; // 4.95m para prancha, 4.40m para outros
         console.log(`Aplicando valor padrão para altura: ${licenseData.height}`);
       } else {
-        // Frontend já envia em centímetros, apenas garantir que é número
-        licenseData.height = Number(licenseData.height);
-        console.log(`Altura já em centímetros: ${licenseData.height} cm`);
+        // Converter metros para centímetros (frontend envia em metros, BD armazena em centímetros)
+        const metersValue = Number(licenseData.height);
+        licenseData.height = metersValue * 100;
+        console.log(`Convertendo altura de ${metersValue}m para ${licenseData.height} cm`);
       }
       
       // Verificar cargoType (tipo de carga)
@@ -2631,9 +2634,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         licenseData.width = isPrancha ? 320 : 260; // 3.20m para prancha, 2.60m para outros
         console.log(`Aplicando valor padrão para largura: ${licenseData.width}`);
       } else {
-        // Frontend já envia em centímetros, apenas garantir que é número
-        licenseData.width = Number(licenseData.width);
-        console.log(`Largura já em centímetros: ${licenseData.width} cm`);
+        // Converter metros para centímetros (frontend envia em metros, BD armazena em centímetros)
+        const metersValue = Number(licenseData.width);
+        licenseData.width = metersValue * 100;
+        console.log(`Convertendo largura de ${metersValue}m para ${licenseData.width} cm`);
       }
       
       // Verificar height (altura)
@@ -2641,9 +2645,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         licenseData.height = isPrancha ? 495 : 440; // 4.95m para prancha, 4.40m para outros
         console.log(`Aplicando valor padrão para altura: ${licenseData.height}`);
       } else {
-        // Frontend já envia em centímetros, apenas garantir que é número
-        licenseData.height = Number(licenseData.height);
-        console.log(`Altura já em centímetros: ${licenseData.height} cm`);
+        // Converter metros para centímetros (frontend envia em metros, BD armazena em centímetros)
+        const metersValue = Number(licenseData.height);
+        licenseData.height = metersValue * 100;
+        console.log(`Convertendo altura de ${metersValue}m para ${licenseData.height} cm`);
       }
       
       // Verificar cargoType (tipo de carga)
