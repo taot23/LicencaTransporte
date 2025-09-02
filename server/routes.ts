@@ -3761,7 +3761,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (rowData.placas_adicionais && rowData.placas_adicionais.trim()) {
             additionalPlates = rowData.placas_adicionais
               .split(',')
-              .map(plate => plate.trim().toUpperCase())
+              .map(plate => {
+                // Limpar caracteres indesejados (aspas, tabs, quebras de linha)
+                return plate.trim()
+                  .replace(/"/g, '')
+                  .replace(/'/g, '')
+                  .replace(/\t/g, '')
+                  .replace(/\n/g, '')
+                  .replace(/\r/g, '')
+                  .toUpperCase();
+              })
               .filter(plate => plate.length >= 6); // Validar comprimento mínimo
             
             console.log(`[BULK IMPORT] Placas adicionais processadas na linha ${i + 1}:`, additionalPlates);
