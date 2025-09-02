@@ -363,9 +363,9 @@ export function LicenseForm({
           dollyId: draft.dollyId || undefined,
           secondTrailerId: draft.secondTrailerId || undefined,
           flatbedId: draft.flatbedId || undefined,
-          length: draft.length / 100, // Convert from cm to meters for display
-          width: draft.width ? draft.width / 100 : undefined, // Convert from cm to meters for display
-          height: draft.height ? draft.height / 100 : undefined, // Convert from cm to meters for display
+          length: draft.length, // Manter em metros - sem conversão
+          width: draft.width ? draft.width : undefined, // Manter em metros - sem conversão  
+          height: draft.height ? draft.height : undefined, // Manter em metros - sem conversão
           additionalPlates: draft.additionalPlates || [],
           additionalPlatesDocuments: draft.additionalPlatesDocuments || [],
           states: draft.states,
@@ -1206,9 +1206,9 @@ export function LicenseForm({
     // Adjust dimensions from meters to centimeters for storage
     const dataToSubmit = {
       ...values,
-      length: Math.round((values.length || 0) * 100), // Convert to centimeters
-      width: values.width ? Math.round(values.width * 100) : undefined, // Convert to centimeters if exists
-      height: values.height ? Math.round(values.height * 100) : undefined, // Convert to centimeters if exists
+      length: Number(values.length || 0), // Manter em metros - sem conversão
+      width: values.width ? Number(values.width) : undefined, // Manter em metros - sem conversão  
+      height: values.height ? Number(values.height) : undefined, // Manter em metros - sem conversão
     };
 
     if (values.isDraft) {
@@ -1291,9 +1291,9 @@ export function LicenseForm({
           // Garantir que os estados selecionados são preservados
           states: currentFormValues.states,
           // Converter comprimento, largura e altura de metros para centímetros
-          length: Math.round((currentFormValues.length || 0) * 100),
-          width: Math.round((currentFormValues.width || 0) * 100),
-          height: Math.round((currentFormValues.height || 0) * 100),
+          length: Number(currentFormValues.length || 0),
+          width: Number(currentFormValues.width || 0),
+          height: Number(currentFormValues.height || 0),
           isDraft: false,
         };
 
@@ -1341,9 +1341,9 @@ export function LicenseForm({
           // Garantir que os estados selecionados são preservados
           states: currentFormValues.states,
           // Converter comprimento, largura e altura de metros para centímetros
-          length: Math.round((currentFormValues.length || 0) * 100),
-          width: Math.round((currentFormValues.width || 0) * 100),
-          height: Math.round((currentFormValues.height || 0) * 100),
+          length: Number(currentFormValues.length || 0),
+          width: Number(currentFormValues.width || 0),
+          height: Number(currentFormValues.height || 0),
           isDraft: false,
         };
 

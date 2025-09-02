@@ -2401,34 +2401,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Valores padrão baseados no tipo de licença - prancha tem limites diferentes
       const isPrancha = licenseData.type === "flatbed";
       
-      // Verificar length (comprimento) - FRONTEND JÁ ENVIA EM CENTÍMETROS
+      // Verificar length (comprimento) - FRONTEND ENVIA EM METROS
       if (licenseData.length === undefined || licenseData.length === null || licenseData.length === "") {
-        licenseData.length = isPrancha ? 2600 : 2500; // 26.00m para prancha, 25.00m para outros (em centímetros)
-        console.log(`Aplicando valor padrão para comprimento: ${licenseData.length} cm`);
+        licenseData.length = isPrancha ? 26.00 : 25.00; // 26.00m para prancha, 25.00m para outros (em metros)
+        console.log(`Aplicando valor padrão para comprimento: ${licenseData.length} m`);
       } else {
-        // Frontend já envia em centímetros (igual à importação), apenas garantir que é número
+        // Frontend envia em metros, armazenar em metros
         licenseData.length = Number(licenseData.length);
-        console.log(`Comprimento recebido em centímetros: ${licenseData.length} cm`);
+        console.log(`Comprimento recebido em metros: ${licenseData.length} m`);
       }
       
       // Verificar width (largura)
       if (licenseData.width === undefined || licenseData.width === null || licenseData.width === "") {
-        licenseData.width = isPrancha ? 320 : 260; // 3.20m para prancha, 2.60m para outros
+        licenseData.width = isPrancha ? 3.20 : 2.60; // 3.20m para prancha, 2.60m para outros (em metros)
         console.log(`Aplicando valor padrão para largura: ${licenseData.width}`);
       } else {
-        // Frontend já envia em centímetros (igual à importação), apenas garantir que é número
+        // Frontend envia em metros, armazenar em metros
         licenseData.width = Number(licenseData.width);
-        console.log(`Largura recebida em centímetros: ${licenseData.width} cm`);
+        console.log(`Largura recebida em metros: ${licenseData.width} m`);
       }
       
       // Verificar height (altura)
       if (licenseData.height === undefined || licenseData.height === null || licenseData.height === "") {
-        licenseData.height = isPrancha ? 495 : 440; // 4.95m para prancha, 4.40m para outros
+        licenseData.height = isPrancha ? 4.95 : 4.40; // 4.95m para prancha, 4.40m para outros (em metros)
         console.log(`Aplicando valor padrão para altura: ${licenseData.height}`);
       } else {
-        // Frontend já envia em centímetros (igual à importação), apenas garantir que é número
+        // Frontend envia em metros, armazenar em metros
         licenseData.height = Number(licenseData.height);
-        console.log(`Altura recebida em centímetros: ${licenseData.height} cm`);
+        console.log(`Altura recebida em metros: ${licenseData.height} m`);
       }
       
       // Verificar cargoType (tipo de carga)
@@ -2628,22 +2628,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Verificar width (largura)
       if (licenseData.width === undefined || licenseData.width === null || licenseData.width === "") {
-        licenseData.width = isPrancha ? 320 : 260; // 3.20m para prancha, 2.60m para outros
+        licenseData.width = isPrancha ? 3.20 : 2.60; // 3.20m para prancha, 2.60m para outros (em metros)
         console.log(`Aplicando valor padrão para largura: ${licenseData.width}`);
       } else {
-        // Frontend já envia em centímetros (igual à importação), apenas garantir que é número
+        // Frontend envia em metros, armazenar em metros
         licenseData.width = Number(licenseData.width);
-        console.log(`Largura recebida em centímetros: ${licenseData.width} cm`);
+        console.log(`Largura recebida em metros: ${licenseData.width} m`);
       }
       
       // Verificar height (altura)
       if (licenseData.height === undefined || licenseData.height === null || licenseData.height === "") {
-        licenseData.height = isPrancha ? 495 : 440; // 4.95m para prancha, 4.40m para outros
+        licenseData.height = isPrancha ? 4.95 : 4.40; // 4.95m para prancha, 4.40m para outros (em metros)
         console.log(`Aplicando valor padrão para altura: ${licenseData.height}`);
       } else {
-        // Frontend já envia em centímetros (igual à importação), apenas garantir que é número
+        // Frontend envia em metros, armazenar em metros
         licenseData.height = Number(licenseData.height);
-        console.log(`Altura recebida em centímetros: ${licenseData.height} cm`);
+        console.log(`Altura recebida em metros: ${licenseData.height} m`);
       }
       
       // Verificar cargoType (tipo de carga)
