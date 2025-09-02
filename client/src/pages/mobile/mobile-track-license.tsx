@@ -186,15 +186,15 @@ export default function MobileTrackLicensePage() {
                               <div className="grid grid-cols-3 gap-2">
                                 <div className="text-center">
                                   <p className="text-xs text-muted-foreground">Comprimento</p>
-                                  <p className="font-medium">{(selectedLicense.length / 100).toFixed(2)}m</p>
+                                  <p className="font-medium">{(selectedLicense.length).toFixed(2)}m</p>
                                 </div>
                                 <div className="text-center">
                                   <p className="text-xs text-muted-foreground">Largura</p>
-                                  <p className="font-medium">{(selectedLicense.width / 100).toFixed(2)}m</p>
+                                  <p className="font-medium">{(selectedLicense.width).toFixed(2)}m</p>
                                 </div>
                                 <div className="text-center">
                                   <p className="text-xs text-muted-foreground">Altura</p>
-                                  <p className="font-medium">{(selectedLicense.height / 100).toFixed(2)}m</p>
+                                  <p className="font-medium">{(selectedLicense.height).toFixed(2)}m</p>
                                 </div>
                               </div>
                             </DetailsSection>
