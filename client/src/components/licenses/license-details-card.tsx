@@ -91,12 +91,7 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
   };
   
   // Estado para armazenar os números AET por estado (será atualizado pelo WebSocket)
-  const [stateAETNumbers, setStateAETNumbers] = useState(() => {
-    console.log('[DEBUG AET] Dados originais da licença:', license.stateAETNumbers);
-    const parsed = parseAETNumbers(license.stateAETNumbers);
-    console.log('[DEBUG AET] Dados convertidos:', parsed);
-    return parsed;
-  });
+  const [stateAETNumbers, setStateAETNumbers] = useState(parseAETNumbers(license.stateAETNumbers));
   // Estado para armazenar os arquivos por estado (será atualizado pelo WebSocket)
   const [stateFiles, setStateFiles] = useState(license.stateFiles || []);
   
@@ -665,7 +660,6 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
                   const stateAETEntry = stateAETNumbers.find(entry => entry.startsWith(`${state}:`));
                   const stateAETNumber = stateAETEntry ? stateAETEntry.split(':')[1] : null;
                   
-                  console.log(`[DEBUG AET] Estado: ${state}, Entry: ${stateAETEntry}, Número: ${stateAETNumber}`);
                   
                   return (
                     <tr key={idx}>

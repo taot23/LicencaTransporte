@@ -4328,6 +4328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         states: licenseRequests.states,
         status: licenseRequests.status,
         stateStatuses: licenseRequests.stateStatuses,
+        stateAETNumbers: licenseRequests.stateAETNumbers, // CAMPO ESSENCIAL PARA NÚMEROS AET POR ESTADO
         createdAt: licenseRequests.createdAt,
         updatedAt: licenseRequests.updatedAt,
         isDraft: licenseRequests.isDraft,
