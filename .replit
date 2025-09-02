@@ -51,4 +51,3 @@ task = "shell.exec"
 args = "node server/production-server.js"
 
 [agent]
-integrations = ["javascript_websocket==1.0.0"]
