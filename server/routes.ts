@@ -3756,7 +3756,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           console.log(`[BULK IMPORT] Estados processados na linha ${i + 1}:`, { original: rawStates, converted: states });
 
-          // 5. Validar dimensões (planilha em metros, BD em centímetros)
+          // 5. Processar placas adicionais (campo opcional)
+          let additionalPlates: string[] = [];
+          if (rowData.placas_adicionais && rowData.placas_adicionais.trim()) {
+            additionalPlates = rowData.placas_adicionais
+              .split(',')
+              .map(plate => plate.trim().toUpperCase())
+              .filter(plate => plate.length >= 6); // Validar comprimento mínimo
+            
+            console.log(`[BULK IMPORT] Placas adicionais processadas na linha ${i + 1}:`, additionalPlates);
+            
+            // Validar se as placas adicionais existem no sistema
+            for (const plate of additionalPlates) {
+              const plateExists = allVehicles.some(v => v.plate.toUpperCase() === plate);
+              if (!plateExists) {
+                console.warn(`[BULK IMPORT] Placa adicional não encontrada: ${plate} (linha ${i + 1})`);
+                results.warnings.push(`Linha ${i + 1}: Placa adicional não cadastrada: ${plate}`);
+              }
+            }
+          }
+
+          // 6. Validar dimensões (planilha em metros, BD em centímetros)
           const lengthInMeters = parseFloat(rowData.comprimento?.replace(',', '.') || '0');
           const widthInMeters = parseFloat(rowData.largura?.replace(',', '.') || '0');
           const heightInMeters = parseFloat(rowData.altura?.replace(',', '.') || '0');
@@ -3771,7 +3791,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const width = Math.round(widthInMeters * 100);   // 2.6m → 260cm
           const height = Math.round(heightInMeters * 100); // 4.4m → 440cm
 
-          // 6. Buscar veículos adicionais baseado no tipo
+          // 7. Buscar veículos adicionais baseado no tipo
           let firstTrailerVehicle = null;
           let secondTrailerVehicle = null;
           let dollyVehicle = null;
@@ -3837,7 +3857,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
 
-          // 7. Verificar licenças existentes para evitar duplicatas
+          // 8. Verificar licenças existentes para evitar duplicatas
           const existingLicenses = await storage.getAllLicenseRequests();
           const vehicleCombination = [
             tractorVehicle.id,
@@ -3866,10 +3886,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             continue;
           }
 
-          // 8. Gerar número da licença
+          // 9. Gerar número da licença
           const requestNumber = `AET-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000)}`;
 
-          // 9. Criar a licença
+          // 10. Criar a licença
           const newLicense = {
             transporterId: transporter.id,
             type: licenseType,
@@ -3890,9 +3910,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             totalWeight: totalWeight,
             cargoType: 'dry_cargo' as const,
             
-            // Campos obrigatórios
-            additionalPlates: [],
-            additionalPlatesDocuments: [],
+            // Placas adicionais
+            additionalPlates: additionalPlates,
+            additionalPlatesDocuments: [], // Documentos serão adicionados posteriormente
             
             // Estados e metadados
             states: states,
@@ -3940,6 +3960,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'segunda_carreta_placa',
       'dolly_placa',
       'prancha_placa',
+      'placas_adicionais',
       'estados',
       'comprimento',
       'largura',
@@ -3956,6 +3977,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       'GHI9012',
       '',
       '',
+      'XYZ9999,KLM1111',
       'SP,MG,RJ',
       '25.5',
       '2.6',
