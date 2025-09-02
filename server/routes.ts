@@ -4384,6 +4384,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         width: licenseRequests.width,
         height: licenseRequests.height,
         cargoType: licenseRequests.cargoType,
+        // PLACAS ADICIONAIS - ESSENCIAL PARA EXIBIÇÃO COMPLETA
+        additionalPlates: licenseRequests.additionalPlates,
+        additionalPlatesDocuments: licenseRequests.additionalPlatesDocuments,
         // CAMPOS DOS VEÍCULOS - ESSENCIAIS PARA A LINHA DE FRENTE
         tractorUnitId: licenseRequests.tractorUnitId,
         firstTrailerId: licenseRequests.firstTrailerId,
