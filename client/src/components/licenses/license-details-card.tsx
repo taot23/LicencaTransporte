@@ -27,8 +27,8 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
   const [stateStatuses, setStateStatuses] = useState(license.stateStatuses || []);
   
   // Função para converter números AET do formato JSON para array de strings
-  const parseAETNumbers = (aetData: string[] | null | undefined): string[] => {
-    if (!aetData || aetData.length === 0) return [];
+  const parseAETNumbers = (aetData: any): string[] => {
+    if (!aetData) return [];
     
     try {
       // Se já está no formato correto [estado:numero], retornar como está
@@ -58,15 +58,45 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
         return result;
       }
       
+      // Se é um objeto JSON direto como {DNIT: "asdasda"}
+      if (typeof aetData === 'object' && !Array.isArray(aetData)) {
+        const result: string[] = [];
+        for (const [state, number] of Object.entries(aetData)) {
+          if (state && number) {
+            result.push(`${state}:${number}`);
+          }
+        }
+        return result;
+      }
+      
+      // Se é uma string no formato "{DNIT:asdasda}" diretamente
+      if (typeof aetData === 'string' && aetData.startsWith('{') && aetData.endsWith('}')) {
+        const result: string[] = [];
+        const cleanJson = aetData.slice(1, -1); // Remove { e }
+        const pairs = cleanJson.split(',');
+        for (const pair of pairs) {
+          const [state, number] = pair.split(':');
+          if (state && number) {
+            result.push(`${state.trim()}:${number.trim()}`);
+          }
+        }
+        return result;
+      }
+      
       return [];
     } catch (error) {
-      console.warn('Erro ao analisar números AET:', error);
+      console.warn('Erro ao analisar números AET:', error, aetData);
       return [];
     }
   };
   
   // Estado para armazenar os números AET por estado (será atualizado pelo WebSocket)
-  const [stateAETNumbers, setStateAETNumbers] = useState(parseAETNumbers(license.stateAETNumbers));
+  const [stateAETNumbers, setStateAETNumbers] = useState(() => {
+    console.log('[DEBUG AET] Dados originais da licença:', license.stateAETNumbers);
+    const parsed = parseAETNumbers(license.stateAETNumbers);
+    console.log('[DEBUG AET] Dados convertidos:', parsed);
+    return parsed;
+  });
   // Estado para armazenar os arquivos por estado (será atualizado pelo WebSocket)
   const [stateFiles, setStateFiles] = useState(license.stateFiles || []);
   
@@ -634,6 +664,8 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
                   // Encontrar número AET para este estado (usando estado atualizado em tempo real)
                   const stateAETEntry = stateAETNumbers.find(entry => entry.startsWith(`${state}:`));
                   const stateAETNumber = stateAETEntry ? stateAETEntry.split(':')[1] : null;
+                  
+                  console.log(`[DEBUG AET] Estado: ${state}, Entry: ${stateAETEntry}, Número: ${stateAETNumber}`);
                   
                   return (
                     <tr key={idx}>
