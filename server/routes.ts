@@ -4390,7 +4390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // APLICAR TODAS AS CONDIÇÕES
       if (conditions.length > 0) {
-        query = query.where(and(...conditions));
+        query = query.where(and(...conditions)) as any;
       }
       
       // BUSCAR CONTAGEM TOTAL (OTIMIZADA)
@@ -5737,7 +5737,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
         const transporter = await db.select({
           name: transporters.name
         }).from(transporters)
-        .where(eq(transporters.id, existingLicense.transporterId))
+        .where(eq(transporters.id, existingLicense.transporterId!))
         .limit(1);
         
         if (transporter.length > 0) {

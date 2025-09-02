@@ -68,13 +68,13 @@ export async function withRetry<T>(
  * @returns Resultado da execução do callback
  */
 export async function withTransaction<T>(
-  callback: (tx: typeof db) => Promise<T>
+  callback: (tx: any) => Promise<T>
 ): Promise<T> {
   const client = await pool.connect();
   
   try {
     await client.query('BEGIN');
-    const tx = drizzle({ client, schema });
+    const tx = drizzle(client, { schema });
     const result = await callback(tx);
     await client.query('COMMIT');
     return result;
