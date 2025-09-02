@@ -24,8 +24,7 @@ import { TransporterInfo } from "@/components/transporters/transporter-info";
 import { SortableHeader } from "@/components/ui/sortable-header";
 import { LicenseDetailsCard } from "@/components/licenses/license-details-card";
 import { exportToCSV, formatDateForCSV } from "@/lib/csv-export";
-import { usePaginatedList } from "@/hooks/use-paginated-list";
-import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
+import { StandardPagination } from "@/components/ui/standard-pagination";
 import { brazilianStates } from "@shared/schema";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
 
@@ -307,18 +306,40 @@ export default function TrackLicensePage() {
     return toSort;
   }, [filteredLicenses, sortColumn, sortDirection]);
 
-  // Hook de paginação aplicado às licenças ordenadas
-  const {
-    paginatedItems: paginatedLicenses,
-    pagination,
-    currentPage,
-    setCurrentPage,
-    searchTerm: paginationSearchTerm,
-    setSearchTerm: setPaginationSearchTerm
-  } = usePaginatedList<ExtendedLicenseWithId>({
-    items: sortedLicenses,
-    itemsPerPage: 10
-  });
+  // Estados de paginação - seguindo padrão das páginas admin
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+
+  // Calculando paginação manualmente
+  const pagination = useMemo(() => {
+    const total = sortedLicenses.length;
+    const totalPages = Math.ceil(total / pageSize);
+    const startItem = (currentPage - 1) * pageSize + 1;
+    const endItem = Math.min(currentPage * pageSize, total);
+
+    return {
+      total,
+      totalPages,
+      currentPage,
+      itemsPerPage: pageSize,
+      hasPrev: currentPage > 1,
+      hasNext: currentPage < totalPages,
+      startItem: total > 0 ? startItem : 0,
+      endItem: total > 0 ? endItem : 0
+    };
+  }, [sortedLicenses.length, currentPage, pageSize]);
+
+  // Aplicar paginação às licenças ordenadas
+  const paginatedLicenses = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return sortedLicenses.slice(startIndex, startIndex + pageSize);
+  }, [sortedLicenses, currentPage, pageSize]);
+
+  // Função para mudança de tamanho de página
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setCurrentPage(1); // Resetar para primeira página
+  };
 
   const handleViewLicense = (license: LicenseRequest) => {
     setSelectedLicense(license);
@@ -515,7 +536,7 @@ export default function TrackLicensePage() {
       {/* Cabeçalho com contador de licenças */}
       <div className="mb-4 flex justify-between items-center">
         <div className="text-sm text-gray-600">
-          Mostrando {paginatedLicenses.length > 0 ? ((currentPage - 1) * 10 + 1) : 0}-{Math.min(currentPage * 10, sortedLicenses.length)} de {sortedLicenses.length} licenças
+          Mostrando {pagination.startItem}-{pagination.endItem} de {pagination.total} licenças
         </div>
       </div>
 
@@ -529,37 +550,23 @@ export default function TrackLicensePage() {
         onSort={handleSort}
       />
 
-      {/* Controles de paginação - Versão desktop */}
-      <div className="hidden md:block mt-6">
-        <ListPagination 
+      {/* Paginação Padronizada */}
+      {sortedLicenses.length > 0 && (
+        <StandardPagination
           currentPage={currentPage}
           totalPages={pagination.totalPages}
           totalItems={pagination.total}
-          itemsPerPage={pagination.itemsPerPage}
+          pageSize={pageSize}
+          onPageSizeChange={handlePageSizeChange}
           hasPrev={pagination.hasPrev}
           hasNext={pagination.hasNext}
           startItem={pagination.startItem}
           endItem={pagination.endItem}
           onPageChange={setCurrentPage}
           itemName="licenças"
+          showPageSizeSelect={true}
         />
-      </div>
-
-      {/* Controles de paginação - Versão mobile */}
-      <div className="block md:hidden mt-6">
-        <MobileListPagination
-          currentPage={currentPage}
-          totalPages={pagination.totalPages}
-          totalItems={pagination.total}
-          itemsPerPage={pagination.itemsPerPage}
-          hasPrev={pagination.hasPrev}
-          hasNext={pagination.hasNext}
-          startItem={pagination.startItem}
-          endItem={pagination.endItem}
-          onPageChange={setCurrentPage}
-          itemName="licenças"
-        />
-      </div>
+      )}
 
       {selectedLicense && (
         <Dialog open={!!selectedLicense} onOpenChange={(open) => !open && setSelectedLicense(null)}>
