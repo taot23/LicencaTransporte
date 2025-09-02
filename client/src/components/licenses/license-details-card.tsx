@@ -1036,6 +1036,16 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
         </div>
       </div>
       
+      {/* Campo de Observações - Logo após Linha de Frente */}
+      {license.comments && license.comments.trim() && (
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold">Observações</h3>
+          <div className="bg-white p-4 rounded-md shadow-sm border border-gray-200">
+            <p className="text-gray-900 text-sm whitespace-pre-wrap">{license.comments}</p>
+          </div>
+        </div>
+      )}
+      
       {/* Placas Adicionais */}
       {license.additionalPlates && license.additionalPlates.length > 0 && (
         <div className="space-y-2">

@@ -1971,16 +1971,6 @@ export default function AdminLicensesPage() {
                 <TabsContent value="details" className="pt-4">
                   {/* Utilizando o componente LicenseDetailsCard para exibição dos detalhes */}
                   <LicenseDetailsCard license={selectedLicense} />
-                  
-                  {/* Campo de Observações */}
-                  {selectedLicense.comments && selectedLicense.comments.trim() && (
-                    <div className="mt-4">
-                      <h3 className="text-sm font-medium text-gray-500">Observações</h3>
-                      <div className="mt-1 p-3 bg-gray-50 border border-gray-200 rounded-md">
-                        <p className="text-gray-900 text-sm whitespace-pre-wrap">{selectedLicense.comments}</p>
-                      </div>
-                    </div>
-                  )}
                 </TabsContent>
                 
                 {/* Aba de Status por Estado */}
