@@ -3739,10 +3739,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
             throw new Error("Estados são obrigatórios");
           }
 
-          const states = rowData.estados.split(',').map(s => s.trim()).filter(s => s);
-          if (states.length === 0) {
+          const rawStates = rowData.estados.split(',').map(s => s.trim()).filter(s => s);
+          if (rawStates.length === 0) {
             throw new Error("Pelo menos um estado deve ser informado");
           }
+
+          // CONVERSÃO AUTOMÁTICA: FD → DNIT
+          const states = rawStates.map(state => {
+            const normalizedState = state.toUpperCase();
+            if (normalizedState === 'FD') {
+              console.log(`[BULK IMPORT] Convertendo estado "FD" para "DNIT" na linha ${i + 1}`);
+              return 'DNIT';
+            }
+            return normalizedState;
+          });
+
+          console.log(`[BULK IMPORT] Estados processados na linha ${i + 1}:`, { original: rawStates, converted: states });
 
           // 5. Validar dimensões (planilha em metros, BD em centímetros)
           const lengthInMeters = parseFloat(rowData.comprimento?.replace(',', '.') || '0');
