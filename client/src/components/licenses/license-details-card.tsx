@@ -25,8 +25,48 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
   const [currentStatus, setCurrentStatus] = useState(license.status);
   // Estado para armazenar os status por estado (será atualizado pelo WebSocket)
   const [stateStatuses, setStateStatuses] = useState(license.stateStatuses || []);
+  
+  // Função para converter números AET do formato JSON para array de strings
+  const parseAETNumbers = (aetData: string[] | null | undefined): string[] => {
+    if (!aetData || aetData.length === 0) return [];
+    
+    try {
+      // Se já está no formato correto [estado:numero], retornar como está
+      if (Array.isArray(aetData) && aetData.length > 0 && aetData[0].includes(':')) {
+        return aetData;
+      }
+      
+      // Se está no formato JSON como {DNIT:asdasda}, converter
+      if (Array.isArray(aetData) && aetData.length > 0) {
+        const result: string[] = [];
+        for (const item of aetData) {
+          if (typeof item === 'string' && item.startsWith('{') && item.endsWith('}')) {
+            // Parse do JSON {DNIT:asdasda}
+            const cleanJson = item.slice(1, -1); // Remove { e }
+            const pairs = cleanJson.split(',');
+            for (const pair of pairs) {
+              const [state, number] = pair.split(':');
+              if (state && number) {
+                result.push(`${state.trim()}:${number.trim()}`);
+              }
+            }
+          } else if (typeof item === 'string' && item.includes(':')) {
+            // Já está no formato correto
+            result.push(item);
+          }
+        }
+        return result;
+      }
+      
+      return [];
+    } catch (error) {
+      console.warn('Erro ao analisar números AET:', error);
+      return [];
+    }
+  };
+  
   // Estado para armazenar os números AET por estado (será atualizado pelo WebSocket)
-  const [stateAETNumbers, setStateAETNumbers] = useState(license.stateAETNumbers || []);
+  const [stateAETNumbers, setStateAETNumbers] = useState(parseAETNumbers(license.stateAETNumbers));
   // Estado para armazenar os arquivos por estado (será atualizado pelo WebSocket)
   const [stateFiles, setStateFiles] = useState(license.stateFiles || []);
   
