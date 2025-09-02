@@ -311,7 +311,7 @@ export const licenseRequests = pgTable("license_requests", {
   validUntil: timestamp("valid_until"),
   issuedAt: timestamp("issued_at"),
   aetNumber: text("aet_number"),
-  scheduledDate: timestamp("scheduled_date"), // Data de agendamento para status "scheduled"
+  // scheduledDate: timestamp("scheduled_date"), // Data de agendamento para status "scheduled" - TEMPORARIAMENTE REMOVIDA
   selectedCnpj: text("selected_cnpj"), // CNPJ selecionado da empresa transportadora (global - legado)
   stateCnpjs: text("state_cnpjs").array(), // Array com formato "ESTADO:CNPJ" (ex: "SP:12345678000100")
 }, (table) => {
