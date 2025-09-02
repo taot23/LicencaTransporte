@@ -73,8 +73,10 @@ export function StatusBadge({
       case "in_progress":
       case "registration_in_progress":
         return "bg-blue-100 text-blue-800";
-      case "pending_documentation":
+      case "scheduled":
         return "bg-orange-100 text-orange-800";
+      case "pending_documentation":
+        return "bg-yellow-100 text-yellow-800";
       case "rejected":
         return "bg-red-100 text-red-800";
       case "analyzing":
@@ -101,6 +103,8 @@ export function StatusBadge({
       case "in_progress":
       case "registration_in_progress":
         return "Cadastro em Andamento";
+      case "scheduled":
+        return "Agendado";
       case "pending_documentation":
         return "Pendente Documentação";
       case "rejected":
@@ -129,6 +133,8 @@ export function StatusBadge({
       case "in_progress":
       case "registration_in_progress":
         return <Loader2 className="h-3 w-3 mr-1 animate-spin" />;
+      case "scheduled":
+        return <Clock className="h-3 w-3 mr-1" />;
       case "pending_documentation":
         return <FileText className="h-3 w-3 mr-1" />;
       case "rejected":

@@ -233,6 +233,7 @@ export const insertVehicleSchema = createInsertSchema(vehicles)
 export const licenseStatusEnum = z.enum([
   "pending_registration", // Pedido em Cadastramento
   "registration_in_progress", // Cadastro em Andamento
+  "scheduled", // Agendado
   "pending_documentation", // Pendente Documentação
   "rejected", // Reprovado - Pendência de Documentação
   "under_review", // Análise do Órgão
@@ -310,6 +311,7 @@ export const licenseRequests = pgTable("license_requests", {
   validUntil: timestamp("valid_until"),
   issuedAt: timestamp("issued_at"),
   aetNumber: text("aet_number"),
+  scheduledDate: timestamp("scheduled_date"), // Data de agendamento para status "scheduled"
   selectedCnpj: text("selected_cnpj"), // CNPJ selecionado da empresa transportadora (global - legado)
   stateCnpjs: text("state_cnpjs").array(), // Array com formato "ESTADO:CNPJ" (ex: "SP:12345678000100")
 }, (table) => {

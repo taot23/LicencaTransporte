@@ -418,10 +418,10 @@ export default function AdminLicensesPage() {
     }
 
     // Verificar se o número já existe em outras licenças (busca global)
-    const duplicateInOtherLicense = licenses.find(license => {
+    const duplicateInOtherLicense = licenses.find((license: LicenseRequest) => {
       if (license.id === currentLicense.id) return false; // Pular a licença atual
       
-      return license.stateAETNumbers?.some(entry => {
+      return license.stateAETNumbers?.some((entry: string) => {
         const [, number] = entry.split(':');
         return number === aetNumber;
       });
@@ -607,7 +607,7 @@ export default function AdminLicensesPage() {
       return matchesTransporter && matchesDate;
     })
     // Aplicar ordenação
-    .sort((a, b) => {
+    .sort((a: LicenseRequest, b: LicenseRequest) => {
       const getValue = (license: LicenseRequest, field: string) => {
         switch (field) {
           case 'requestNumber':
@@ -881,13 +881,14 @@ export default function AdminLicensesPage() {
         "Última Atualização"
       ];
 
-      const formattedData = filteredLicenses.map(license => ({
+      const formattedData = filteredLicenses.map((license: LicenseRequest) => ({
         ID: license.id,
         "Número do Pedido": license.requestNumber,
         "Tipo de Licença": getLicenseTypeLabel(license.type),
         "Placa Principal": license.mainVehiclePlate,
         Status: license.status === "pending_registration" ? "Pendente de Registro" :
                 license.status === "registration_in_progress" ? "Registro em Andamento" :
+                license.status === "scheduled" ? "Agendado" :
                 license.status === "pending_documentation" ? "Pendente Documentação" :
                 license.status === "under_review" ? "Em Análise" :
                 license.status === "pending_approval" ? "Pendente de Aprovação" :
@@ -926,6 +927,7 @@ export default function AdminLicensesPage() {
   const statusOptions = [
     { value: "pending_registration", label: "Pedido em Cadastramento", description: "Status inicial do pedido" },
     { value: "registration_in_progress", label: "Cadastro em Andamento", description: "Em fase de edição pelo usuário" },
+    { value: "scheduled", label: "Agendado", description: "Agendado para cadastro em data específica" },
     { value: "pending_documentation", label: "Pendente Documentação", description: "Aguardando documentos pendentes" },
     { value: "rejected", label: "Reprovado", description: "Com justificativa de pendências" },
     { value: "under_review", label: "Análise do Órgão", description: "Em avaliação oficial" },
@@ -1255,8 +1257,11 @@ export default function AdminLicensesPage() {
                                       case "registration_in_progress":
                                         badgeClass = "bg-blue-100 border-blue-200 text-blue-800";
                                         break;
-                                      case "pending_documentation":
+                                      case "scheduled":
                                         badgeClass = "bg-orange-100 border-orange-200 text-orange-800";
+                                        break;
+                                      case "pending_documentation":
+                                        badgeClass = "bg-yellow-100 border-yellow-200 text-yellow-800";
                                         break;
                                       case "analyzing":
                                       case "under_review":

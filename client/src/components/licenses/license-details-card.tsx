@@ -482,7 +482,9 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
   const getStatusLabel = (status: string): string => {
     const statusLabels: Record<string, string> = {
       pending_registration: "Pedido em Cadastramento",
-      registration_in_progress: "Cadastro em Andamento", 
+      registration_in_progress: "Cadastro em Andamento",
+      scheduled: "Agendado",
+      pending_documentation: "Pendente Documentação",
       rejected: "Reprovado",
       under_review: "Análise do Órgão",
       pending_approval: "Pendente Liberação",
@@ -1377,7 +1379,7 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
                   model: editForm.model,
                   year: Number(editForm.year) || 2020,
                   axleCount: Number(editForm.axleCount) || 1,
-                  tare: Number(editForm.tare) || 1000
+                  tare: String(Number(editForm.tare) || 1000)
                 };
                 
                 // Adicionar tipo de carroceria se aplicável
