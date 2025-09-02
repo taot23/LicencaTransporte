@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { exportToCSV, formatDateForCSV } from "@/lib/csv-export";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
-import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
+import { StandardPagination } from "@/components/ui/standard-pagination";
 import { Plus, MoreVertical, Edit, Trash, Link as LinkIcon, UserCircle2, Download, Search, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SkeletonTable } from "@/components/ui/skeleton-table";
@@ -435,38 +435,20 @@ export default function AdminTransporters() {
         {/* Lista de transportadores */}
         {renderTransportersList()}
 
-        {/* Controles de paginação - Versão desktop */}
+        {/* Paginação Padronizada */}
         {filteredTransporters.length > 0 && !isLoading && (
-          <div className="hidden md:block mt-6">
-            <ListPagination 
-              currentPage={currentPage}
-              totalPages={pagination.totalPages}
-              totalItems={filteredTransporters.length}
-              itemsPerPage={10}
-              hasPrev={currentPage > 1}
-              hasNext={currentPage < pagination.totalPages}
-              startItem={(currentPage - 1) * 10 + 1}
-              endItem={Math.min(currentPage * 10, filteredTransporters.length)}
-              onPageChange={setCurrentPage}
-            />
-          </div>
-        )}
-
-        {/* Controles de paginação - Versão mobile */}
-        {filteredTransporters.length > 0 && !isLoading && (
-          <div className="block md:hidden mt-6">
-            <MobileListPagination
-              currentPage={currentPage}
-              totalPages={pagination.totalPages}
-              totalItems={filteredTransporters.length}
-              itemsPerPage={10}
-              hasPrev={currentPage > 1}
-              hasNext={currentPage < pagination.totalPages}
-              startItem={(currentPage - 1) * 10 + 1}
-              endItem={Math.min(currentPage * 10, filteredTransporters.length)}
-              onPageChange={setCurrentPage}
-            />
-          </div>
+          <StandardPagination
+            currentPage={currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={filteredTransporters.length}
+            hasPrev={pagination.hasPrev}
+            hasNext={pagination.hasNext}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+            onPageChange={setCurrentPage}
+            itemName="transportadores"
+            showPageSizeSelect={false}
+          />
         )}
 
         {/* Modal de edição de transportador */}

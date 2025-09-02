@@ -24,7 +24,7 @@ import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { getRoleColor, getRoleLabel } from "@/lib/role-utils";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
-import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
+import { StandardPagination } from "@/components/ui/standard-pagination";
 
 // Schema para validação do formulário base
 const baseUserFormSchema = {
@@ -557,38 +557,20 @@ export default function AdminUsers() {
         {/* Lista de usuários */}
         {renderUsersList()}
 
-        {/* Controles de paginação - Versão desktop */}
+        {/* Paginação Padronizada */}
         {filteredUsers.length > 0 && !isLoading && (
-          <div className="hidden md:block mt-6">
-            <ListPagination 
-              currentPage={currentPage}
-              totalPages={pagination.totalPages}
-              totalItems={filteredUsers.length}
-              itemsPerPage={10}
-              hasPrev={currentPage > 1}
-              hasNext={currentPage < pagination.totalPages}
-              startItem={(currentPage - 1) * 10 + 1}
-              endItem={Math.min(currentPage * 10, filteredUsers.length)}
-              onPageChange={setCurrentPage}
-            />
-          </div>
-        )}
-
-        {/* Controles de paginação - Versão mobile */}
-        {filteredUsers.length > 0 && !isLoading && (
-          <div className="block md:hidden mt-6">
-            <MobileListPagination
-              currentPage={currentPage}
-              totalPages={pagination.totalPages}
-              totalItems={filteredUsers.length}
-              itemsPerPage={10}
-              hasPrev={currentPage > 1}
-              hasNext={currentPage < pagination.totalPages}
-              startItem={(currentPage - 1) * 10 + 1}
-              endItem={Math.min(currentPage * 10, filteredUsers.length)}
-              onPageChange={setCurrentPage}
-            />
-          </div>
+          <StandardPagination
+            currentPage={currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={filteredUsers.length}
+            hasPrev={pagination.hasPrev}
+            hasNext={pagination.hasNext}
+            startItem={pagination.startItem}
+            endItem={pagination.endItem}
+            onPageChange={setCurrentPage}
+            itemName="usuários"
+            showPageSizeSelect={false}
+          />
         )}
 
         {/* Modal de edição de usuário */}

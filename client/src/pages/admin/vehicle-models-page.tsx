@@ -14,7 +14,7 @@ import type { VehicleModel, InsertVehicleModel } from "@shared/schema";
 import { VehicleModelForm } from "@/components/admin/vehicle-model-form";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
-import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
+import { StandardPagination } from "@/components/ui/standard-pagination";
 
 export default function VehicleModelsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -335,14 +335,18 @@ export default function VehicleModelsPage() {
                   </TableBody>
                 </Table>
                 
-                {/* Paginação Desktop */}
-                <ListPagination
+                {/* Paginação Padronizada */}
+                <StandardPagination
                   currentPage={currentPage}
                   totalPages={pagination.totalPages}
                   onPageChange={setCurrentPage}
                   totalItems={pagination.total}
-                  itemsPerPage={pagination.itemsPerPage}
-                  itemName="modelo"
+                  hasPrev={pagination.hasPrev}
+                  hasNext={pagination.hasNext}
+                  startItem={pagination.startItem}
+                  endItem={pagination.endItem}
+                  itemName="modelos"
+                  showPageSizeSelect={false}
                 />
               </div>
 
@@ -401,14 +405,6 @@ export default function VehicleModelsPage() {
                     </Card>
                   ))}
 
-                {/* Paginação Mobile */}
-                <MobileListPagination
-                  currentPage={currentPage}
-                  totalPages={pagination.totalPages}
-                  onPageChange={setCurrentPage}
-                  totalItems={pagination.total}
-                  itemName="modelo"
-                />
               </div>
             </div>
           )}

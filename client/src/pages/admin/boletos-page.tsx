@@ -30,7 +30,7 @@ import {
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { exportToCSV, formatDateForCSV, formatCurrencyForCSV } from "@/lib/csv-export";
 import { usePaginatedList } from "@/hooks/use-paginated-list";
-import { ListPagination, MobileListPagination } from "@/components/ui/list-pagination";
+import { StandardPagination } from "@/components/ui/standard-pagination";
 
 // Schema de validação para o formulário de boleto
 const boletoFormSchema = z.object({
@@ -76,14 +76,14 @@ export default function BoletosPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: boletos = [], isLoading, error, refetch } = useQuery({
+  const { data: boletos = [], isLoading, error, refetch } = useQuery<Boleto[]>({
     queryKey: ["/api/boletos"],
     refetchInterval: 30000, // Atualização automática a cada 30 segundos
     refetchOnWindowFocus: true,
     staleTime: 1000, // 1 segundo para garantir dados frescos
   });
 
-  const { data: transporters = [] } = useQuery({
+  const { data: transporters = [] } = useQuery<any[]>({
     queryKey: ["/api/admin/transporters"],
   });
 
@@ -91,7 +91,7 @@ export default function BoletosPage() {
   const boletosFiltrados = useMemo(() => {
     if (!boletos) return [];
     
-    return boletos.filter((boleto) => {
+    return boletos.filter((boleto: Boleto) => {
       // Filtro por status
       let matchStatus = true;
       if (filtroStatus && filtroStatus !== "todos") {
@@ -134,24 +134,14 @@ export default function BoletosPage() {
   }, [boletos, filtroStatus, filtroVencimento, termoBusca]);
 
   // Implementar paginação
-  const {
-    currentPage,
-    pageSize,
-    paginatedItems: boletosExibidos,
-    totalPages,
-    totalItems,
-    handlePageChange,
-    handlePageSizeChange,
-    goToFirstPage,
-    goToLastPage,
-    goToPreviousPage,
-    goToNextPage,
-    canGoPrevious,
-    canGoNext
-  } = usePaginatedList({
+  const { 
+    paginatedItems: boletosExibidos, 
+    pagination, 
+    currentPage, 
+    setCurrentPage 
+  } = usePaginatedList({ 
     items: boletosFiltrados,
-    defaultPageSize: 25,
-    searchTerm: termoBusca
+    itemsPerPage: 25 
   });
 
   // Estados para controlar uploads
@@ -642,7 +632,7 @@ export default function BoletosPage() {
         <Card>
           <CardHeader>
             <CardTitle>
-              Lista de Boletos ({totalItems} total{totalItems !== boletosExibidos.length ? `, ${boletosExibidos.length} exibidos` : ''})
+              Lista de Boletos ({pagination.total} total{pagination.total !== boletosExibidos.length ? `, ${boletosExibidos.length} exibidos` : ''})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -733,41 +723,20 @@ export default function BoletosPage() {
               </TableBody>
             </Table>
 
-            {/* Controles de paginação modernos */}
-            {totalPages > 1 && (
-              <>
-                {/* Desktop */}
-                <div className="hidden md:block mt-6">
-                  <ListPagination 
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalItems={totalItems}
-                    itemsPerPage={pageSize}
-                    hasPrev={canGoPrevious}
-                    hasNext={canGoNext}
-                    startItem={(currentPage - 1) * pageSize + 1}
-                    endItem={Math.min(currentPage * pageSize, totalItems)}
-                    onPageChange={handlePageChange}
-                    onPageSizeChange={handlePageSizeChange}
-                    pageSizeOptions={[10, 25, 50, 100]}
-                  />
-                </div>
-
-                {/* Mobile */}
-                <div className="block md:hidden mt-6">
-                  <MobileListPagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalItems={totalItems}
-                    itemsPerPage={pageSize}
-                    hasPrev={canGoPrevious}
-                    hasNext={canGoNext}
-                    startItem={(currentPage - 1) * pageSize + 1}
-                    endItem={Math.min(currentPage * pageSize, totalItems)}
-                    onPageChange={handlePageChange}
-                  />
-                </div>
-              </>
+            {/* Paginação Padronizada */}
+            {boletosFiltrados.length > 0 && (
+              <StandardPagination
+                currentPage={currentPage}
+                totalPages={pagination.totalPages}
+                totalItems={pagination.total}
+                hasPrev={pagination.hasPrev}
+                hasNext={pagination.hasNext}
+                startItem={pagination.startItem}
+                endItem={pagination.endItem}
+                onPageChange={setCurrentPage}
+                itemName="boletos"
+                showPageSizeSelect={false}
+              />
             )}
           </CardContent>
         </Card>
