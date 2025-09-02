@@ -458,7 +458,7 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
     return type === "flatbed" ? "indivisible_cargo" : "dry_cargo";
   }
   
-  // Formatar valores para exibição - mantém valores float exatamente como no banco
+  // Formatar valores para exibição - converte de centímetros (banco) para metros (exibição)
   const formatDimension = (value: number | string | null | undefined): string => {
     if (value === null || value === undefined) {
       return '-';
@@ -471,9 +471,11 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
       return '-';
     }
     
-    // Retornar valor exatamente como está no banco, mantendo precisão float
+    // Converter de centímetros (banco) para metros (exibição) dividindo por 100
+    const metersValue = numericValue / 100;
+    
     // Usar toFixed(2) para garantir 2 casas decimais na exibição
-    return numericValue.toFixed(2);
+    return metersValue.toFixed(2);
   };
   
   // Função para obter o label do status
