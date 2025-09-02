@@ -34,8 +34,8 @@ export function useDashboardStats() {
       }
       return res.json();
     },
-    staleTime: 1000, // Cache por 1 segundo (instantâneo)
-    refetchInterval: 15000, // Refetch a cada 15 segundos (ultra rápido)
+    staleTime: 2 * 60 * 1000, // Cache por 2 minutos
+    // Removido refetchInterval - usar apenas WebSocket para updates
   });
 
   // TEMPO REAL INSTANTÂNEO: Dashboard atualiza cores imediatamente

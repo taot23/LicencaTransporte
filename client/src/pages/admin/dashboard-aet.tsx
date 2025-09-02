@@ -83,7 +83,8 @@ export default function DashboardAET() {
 
   const { data: dashboardData, isLoading, error } = useQuery<DashboardAETData>({
     queryKey: ["/api/dashboard/aet"],
-    refetchInterval: 30000, // Atualiza a cada 30 segundos
+    staleTime: 5 * 60 * 1000, // 5 minutos de cache
+    // Removido refetchInterval - usar WebSocket para updates
   });
 
   // WebSocket para atualizações em tempo real

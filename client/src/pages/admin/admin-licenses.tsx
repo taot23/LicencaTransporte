@@ -386,8 +386,8 @@ export default function AdminLicensesPage() {
       return data;
     },
     // TEMPO REAL OTIMIZADO
-    staleTime: 1000, // 1 segundo para tempo real instantâneo
-    refetchInterval: 15000, // Refetch a cada 15 segundos
+    staleTime: 3 * 60 * 1000, // 3 minutos - cache otimizado
+    // Removido refetchInterval - usar WebSocket para updates
     refetchOnWindowFocus: true,
     refetchOnMount: true,
   });

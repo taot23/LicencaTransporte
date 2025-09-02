@@ -69,11 +69,11 @@ export default function TrackLicensePage() {
       
       return filteredData;
     },
-    // TEMPO REAL INSTANTÂNEO: Para cores de status mudarem IMEDIATAMENTE
-    staleTime: 1000, // 1 segundo apenas (instantâneo)
-    refetchInterval: 15 * 1000, // Refetch a cada 15 segundos (ultra rápido)
-    refetchOnWindowFocus: true, // Reabilitado para tempo real
-    refetchOnMount: true,
+    // Cache otimizado para performance
+    staleTime: 2 * 60 * 1000, // 2 minutos - cache otimizado
+    // Removido refetchInterval - usar WebSocket para updates
+    refetchOnWindowFocus: false, // Desabilitar para economizar requisições
+    refetchOnMount: false, // Usar cache se disponível
     retry: 1
   });
 

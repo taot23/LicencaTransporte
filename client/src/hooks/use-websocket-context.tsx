@@ -40,21 +40,13 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
         const message: WebSocketMessage = JSON.parse(event.data);
         setLastMessage(message);
         
-        // TEMPO REAL INSTANTÂNEO: Processar atualizações imediatamente
+        // Updates otimizados via WebSocket  
         if (message.type === 'STATUS_UPDATE' || message.type === 'LICENSE_UPDATE') {
-          // FORÇAR ATUALIZAÇÃO IMEDIATA - staleTime = 0 temporariamente
-          queryClient.resetQueries({ queryKey: ['/api/licenses'] });
-          queryClient.resetQueries({ queryKey: ['/api/admin/licenses'] });
-          queryClient.resetQueries({ queryKey: ['/api/dashboard/stats'] });
+          // Invalidar apenas queries específicas sem refetch forçado
+          queryClient.invalidateQueries({ queryKey: ['/api/admin/licenses'] });
+          queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
           
-          // Refetch forçado para garantir dados frescos
-          Promise.all([
-            queryClient.refetchQueries({ queryKey: ['/api/licenses'], type: 'active' }),
-            queryClient.refetchQueries({ queryKey: ['/api/admin/licenses'], type: 'active' }),
-            queryClient.refetchQueries({ queryKey: ['/api/dashboard/stats'], type: 'active' })
-          ]);
-          
-          // Forçar re-render dos componentes com timestamp único
+          // Timestamp para re-render sem múltiplas requisições
           setLastMessage({ ...message, timestamp: new Date().toISOString() });
         }
       } catch (error) {

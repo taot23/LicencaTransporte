@@ -58,8 +58,8 @@ export default function MeusBoletos() {
 
   const { data: boletos = [], isLoading, error, refetch } = useQuery<Boleto[]>({
     queryKey: ["/api/meus-boletos"],
-    refetchInterval: 30000, // Atualiza a cada 30 segundos
-    staleTime: 1000, // 1 segundo para garantir dados frescos
+    staleTime: 5 * 60 * 1000, // 5 minutos - cache otimizado
+    // Removido refetchInterval - usar WebSocket para updates
   });
 
   // Atualização em tempo real via WebSocket

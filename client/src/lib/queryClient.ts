@@ -107,13 +107,13 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
-      // TEMPO REAL INSTANTÂNEO: Cache ultra baixo para cores mudarem instantaneamente
-      staleTime: 1000, // 1 segundo para tempo real
-      gcTime: 30 * 1000, // 30 segundos
-      // FORÇA refetch para tempo real
-      refetchOnWindowFocus: true,
-      refetchOnReconnect: true,
-      refetchOnMount: true,
+      // Cache otimizado para performance
+      staleTime: 5 * 60 * 1000, // 5 minutos - dados frescos sem sobrecarga
+      gcTime: 10 * 60 * 1000, // 10 minutos
+      // Refetch otimizado
+      refetchOnWindowFocus: false, // Desabilitar refetch no foco
+      refetchOnReconnect: true,   // Manter apenas reconexão
+      refetchOnMount: false,      // Usar cache se disponível
       // Retry otimizado para tempo real
       retry: (failureCount, error: any) => {
         if (error?.message?.includes('401') || error?.message?.includes('Não autenticado')) {

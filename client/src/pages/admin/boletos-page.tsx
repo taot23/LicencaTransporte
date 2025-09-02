@@ -78,9 +78,9 @@ export default function BoletosPage() {
 
   const { data: boletos = [], isLoading, error, refetch } = useQuery<Boleto[]>({
     queryKey: ["/api/boletos"],
-    refetchInterval: 30000, // Atualização automática a cada 30 segundos
-    refetchOnWindowFocus: true,
-    staleTime: 1000, // 1 segundo para garantir dados frescos
+    staleTime: 5 * 60 * 1000, // 5 minutos - cache otimizado
+    refetchOnWindowFocus: false, // Desabilitar para economia
+    // Removido refetchInterval - usar WebSocket para updates
   });
 
   const { data: transporters = [] } = useQuery<any[]>({
