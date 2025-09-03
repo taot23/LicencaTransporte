@@ -7,10 +7,7 @@ import { StatusChart } from "@/components/dashboard/status-chart";
 import { useDashboardStats } from "@/hooks/use-dashboard-stats";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
-import { CheckCircle, Clock, AlertCircle, Search } from "lucide-react";
-
-// Importar ícone personalizado de veículo
-import genericTruckIcon from '@assets/{F9464883-3F10-4933-AF74-76A8D67A0F59}_1756866800903.png';
+import { CheckCircle, Clock, Truck, AlertCircle, Search } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SkeletonCardGroup } from "@/components/ui/skeleton-card";
 import { PageTransition, FadeIn } from "@/components/ui/page-transition";
@@ -87,7 +84,7 @@ export default function DashboardPage() {
             <StatsCard 
               title="Veículos Cadastrados"
               value={stats?.registeredVehicles || 0}
-              icon={<img src={genericTruckIcon} className={`${isMobile ? 'h-6 w-6' : 'h-8 w-8'}`} alt="Veículos" />}
+              icon={<Truck className={`${isMobile ? 'h-6 w-6' : 'h-8 w-8'}`} />}
               secondaryText={`${stats?.activeVehicles || 0} ativos`}
               color="blue"
             />
