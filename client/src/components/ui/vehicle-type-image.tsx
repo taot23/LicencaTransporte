@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import { Truck } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { VehicleSetType } from '@shared/vehicle-set-types';
 
@@ -10,6 +9,10 @@ import bitrain9AxlesImg from '../../assets/vehicles/bitrain_9_axles.png';
 import roadtrain9AxlesImg from '../../assets/vehicles/roadtrain_9_axles.png';
 import flatbedImg from '../../assets/vehicles/flatbed.png';
 import romeoAndJulietImg from '../../assets/vehicles/romeo_and_juliet.png';
+
+// Importando os novos ícones personalizados
+import genericTruckIcon from '@assets/{F9464883-3F10-4933-AF74-76A8D67A0F59}_1756866800903.png';
+import containerTruckIcon from '@assets/caminhao-conteiner_1756866832654.png';
 
 interface VehicleTypeImageProps {
   type: string;
@@ -102,7 +105,7 @@ export const VehicleTypeImage: FC<VehicleTypeImageProps> = ({
     case 'flatbed':
       return (
         <img 
-          src={flatbedImg} 
+          src={containerTruckIcon} 
           alt="Prancha" 
           className={`w-auto ${className}`}
           style={{ 
@@ -128,7 +131,18 @@ export const VehicleTypeImage: FC<VehicleTypeImageProps> = ({
     // Adicionar mais cases para outros tipos conforme necessário
     
     default:
-      // Para tipos sem imagem específica, usar o ícone padrão
-      return <Truck className={className} size={iconSize} />;
+      // Para tipos sem imagem específica, usar o novo ícone personalizado
+      return (
+        <img 
+          src={genericTruckIcon} 
+          alt="Veículo genérico" 
+          className={`w-auto ${className}`}
+          style={{ 
+            height: `${iconSize}px`,
+            objectFit: 'contain',
+            objectPosition: 'center'
+          }}
+        />
+      );
   }
 };

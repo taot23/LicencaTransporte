@@ -8,7 +8,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   Menu, 
   Home, 
-  Truck, 
   FileText, 
   ClipboardList, 
   ListChecks, 
@@ -28,6 +27,23 @@ import {
   PanelLeftClose,
   PanelLeftOpen
 } from "lucide-react";
+
+// Importar ícone personalizado de veículo
+import genericTruckIcon from '@assets/{F9464883-3F10-4933-AF74-76A8D67A0F59}_1756866800903.png';
+
+// Componente de ícone personalizado de veículo
+const TruckIcon = ({ className, size = 20 }: { className?: string; size?: number }) => (
+  <img 
+    src={genericTruckIcon} 
+    alt="Veículo" 
+    className={className}
+    style={{ 
+      width: `${size}px`,
+      height: `${size}px`,
+      objectFit: 'contain'
+    }}
+  />
+);
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Logo } from "@/components/ui/logo";
@@ -199,7 +215,7 @@ export function Sidebar({ className, isCollapsed = false, onToggleCollapse }: Si
                   handleNavigate("/vehicles");
                 }}
               >
-                <Truck className="mr-3 h-5 w-5" />
+                <TruckIcon className="mr-3" size={20} />
                 <span className="flex-1 text-left">Veículos</span>
                 {vehicleMenuExpanded ? (
                   <ChevronDown className="h-4 w-4" />
@@ -210,7 +226,7 @@ export function Sidebar({ className, isCollapsed = false, onToggleCollapse }: Si
             ) : (
               // No modo colapsado, mostrar apenas ícone dos veículos com acesso direto à lista
               <SidebarItem
-                icon={Truck}
+                icon={() => <TruckIcon size={20} />}
                 label="Veículos"
                 path="/vehicles"
                 isActive={location === "/vehicles" || location === "/admin/vehicle-models" || location === "/admin/vehicle-transfer" || location === "/cadastro-massa-veiculos"}
@@ -229,7 +245,7 @@ export function Sidebar({ className, isCollapsed = false, onToggleCollapse }: Si
                   )}
                   onClick={() => handleNavigate("/vehicles")}
                 >
-                  <Truck className="mr-3 h-4 w-4" />
+                  <TruckIcon className="mr-3" size={16} />
                   Veículos Cadastrados
                 </Button>
                 

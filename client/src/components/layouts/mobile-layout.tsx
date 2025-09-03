@@ -3,7 +3,6 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { 
   Home, 
-  Truck, 
   FileText, 
   Search, 
   List, 
@@ -15,6 +14,9 @@ import {
   Settings,
   Check
 } from "lucide-react";
+
+// Importar ícone personalizado de veículo
+import genericTruckIcon from '@assets/{F9464883-3F10-4933-AF74-76A8D67A0F59}_1756866800903.png';
 import { MobileNavigation } from "@/components/mobile/mobile-navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -137,7 +139,7 @@ export function MobileLayout({
                       className="w-full justify-start" 
                       onClick={() => setIsOpen(false)}
                     >
-                      <Truck className="mr-2 h-4 w-4" />
+                      <img src={genericTruckIcon} className="mr-2 h-4 w-4" alt="Veículos" />
                       Veículos
                     </Button>
                   </Link>
