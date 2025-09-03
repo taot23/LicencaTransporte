@@ -6571,25 +6571,12 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       console.log(`[VEHICLE BY TYPE] Tipo: ${type}, Busca: "${search}", Limite: ${maxResults}`);
       
       // Query otimizada para busca por tipo de veículo (sem JOIN desnecessário)
-      let vehicleQuery;
-      
-      if (type === 'flatbed') {
-        // Para pranchas, buscar por body_type ao invés de type
-        vehicleQuery = sql`
-          SELECT v.id, v.plate, v.brand, v.model, v.year, v.tare::text, 
-                 v.axle_count, v.status
-          FROM vehicles v
-          WHERE v.body_type = 'flatbed' AND v.status = 'active'
-        `;
-      } else {
-        // Para outros tipos, manter busca por type
-        vehicleQuery = sql`
-          SELECT v.id, v.plate, v.brand, v.model, v.year, v.tare::text, 
-                 v.axle_count, v.status
-          FROM vehicles v
-          WHERE v.type = ${type} AND v.status = 'active'
-        `;
-      }
+      let vehicleQuery = sql`
+        SELECT v.id, v.plate, v.brand, v.model, v.year, v.tare::text, 
+               v.axle_count, v.status
+        FROM vehicles v
+        WHERE v.type = ${type} AND v.status = 'active'
+      `;
       
       // Filtro por usuário se não for admin
       if (!isAdministrativeRole(user.role as UserRole)) {
@@ -6671,13 +6658,7 @@ app.patch('/api/admin/licenses/:id/status', requireOperational, upload.single('l
       
       // Filtro por tipo (aplicado cedo para usar índice combinado)
       if (typeFilter) {
-        if (typeFilter === 'flatbed') {
-          // Para pranchas, buscar por body_type
-          vehicleQuery = sql`${vehicleQuery} AND v.body_type = 'flatbed'`;
-        } else {
-          // Para outros tipos, manter busca por type
-          vehicleQuery = sql`${vehicleQuery} AND v.type = ${typeFilter}`;
-        }
+        vehicleQuery = sql`${vehicleQuery} AND v.type = ${typeFilter}`;
       }
       
       // Filtro por usuário se não for admin
