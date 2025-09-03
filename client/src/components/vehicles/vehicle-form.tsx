@@ -160,6 +160,7 @@ const vehicleTypeOptions = [
   { value: "semi_trailer", label: "Semirreboque" },
   { value: "trailer", label: "Reboque" },
   { value: "dolly", label: "Dolly" },
+  { value: "flatbed", label: "Prancha" },
 ];
 
 // Opções de tipos de carroceria
