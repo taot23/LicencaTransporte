@@ -823,12 +823,29 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
                     <span className="text-gray-500">TARA:</span> {vehicles[license.tractorUnitId]?.tare || '9000'} kg
                   </div>
                 </div>
-                <button className="text-blue-600 text-xs flex items-center hover:text-blue-800">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                  </svg>
-                  CRLV
-                </button>
+                {vehicles[license.tractorUnitId]?.crlvUrl ? (
+                  <button 
+                    className="text-blue-600 text-xs flex items-center hover:text-blue-800"
+                    onClick={() => vehicles[license.tractorUnitId]?.crlvUrl && window.open(vehicles[license.tractorUnitId].crlvUrl, '_blank')}
+                    title="Download CRLV"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    CRLV
+                  </button>
+                ) : (
+                  <button 
+                    className="text-blue-600 text-xs flex items-center hover:text-blue-800 opacity-50" 
+                    disabled
+                    title="CRLV não disponível"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    CRLV
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -889,12 +906,29 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
                     <span className="text-gray-500">TARA:</span> {vehicles[license.firstTrailerId]?.tare || '7500'} kg
                   </div>
                 </div>
-                <button className="text-blue-600 text-xs flex items-center hover:text-blue-800">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                  </svg>
-                  CRLV
-                </button>
+                {vehicles[license.firstTrailerId]?.crlvUrl ? (
+                  <button 
+                    className="text-blue-600 text-xs flex items-center hover:text-blue-800"
+                    onClick={() => vehicles[license.firstTrailerId]?.crlvUrl && window.open(vehicles[license.firstTrailerId].crlvUrl, '_blank')}
+                    title="Download CRLV"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    CRLV
+                  </button>
+                ) : (
+                  <button 
+                    className="text-blue-600 text-xs flex items-center hover:text-blue-800 opacity-50" 
+                    disabled
+                    title="CRLV não disponível"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    CRLV
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -955,12 +989,29 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
                     <span className="text-gray-500">TARA:</span> {vehicles[license.secondTrailerId]?.tare || '7000'} kg
                   </div>
                 </div>
-                <button className="text-blue-600 text-xs flex items-center hover:text-blue-800">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                  </svg>
-                  CRLV
-                </button>
+                {vehicles[license.secondTrailerId]?.crlvUrl ? (
+                  <button 
+                    className="text-blue-600 text-xs flex items-center hover:text-blue-800"
+                    onClick={() => vehicles[license.secondTrailerId]?.crlvUrl && window.open(vehicles[license.secondTrailerId].crlvUrl, '_blank')}
+                    title="Download CRLV"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    CRLV
+                  </button>
+                ) : (
+                  <button 
+                    className="text-blue-600 text-xs flex items-center hover:text-blue-800 opacity-50" 
+                    disabled
+                    title="CRLV não disponível"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    CRLV
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -1021,12 +1072,29 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
                     <span className="text-gray-500">TARA:</span> {vehicles[license.dollyId]?.tare || '1500'} kg
                   </div>
                 </div>
-                <button className="text-blue-600 text-xs flex items-center hover:text-blue-800">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                  </svg>
-                  CRLV
-                </button>
+                {vehicles[license.dollyId]?.crlvUrl ? (
+                  <button 
+                    className="text-blue-600 text-xs flex items-center hover:text-blue-800"
+                    onClick={() => vehicles[license.dollyId]?.crlvUrl && window.open(vehicles[license.dollyId].crlvUrl, '_blank')}
+                    title="Download CRLV"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    CRLV
+                  </button>
+                ) : (
+                  <button 
+                    className="text-blue-600 text-xs flex items-center hover:text-blue-800 opacity-50" 
+                    disabled
+                    title="CRLV não disponível"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    CRLV
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -1087,12 +1155,29 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
                     <span className="text-gray-500">TARA:</span> {vehicles[license.flatbedId]?.tare || '8000'} kg
                   </div>
                 </div>
-                <button className="text-blue-600 text-xs flex items-center hover:text-blue-800">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                  </svg>
-                  CRLV
-                </button>
+                {vehicles[license.flatbedId]?.crlvUrl ? (
+                  <button 
+                    className="text-blue-600 text-xs flex items-center hover:text-blue-800"
+                    onClick={() => vehicles[license.flatbedId]?.crlvUrl && window.open(vehicles[license.flatbedId].crlvUrl, '_blank')}
+                    title="Download CRLV"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    CRLV
+                  </button>
+                ) : (
+                  <button 
+                    className="text-blue-600 text-xs flex items-center hover:text-blue-800 opacity-50" 
+                    disabled
+                    title="CRLV não disponível"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    CRLV
+                  </button>
+                )}
               </div>
             </div>
           )}
