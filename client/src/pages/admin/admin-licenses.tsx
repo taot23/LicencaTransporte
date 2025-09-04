@@ -91,6 +91,7 @@ const updateStateStatusSchema = z.object({
   issuedAt: z.string().optional(),
   aetNumber: z.string().optional(),
   selectedCnpj: z.string().optional(),
+  dueDate: z.string().optional(), // Data de vencimento do boleto
   licenseFile: z
     .any()
     .optional()
@@ -136,6 +137,15 @@ const updateStateStatusSchema = z.object({
   if (data.status === "approved" && !data.aetNumber) {
     // Não vamos adicionar o erro aqui, pois o backend vai buscar o valor do status anterior
     // Mas podemos melhorar isso com validação do lado do cliente se necessário
+  }
+  
+  // Se o status for "paying" ou "fee_generated", data de vencimento é obrigatória
+  if ((data.status === "paying" || data.status === "fee_generated") && !data.dueDate) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "A data de vencimento do boleto é obrigatória para este status",
+      path: ["dueDate"]
+    });
   }
 });
 
@@ -922,18 +932,32 @@ export default function AdminLicensesPage() {
     }
   };
 
+  // Função para filtrar status baseado no estado e tipo de usuário
+  const getFilteredStatusOptions = (state?: string, isTransporter?: boolean) => {
+    const allStatusOptions = [
+      { value: "pending_registration", label: "Pedido em Cadastramento", description: "Status inicial do pedido" },
+      { value: "registration_in_progress", label: "Cadastro em Andamento", description: "Em fase de edição pelo usuário" },
+      { value: "scheduled", label: "Agendado", description: "Agendado para cadastro em data específica" },
+      { value: "pending_documentation", label: "Pendente Documentação", description: "Aguardando documentos pendentes" },
+      { value: "rejected", label: "Reprovado", description: "Com justificativa de pendências" },
+      { value: "under_review", label: "Análise do Órgão", description: "Em avaliação oficial" },
+      { value: "pending_approval", label: "Pendente Liberação", description: "Aguardando aprovação final" },
+      { value: "approved", label: "Liberada", description: "Licença aprovada com documento disponível" },
+      { value: "canceled", label: "Cancelado", description: "Licença cancelada pelo cliente ou pelo sistema" },
+      { value: "paying", label: "A Pagar", description: "Aguardando pagamento da taxa pelo cliente" },
+      // Status exclusivos para MS e TO (não mostrados para transportadores)
+      ...((!isTransporter && (state === "MS" || state === "TO")) ? [
+        { value: "generate_fee", label: "Gerar Taxa", description: "Processo de geração de taxa (exclusivo MS/TO)" },
+        { value: "fee_generated", label: "Taxa Gerada", description: "Taxa gerada e aguardando pagamento (exclusivo MS/TO)" },
+      ] : []),
+      // "unpaid" não é incluído pois é um status automático (não selecionável)
+    ];
+    
+    return allStatusOptions;
+  };
+
   // Opções de status para o select com descrições detalhadas
-  const statusOptions = [
-    { value: "pending_registration", label: "Pedido em Cadastramento", description: "Status inicial do pedido" },
-    { value: "registration_in_progress", label: "Cadastro em Andamento", description: "Em fase de edição pelo usuário" },
-    { value: "scheduled", label: "Agendado", description: "Agendado para cadastro em data específica" },
-    { value: "pending_documentation", label: "Pendente Documentação", description: "Aguardando documentos pendentes" },
-    { value: "rejected", label: "Reprovado", description: "Com justificativa de pendências" },
-    { value: "under_review", label: "Análise do Órgão", description: "Em avaliação oficial" },
-    { value: "pending_approval", label: "Pendente Liberação", description: "Aguardando aprovação final" },
-    { value: "approved", label: "Liberada", description: "Licença aprovada com documento disponível" },
-    { value: "canceled", label: "Cancelado", description: "Licença cancelada pelo cliente ou pelo sistema" },
-  ];
+  const statusOptions = getFilteredStatusOptions();
 
   return (
     <AdminLayout>
@@ -1673,6 +1697,39 @@ export default function AdminLicensesPage() {
                       )}
                     />
                   </div>
+                </div>
+              )}
+              
+              {/* Campo de vencimento do boleto para status "A Pagar" e "Taxa Gerada" */}
+              {(stateStatusForm.watch("status") === "paying" || stateStatusForm.watch("status") === "fee_generated") && (
+                <div className="space-y-4">
+                  <h3 className="font-medium text-sm text-gray-800 mt-2 border-t pt-4">Informações do Boleto</h3>
+                  <FormField
+                    control={stateStatusForm.control}
+                    name="dueDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Data de Vencimento do Boleto <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            min={new Date().toISOString().split('T')[0]}
+                            className="w-full"
+                          />
+                        </FormControl>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Data de vencimento do boleto para pagamento da taxa
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               )}
               

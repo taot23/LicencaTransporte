@@ -20,6 +20,7 @@ interface StatusBadgeProps {
   className?: string;
   showIcon?: boolean;
   size?: 'sm' | 'md' | 'lg'; // Tamanho do badge: pequeno, médio (padrão) ou grande
+  isTransporter?: boolean; // Indica se o usuário é transportador (para filtrar status exclusivos)
 }
 
 export function StatusBadge({ 
@@ -28,7 +29,8 @@ export function StatusBadge({
   state, 
   className, 
   showIcon = true,
-  size = 'md'
+  size = 'md',
+  isTransporter = false
 }: StatusBadgeProps) {
   const [status, setStatus] = useState(initialStatus);
   const [recentUpdate, setRecentUpdate] = useState(false);
@@ -66,6 +68,11 @@ export function StatusBadge({
   }, [lastMessage, licenseId, state]);
   
   const getStatusStyles = () => {
+    // Para transportadores, status exclusivos de MS/TO usam estilo de "under_review"
+    if (isTransporter && (status === "generate_fee" || status === "fee_generated")) {
+      return "bg-yellow-100 text-yellow-800";
+    }
+
     switch (status) {
       case "pending":
       case "pending_registration":
@@ -90,12 +97,25 @@ export function StatusBadge({
         return "bg-green-100 text-green-800";
       case "canceled":
         return "bg-[#FFEDED] text-[#B22222]";
+      case "paying":
+        return "bg-orange-100 text-orange-800";
+      case "unpaid":
+        return "bg-red-100 text-red-800";
+      case "generate_fee":
+        return "bg-indigo-100 text-indigo-800";
+      case "fee_generated":
+        return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusLabel = () => {
+    // Para transportadores, status exclusivos de MS/TO aparecem como "Aguardando Análise do Órgão"
+    if (isTransporter && (status === "generate_fee" || status === "fee_generated")) {
+      return "Aguardando Análise do Órgão";
+    }
+
     switch (status) {
       case "pending":
       case "pending_registration":
@@ -120,6 +140,14 @@ export function StatusBadge({
         return "Liberada";
       case "canceled":
         return "Cancelado";
+      case "paying":
+        return "A Pagar";
+      case "unpaid":
+        return "Não Pago";
+      case "generate_fee":
+        return "Gerar Taxa";
+      case "fee_generated":
+        return "Taxa Gerada";
       default:
         return status;
     }

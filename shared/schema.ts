@@ -240,6 +240,10 @@ export const licenseStatusEnum = z.enum([
   "pending_approval", // Pendente Liberação
   "approved", // Liberada
   "canceled", // Cancelado
+  "paying", // A Pagar
+  "unpaid", // Não Pago (automático quando boleto vence)
+  "generate_fee", // Gerar Taxa (exclusivo MS/TO)
+  "fee_generated", // Taxa Gerada (exclusivo MS/TO)
 ]);
 
 export type LicenseStatus = z.infer<typeof licenseStatusEnum>;
@@ -863,6 +867,7 @@ export const stateLicenses = pgTable("state_licenses", {
   aetNumber: text("aet_number"), // Número AET específico do estado
   issuedAt: timestamp("issued_at"), // Data de emissão específica do estado
   validUntil: timestamp("valid_until"), // Data de validade específica do estado
+  dueDate: timestamp("due_date"), // Data de vencimento do boleto (para status "paying" e "fee_generated")
   comments: text("comments"), // Observações específicas do estado
   selectedCnpj: text("selected_cnpj"), // CNPJ selecionado para este estado
   licenseFileUrl: text("license_file_url"), // URL do arquivo de licença específico

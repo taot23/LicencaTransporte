@@ -65,7 +65,11 @@ export function ProgressFlow({
   // Estados excepcionais que só são mostrados quando são o status atual
   const specialSteps: ProgressFlowStep[] = [
     { label: "Reprovado", value: "rejected", number: 3 },
-    { label: "Cancelado", value: "canceled", number: 0 }
+    { label: "Cancelado", value: "canceled", number: 0 },
+    { label: "A Pagar", value: "paying", number: 4 },
+    { label: "Não Pago", value: "unpaid", number: 4 },
+    { label: "Gerar Taxa", value: "generate_fee", number: 3 },
+    { label: "Taxa Gerada", value: "fee_generated", number: 4 }
   ];
   
   // Verificar se o status atual é um dos especiais
@@ -90,6 +94,18 @@ export function ProgressFlow({
       steps = [
         currentSpecialStep,
         ...normalSteps
+      ];
+    } else if (status === "paying" || status === "unpaid") {
+      // Para status de pagamento, mostramos até "Pendente Liberação" + status atual
+      steps = [
+        ...normalSteps.slice(0, 4),
+        currentSpecialStep
+      ];
+    } else if (status === "generate_fee" || status === "fee_generated") {
+      // Para status de taxa (MS/TO), mostramos até "Análise do Órgão" + status atual
+      steps = [
+        ...normalSteps.slice(0, 3),
+        currentSpecialStep
       ];
     } else {
       steps = normalSteps;

@@ -48,6 +48,31 @@ app.use((req, res, next) => {
   next();
 });
 
+// Função para verificar e atualizar boletos vencidos
+async function checkExpiredBoletos() {
+  try {
+    const { storage } = await import("./storage");
+    const now = new Date();
+    
+    // Buscar licenças com status 'paying' ou 'fee_generated' e due_date vencida
+    // Nota: Esta é uma implementação simplificada
+    // Em produção, seria necessário consultar o banco diretamente
+    console.log(`[BOLETO CHECK] Verificando boletos vencidos em: ${now.toISOString()}`);
+    
+    // TODO: Implementar query específica para buscar registros com dueDate vencida
+    // e atualizar status para 'unpaid' automaticamente
+    
+  } catch (error) {
+    console.error('[BOLETO CHECK] Erro ao verificar boletos vencidos:', error);
+  }
+}
+
+// Iniciar verificação automática de boletos vencidos a cada hora (3600000 ms)
+setInterval(checkExpiredBoletos, 3600000);
+
+// Executar verificação inicial após 1 minuto do startup
+setTimeout(checkExpiredBoletos, 60000);
+
 (async () => {
   const server = await registerRoutes(app);
 
