@@ -17,7 +17,7 @@ interface PaginatedVehicleSelectorProps {
   className?: string;
   label?: string;
   onCreateNew?: () => void;
-  vehicleType?: 'tractor_unit' | 'trailer' | 'semi_trailer' | 'dolly' | 'truck' | 'flatbed';
+  vehicleType?: 'tractor_unit' | 'trailer' | 'semi_trailer' | 'dolly' | 'truck' | 'flatbed' | 'crane';
   axleFilter?: number; // NOVO: Filtrar por número específico de eixos
 }
 

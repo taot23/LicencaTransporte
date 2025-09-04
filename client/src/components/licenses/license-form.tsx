@@ -1558,6 +1558,7 @@ export function LicenseForm({
                           <SelectItem value="trailer">Reboque</SelectItem>
                           <SelectItem value="dolly">Dolly</SelectItem>
                           <SelectItem value="flatbed">Prancha</SelectItem>
+                          <SelectItem value="crane">Guindastes</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

@@ -211,32 +211,6 @@ function getDefaultVehicleSetTypes(): VehicleSetType[] {
     createdAt: new Date(),
     updatedAt: new Date(),
   },
-  {
-    id: "crane",
-    name: "crane",
-    label: "Guindastes",
-    description: "Conjunto para guindastes sem restrições de comprimento e sem tipo de carga",
-    axleConfiguration: {
-      tractorAxles: 0,
-      firstTrailerAxles: 0,
-      secondTrailerAxles: 0,
-      totalAxles: 0,
-      requiresDolly: false,
-      isFlexible: true, // Ignora validação de eixos
-    },
-    dimensionLimits: {
-      // Sem limite de comprimento para guindastes
-      maxWidth: 3.2,
-      maxHeight: 4.95,
-    },
-    vehicleTypes: {
-      tractor: ["crane"], // Apenas veículos tipo guindaste
-      firstTrailer: [], // Guindastes não usam trailers
-    },
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
   ];
   
   return _defaultTypesCache;
