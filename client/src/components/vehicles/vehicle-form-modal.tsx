@@ -39,7 +39,8 @@ const VEHICLE_TYPES = {
   semi_trailer: "Semirreboque",
   trailer: "Reboque",
   dolly: "Dolly",
-  flatbed: "Prancha"
+  flatbed: "Prancha",
+  crane: "Guindastes"
 };
 
 // Constante para tipos de carroceria
