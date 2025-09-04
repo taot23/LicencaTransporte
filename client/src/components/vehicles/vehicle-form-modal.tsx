@@ -33,9 +33,10 @@ import {
 } from "@/components/ui/select";
 
 // Constante para tipos de veículos
+// Tipos de veículo disponíveis para cadastro
 const VEHICLE_TYPES = {
   tractor_unit: "Unidade Tratora (Cavalo)",
-  truck: "Caminhão",
+  truck: "Caminhão", 
   semi_trailer: "Semirreboque",
   trailer: "Reboque",
   dolly: "Dolly",
