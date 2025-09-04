@@ -1306,7 +1306,7 @@ export default function IssuedLicensesPage() {
                             <div className="flex items-center mb-1">
                               <span className="font-medium text-gray-800">{state}</span>
                               <div className="mx-1 text-gray-400">•</div>
-                              <StatusBadge status={stateStatus as LicenseStatus} />
+                              <StatusBadge status={stateStatus as LicenseStatus} isTransporter={true} />
                             </div>
                             
                             {stateStatus === "approved" ? (

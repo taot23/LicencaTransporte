@@ -160,7 +160,7 @@ export default function MobileTrackLicensePage() {
                               {getLicenseTypeLabel(selectedLicense.type)}
                             </p>
                           </div>
-                          <StatusBadge status={selectedLicense.status} />
+                          <StatusBadge status={selectedLicense.status} isTransporter={true} />
                         </div>
                       </div>
                       
@@ -247,7 +247,7 @@ export default function MobileTrackLicensePage() {
                                         <Badge variant="outline" className="mr-2">
                                           {state}
                                         </Badge>
-                                        <StatusBadge status={stateStatus} size="sm" />
+                                        <StatusBadge status={stateStatus} size="sm" isTransporter={true} />
                                       </div>
                                       
                                       {/* Exibir número AET se disponível */}

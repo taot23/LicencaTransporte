@@ -10,6 +10,7 @@ import { StatusBadge, Status } from "@/components/licenses/status-badge";
 import { StatusHistory } from "@/components/licenses/status-history";
 import { StatusHistoryNew } from "@/components/licenses/status-history-new";
 import { useWebSocketContext } from "@/hooks/use-websocket-context";
+import { useAuth } from "@/hooks/use-auth";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { TransporterWithSubsidiaries } from "@/components/transporters/transporter-with-subsidiaries";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,9 @@ interface LicenseDetailsCardProps {
 }
 
 export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
+  const { user } = useAuth();
+  const isTransporter = user?.role === 'user'; // Usuários comuns são transportadores
+  
   // Estado para armazenar o status atual (será atualizado pelo WebSocket)
   const [currentStatus, setCurrentStatus] = useState(license.status);
   // Estado para armazenar os status por estado (será atualizado pelo WebSocket)
@@ -569,6 +573,7 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
               status={currentStatus} 
               licenseId={license.id}
               className="text-sm py-1 px-3"
+              isTransporter={isTransporter}
             />
           </div>
         </div>
@@ -666,7 +671,7 @@ export function LicenseDetailsCard({ license }: LicenseDetailsCardProps) {
                         </Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <StatusBadge status={status} />
+                        <StatusBadge status={status} isTransporter={isTransporter} />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {stateAETNumber ? (
