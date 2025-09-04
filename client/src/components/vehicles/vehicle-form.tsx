@@ -161,6 +161,7 @@ const vehicleTypeOptions = [
   { value: "trailer", label: "Reboque" },
   { value: "dolly", label: "Dolly" },
   { value: "flatbed", label: "Prancha" },
+  { value: "crane", label: "Guindastes" },
 ];
 
 // Opções de tipos de carroceria
