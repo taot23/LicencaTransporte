@@ -31,7 +31,7 @@ function MobileLicenseCard({ license }: { license: any }) {
                 {getLicenseTypeLabel(license.type)}
               </p>
             </div>
-            <StatusBadge status={license.status} size="sm" />
+            <StatusBadge status={license.status} size="sm" isTransporter={true} />
           </div>
           
           <div className="mt-3 flex justify-between items-center">

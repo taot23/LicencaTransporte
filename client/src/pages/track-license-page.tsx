@@ -648,7 +648,7 @@ export default function TrackLicensePage() {
                             <div>
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="font-medium">{state}</span>
-                                <StatusBadge status={stateStatus} />
+                                <StatusBadge status={stateStatus} isTransporter={true} />
                               </div>
                               <p className="text-xs text-gray-600">
                                 {stateStatus === "approved" 

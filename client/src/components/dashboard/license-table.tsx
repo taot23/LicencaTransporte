@@ -2,6 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { StatusBadge } from "@/components/licenses/status-badge";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/use-auth";
 import { SkeletonTable } from "@/components/ui/skeleton-table";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -23,6 +24,8 @@ interface LicenseTableProps {
 
 export function LicenseTable({ licenses, isLoading }: LicenseTableProps) {
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  const isTransporter = user?.role === 'user'; // Usuários comuns são transportadores
   
   if (isLoading) {
     return (
@@ -67,7 +70,7 @@ export function LicenseTable({ licenses, isLoading }: LicenseTableProps) {
               <div key={license.id} className="bg-white border rounded-lg p-4 shadow-sm">
                 <div className="flex justify-between items-start mb-2">
                   <div className="font-medium">{license.requestNumber}</div>
-                  <StatusBadge status={license.status} />
+                  <StatusBadge status={license.status} isTransporter={isTransporter} />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-2 text-sm">
@@ -133,7 +136,7 @@ export function LicenseTable({ licenses, isLoading }: LicenseTableProps) {
                 <TableCell>{license.mainVehiclePlate}</TableCell>
                 <TableCell>{license.states.join(", ")}</TableCell>
                 <TableCell>
-                  <StatusBadge status={license.status} />
+                  <StatusBadge status={license.status} isTransporter={isTransporter} />
                 </TableCell>
                 <TableCell>
                   {license.createdAt && format(new Date(license.createdAt), "dd/MM/yyyy")}
