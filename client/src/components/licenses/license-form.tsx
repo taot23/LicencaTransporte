@@ -1265,7 +1265,8 @@ export function LicenseForm({
     const values = form.getValues();
     const isWidthEmpty = values.width === undefined || values.width === null;
     const isHeightEmpty = values.height === undefined || values.height === null;
-    const isCargoTypeEmpty = !values.cargoType;
+    // Para guindastes, tipo de carga não é obrigatório
+    const isCargoTypeEmpty = values.type !== "crane" && !values.cargoType;
 
     // Adicionar log detalhado para debug
     console.log("Valores do formulário:", {
