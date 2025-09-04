@@ -440,6 +440,12 @@ export const insertLicenseRequestSchema = createInsertSchema(licenseRequests)
     }
 
     // VALIDAÇÕES ESPECÍFICAS POR TIPO DE LICENÇA
+    // GUINDASTES: apenas unidade tratora, sem carretas
+    if (data.type === "crane") {
+      // Guindastes não precisam de carretas - validação específica concluída
+      return;
+    }
+    
     if (licenseType?.includes('flatbed') || licenseType?.includes('prancha')) {
       // TIPO PRANCHA: Cavalo + Prancha obrigatórios
       if (!data.flatbedId) {
