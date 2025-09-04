@@ -12,7 +12,8 @@ export function getVehicleTypeLabel(type: string): string {
     trailer: "Reboque",
     dolly: "Dolly",
     flatbed: "Prancha",
-    truck: "Caminhão"
+    truck: "Caminhão",
+    crane: "Guindaste"
   };
   
   return vehicleTypes[type] || type;
@@ -26,7 +27,8 @@ export function getLicenseTypeLabel(type: string): string {
     bitrain_6_axles: "Bitrem 6 eixos",
     flatbed: "Prancha",
     rodotrain: "Rodotrem 9 eixos", // Para compatibilidade
-    romeo_juliet: "Romeu e Julieta"
+    romeo_juliet: "Romeu e Julieta",
+    crane: "Guindastes"
   };
   
   return licenseTypes[type] || type;
