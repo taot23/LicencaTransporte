@@ -69,7 +69,7 @@ export function StatusBadge({
   
   const getStatusStyles = () => {
     // Para transportadores, status exclusivos de MS/TO usam estilo de "under_review"
-    if (isTransporter && (status === "generate_fee" || status === "fee_generated")) {
+    if (isTransporter && (status === "gerar_taxa" || status === "taxa_gerada")) {
       return "bg-yellow-100 text-yellow-800";
     }
 
@@ -101,9 +101,9 @@ export function StatusBadge({
         return "bg-orange-100 text-orange-800";
       case "unpaid":
         return "bg-red-100 text-red-800";
-      case "generate_fee":
+      case "gerar_taxa":
         return "bg-indigo-100 text-indigo-800";
-      case "fee_generated":
+      case "taxa_gerada":
         return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -112,7 +112,7 @@ export function StatusBadge({
 
   const getStatusLabel = () => {
     // Para transportadores, status exclusivos de MS/TO aparecem como "Aguardando Análise do Órgão"
-    if (isTransporter && (status === "generate_fee" || status === "fee_generated")) {
+    if (isTransporter && (status === "gerar_taxa" || status === "taxa_gerada")) {
       return "Aguardando Análise do Órgão";
     }
 
@@ -144,9 +144,9 @@ export function StatusBadge({
         return "A Pagar";
       case "unpaid":
         return "Não Pago";
-      case "generate_fee":
+      case "gerar_taxa":
         return "Gerar Taxa";
-      case "fee_generated":
+      case "taxa_gerada":
         return "Taxa Gerada";
       default:
         return status;
