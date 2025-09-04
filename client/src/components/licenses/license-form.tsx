@@ -2869,67 +2869,36 @@ export function LicenseForm({
                   )}
                 </div>
 
-                {/* Placas adicionais */}
-                {form.watch("additionalPlates") &&
-                  form.watch("additionalPlates").length > 0 && (
-                    <div className="flex flex-col">
-                      <div className="text-xs font-medium text-gray-600 mb-1">
-                        Placas adicionais:
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {form.watch("additionalPlates").map(
-                          (plate, index) =>
-                            plate && (
-                              <div
-                                key={index}
-                                className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-md flex items-center"
-                              >
-                                <span className="font-medium mr-1">
-                                  {index + 1}:
-                                </span>{" "}
-                                {plate}
-                              </div>
-                            ),
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                {/* Total de veículos */}
+                {/* Total de veículos - apenas 1 para guindastes */}
                 <div className="text-xs text-gray-500 mt-1">
-                  Total:{" "}
-                  {[
-                    form.watch("tractorUnitId") ? 1 : 0,
-                    form.watch("additionalPlates")
-                      ? form.watch("additionalPlates").filter((p) => p).length
-                      : 0,
-                  ].reduce((a, b) => a + b, 0)}{" "}
-                  veículos
+                  Total: {form.watch("tractorUnitId") ? "1 veículo" : "0 veículos"}
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        <div className="border border-gray-200 rounded-lg p-5 shadow-sm">
-          <h3 className="font-semibold text-gray-800 text-lg mb-4 flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-2 text-gray-600"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect>
-              <path d="M2 13h20"></path>
-            </svg>
-            Placas Adicionais (Veículos Secundários)
-          </h3>
+        {/* Placas Adicionais - não exibir para guindastes pois é apenas um veículo */}
+        {licenseType !== "crane" && (
+          <div className="border border-gray-200 rounded-lg p-5 shadow-sm">
+            <h3 className="font-semibold text-gray-800 text-lg mb-4 flex items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-2 text-gray-600"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect>
+                <path d="M2 13h20"></path>
+              </svg>
+              Placas Adicionais (Veículos Secundários)
+            </h3>
 
           <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-md">
             <div className="flex items-start">
@@ -3076,6 +3045,7 @@ export function LicenseForm({
             </span>
           </div>
         </div>
+        )}
 
         <div className="border border-gray-200 rounded-lg p-5 shadow-sm">
           <h3 className="font-semibold text-gray-800 text-lg mb-4 flex items-center">
