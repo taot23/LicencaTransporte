@@ -1618,7 +1618,7 @@ export default function AdminLicensesPage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {statusOptions.map((option) => (
+                          {getFilteredStatusOptions(selectedState, false).map((option) => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
                             </SelectItem>
