@@ -256,6 +256,7 @@ export const licenseTypeEnum = z.enum([
   "bitrain_6_axles", // Bitrem 6 eixos
   "flatbed", // Prancha
   "romeo_and_juliet", // Romeu e Julieta
+  "crane", // Guindastes
 ]);
 
 export type LicenseType = z.infer<typeof licenseTypeEnum>;
@@ -630,6 +631,7 @@ export const vehicleTypeEnum = z.enum([
   "trailer", // Reboque
   "dolly", // Dolly
   "flatbed", // Prancha
+  "crane", // Guindastes
 ]);
 
 export type VehicleType = z.infer<typeof vehicleTypeEnum>;
@@ -642,6 +644,7 @@ export const vehicleTypeOptions = [
   { value: "trailer", label: "Reboque" },
   { value: "dolly", label: "Dolly" },
   { value: "flatbed", label: "Prancha" },
+  { value: "crane", label: "Guindastes" },
 ];
 
 // Enum para tipos de carroceria

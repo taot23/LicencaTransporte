@@ -193,6 +193,7 @@ export function LicenseForm({
   const trailers = vehicles?.filter((v) => v.type === "trailer") || [];
   const allDollys = vehicles?.filter((v) => v.type === "dolly") || [];
   const flatbeds = vehicles?.filter((v) => v.type === "flatbed") || [];
+  const cranes = vehicles?.filter((v) => v.type === "crane") || [];
 
   // ✅ NOVA FUNÇÃO: Validação por combinação específica
   const validateState = async (estado: string): Promise<boolean> => {
@@ -874,7 +875,15 @@ export function LicenseForm({
       ) {
         let limits = DIMENSION_LIMITS.default;
 
-        if (currentType === "flatbed") {
+        if (currentType === "crane") {
+          // Para guindastes: sem limite de comprimento
+          limits = {
+            maxLength: 999.99,
+            minLength: 0,
+            maxWidth: 3.2,
+            maxHeight: 4.95,
+          };
+        } else if (currentType === "flatbed") {
           limits =
             currentCargoType === "oversized"
               ? DIMENSION_LIMITS.oversized
@@ -891,7 +900,37 @@ export function LicenseForm({
         const currentWidth = form.getValues("width");
         const currentHeight = form.getValues("height");
 
-        if (currentType === "flatbed") {
+        if (currentType === "crane") {
+          // Para guindastes: aplicar validações especiais (sem limite de comprimento)
+          
+          // Validar largura para guindastes
+          if (currentWidth !== undefined && currentWidth !== null) {
+            if (currentWidth > limits.maxWidth) {
+              form.setError("width", {
+                type: "manual",
+                message: `A largura máxima para guindastes é ${limits.maxWidth.toFixed(2).replace(".", ",")} metros`,
+              });
+            } else {
+              form.clearErrors("width");
+            }
+          }
+
+          // Validar altura para guindastes
+          if (currentHeight !== undefined && currentHeight !== null) {
+            if (currentHeight > limits.maxHeight) {
+              form.setError("height", {
+                type: "manual",
+                message: `A altura máxima para guindastes é ${limits.maxHeight.toFixed(2).replace(".", ",")} metros`,
+              });
+            } else {
+              form.clearErrors("height");
+            }
+          }
+
+          // Para guindastes, NÃO validar comprimento (sem limite)
+          form.clearErrors("length");
+
+        } else if (currentType === "flatbed") {
           // Para pranchas: aplicar validações específicas para prancha
 
           // Validar comprimento para prancha
@@ -1733,8 +1772,8 @@ export function LicenseForm({
               )}
             />
 
-            {/* Campo de Tipo de Carga - varia conforme tipo de conjunto */}
-            {licenseType && (
+            {/* Campo de Tipo de Carga - varia conforme tipo de conjunto (não exibir para guindastes) */}
+            {licenseType && licenseType !== "crane" && (
               <FormField
                 control={form.control}
                 name="cargoType"
@@ -2747,6 +2786,120 @@ export function LicenseForm({
                   {[
                     form.watch("tractorUnitId") ? 1 : 0,
                     form.watch("firstTrailerId") ? 1 : 0,
+                    form.watch("additionalPlates")
+                      ? form.watch("additionalPlates").filter((p) => p).length
+                      : 0,
+                  ].reduce((a, b) => a + b, 0)}{" "}
+                  veículos
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Dynamic fields for Crane (Guindastes) */}
+        {licenseType === "crane" && (
+          <div className="border border-gray-200 rounded-lg p-5 shadow-sm">
+            <h3 className="font-semibold text-gray-800 text-lg mb-4 flex items-center">
+              <VehicleTypeImage
+                type="crane"
+                className="mr-2"
+                iconSize={32}
+              />
+              Composição Principal dos Guindastes
+            </h3>
+
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+              <p className="text-sm text-yellow-800 flex items-center">
+                <Check className="h-4 w-4 mr-2 flex-shrink-0" />
+                Para guindastes, não há restrições de comprimento e não é necessário especificar tipo de carga.
+              </p>
+            </div>
+
+            {/* Veículo Guindaste */}
+            <div className="mb-6">
+              <FormField
+                control={form.control}
+                name="tractorUnitId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-medium">Guindaste</FormLabel>
+                    <FormControl>
+                      <PaginatedVehicleSelector
+                        vehicleType="crane"
+                        value={field.value}
+                        onSelect={(vehicleId) => {
+                          field.onChange(vehicleId);
+                          if (vehicleId) {
+                            handleVehicleSelection(vehicleId, 'tractorUnitId');
+                          }
+                        }}
+                        placeholder="Digite a placa ou selecione o guindaste"
+                        disabled={isLoadingVehicles}
+                        className="h-10 bg-yellow-50 border-yellow-200"
+                      />
+                    </FormControl>
+                    <FormDescription className="text-xs text-muted-foreground mt-1">
+                      Veículo guindaste principal da composição
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Resumo da composição */}
+            <div className="bg-gray-50 p-3 rounded-md border border-gray-200">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">
+                Composição selecionada:
+              </h4>
+              <div className="flex flex-col gap-3">
+                {/* Veículo principal */}
+                <div className="flex flex-wrap gap-2">
+                  <div className="text-xs font-medium text-gray-600 mr-1">
+                    Veículo principal:
+                  </div>
+                  {form.watch("tractorUnitId") && (
+                    <div className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-md flex items-center">
+                      <Truck className="h-3 w-3 mr-1" />
+                      <span className="font-medium">Guindaste:</span>{" "}
+                      {cranes.find((v) => v.id === form.watch("tractorUnitId"))
+                        ?.plate || "Selecionado"}
+                    </div>
+                  )}
+                </div>
+
+                {/* Placas adicionais */}
+                {form.watch("additionalPlates") &&
+                  form.watch("additionalPlates").length > 0 && (
+                    <div className="flex flex-col">
+                      <div className="text-xs font-medium text-gray-600 mb-1">
+                        Placas adicionais:
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {form.watch("additionalPlates").map(
+                          (plate, index) =>
+                            plate && (
+                              <div
+                                key={index}
+                                className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-md flex items-center"
+                              >
+                                <span className="font-medium mr-1">
+                                  {index + 1}:
+                                </span>{" "}
+                                {plate}
+                              </div>
+                            ),
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                {/* Total de veículos */}
+                <div className="text-xs text-gray-500 mt-1">
+                  Total:{" "}
+                  {[
+                    form.watch("tractorUnitId") ? 1 : 0,
                     form.watch("additionalPlates")
                       ? form.watch("additionalPlates").filter((p) => p).length
                       : 0,

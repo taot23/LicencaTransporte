@@ -55,6 +55,13 @@ export const AXLE_CONFIGURATIONS: Record<LicenseType, AxleConfiguration> = {
     secondTrailerAxles: 0,
     totalAxles: 0, // Sem restrição específica
     requiresDolly: false
+  },
+  "crane": {
+    tractorAxles: 0, // Flexível - qualquer guindaste
+    firstTrailerAxles: 0, // Não usa trailers
+    secondTrailerAxles: 0,
+    totalAxles: 0, // Sem restrição específica
+    requiresDolly: false
   }
 };
 
@@ -144,7 +151,7 @@ export function validateVehicleForPosition(
   // REGRAS ESPECÍFICAS CRÍTICAS POR TIPO DE LICENÇA
   
   // TIPOS FLEXÍVEIS: SEM restrições de eixos 
-  if (config?.isFlexible || licenseType === 'flatbed' || licenseType === 'romeo_and_juliet') {
+  if (config?.isFlexible || licenseType === 'flatbed' || licenseType === 'romeo_and_juliet' || licenseType === 'crane') {
     // Para tipos flexíveis, apenas verificar o tipo de veículo, não os eixos
     return { isValid: true };
   }
