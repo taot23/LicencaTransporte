@@ -346,10 +346,7 @@ export const insertLicenseRequestSchema = createInsertSchema(licenseRequests)
   .extend({
     transporterId: z.number().positive("Um transportador deve ser selecionado"),
     states: z.array(z.string()).min(1, "Selecione pelo menos um estado"),
-    cargoType: cargoTypeEnum.refine(val => !!val, {
-      message: "O tipo de carga é obrigatório",
-      path: ["cargoType"]
-    }),
+    cargoType: cargoTypeEnum.optional(),
     length: z.coerce.number().positive("O comprimento deve ser positivo"),
     width: z.coerce.number().positive("A largura deve ser um valor positivo"),
     height: z.coerce.number().positive("A altura deve ser um valor positivo"),
@@ -420,6 +417,17 @@ export const insertLicenseRequestSchema = createInsertSchema(licenseRequests)
           path: ["height"]
         });
       }
+    }
+    
+    // VALIDAÇÃO CONDICIONAL: cargoType obrigatório para todos exceto guindastes
+    if (data.type !== "crane" && !data.cargoType) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.invalid_type,
+        expected: "string",
+        received: "undefined",
+        path: ["cargoType"],
+        message: "O tipo de carga é obrigatório"
+      });
     }
     
     // VALIDAÇÃO OBRIGATÓRIA: Unidade Tratora/Cavalo sempre obrigatória
