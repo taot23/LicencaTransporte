@@ -15,7 +15,7 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import { VehicleForm } from "@/components/vehicles/vehicle-form";
-import { VehicleType, VehicleBodyType } from "@shared/schema";
+import { VehicleType, VehicleBodyType, Vehicle } from "@shared/schema";
 import { cn } from "@/lib/utils";
 
 const getVehicleTypeLabel = (type: VehicleType) => {
@@ -62,13 +62,13 @@ export default function MobileVehiclesPage() {
   const [openVehicleDialogs, setOpenVehicleDialogs] = useState<Record<number, boolean>>({});
   
   // Buscar veículos
-  const { data: vehicles, isLoading } = useQuery({
+  const { data: vehicles, isLoading } = useQuery<Vehicle[]>({
     queryKey: ["/api/vehicles"],
     staleTime: 1000 * 60 * 5, // 5 minutos
   });
   
   // Filtrar veículos baseado no termo de busca
-  const filteredVehicles = vehicles?.filter((vehicle: any) => {
+  const filteredVehicles = vehicles?.filter((vehicle: Vehicle) => {
     if (!searchTerm) return true;
     
     const search = searchTerm.toLowerCase();
@@ -161,7 +161,7 @@ export default function MobileVehiclesPage() {
               )}
             </div>
           ) : (
-            filteredVehicles?.map((vehicle) => (
+            filteredVehicles?.map((vehicle: Vehicle) => (
               <Dialog 
                 key={vehicle.id} 
                 open={openVehicleDialogs[vehicle.id] || false}
