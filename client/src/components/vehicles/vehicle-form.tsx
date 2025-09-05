@@ -370,7 +370,8 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
     if (!type) return [];
 
     const allowedTypes = type === "tractor_unit" ? ["tractor_unit", "truck"] : 
-                        type === "semi_trailer" ? ["semi_trailer", "trailer"] : [type];
+                        type === "semi_trailer" ? ["semi_trailer", "trailer"] :
+                        type === "crane" ? ["crane", "truck"] : [type];
 
     const filteredModels = vehicleModels.filter(model => 
       allowedTypes.includes(model.vehicleType)
@@ -383,7 +384,8 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
     if (!brand || !type) return [];
 
     const allowedTypes = type === "tractor_unit" ? ["tractor_unit", "truck"] : 
-                        type === "semi_trailer" ? ["semi_trailer", "trailer"] : [type];
+                        type === "semi_trailer" ? ["semi_trailer", "trailer"] :
+                        type === "crane" ? ["crane", "truck"] : [type];
 
     return Array.from(new Set(
       vehicleModels
