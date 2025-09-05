@@ -42,8 +42,12 @@ export function exportToCSV(options: CSVExportOptions): void {
     ...csvData.map(row => row.join(";"))
   ].join("\n");
 
+  // Adicionar BOM UTF-8 para garantir codificação correta no Excel
+  const BOM = '\uFEFF';
+  const csvWithBOM = BOM + csvContent;
+
   // Cria e baixa o arquivo
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const blob = new Blob([csvWithBOM], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
   

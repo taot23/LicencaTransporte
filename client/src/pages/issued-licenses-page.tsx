@@ -262,7 +262,7 @@ export default function IssuedLicensesPage() {
     
     if (dateFrom && dateFrom !== "") {
       const filterFromDate = new Date(dateFrom);
-      matchesDateFrom = (
+      matchesDateFrom = Boolean(
         (emissionDate && emissionDate >= filterFromDate) ||
         (liberationDate && liberationDate >= filterFromDate)
       );
@@ -270,7 +270,7 @@ export default function IssuedLicensesPage() {
     
     if (dateTo && dateTo !== "") {
       const filterToDate = new Date(dateTo);
-      matchesDateTo = (
+      matchesDateTo = Boolean(
         (emissionDate && emissionDate <= filterToDate) ||
         (liberationDate && liberationDate <= filterToDate)
       );
