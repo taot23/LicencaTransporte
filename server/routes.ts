@@ -3667,18 +3667,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
         warnings: [] as string[]
       };
 
-      // Mapeamento de tipos de conjunto (case insensitive)
-      const vehicleSetTypeMap: Record<string, string> = {
-        'bitrem 6 eixos': 'bitrain_6_axles',
-        'bitrem 7 eixos': 'bitrain_7_axles', 
-        'bitrem 9 eixos': 'bitrain_9_axles',
-        'rodotrem 7 eixos': 'roadtrain_7_axles',
-        'rodotrem 9 eixos': 'roadtrain_9_axles',
+      // Buscar tipos de conjunto dinâmicos (padrão + personalizados)
+      const { DEFAULT_VEHICLE_SET_TYPES } = await import('../shared/vehicle-set-types');
+      const { vehicleSetTypes } = await import('../shared/schema');
+      const { eq } = await import('drizzle-orm');
+      
+      // Buscar tipos personalizados do banco de dados
+      const customTypes = await db.select().from(vehicleSetTypes).where(eq(vehicleSetTypes.isActive, true));
+      
+      // Combinar tipos padrão com tipos personalizados
+      const allVehicleSetTypes = [
+        ...DEFAULT_VEHICLE_SET_TYPES,
+        ...customTypes.map(type => ({
+          ...type,
+          axleConfiguration: type.axleConfiguration as any,
+          dimensionLimits: type.dimensionLimits as any,
+          vehicleTypes: type.vehicleTypes as any,
+          createdAt: new Date(type.createdAt),
+          updatedAt: new Date(type.updatedAt),
+        }))
+      ];
+
+      // Criar mapeamento dinâmico baseado nos tipos cadastrados (case insensitive)
+      const vehicleSetTypeMap: Record<string, string> = {};
+      
+      // Mapeamento dos tipos cadastrados no sistema
+      allVehicleSetTypes.forEach(type => {
+        if (type.label) {
+          vehicleSetTypeMap[type.label.toLowerCase().trim()] = type.name;
+        }
+      });
+      
+      // Mapeamento adicional para compatibilidade com variações comuns
+      const additionalMappings: Record<string, string> = {
         'guindastes': 'crane',
         'guindaste': 'crane',
         'prancha': 'flatbed',
-        'romeu e julieta': 'romeo_juliet'
+        'romeu e julieta': 'romeo_juliet',
+        'romeu e julieta': 'romeo_and_juliet'
       };
+      
+      // Adicionar mapeamentos adicionais
+      Object.entries(additionalMappings).forEach(([key, value]) => {
+        vehicleSetTypeMap[key] = value;
+      });
+
+      console.log(`[BULK IMPORT LICENSES] Tipos de conjunto disponíveis:`, Object.keys(vehicleSetTypeMap));
 
       // Obter todos os transportadores e veículos
       const allTransporters = await storage.getAllTransporters();
