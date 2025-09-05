@@ -361,6 +361,7 @@ export default function AdminLicensesPage() {
       status: statusFilter === "all" ? undefined : statusFilter,
       state: stateFilter === "all_states" ? undefined : stateFilter,
       transporter: transporterFilter === "all" ? undefined : transporterFilter,
+      date: dateFilter || undefined, // Novo filtro de data
       includeRenewal: false
     }],
     queryFn: async () => {
@@ -374,6 +375,7 @@ export default function AdminLicensesPage() {
       if (statusFilter !== "all") params.set('status', statusFilter);
       if (stateFilter !== "all_states") params.set('state', stateFilter);
       if (transporterFilter !== "all") params.set('transporter', transporterFilter);
+      if (dateFilter) params.set('date', dateFilter); // Novo parâmetro de data
       
       const startTime = Date.now();
       
@@ -597,23 +599,9 @@ export default function AdminLicensesPage() {
         }
       }
       
-      // Filtro de data (aplicado no cliente para precisão)
-      let matchesDate = true;
-      if (dateFilter) {
-        const requestDate = license.createdAt ? new Date(license.createdAt) : null;
-        
-        if (requestDate) {
-          // Converter ambas as datas para formato YYYY-MM-DD para comparação precisa
-          const requestDateStr = requestDate.toISOString().split('T')[0]; // YYYY-MM-DD
-          const filterDateStr = dateFilter; // Já está no formato YYYY-MM-DD do input
-          
-          matchesDate = requestDateStr === filterDateStr;
-        } else {
-          matchesDate = false;
-        }
-      }
+      // FILTRO DE DATA REMOVIDO - AGORA É APLICADO NO BACKEND PARA FILTRO GLOBAL
       
-      return matchesTransporter && matchesDate;
+      return matchesTransporter;
     })
     // Aplicar ordenação
     .sort((a: LicenseRequest, b: LicenseRequest) => {

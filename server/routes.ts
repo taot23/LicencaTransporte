@@ -4395,6 +4395,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const statusFilter = req.query.status as string;
       const stateFilter = req.query.state as string;
       const transporterFilter = req.query.transporter as string;
+      const dateFilter = req.query.date as string; // Novo filtro de data
       const shouldIncludeRenewalDrafts = req.query.includeRenewal === 'true';
       
       // QUERY OTIMIZADA COM ÍNDICES - BUSCA APENAS DADOS NECESSÁRIOS
@@ -4470,6 +4471,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (stateFilter && stateFilter !== 'all_states') {
         // O campo states é um array de texto, então verificamos se o estado está contido no array
         conditions.push(sql`${stateFilter} = ANY(${licenseRequests.states})`);
+      }
+      
+      // Filtro de data (YYYY-MM-DD)
+      if (dateFilter) {
+        // Comparar apenas a data (ignorar hora) usando DATE() do PostgreSQL
+        conditions.push(sql`DATE(${licenseRequests.createdAt}) = ${dateFilter}`);
       }
       
       // APLICAR TODAS AS CONDIÇÕES
