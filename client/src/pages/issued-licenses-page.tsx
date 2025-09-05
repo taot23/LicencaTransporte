@@ -504,8 +504,8 @@ export default function IssuedLicensesPage() {
         "Placa Principal",
         "Estado",
         "Status",
-        "Data de Emissão",
         "Data de Liberação",
+        "Data de Emissão",
         "Data de Validade",
         "Número AET",
         "Transportador"
@@ -517,8 +517,8 @@ export default function IssuedLicensesPage() {
         "Placa Principal": license.mainVehiclePlate || '',
         "Estado": license.state || '',
         "Status": translateStatus(license.status) || '',
-        "Data de Emissão": license.emissionDate ? formatDateForCSV(license.emissionDate) : '',
         "Data de Liberação": license.liberationDate ? formatDateForCSV(license.liberationDate) : '',
+        "Data de Emissão": license.emissionDate ? formatDateForCSV(license.emissionDate) : '',
         "Data de Validade": license.validUntil ? formatDateForCSV(license.validUntil) : '',
         "Número AET": license.aetNumber || '',
         "Transportador": license.transporter?.name || license.transporter?.tradeName || `ID: ${license.transporterId}`
@@ -748,15 +748,15 @@ export default function IssuedLicensesPage() {
                   <TableHead>Transportador</TableHead>
                   <TableHead>Nº Licença</TableHead>
                   <SortableHeader
-                    column="emissionDate"
-                    label="Emissão"
+                    column="liberationDate"
+                    label="Data de Liberação"
                     currentSort={sortColumn}
                     currentDirection={sortDirection}
                     onSort={handleSort}
                   />
                   <SortableHeader
-                    column="liberationDate"
-                    label="Data de Liberação"
+                    column="emissionDate"
+                    label="Emissão"
                     currentSort={sortColumn}
                     currentDirection={sortDirection}
                     onSort={handleSort}
@@ -810,10 +810,10 @@ export default function IssuedLicensesPage() {
                           )}
                         </TableCell>
                         <TableCell>
-                          {license.emissionDate ? license.emissionDate.split('-').reverse().join('/') : '-'}
+                          {license.liberationDate ? license.liberationDate.split('-').reverse().join('/') : '-'}
                         </TableCell>
                         <TableCell>
-                          {license.liberationDate ? license.liberationDate.split('-').reverse().join('/') : '-'}
+                          {license.emissionDate ? license.emissionDate.split('-').reverse().join('/') : '-'}
                         </TableCell>
                         <TableCell>
                           {license.validUntil ? (
