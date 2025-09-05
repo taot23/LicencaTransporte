@@ -65,6 +65,7 @@ interface ExpandedLicenseRequest {
   status: string;
   stateStatus: string;
   emissionDate: string | null;
+  liberationDate: string | null; // Nova coluna Data de Liberação
   validUntil: string | null;
   licenseFileUrl: string | null;
   stateFileUrl: string | null;
@@ -187,7 +188,12 @@ export default function IssuedLicensesPage() {
             console.log(`[DEBUG] Usando data validade global para ${state}: ${stateValidUntil}`);
           }
           
-
+          // Obter data de liberação (usando updatedAt da licença)
+          let stateLiberationDate = null;
+          if (license.updatedAt) {
+            const updatedDate = typeof license.updatedAt === 'string' ? license.updatedAt : license.updatedAt.toISOString();
+            stateLiberationDate = updatedDate.split('T')[0];
+          }
           
           result.push({
             id: license.id * 100 + index, // Gerar ID único para a linha
@@ -199,6 +205,7 @@ export default function IssuedLicensesPage() {
             status: stateStatus,
             stateStatus,
             emissionDate: stateEmissionDate,
+            liberationDate: stateLiberationDate, // Nova coluna Data de Liberação
             validUntil: stateValidUntil,
             licenseFileUrl: license.licenseFileUrl,
             stateFileUrl,
@@ -291,6 +298,8 @@ export default function IssuedLicensesPage() {
         return license.validUntil ? new Date(license.validUntil).getTime() : 0;
       } else if (column === 'emissionDate') {
         return license.emissionDate ? new Date(license.emissionDate).getTime() : 0;
+      } else if (column === 'liberationDate') {
+        return license.liberationDate ? new Date(license.liberationDate).getTime() : 0;
       } else if (column === 'status') {
         return getLicenseStatus(license.validUntil);
       } else {
@@ -496,6 +505,7 @@ export default function IssuedLicensesPage() {
         "Estado",
         "Status",
         "Data de Emissão",
+        "Data de Liberação",
         "Data de Validade",
         "Número AET",
         "Transportador"
@@ -508,6 +518,7 @@ export default function IssuedLicensesPage() {
         "Estado": license.state || '',
         "Status": translateStatus(license.status) || '',
         "Data de Emissão": license.emissionDate ? formatDateForCSV(license.emissionDate) : '',
+        "Data de Liberação": license.liberationDate ? formatDateForCSV(license.liberationDate) : '',
         "Data de Validade": license.validUntil ? formatDateForCSV(license.validUntil) : '',
         "Número AET": license.aetNumber || '',
         "Transportador": license.transporter?.name || license.transporter?.tradeName || `ID: ${license.transporterId}`
@@ -744,6 +755,13 @@ export default function IssuedLicensesPage() {
                     onSort={handleSort}
                   />
                   <SortableHeader
+                    column="liberationDate"
+                    label="Data de Liberação"
+                    currentSort={sortColumn}
+                    currentDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                  <SortableHeader
                     column="validUntil"
                     label="Validade"
                     currentSort={sortColumn}
@@ -757,7 +775,7 @@ export default function IssuedLicensesPage() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-10">
+                    <TableCell colSpan={10} className="text-center py-10">
                       Carregando licenças...
                     </TableCell>
                   </TableRow>
@@ -793,6 +811,9 @@ export default function IssuedLicensesPage() {
                         </TableCell>
                         <TableCell>
                           {license.emissionDate ? license.emissionDate.split('-').reverse().join('/') : '-'}
+                        </TableCell>
+                        <TableCell>
+                          {license.liberationDate ? license.liberationDate.split('-').reverse().join('/') : '-'}
                         </TableCell>
                         <TableCell>
                           {license.validUntil ? (
@@ -914,7 +935,7 @@ export default function IssuedLicensesPage() {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-10">
+                    <TableCell colSpan={10} className="text-center py-10">
                       Nenhuma licença emitida encontrada.
                     </TableCell>
                   </TableRow>
