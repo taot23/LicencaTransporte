@@ -3674,6 +3674,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'bitrem 9 eixos': 'bitrain_9_axles',
         'rodotrem 7 eixos': 'roadtrain_7_axles',
         'rodotrem 9 eixos': 'roadtrain_9_axles',
+        'guindastes': 'crane',
+        'guindaste': 'crane',
         'prancha': 'flatbed',
         'romeu e julieta': 'romeo_juliet'
       };
@@ -4075,7 +4077,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Reboque': 'trailer',
         'Dolly': 'dolly',
         'Prancha': 'flatbed',
-        'Caminhão': 'truck'
+        'Caminhão': 'truck',
+        'Guindastes': 'crane',
+        'Guindaste': 'crane'
       };
 
       // Mapear tipos de carroceria aceitos (opcional)
