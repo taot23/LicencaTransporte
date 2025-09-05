@@ -26,6 +26,7 @@ const getVehicleTypeLabel = (type: VehicleType) => {
     dolly: "Dolly",
     flatbed: "Prancha",
     truck: "Caminhão",
+    crane: "Guindastes",
   };
   return types[type] || type;
 };

@@ -91,11 +91,13 @@ export default function AdminVehiclesPage() {
 
   const getVehicleTypeLabel = (type: string): string => {
     const typeMapping: Record<string, string> = {
-      tractor: "Unidade Tratora (Cavalo)",
-      semitrailer: "Semirreboque",
+      tractor_unit: "Unidade Tratora (Cavalo)",
+      semi_trailer: "Semirreboque",
       trailer: "Reboque",
       dolly: "Dolly",
-      flatbed: "Prancha"
+      flatbed: "Prancha",
+      truck: "Caminhão",
+      crane: "Guindastes"
     };
     return typeMapping[type] || type;
   };
