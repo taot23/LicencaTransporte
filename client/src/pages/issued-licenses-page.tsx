@@ -252,17 +252,29 @@ export default function IssuedLicensesPage() {
       license.requestNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       license.mainVehiclePlate.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const licenseDate = license.emissionDate ? new Date(license.emissionDate) : null;
+    // Usar tanto emissionDate quanto liberationDate para filtro de data
+    const emissionDate = license.emissionDate ? new Date(license.emissionDate) : null;
+    const liberationDate = license.liberationDate ? new Date(license.liberationDate) : null;
     
-    const matchesDateFrom = !dateFrom || (
-      licenseDate && 
-      licenseDate >= new Date(dateFrom)
-    );
+    // Se temos filtro de data, verificar contra ambas as datas (emissão e liberação)
+    let matchesDateFrom = true;
+    let matchesDateTo = true;
     
-    const matchesDateTo = !dateTo || (
-      licenseDate && 
-      licenseDate <= new Date(dateTo)
-    );
+    if (dateFrom && dateFrom !== "") {
+      const filterFromDate = new Date(dateFrom);
+      matchesDateFrom = (
+        (emissionDate && emissionDate >= filterFromDate) ||
+        (liberationDate && liberationDate >= filterFromDate)
+      );
+    }
+    
+    if (dateTo && dateTo !== "") {
+      const filterToDate = new Date(dateTo);
+      matchesDateTo = (
+        (emissionDate && emissionDate <= filterToDate) ||
+        (liberationDate && liberationDate <= filterToDate)
+      );
+    }
     
     const matchesState = !stateFilter || stateFilter === "all_states" || (
       license.state === stateFilter
