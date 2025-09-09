@@ -934,9 +934,9 @@ export default function AdminLicensesPage() {
       { value: "canceled", label: "Cancelado", description: "Licença cancelada pelo cliente ou pelo sistema" },
       { value: "paying", label: "A Pagar", description: "Aguardando pagamento da taxa pelo cliente" },
       // Status exclusivos para MS e TO (não mostrados para transportadores)
-      ...((!isTransporter && (state === "MS" || state === "TO")) ? [
-        { value: "generate_fee", label: "Gerar Taxa", description: "Processo de geração de taxa (exclusivo MS/TO)" },
-        { value: "fee_generated", label: "Taxa Gerada", description: "Taxa gerada e aguardando pagamento (exclusivo MS/TO)" },
+      ...((!isTransporter && ["MS","TO","GO","PA"].includes((state || "").toUpperCase())) ? [
+        { value: "generate_fee", label: "Gerar Taxa", description: "Processo de geração de taxa (MS/TO/GO/PA)" },
+        { value: "fee_generated", label: "Taxa Gerada", description: "Taxa gerada e aguardando pagamento (MS/TO/GO/PA)" },
       ] : []),
       // "unpaid" não é incluído pois é um status automático (não selecionável)
     ];
